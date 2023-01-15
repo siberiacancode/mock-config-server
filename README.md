@@ -28,15 +28,15 @@ $ yarn add mock-config-server --dev
 Install **🎉 Mock Config Server** with [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
 
 ```bash
-$ npm i mock-server --save --dev
+$ npm i mock-config-server --save --dev
 # or
-$ yarn add mock-server --dev
+$ yarn add mock-config-server --dev
 ```
 
 Create a `mock-server.config.js` file with server configuration
 
 ```javascript
-/** @type {import('mock-server').Mock.ServerConfig} */
+/** @type {import('mock-config-server').Mock.ServerConfig} */
 const mockServerConfig: Mock.ServerConfig = {
   configs: [
     {
