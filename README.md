@@ -47,13 +47,13 @@ const mockServerConfig = {
   ]
 };
 
-module.exports = mockServerConfig;
+export default mockServerConfig;
 ```
 
 Start **🎉 Mock Config Server**
 
 ```bash
-$ mock-config-server
+$ npx mock-config-server
 
 # 🎉 Mock Config Server is running at http://localhost:31299
 ```
