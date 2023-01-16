@@ -37,7 +37,7 @@ Create a `mock-server.config.js` file with server configuration
 
 ```javascript
 /** @type {import('mock-config-server').Mock.ServerConfig} */
-const mockServerConfig: Mock.ServerConfig = {
+const mockServerConfig = {
   configs: [
     {
       path: '/user',
