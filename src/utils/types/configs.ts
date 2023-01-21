@@ -1,12 +1,22 @@
 export type PlainObject = Record<string, string | number>;
 export type PlainFunction = (...args: any[]) => any;
+
 export type BodyValue = any;
 export type VariablesValue = any;
+export type QueryValue = Record<string, string | string[]>;
+export type HeadersOrParamsValue = Record<string, string>;
 
 export type RestEntities = 'headers' | 'query' | 'params' | 'body';
+export type RestEntitiesValue = BodyValue | QueryValue | HeadersOrParamsValue;
 
 export type RestEntitiesValues = {
-  [Key in RestEntities]: Key extends 'body' ? BodyValue : PlainObject;
+  [Key in RestEntities]: Key extends 'body'
+    ? BodyValue
+    : Key extends 'query'
+      ? QueryValue
+      : Key extends 'headers' | 'params'
+        ? HeadersOrParamsValue
+        : never;
 };
 
 export interface RestMethodsEntities {

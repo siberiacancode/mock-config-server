@@ -4,10 +4,9 @@ import { isEntityValuesEqual } from '../../configs/isEntitiesEqual/isEntityValue
 import { callRequestInterceptors } from '../../routes/callRequestInterceptors/callRequestInterceptors';
 import { callResponseInterceptors } from '../../routes/callResponseInterceptors/callResponseInterceptors';
 import type {
-  BodyValue,
   Interceptors,
-  PlainObject,
   RestEntities,
+  RestEntitiesValue,
   RestRequestConfig
 } from '../../utils/types';
 import { prepareRestRequestConfigs } from '../prepareRestRequestConfigs/prepareRestRequestConfigs';
@@ -29,7 +28,7 @@ export const createRestRoutes = (
 
       const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
         if (!entities) return true;
-        return (Object.entries(entities) as [RestEntities, PlainObject | BodyValue][]).every(
+        return (Object.entries(entities) as [RestEntities, RestEntitiesValue][]).every(
           ([entity, entityValue]) => isEntityValuesEqual(entityValue, request[entity])
         );
       });
