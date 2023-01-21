@@ -33,7 +33,7 @@
     "node": ">=14"
   },
   "scripts": {
-    "build": "rimraf dist && tsc -p ./tsconfig.json",
+    "build": "rimraf dist && tsc -p tsconfig.production.json",
     "prepare": "yarn build",
     "test": "jest",
     "lint": "eslint . --ext ts --no-error-on-unmatched-pattern",
