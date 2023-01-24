@@ -1,13 +1,13 @@
-import type { RequestConfig } from '../../utils/types';
+import type { GraphQLRequestConfig } from '../../utils/types';
 
-import { prepareRequestConfigs } from './prepareRequestConfigs';
+import { prepareGraphQLRequestConfigs } from './prepareGraphQLRequestConfigs';
 
-describe('prepareRequestConfigs', () => {
+describe('prepareGraphQLRequestConfigs', () => {
   test('Should not sort routes if they does not contain entities', () => {
-    const requestConfigs: RequestConfig[] = [
+    const GraphQLRequestConfigs: GraphQLRequestConfig[] = [
       {
-        path: '/user',
-        method: 'get',
+        operationName: 'GetUser',
+        operationType: 'query',
         routes: [
           {
             data: { name: 'John', surname: 'Doe' }
@@ -21,14 +21,16 @@ describe('prepareRequestConfigs', () => {
         ]
       }
     ];
-    expect(prepareRequestConfigs(requestConfigs)).toStrictEqual(requestConfigs);
+    expect(prepareGraphQLRequestConfigs(GraphQLRequestConfigs)).toStrictEqual(
+      GraphQLRequestConfigs
+    );
   });
 
   test('Should sort routes by their specificity of entities', () => {
-    const requestConfigs: RequestConfig[] = [
+    const GraphQLRequestConfigs: GraphQLRequestConfig[] = [
       {
-        path: '/user',
-        method: 'get',
+        operationName: 'GetUser',
+        operationType: 'query',
         routes: [
           {
             entities: {
@@ -62,10 +64,10 @@ describe('prepareRequestConfigs', () => {
         ]
       }
     ];
-    const expectedRequestConfigs: RequestConfig[] = [
+    const expectedGraphQLRequestConfigs: GraphQLRequestConfig[] = [
       {
-        path: '/user',
-        method: 'get',
+        operationName: 'GetUser',
+        operationType: 'query',
         routes: [
           {
             entities: {
@@ -99,18 +101,20 @@ describe('prepareRequestConfigs', () => {
         ]
       }
     ];
-    expect(prepareRequestConfigs(requestConfigs)).toStrictEqual(expectedRequestConfigs);
+    expect(prepareGraphQLRequestConfigs(GraphQLRequestConfigs)).toStrictEqual(
+      expectedGraphQLRequestConfigs
+    );
   });
 
   test('Should set not object body weight equals to one', () => {
-    const requestConfigs: RequestConfig[] = [
+    const GraphQLRequestConfigs: GraphQLRequestConfig[] = [
       {
-        path: '/user',
-        method: 'post',
+        operationName: 'GetUser',
+        operationType: 'query',
         routes: [
           {
             entities: {
-              body: ['value', 'value', 'value']
+              variables: ['value', 'value', 'value']
             },
             data: { name: 'John', surname: 'Doe' }
           },
@@ -126,10 +130,10 @@ describe('prepareRequestConfigs', () => {
         ]
       }
     ];
-    const expectedRequestConfigs: RequestConfig[] = [
+    const expectedGraphQLRequestConfigs: GraphQLRequestConfig[] = [
       {
-        path: '/user',
-        method: 'post',
+        operationName: 'GetUser',
+        operationType: 'query',
         routes: [
           {
             entities: {
@@ -142,13 +146,15 @@ describe('prepareRequestConfigs', () => {
           },
           {
             entities: {
-              body: ['value', 'value', 'value']
+              variables: ['value', 'value', 'value']
             },
             data: { name: 'John', surname: 'Doe' }
           }
         ]
       }
     ];
-    expect(prepareRequestConfigs(requestConfigs)).toStrictEqual(expectedRequestConfigs);
+    expect(prepareGraphQLRequestConfigs(GraphQLRequestConfigs)).toStrictEqual(
+      expectedGraphQLRequestConfigs
+    );
   });
 });

@@ -1,21 +1,20 @@
 import { isPlainObject } from '../../utils/helpers';
-import type { RequestConfig, RestMethod, RouteConfig } from '../../utils/types';
+import type { GraphQLRequestConfig, GraphQLRouteConfig } from '../../utils/types';
 
-const calculateRouteConfigWeight = (routeConfig: RouteConfig<RestMethod>) => {
-  const { entities } = routeConfig;
+const calculateRouteConfigWeight = (graphQLRouteConfig: GraphQLRouteConfig) => {
+  const { entities } = graphQLRouteConfig;
   if (!entities) return 0;
 
   let routeConfigWeight = 0;
-  const { headers, query, params, body } = entities;
+  const { headers, query, variables } = entities;
   if (headers) routeConfigWeight += Object.keys(headers).length;
   if (query) routeConfigWeight += Object.keys(query).length;
-  if (params) routeConfigWeight += Object.keys(params).length;
-  if (body) routeConfigWeight += isPlainObject(body) ? Object.keys(body).length : 1;
+  if (variables) routeConfigWeight += isPlainObject(variables) ? Object.keys(variables).length : 1;
 
   return routeConfigWeight;
 };
 
-export const prepareRequestConfigs = (requestConfigs: RequestConfig[]) => {
+export const prepareGraphQLRequestConfigs = (requestConfigs: GraphQLRequestConfig[]) => {
   requestConfigs.forEach((requestConfig) => {
     requestConfig.routes.sort(
       (first, second) =>

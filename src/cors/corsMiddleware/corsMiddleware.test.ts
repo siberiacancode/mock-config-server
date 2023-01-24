@@ -25,6 +25,25 @@ describe('corsMiddleware', () => {
     });
   });
 
+  test('Should set default cors for request if origin is regexp', async () => {
+    const server = express();
+
+    const cors: Cors = {
+      origin: [/test.com/g, 'https://uncorrectDomain.com']
+    };
+
+    corsMiddleware(server, cors);
+    const response = await request(server).get('/').set({ origin: 'https://test.com' });
+
+    expect(response.headers).toMatchObject({
+      'access-control-allow-headers': '*',
+      'access-control-allow-methods': '*',
+      'access-control-allow-origin': 'https://test.com',
+      'access-control-max-age': '3600',
+      'access-control-allow-credentials': 'true'
+    });
+  });
+
   test('Should not set cors for request if origin does not match', async () => {
     const server = express();
 

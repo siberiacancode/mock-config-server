@@ -1,30 +1,36 @@
-import type { IRouter } from 'express';
+import { IRouter } from 'express';
 
 import { isEntityValuesEqual } from '../../configs/isEntitiesEqual/isEntityValuesEqual';
-import { prepareRequestConfigs } from '../../configs/prepareRequestConfigs/prepareRequestConfigs';
-import type { BodyValue, Entities, MockServerConfig, PlainObject } from '../../utils/types';
-import { callRequestInterceptors } from '../callRequestInterceptors/callRequestInterceptors';
-import { callResponseInterceptors } from '../callResponseInterceptors/callResponseInterceptors';
+import { callRequestInterceptors } from '../../routes/callRequestInterceptors/callRequestInterceptors';
+import { callResponseInterceptors } from '../../routes/callResponseInterceptors/callResponseInterceptors';
+import type {
+  BodyValue,
+  Interceptors,
+  PlainObject,
+  RestEntities,
+  RestRequestConfig
+} from '../../utils/types';
+import { prepareRestRequestConfigs } from '../prepareRestRequestConfigs/prepareRestRequestConfigs';
 
-export const createRoutes = (
+export const createRestRoutes = (
   router: IRouter,
-  mockServerConfig: Pick<MockServerConfig, 'configs' | 'interceptors'>
+  configs: RestRequestConfig[],
+  interceptors?: Interceptors
 ) => {
-  prepareRequestConfigs(mockServerConfig.configs).forEach((requestConfig) => {
+  prepareRestRequestConfigs(configs).forEach((requestConfig) => {
     router.route(requestConfig.path)[requestConfig.method]((request, response) => {
       callRequestInterceptors({
         request,
         interceptors: {
           requestInterceptor: requestConfig.interceptors?.request,
-          serverInterceptor: mockServerConfig.interceptors?.request
+          serverInterceptor: interceptors?.request
         }
       });
 
       const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
         if (!entities) return true;
-        return (Object.entries(entities) as [Entities, PlainObject | BodyValue][]).every(
-          ([entity, entityValue]) =>
-            isEntityValuesEqual<typeof entity>(entityValue, request[entity])
+        return (Object.entries(entities) as [RestEntities, PlainObject | BodyValue][]).every(
+          ([entity, entityValue]) => isEntityValuesEqual(entityValue, request[entity])
         );
       });
 
@@ -41,7 +47,7 @@ export const createRoutes = (
         interceptors: {
           routeInterceptor: matchedRouteConfig.interceptors?.response,
           requestInterceptor: requestConfig.interceptors?.response,
-          serverInterceptor: mockServerConfig.interceptors?.response
+          serverInterceptor: interceptors?.response
         }
       });
       return response.status(response.statusCode).json(data);

@@ -15,8 +15,15 @@ export type Port = number;
 export type BaseUrl = string;
 
 export interface MockServerConfig {
-  configs: import('./configs').RequestConfig[];
   baseUrl?: BaseUrl;
+  rest?: {
+    baseUrl?: BaseUrl;
+    configs: import('./configs').RestRequestConfig[];
+  };
+  graphql?: {
+    baseUrl?: BaseUrl;
+    configs: import('./configs').GraphQLRequestConfig[];
+  };
   port?: Port;
   staticPath?: StaticPath;
   interceptors?: import('./interceptors').Interceptors;
