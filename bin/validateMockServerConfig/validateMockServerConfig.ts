@@ -7,7 +7,9 @@ import { validateStaticPath } from './validateStaticPath/validateStaticPath';
 
 export const validateMockServerConfig = (possibleConfig: any) => {
   if (!isPlainObject(possibleConfig)) {
-    throw new Error(`configuration should be plain object; see our doc (https://www.npmjs.com/package/mock-config-server) for more information`);
+    throw new Error(
+      `configuration should be plain object; see our doc (https://www.npmjs.com/package/mock-config-server) for more information`
+    );
   }
 
   validateBasePath(possibleConfig.baseUrl, possibleConfig.port);

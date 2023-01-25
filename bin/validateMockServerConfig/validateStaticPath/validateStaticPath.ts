@@ -18,7 +18,12 @@ export const validateStaticPath = (staticPath: any) => {
       }
 
       if (typeof staticPathElement !== 'string') {
-        throw new Error(createValidationErrorMessage(`staticPath[${index}]`, 'string | { prefix: string; path: string }'));
+        throw new Error(
+          createValidationErrorMessage(
+            `staticPath[${index}]`,
+            'string | { prefix: string; path: string }'
+          )
+        );
       }
     });
     return;
@@ -37,6 +42,11 @@ export const validateStaticPath = (staticPath: any) => {
   }
 
   if (typeof staticPath !== 'string' && typeof staticPath !== 'undefined') {
-    throw new Error(createValidationErrorMessage('staticPath', 'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[] | undefined'))
+    throw new Error(
+      createValidationErrorMessage(
+        'staticPath',
+        'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[] | undefined'
+      )
+    );
   }
 };

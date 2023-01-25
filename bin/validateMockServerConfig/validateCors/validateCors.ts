@@ -14,7 +14,10 @@ const validateOrigin = (origin: any) => {
 
   if (!(origin instanceof RegExp) && typeof origin !== 'function' && typeof origin !== 'string') {
     throw new Error(
-      createValidationErrorMessage('cors.origin', 'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)')
+      createValidationErrorMessage(
+        'cors.origin',
+        'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'
+      )
     );
   }
 };
@@ -25,14 +28,24 @@ const validateMethods = (methods: any) => {
     const ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     methods.forEach((method, index) => {
       if (!ALLOWED_METHODS.includes(method)) {
-        throw new Error(createValidationErrorMessage(`cors.methods[${index}]`, 'RestMethod (see our doc: https://github.com/siberiacancode/mock-config-server)'));
+        throw new Error(
+          createValidationErrorMessage(
+            `cors.methods[${index}]`,
+            'RestMethod (see our doc: https://github.com/siberiacancode/mock-config-server)'
+          )
+        );
       }
     });
     return;
   }
 
   if (typeof methods !== 'undefined') {
-    throw new Error(createValidationErrorMessage('cors.methods', 'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'));
+    throw new Error(
+      createValidationErrorMessage(
+        'cors.methods',
+        'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
+      )
+    );
   }
 };
 
@@ -48,7 +61,7 @@ const validateHeaders = (headers: any) => {
   }
 
   if (typeof headers !== 'undefined') {
-    throw new Error(createValidationErrorMessage('cors.headers', 'string[] | undefined'))
+    throw new Error(createValidationErrorMessage('cors.headers', 'string[] | undefined'));
   }
 };
 
@@ -77,7 +90,10 @@ export const validateCors = (cors: any) => {
 
   if (typeof cors !== 'undefined') {
     throw new Error(
-      createValidationErrorMessage('cors', 'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined')
+      createValidationErrorMessage(
+        'cors',
+        'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
+      )
     );
   }
 };
