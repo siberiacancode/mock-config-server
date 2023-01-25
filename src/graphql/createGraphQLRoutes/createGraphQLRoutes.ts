@@ -32,6 +32,14 @@ export const createGraphQLRoutes = (
 
     const query = parseQuery(graphQLInput.query);
 
+    if (!query.operationName || !query.operationType) {
+      return response
+        .status(404)
+        .json(
+          `You should to specify operationName and operationType for ${request.method}:${request.baseUrl}${request.path}`
+        );
+    }
+
     const matchedRequestConfig = preparedGraphQLRequestConfig.find((requestConfig) => {
       if (requestConfig.operationName instanceof RegExp) {
         return (
@@ -46,7 +54,6 @@ export const createGraphQLRoutes = (
       );
     });
 
-    // console.log('matchedRequestConfig', matchedRequestConfig);
     if (!matchedRequestConfig) {
       return response
         .status(404)

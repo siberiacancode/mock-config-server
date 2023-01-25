@@ -20,4 +20,13 @@ describe('parseQuery', () => {
       operationName: 'CreateCharacters'
     });
   });
+
+  test('Should parse graphQL query with empty operationName', async () => {
+    const parsedQuery = parseQuery('query { characters { name } }');
+
+    expect(parsedQuery).toStrictEqual({
+      operationType: 'query',
+      operationName: ''
+    });
+  });
 });

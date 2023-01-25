@@ -3,7 +3,7 @@ import type { Request } from 'express';
 import { getGraphQLInput } from './getGraphQLInput';
 
 describe('getGraphQLInput', () => {
-  test('Should get right graphQL input from get request', async () => {
+  test('Should get right graphQL input from GET request', async () => {
     const mockRequest = {
       method: 'GET',
       query: {
@@ -20,7 +20,7 @@ describe('getGraphQLInput', () => {
     });
   });
 
-  test('Should get right graphQL input from get request with empty variables', async () => {
+  test('Should get right graphQL input from GET request with empty variables', async () => {
     const mockRequest = {
       method: 'GET',
       query: {
@@ -36,7 +36,7 @@ describe('getGraphQLInput', () => {
     });
   });
 
-  test('Should get right graphQL input from post request', async () => {
+  test('Should get right graphQL input from POST request', async () => {
     const mockRequest = {
       method: 'POST',
       body: {
@@ -53,7 +53,7 @@ describe('getGraphQLInput', () => {
     });
   });
 
-  test('Should get right graphQL input from post with empty variables', async () => {
+  test('Should get right graphQL input from POST with empty variables', async () => {
     const mockRequest = {
       method: 'POST',
       body: {
