@@ -9,12 +9,19 @@ export const validateInterceptors = (interceptors: any) => {
       throw new Error(createValidationErrorMessage('interceptors.request', 'Function | undefined'));
     }
     if (typeof response !== 'function' && typeof response !== 'undefined') {
-      throw new Error(createValidationErrorMessage('interceptors.response', 'Function | undefined'));
+      throw new Error(
+        createValidationErrorMessage('interceptors.response', 'Function | undefined')
+      );
     }
     return;
   }
 
   if (typeof interceptors !== 'undefined') {
-    throw new Error(createValidationErrorMessage('interceptors', '{ request?: Function; response?: Function } | undefined'));
+    throw new Error(
+      createValidationErrorMessage(
+        'interceptors',
+        '{ request?: Function; response?: Function } | undefined'
+      )
+    );
   }
 };

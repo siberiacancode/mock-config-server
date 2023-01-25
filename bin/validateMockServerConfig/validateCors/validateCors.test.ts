@@ -8,22 +8,52 @@ describe('validateCors', () => {
     expect(() => validateCors(undefined)).not.toThrow(Error);
 
     expect(() => validateCors(true)).toThrow(
-      new Error(createValidationErrorMessage('cors', 'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'))
+      new Error(
+        createValidationErrorMessage(
+          'cors',
+          'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
+        )
+      )
     );
     expect(() => validateCors('cors')).toThrow(
-      new Error(createValidationErrorMessage('cors', 'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'))
+      new Error(
+        createValidationErrorMessage(
+          'cors',
+          'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
+        )
+      )
     );
     expect(() => validateCors(3000)).toThrow(
-      new Error(createValidationErrorMessage('cors', 'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'))
+      new Error(
+        createValidationErrorMessage(
+          'cors',
+          'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
+        )
+      )
     );
     expect(() => validateCors(null)).toThrow(
-      new Error(createValidationErrorMessage('cors', 'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'))
+      new Error(
+        createValidationErrorMessage(
+          'cors',
+          'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
+        )
+      )
     );
     expect(() => validateCors([])).toThrow(
-      new Error(createValidationErrorMessage('cors', 'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'))
+      new Error(
+        createValidationErrorMessage(
+          'cors',
+          'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
+        )
+      )
     );
     expect(() => validateCors(() => {})).toThrow(
-      new Error(createValidationErrorMessage('cors', 'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'))
+      new Error(
+        createValidationErrorMessage(
+          'cors',
+          'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
+        )
+      )
     );
   });
 
@@ -40,43 +70,97 @@ describe('validateCors', () => {
     expect(() => validateCors({ origin: () => ['origin', /origin/gi] })).not.toThrow(Error);
     expect(() => validateCors({ origin: () => Promise.resolve('origin') })).not.toThrow(Error);
     expect(() => validateCors({ origin: () => Promise.resolve(/origin/gi) })).not.toThrow(Error);
-    expect(() => validateCors({ origin: () => Promise.resolve(['origin', /origin/gi]) })).not.toThrow(Error);
+    expect(() =>
+      validateCors({ origin: () => Promise.resolve(['origin', /origin/gi]) })
+    ).not.toThrow(Error);
 
     expect(() => validateCors({ origin: true })).toThrow(
-      new Error(createValidationErrorMessage('cors.origin', 'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'))
+      new Error(
+        createValidationErrorMessage(
+          'cors.origin',
+          'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'
+        )
+      )
     );
     expect(() => validateCors({ origin: 3000 })).toThrow(
-      new Error(createValidationErrorMessage('cors.origin', 'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'))
+      new Error(
+        createValidationErrorMessage(
+          'cors.origin',
+          'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'
+        )
+      )
     );
     expect(() => validateCors({ origin: null })).toThrow(
-      new Error(createValidationErrorMessage('cors.origin', 'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'))
+      new Error(
+        createValidationErrorMessage(
+          'cors.origin',
+          'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'
+        )
+      )
     );
     expect(() => validateCors({ origin: undefined })).toThrow(
-      new Error(createValidationErrorMessage('cors.origin', 'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'))
+      new Error(
+        createValidationErrorMessage(
+          'cors.origin',
+          'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'
+        )
+      )
     );
     expect(() => validateCors({ origin: {} })).toThrow(
-      new Error(createValidationErrorMessage('cors.origin', 'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'))
+      new Error(
+        createValidationErrorMessage(
+          'cors.origin',
+          'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'
+        )
+      )
     );
   });
 
   test('Should correctly handle cors.methods only with type RestMethod[]', () => {
-    expect(() => validateCors({ origin: 'origin', methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] })).not.toThrow(Error);
+    expect(() =>
+      validateCors({ origin: 'origin', methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] })
+    ).not.toThrow(Error);
     expect(() => validateCors({ origin: 'origin', methods: undefined })).not.toThrow(Error);
 
     expect(() => validateCors({ origin: 'origin', methods: true })).toThrow(
-      new Error(createValidationErrorMessage('cors.methods', 'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'))
+      new Error(
+        createValidationErrorMessage(
+          'cors.methods',
+          'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
+        )
+      )
     );
     expect(() => validateCors({ origin: 'origin', methods: 'methods' })).toThrow(
-      new Error(createValidationErrorMessage('cors.methods', 'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'))
+      new Error(
+        createValidationErrorMessage(
+          'cors.methods',
+          'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
+        )
+      )
     );
     expect(() => validateCors({ origin: 'origin', methods: 3000 })).toThrow(
-      new Error(createValidationErrorMessage('cors.methods', 'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'))
+      new Error(
+        createValidationErrorMessage(
+          'cors.methods',
+          'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
+        )
+      )
     );
     expect(() => validateCors({ origin: 'origin', methods: null })).toThrow(
-      new Error(createValidationErrorMessage('cors.methods', 'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'))
+      new Error(
+        createValidationErrorMessage(
+          'cors.methods',
+          'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
+        )
+      )
     );
     expect(() => validateCors({ origin: 'origin', methods: ['string'] })).toThrow(
-      new Error(createValidationErrorMessage('cors.methods[0]', 'RestMethod (see our doc: https://github.com/siberiacancode/mock-config-server)'))
+      new Error(
+        createValidationErrorMessage(
+          'cors.methods[0]',
+          'RestMethod (see our doc: https://github.com/siberiacancode/mock-config-server)'
+        )
+      )
     );
   });
 
