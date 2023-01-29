@@ -5,6 +5,7 @@ import path from 'path';
 
 import { corsMiddleware } from '../../cors/corsMiddleware/corsMiddleware';
 import { noCorsMiddleware } from '../../cors/noCorsMiddleware/noCorsMiddleware';
+import { notFoundMiddleware, requestLoggerMiddleware } from '../../middlewares';
 import { createGraphQLRoutes } from '../../graphql/createGraphQLRoutes/createGraphQLRoutes';
 import { createRestRoutes } from '../../rest/createRestRoutes/createRestRoutes';
 import { staticMiddleware } from '../../static/staticMiddleware/staticMiddleware';
@@ -21,6 +22,7 @@ export const createMockServer = ({
   server.use(bodyParser.json({ limit: '10mb' }));
 
   const baseUrl = mockServerConfig.baseUrl ?? '/';
+  const configPaths = mockServerConfig.configs.map((config) => config.path);
 
   if (cors) {
     corsMiddleware(server, cors);
@@ -31,6 +33,26 @@ export const createMockServer = ({
   if (staticPath) {
     staticMiddleware(server, baseUrl, staticPath);
   }
+
+  server.use(
+    requestLoggerMiddleware({
+      logger: console.log,
+      logHeaders: false,
+      logQuery: true
+    })
+  );
+
+  server.get('/', (_, res) => {
+    res.send(`
+    <h1>🎉Welcome to mock-config-server!🎉</h1>
+    <div>
+      <h2>Your config have the following paths:</h2>
+      <ul>
+        ${configPaths.map((path) => `<li><a href=${path}>${path}</a></li>`).join('')}
+      </ul>
+    </div>
+    `);
+  });
 
   const routerBase = express.Router();
 
@@ -54,6 +76,13 @@ export const createMockServer = ({
     const graphqlBaseUrl = path.join(baseUrl, mockServerConfig.graphql.baseUrl ?? '/');
     server.use(graphqlBaseUrl, routerWithGraphQLRoutes);
   }
+
+  // TODO: add RegExp support for typo checking
+  server.use(
+    notFoundMiddleware(
+      configPaths.filter((configPath): configPath is string => typeof configPath === 'string')
+    )
+  );
 
   return server;
 };
