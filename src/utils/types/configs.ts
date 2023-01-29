@@ -67,8 +67,6 @@ export interface GraphQLRequestConfig {
   interceptors?: import('./interceptors').Interceptors;
 }
 
-export type RequestConfigType = 'graphql' | 'rest';
-
 export type RestRequestConfig =
   | RestGetRequestConfig
   | RestPostRequestConfig

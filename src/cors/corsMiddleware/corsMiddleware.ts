@@ -4,7 +4,7 @@ import { DEFAULT } from '../../utils/constants';
 import type { Cors } from '../../utils/types';
 import { getAllowedOrigins } from '../getOrigins/getAllowedOrigins';
 
-export const corsMiddleware = async (server: Express, cors: Cors) => {
+export const corsMiddleware = (server: Express, cors: Cors) => {
   server.use(async (req, res, next) => {
     if (Array.isArray(cors.origin) && !cors.origin.length) {
       return next();

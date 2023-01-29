@@ -164,7 +164,7 @@ describe('createGraphQLRoutes', () => {
     expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Smith' });
   });
 
-  test('Should return 404 and description text for no matched request entities', async () => {
+  test('Should return 404 and description text for no matched request configs', async () => {
     const server = createServer({
       graphql: {
         configs: [

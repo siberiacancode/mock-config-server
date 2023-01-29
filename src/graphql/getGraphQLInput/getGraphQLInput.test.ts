@@ -12,7 +12,7 @@ describe('getGraphQLInput', () => {
       }
     } as unknown as Request;
 
-    const graphQLInput = getGraphQLInput(mockRequest as unknown as Request);
+    const graphQLInput = getGraphQLInput(mockRequest);
 
     expect(graphQLInput).toStrictEqual({
       query: 'query GetCharacters { characters { name } }',
@@ -67,5 +67,29 @@ describe('getGraphQLInput', () => {
       query: 'query GetCharacters { characters { name } }',
       variables: {}
     });
+  });
+
+  test('Should get error if request is not GET or POST', async () => {
+    const deleteMockRequest = {
+      method: 'DELETE',
+      query: {
+        query: `query GetCharacters { characters { name } }`
+      }
+    } as unknown as Request;
+
+    expect(() => getGraphQLInput(deleteMockRequest)).toThrow(
+      'Not allowed request method for graphql request'
+    );
+
+    const putMockRequest = {
+      method: 'PUT',
+      body: {
+        query: `query GetCharacters { characters { name } }`
+      }
+    } as unknown as Request;
+
+    expect(() => getGraphQLInput(putMockRequest)).toThrow(
+      'Not allowed request method for graphql request'
+    );
   });
 });

@@ -106,7 +106,7 @@ describe('prepareGraphQLRequestConfigs', () => {
     );
   });
 
-  test('Should set not object body weight equals to one', () => {
+  test('Should set not object variables weight equals to one', () => {
     const GraphQLRequestConfigs: GraphQLRequestConfig[] = [
       {
         operationName: 'GetUser',

@@ -4,7 +4,7 @@ import { prepareRestRequestConfigs } from './prepareRestRequestConfigs';
 
 describe('prepareRestRequestConfigs', () => {
   test('Should not sort routes if they does not contain entities', () => {
-    const RestRequestConfigs: RestRequestConfig[] = [
+    const restRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',
         method: 'get',
@@ -21,11 +21,11 @@ describe('prepareRestRequestConfigs', () => {
         ]
       }
     ];
-    expect(prepareRestRequestConfigs(RestRequestConfigs)).toStrictEqual(RestRequestConfigs);
+    expect(prepareRestRequestConfigs(restRequestConfigs)).toStrictEqual(restRequestConfigs);
   });
 
   test('Should sort routes by their specificity of entities', () => {
-    const RestRequestConfigs: RestRequestConfig[] = [
+    const restRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',
         method: 'get',
@@ -99,11 +99,11 @@ describe('prepareRestRequestConfigs', () => {
         ]
       }
     ];
-    expect(prepareRestRequestConfigs(RestRequestConfigs)).toStrictEqual(expectedRestRequestConfigs);
+    expect(prepareRestRequestConfigs(restRequestConfigs)).toStrictEqual(expectedRestRequestConfigs);
   });
 
   test('Should set not object body weight equals to one', () => {
-    const RestRequestConfigs: RestRequestConfig[] = [
+    const restRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',
         method: 'post',
@@ -149,6 +149,6 @@ describe('prepareRestRequestConfigs', () => {
         ]
       }
     ];
-    expect(prepareRestRequestConfigs(RestRequestConfigs)).toStrictEqual(expectedRestRequestConfigs);
+    expect(prepareRestRequestConfigs(restRequestConfigs)).toStrictEqual(expectedRestRequestConfigs);
   });
 });
