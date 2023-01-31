@@ -32,6 +32,10 @@ export const createGraphQLRoutes = (
 
     const query = parseQuery(graphQLInput.query);
 
+    if (!query) {
+      return response.status(400).json(`Query is invalid, you must use a valid GraphQL query`);
+    }
+
     if (!query.operationName || !query.operationType) {
       return response
         .status(404)

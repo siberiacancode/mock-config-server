@@ -18,6 +18,10 @@ const parseDocumentNode = (node: DocumentNode): ParseDocumentNodeResult => {
 };
 
 export const parseQuery = (query: string) => {
-  const document = parse(query);
-  return parseDocumentNode(document);
+  try {
+    const document = parse(query);
+    return parseDocumentNode(document);
+  } catch {
+    return null;
+  }
 };

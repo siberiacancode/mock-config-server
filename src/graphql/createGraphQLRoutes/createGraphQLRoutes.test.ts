@@ -71,6 +71,40 @@ describe('createGraphQLRoutes', () => {
     expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
+  test('Should return 400 and description text for invalid query', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            operationName: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                entities: {
+                  headers: { key1: 'value1', key2: 'value2' },
+                  query: { key1: 'value1' }
+                },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const postResponse = await request(server).post('/').send({ query: 'invalid query' });
+
+    expect(postResponse.statusCode).toBe(400);
+    expect(postResponse.body).toBe('Query is invalid, you must use a valid GraphQL query');
+
+    const getResponse = await request(server).get('/').query({
+      query: 'invalid query'
+    });
+
+    expect(postResponse.statusCode).toBe(400);
+    expect(getResponse.body).toBe('Query is invalid, you must use a valid GraphQL query');
+  });
+
   test('Should match config by entities "includes" behavior with operationName regexp', async () => {
     const server = createServer({
       graphql: {
