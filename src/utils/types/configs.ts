@@ -39,6 +39,13 @@ export type RestPutRequestConfig = BaseRestRequestConfig<'put'>;
 export type RestDeleteRequestConfig = BaseRestRequestConfig<'delete'>;
 export type RestPatchRequestConfig = BaseRestRequestConfig<'patch'>;
 
+export type RestRequestConfig =
+  | RestGetRequestConfig
+  | RestPostRequestConfig
+  | RestPutRequestConfig
+  | RestDeleteRequestConfig
+  | RestPatchRequestConfig;
+
 export type GraphQLEntities = 'headers' | 'query' | 'variables';
 
 export type GraphQLEntitiesValues = {
@@ -66,10 +73,3 @@ export interface GraphQLRequestConfig {
   routes: GraphQLRouteConfig[];
   interceptors?: import('./interceptors').Interceptors;
 }
-
-export type RestRequestConfig =
-  | RestGetRequestConfig
-  | RestPostRequestConfig
-  | RestPutRequestConfig
-  | RestDeleteRequestConfig
-  | RestPatchRequestConfig;

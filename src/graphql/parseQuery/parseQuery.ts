@@ -7,13 +7,13 @@ interface ParseDocumentNodeResult {
 }
 
 const parseDocumentNode = (node: DocumentNode): ParseDocumentNodeResult => {
-  const operationDef = node.definitions.find(
+  const operationDefinition = node.definitions.find(
     (definition) => definition.kind === 'OperationDefinition'
   ) as OperationDefinitionNode;
 
   return {
-    operationType: operationDef?.operation,
-    operationName: operationDef?.name?.value ?? ''
+    operationType: operationDefinition?.operation,
+    operationName: operationDefinition?.name?.value ?? ''
   };
 };
 
