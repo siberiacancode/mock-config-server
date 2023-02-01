@@ -12,8 +12,8 @@ const parseDocumentNode = (node: DocumentNode): ParseDocumentNodeResult => {
   ) as OperationDefinitionNode;
 
   return {
-    operationType: operationDefinition?.operation,
-    operationName: operationDefinition?.name?.value ?? ''
+    operationType: operationDefinition.operation,
+    operationName: operationDefinition.name?.value ?? ''
   };
 };
 
