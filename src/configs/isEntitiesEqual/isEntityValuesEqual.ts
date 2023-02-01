@@ -1,12 +1,8 @@
 import { flatten } from 'flat';
 
 import { isPlainObject } from '../../utils/helpers';
-import type { Entities, EntitiesValues } from '../../utils/types';
 
-export const isEntityValuesEqual = <Entity extends Entities>(
-  firstEntityValue: EntitiesValues[Entity],
-  secondEntityValue: EntitiesValues[Entity]
-) => {
+export const isEntityValuesEqual = (firstEntityValue: any, secondEntityValue: any) => {
   const isValuesArePlainObjects =
     isPlainObject(firstEntityValue) && isPlainObject(secondEntityValue);
   if (isValuesArePlainObjects) {
@@ -37,5 +33,5 @@ export const isEntityValuesEqual = <Entity extends Entities>(
     );
   }
 
-  return firstEntityValue.toString() === secondEntityValue.toString();
+  return `${firstEntityValue}` === `${secondEntityValue}`;
 };

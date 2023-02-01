@@ -10,7 +10,7 @@ describe('corsMiddleware', () => {
     const server = express();
 
     const cors: Cors = {
-      origin: ['https://test.com', 'https://uncorrectDomain.com']
+      origin: [/test.com/g, 'https://test.com', 'https://uncorrectDomain.com']
     };
 
     corsMiddleware(server, cors);

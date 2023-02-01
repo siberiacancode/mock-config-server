@@ -40,5 +40,5 @@
     "import/prefer-default-export": "off",
     "consistent-return": "off"
   },
-  "ignorePatterns": ["jest.config.js", "mock-server.config.js"]
+  "ignorePatterns": ["jest.config.js"]
 }

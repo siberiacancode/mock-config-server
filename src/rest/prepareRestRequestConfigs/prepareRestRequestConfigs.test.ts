@@ -1,10 +1,10 @@
-import type { RequestConfig } from '../../utils/types';
+import type { RestRequestConfig } from '../../utils/types';
 
-import { prepareRequestConfigs } from './prepareRequestConfigs';
+import { prepareRestRequestConfigs } from './prepareRestRequestConfigs';
 
-describe('prepareRequestConfigs', () => {
+describe('prepareRestRequestConfigs', () => {
   test('Should not sort routes if they does not contain entities', () => {
-    const requestConfigs: RequestConfig[] = [
+    const restRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',
         method: 'get',
@@ -21,11 +21,11 @@ describe('prepareRequestConfigs', () => {
         ]
       }
     ];
-    expect(prepareRequestConfigs(requestConfigs)).toStrictEqual(requestConfigs);
+    expect(prepareRestRequestConfigs(restRequestConfigs)).toStrictEqual(restRequestConfigs);
   });
 
   test('Should sort routes by their specificity of entities', () => {
-    const requestConfigs: RequestConfig[] = [
+    const restRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',
         method: 'get',
@@ -62,7 +62,7 @@ describe('prepareRequestConfigs', () => {
         ]
       }
     ];
-    const expectedRequestConfigs: RequestConfig[] = [
+    const expectedRestRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',
         method: 'get',
@@ -99,11 +99,11 @@ describe('prepareRequestConfigs', () => {
         ]
       }
     ];
-    expect(prepareRequestConfigs(requestConfigs)).toStrictEqual(expectedRequestConfigs);
+    expect(prepareRestRequestConfigs(restRequestConfigs)).toStrictEqual(expectedRestRequestConfigs);
   });
 
   test('Should set not object body weight equals to one', () => {
-    const requestConfigs: RequestConfig[] = [
+    const restRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',
         method: 'post',
@@ -126,7 +126,7 @@ describe('prepareRequestConfigs', () => {
         ]
       }
     ];
-    const expectedRequestConfigs: RequestConfig[] = [
+    const expectedRestRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',
         method: 'post',
@@ -149,6 +149,6 @@ describe('prepareRequestConfigs', () => {
         ]
       }
     ];
-    expect(prepareRequestConfigs(requestConfigs)).toStrictEqual(expectedRequestConfigs);
+    expect(prepareRestRequestConfigs(restRequestConfigs)).toStrictEqual(expectedRestRequestConfigs);
   });
 });
