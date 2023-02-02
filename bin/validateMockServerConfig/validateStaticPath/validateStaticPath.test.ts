@@ -11,7 +11,7 @@ describe('validateStaticPath', () => {
       new Error(
         createValidationErrorMessage(
           'staticPath',
-          'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[]'
+          'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[] | undefined'
         )
       )
     );
@@ -19,7 +19,7 @@ describe('validateStaticPath', () => {
       new Error(
         createValidationErrorMessage(
           'staticPath',
-          'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[]'
+          'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[] | undefined'
         )
       )
     );
@@ -27,7 +27,7 @@ describe('validateStaticPath', () => {
       new Error(
         createValidationErrorMessage(
           'staticPath',
-          'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[]'
+          'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[] | undefined'
         )
       )
     );
@@ -66,7 +66,7 @@ describe('validateStaticPath', () => {
       new Error(
         createValidationErrorMessage(
           'staticPath',
-          'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[]'
+          'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[] | undefined'
         )
       )
     );
