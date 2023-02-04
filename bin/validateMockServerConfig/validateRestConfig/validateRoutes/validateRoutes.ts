@@ -55,7 +55,8 @@ const validateEntities = (entities: unknown, method: RestMethod) => {
   const isEntitiesObject = isPlainObject(entities);
   if (isEntitiesObject) {
     Object.keys(entities).forEach((entity) => {
-      if (!ALLOWED_ENTITIES_BY_METHOD[method].includes(entity as any)) {
+      const isEntityAllowed = ALLOWED_ENTITIES_BY_METHOD[method].includes(entity as any)
+      if (!isEntityAllowed) {
         throw new Error();
       }
 
