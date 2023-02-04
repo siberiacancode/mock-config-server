@@ -5,6 +5,7 @@ import * as fs from 'fs';
 
 import { startMockServer } from '../src';
 
+import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
 import { resolveExportsFromSourceCode } from './resolveExportsFromSourceCode';
 
 const start = async () => {
@@ -40,6 +41,7 @@ const start = async () => {
       throw new Error('Cannot handle exports of mock-server.config.(ts|js)');
     }
 
+    validateMockServerConfig(mockServerConfigExports.default);
     startMockServer(mockServerConfigExports.default);
   } catch (e: any) {
     console.error(e.message);
