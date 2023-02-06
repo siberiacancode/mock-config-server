@@ -1,5 +1,6 @@
 import { isPlainObject } from '../../src/utils/helpers';
 
+import { createValidationErrorMessage } from './createValidationErrorMessage/createValidationErrorMessage';
 import { validateBaseUrl } from './validateBaseUrl/validateBaseUrl';
 import { validateCors } from './validateCors/validateCors';
 import { validateGraphQLConfig } from './validateGraphQLConfig/validateGraphQLConfig';
@@ -20,12 +21,17 @@ export const validateMockServerConfig = (mockServerConfig: unknown) => {
       'configuration should contain at least one of these configs: rest | graphql; see our doc (https://www.npmjs.com/package/mock-config-server) for more information'
     );
   }
-  if (mockServerConfig.rest) validateRestConfig(mockServerConfig.rest);
-  if (mockServerConfig.graphql) validateGraphQLConfig(mockServerConfig.graphql);
 
-  validateBaseUrl(mockServerConfig.baseUrl);
-  validatePort(mockServerConfig.port);
-  validateStaticPath(mockServerConfig.staticPath);
-  validateInterceptors(mockServerConfig.interceptors);
-  validateCors(mockServerConfig.cors);
+  try {
+    if (mockServerConfig.rest) validateRestConfig(mockServerConfig.rest);
+    if (mockServerConfig.graphql) validateGraphQLConfig(mockServerConfig.graphql);
+
+    validateBaseUrl(mockServerConfig.baseUrl);
+    validatePort(mockServerConfig.port);
+    validateStaticPath(mockServerConfig.staticPath);
+    validateInterceptors(mockServerConfig.interceptors);
+    validateCors(mockServerConfig.cors);
+  } catch (e: any) {
+    throw new Error(createValidationErrorMessage(e.message));
+  }
 };

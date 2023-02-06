@@ -13,80 +13,92 @@ const ALLOWED_ENTITIES_BY_METHOD: AllowedEntitiesByMethod = {
   patch: ['headers', 'query', 'params', 'body']
 };
 
-const validateHeadersOrParams = (headersOrParams: unknown) => {
+const validateHeadersOrParams = (headersOrParams: unknown, entity: string) => {
   const isHeadersOrParamsObject = isPlainObject(headersOrParams);
   if (isHeadersOrParamsObject) {
-    Object.values(headersOrParams).forEach((headerOrParam) => {
-      if (typeof headerOrParam !== 'string') {
-        throw new Error();
+    Object.entries(headersOrParams).forEach(([headerOrParamKey, headerOrParamValue]) => {
+      if (typeof headerOrParamValue !== 'string') {
+        throw new Error(`${entity}.${headerOrParamKey}`);
       }
     });
     return;
   }
 
-  throw new Error();
+  throw new Error(entity);
 };
 
-const validateQuery = (query: unknown) => {
+const validateQuery = (query: unknown, entity: string) => {
   const isQueryObject = isPlainObject(query);
   if (isQueryObject) {
-    Object.values(query).forEach((queryPart) => {
-      const isQueryPartArray = Array.isArray(queryPart);
-      if (isQueryPartArray) {
-        queryPart.forEach((queryPartElement) => {
-          if (typeof queryPartElement !== 'string') {
-            throw new Error();
+    Object.entries(query).forEach(([queryKey, queryValue]) => {
+      const isQueryValueArray = Array.isArray(queryValue);
+      if (isQueryValueArray) {
+        queryValue.forEach((queryValueElement, index) => {
+          if (typeof queryValueElement !== 'string') {
+            throw new Error(`${entity}.${queryKey}${index}`);
           }
         });
         return;
       }
 
-      if (typeof queryPart !== 'string') {
-        throw new Error();
+      if (typeof queryValue !== 'string') {
+        throw new Error(`${entity}.${queryKey}`);
       }
     });
     return;
   }
 
-  throw new Error();
+  throw new Error(entity);
 };
 
 const validateEntities = (entities: unknown, method: RestMethod) => {
   const isEntitiesObject = isPlainObject(entities);
   if (isEntitiesObject) {
     Object.keys(entities).forEach((entity) => {
-      const isEntityAllowed = ALLOWED_ENTITIES_BY_METHOD[method].includes(entity as any)
+      const isEntityAllowed = ALLOWED_ENTITIES_BY_METHOD[method].includes(entity as any);
       if (!isEntityAllowed) {
-        throw new Error();
+        throw new Error(`entities.${entity}`);
       }
 
       if (entity === 'headers' || entity === 'params') {
-        const headersOrParams = entities[entity];
-        return validateHeadersOrParams(headersOrParams);
+        try {
+          const headersOrParams = entities[entity];
+          return validateHeadersOrParams(headersOrParams, entity);
+        } catch (e: any) {
+          throw new Error(`entities.${e.message}`);
+        }
       }
 
       if (entity === 'query') {
-        const query = entities[entity];
-        return validateQuery(query);
+        try {
+          const query = entities[entity];
+          return validateQuery(query, entity);
+        } catch (e: any) {
+          throw new Error(`entities.${e.message}`);
+        }
       }
     });
     return;
   }
 
   if (typeof entities !== 'undefined') {
-    throw new Error();
+    throw new Error('entities');
   }
 };
 
 export const validateRoutes = (routes: unknown, method: RestMethod) => {
   const isRoutesArray = Array.isArray(routes);
   if (isRoutesArray) {
-    routes.forEach((route) => {
-      validateEntities(route.entities, method);
-      validateInterceptors(route.interceptors);
+    routes.forEach((route, index) => {
+      try {
+        validateEntities(route.entities, method);
+        validateInterceptors(route.interceptors);
+      } catch (e: any) {
+        throw new Error(`routes[${index}].${e.message}`);
+      }
     });
     return;
   }
 
-  throw new Error();
+  throw new Error('routes');
 };
