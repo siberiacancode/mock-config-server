@@ -1,99 +1,88 @@
 import { isPlainObject } from '../../../src/utils/helpers';
-import { createValidationErrorMessage } from '../createValidationErrorMessage/createValidationErrorMessage';
 
-const validateOrigin = (origin: any) => {
+const validateOrigin = (origin: unknown) => {
   const isOriginArray = Array.isArray(origin);
   if (isOriginArray) {
     origin.forEach((originElement, index) => {
-      if (!(originElement instanceof RegExp) && typeof originElement !== 'string') {
-        throw new Error(createValidationErrorMessage(`cors.origin[${index}]`, 'RegExp | string'));
+      const isOriginElementStringOrRegExp =
+        typeof originElement === 'string' || originElement instanceof RegExp;
+      if (!isOriginElementStringOrRegExp) {
+        throw new Error(`origin[${index}]`);
       }
     });
     return;
   }
 
-  if (!(origin instanceof RegExp) && typeof origin !== 'function' && typeof origin !== 'string') {
-    throw new Error(
-      createValidationErrorMessage(
-        'cors.origin',
-        'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'
-      )
-    );
+  const isOriginStringOrRegexp = typeof origin === 'string' || origin instanceof RegExp;
+  const isOriginFunction = typeof origin === 'function';
+  if (!isOriginStringOrRegexp && !isOriginFunction) {
+    throw new Error('origin');
   }
 };
 
-const validateMethods = (methods: any) => {
+const validateMethods = (methods: unknown) => {
   const isMethodsArray = Array.isArray(methods);
   if (isMethodsArray) {
-    const ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     methods.forEach((method, index) => {
-      if (!ALLOWED_METHODS.includes(method)) {
-        throw new Error(
-          createValidationErrorMessage(
-            `cors.methods[${index}]`,
-            'RestMethod (see our doc: https://github.com/siberiacancode/mock-config-server)'
-          )
-        );
+      // ✅ important:
+      // compare without 'toUpperCase' because 'Access-Control-Allow-Methods' value is case-sensitive
+      if (!allowedMethods.includes(method)) {
+        throw new Error(`methods[${index}]`);
       }
     });
     return;
   }
 
   if (typeof methods !== 'undefined') {
-    throw new Error(
-      createValidationErrorMessage(
-        'cors.methods',
-        'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
-      )
-    );
+    throw new Error('methods');
   }
 };
 
-const validateHeaders = (headers: any) => {
+const validateHeaders = (headers: unknown) => {
   const isHeadersArray = Array.isArray(headers);
   if (isHeadersArray) {
     headers.forEach((header, index) => {
       if (typeof header !== 'string') {
-        throw new Error(createValidationErrorMessage(`cors.headers[${index}]`, 'string'));
+        throw new Error(`headers[${index}]`);
       }
     });
     return;
   }
 
   if (typeof headers !== 'undefined') {
-    throw new Error(createValidationErrorMessage('cors.headers', 'string[] | undefined'));
+    throw new Error('headers');
   }
 };
 
-const validateCredentials = (credentials: any) => {
+const validateCredentials = (credentials: unknown) => {
   if (typeof credentials !== 'boolean' && typeof credentials !== 'undefined') {
-    throw new Error(createValidationErrorMessage('cors.credentials', 'boolean | undefined'));
+    throw new Error('credentials');
   }
 };
 
-const validateMaxAge = (maxAge: any) => {
+const validateMaxAge = (maxAge: unknown) => {
   if (typeof maxAge !== 'number' && typeof maxAge !== 'undefined') {
-    throw new Error(createValidationErrorMessage('cors.maxAge', 'number | undefined'));
+    throw new Error('maxAge');
   }
 };
 
-export const validateCors = (cors: any) => {
+export const validateCors = (cors: unknown) => {
   const isCorsObject = isPlainObject(cors);
   if (isCorsObject) {
-    validateOrigin(cors.origin);
-    validateMethods(cors.methods);
-    validateHeaders(cors.headers);
-    validateCredentials(cors.credentials);
-    validateMaxAge(cors.maxAge);
+    try {
+      validateOrigin(cors.origin);
+      validateMethods(cors.methods);
+      validateHeaders(cors.headers);
+      validateCredentials(cors.credentials);
+      validateMaxAge(cors.maxAge);
+    } catch (e: any) {
+      throw new Error(`cors.${e.message}`);
+    }
     return;
   }
 
   if (typeof cors !== 'undefined') {
-    throw new Error(
-      createValidationErrorMessage(
-        'cors',
-        'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
-      )
-    );
+    throw new Error('cors');
   }
 };

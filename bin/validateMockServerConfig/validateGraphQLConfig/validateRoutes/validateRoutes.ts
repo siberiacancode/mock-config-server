@@ -10,18 +10,18 @@ const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntitiesByOperationType = {
   mutation: ['headers', 'query', 'variables']
 };
 
-const validateHeadersOrQuery = (headersOrQuery: unknown) => {
+const validateHeadersOrQuery = (headersOrQuery: unknown, entity: string) => {
   const isHeadersOrQueryObject = isPlainObject(headersOrQuery);
   if (isHeadersOrQueryObject) {
-    Object.values(headersOrQuery).forEach((headerOrQuery) => {
-      if (typeof headerOrQuery !== 'string') {
-        throw new Error();
+    Object.entries(headersOrQuery).forEach(([headerOrQueryKey, headerOrQueryValue]) => {
+      if (typeof headerOrQueryValue !== 'string') {
+        throw new Error(`${entity}.${headerOrQueryKey}`);
       }
     });
     return;
   }
 
-  throw new Error();
+  throw new Error(entity);
 };
 
 const validateEntities = (entities: unknown, operationType: GraphQLOperationType) => {
@@ -30,31 +30,39 @@ const validateEntities = (entities: unknown, operationType: GraphQLOperationType
     Object.keys(entities).forEach((entity) => {
       const isEntityAllowed = ALLOWED_ENTITIES_BY_OPERATION_TYPE[operationType].includes(entity as any);
       if (!isEntityAllowed) {
-        throw new Error();
+        throw new Error(`entities.${entity}`);
       }
 
       if (entity === 'headers' || entity === 'query') {
-        const headersOrQuery = entities[entity];
-        return validateHeadersOrQuery(headersOrQuery);
+        try {
+          const headersOrQuery = entities[entity];
+          return validateHeadersOrQuery(headersOrQuery, entity);
+        } catch (e: any) {
+          throw new Error(`entities.${e.message}`);
+        }
       }
     });
     return;
   }
 
   if (typeof entities !== 'undefined') {
-    throw new Error();
+    throw new Error('entities');
   }
 };
 
 export const validateRoutes = (routes: unknown, operationType: GraphQLOperationType) => {
   const isRoutesArray = Array.isArray(routes);
   if (isRoutesArray) {
-    routes.forEach((route) => {
-      validateEntities(route.entities, operationType);
-      validateInterceptors(route.interceptors);
+    routes.forEach((route, index) => {
+      try {
+        validateEntities(route.entities, operationType);
+        validateInterceptors(route.interceptors);
+      } catch (e: any) {
+        throw new Error(`routes[${index}].${e.message}`);
+      }
     });
     return;
   }
 
-  throw new Error();
+  throw new Error('routes');
 };
