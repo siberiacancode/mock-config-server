@@ -1,7 +1,7 @@
 import { parseQuery } from './parseQuery';
 
 describe('parseQuery', () => {
-  test('Should parse graphQL query', async () => {
+  test('Should parse graphQL query', () => {
     const parsedQuery = parseQuery('query GetCharacters { characters { name } }');
 
     expect(parsedQuery).toStrictEqual({
@@ -10,7 +10,7 @@ describe('parseQuery', () => {
     });
   });
 
-  test('Should parse graphQL mutation', async () => {
+  test('Should parse graphQL mutation', () => {
     const parsedQuery = parseQuery(
       'mutation CreateCharacters($name: String!) { createCharacters(name: $name) { name } }'
     );
@@ -21,7 +21,7 @@ describe('parseQuery', () => {
     });
   });
 
-  test('Should parse graphQL query with empty operationName', async () => {
+  test('Should parse graphQL query with empty operationName', () => {
     const parsedQuery = parseQuery('query { characters { name } }');
 
     expect(parsedQuery).toStrictEqual({

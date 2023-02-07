@@ -39,7 +39,6 @@ const start = async () => {
     if (!mockServerConfigExports?.default) {
       throw new Error('Cannot handle exports of mock-server.config.(ts|js)');
     }
-
     startMockServer(mockServerConfigExports.default);
   } catch (e: any) {
     console.error(e.message);

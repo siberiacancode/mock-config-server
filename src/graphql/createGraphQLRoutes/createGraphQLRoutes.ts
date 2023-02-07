@@ -1,4 +1,4 @@
-import { IRouter, Request, Response } from 'express';
+import { IRouter, NextFunction, Request, Response } from 'express';
 
 import { isEntityValuesEqual } from '../../configs/isEntitiesEqual/isEntityValuesEqual';
 import { callRequestInterceptors } from '../../routes/callRequestInterceptors/callRequestInterceptors';
@@ -21,13 +21,10 @@ export const createGraphQLRoutes = (
 ) => {
   const preparedGraphQLRequestConfig = prepareGraphQLRequestConfigs(configs);
 
-  const graphqlMiddleware = (request: Request, response: Response) => {
+  const graphqlMiddleware = (request: Request, response: Response, next: NextFunction) => {
     const graphQLInput = getGraphQLInput(request);
-
     if (!graphQLInput || !graphQLInput.query) {
-      return response
-        .status(404)
-        .json(`No data for ${request.method}:${request.baseUrl}${request.path}`);
+      return response.status(400).json(`Query is missing, you must pass a valid GraphQL query`);
     }
 
     const query = parseQuery(graphQLInput.query);
@@ -38,7 +35,7 @@ export const createGraphQLRoutes = (
 
     if (!query.operationName || !query.operationType) {
       return response
-        .status(404)
+        .status(400)
         .json(
           `You should to specify operationName and operationType for ${request.method}:${request.baseUrl}${request.path}`
         );
@@ -59,9 +56,7 @@ export const createGraphQLRoutes = (
     });
 
     if (!matchedRequestConfig) {
-      return response
-        .status(404)
-        .json(`No data for ${request.method}:${request.baseUrl}${request.path}`);
+      return next();
     }
 
     callRequestInterceptors({
@@ -86,9 +81,7 @@ export const createGraphQLRoutes = (
     });
 
     if (!matchedRouteConfig) {
-      return response
-        .status(404)
-        .json(`No data for ${request.method}:${request.baseUrl}${request.path}`);
+      return next();
     }
 
     const data = callResponseInterceptors({

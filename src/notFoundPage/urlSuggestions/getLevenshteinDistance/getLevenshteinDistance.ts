@@ -1,4 +1,3 @@
-// @ts-nocheck
 /* eslint-disable */
 
 const min = (d0: number, d1: number, d2: number, bx: number, ay: number) =>
@@ -34,7 +33,7 @@ export const getLevenshteinDistance = (a: string, b: string) => {
   let d1: number;
   let d2: number;
   let d3: number;
-  let dd: number;
+  let dd = 0;
   let dy: number;
   let ay: number;
   let bx0: number;

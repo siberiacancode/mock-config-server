@@ -3,7 +3,7 @@ import type { Request } from 'express';
 import { getGraphQLInput } from './getGraphQLInput';
 
 describe('getGraphQLInput', () => {
-  test('Should get right graphQL input from GET request', async () => {
+  test('Should get right graphQL input from GET request', () => {
     const mockRequest = {
       method: 'GET',
       query: {
@@ -20,7 +20,7 @@ describe('getGraphQLInput', () => {
     });
   });
 
-  test('Should get right graphQL input from GET request with empty variables', async () => {
+  test('Should get right graphQL input from GET request with empty variables', () => {
     const mockRequest = {
       method: 'GET',
       query: {
@@ -36,7 +36,7 @@ describe('getGraphQLInput', () => {
     });
   });
 
-  test('Should get right graphQL input from POST request', async () => {
+  test('Should get right graphQL input from POST request', () => {
     const mockRequest = {
       method: 'POST',
       body: {
@@ -53,7 +53,7 @@ describe('getGraphQLInput', () => {
     });
   });
 
-  test('Should get right graphQL input from POST with empty variables', async () => {
+  test('Should get right graphQL input from POST with empty variables', () => {
     const mockRequest = {
       method: 'POST',
       body: {
@@ -69,7 +69,7 @@ describe('getGraphQLInput', () => {
     });
   });
 
-  test('Should get error if request is not GET or POST', async () => {
+  test('Should get error if request is not GET or POST', () => {
     const deleteMockRequest = {
       method: 'DELETE',
       query: {

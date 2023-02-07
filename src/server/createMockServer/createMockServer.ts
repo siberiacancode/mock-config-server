@@ -5,8 +5,8 @@ import path from 'path';
 
 import { corsMiddleware } from '../../cors/corsMiddleware/corsMiddleware';
 import { noCorsMiddleware } from '../../cors/noCorsMiddleware/noCorsMiddleware';
-import { notFoundMiddleware, requestLoggerMiddleware } from '../../middlewares';
 import { createGraphQLRoutes } from '../../graphql/createGraphQLRoutes/createGraphQLRoutes';
+import { notFoundMiddleware } from '../../notFoundPage/notFoundMiddleware';
 import { createRestRoutes } from '../../rest/createRestRoutes/createRestRoutes';
 import { staticMiddleware } from '../../static/staticMiddleware/staticMiddleware';
 import type { MockServerConfig } from '../../utils/types';
@@ -22,7 +22,6 @@ export const createMockServer = ({
   server.use(bodyParser.json({ limit: '10mb' }));
 
   const baseUrl = mockServerConfig.baseUrl ?? '/';
-  const configPaths = mockServerConfig.configs.map((config) => config.path);
 
   if (cors) {
     corsMiddleware(server, cors);
@@ -33,42 +32,20 @@ export const createMockServer = ({
   if (staticPath) {
     staticMiddleware(server, baseUrl, staticPath);
   }
-
-  server.use(
-    requestLoggerMiddleware({
-      logger: console.log,
-      logHeaders: false,
-      logQuery: true
-    })
-  );
-
-  server.get('/', (_, res) => {
-    res.send(`
-    <h1>🎉Welcome to mock-config-server!🎉</h1>
-    <div>
-      <h2>Your config have the following paths:</h2>
-      <ul>
-        ${configPaths.map((path) => `<li><a href=${path}>${path}</a></li>`).join('')}
-      </ul>
-    </div>
-    `);
-  });
-
-  const routerBase = express.Router();
-
   if (mockServerConfig.rest) {
     const routerWithRestRoutes = createRestRoutes(
-      routerBase,
+      express.Router(),
       mockServerConfig.rest.configs,
       mockServerConfig.interceptors
     );
+
     const restBaseUrl = path.join(baseUrl, mockServerConfig.rest.baseUrl ?? '/');
     server.use(restBaseUrl, routerWithRestRoutes);
   }
 
   if (mockServerConfig.graphql) {
     const routerWithGraphQLRoutes = createGraphQLRoutes(
-      routerBase,
+      express.Router(),
       mockServerConfig.graphql.configs,
       mockServerConfig.interceptors
     );
@@ -77,12 +54,7 @@ export const createMockServer = ({
     server.use(graphqlBaseUrl, routerWithGraphQLRoutes);
   }
 
-  // TODO: add RegExp support for typo checking
-  server.use(
-    notFoundMiddleware(
-      configPaths.filter((configPath): configPath is string => typeof configPath === 'string')
-    )
-  );
+  notFoundMiddleware(server, mockServerConfig);
 
   return server;
 };

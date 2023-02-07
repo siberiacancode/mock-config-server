@@ -14,6 +14,8 @@ export type Cors = {
 export type Port = number;
 export type BaseUrl = string;
 
+export type TypoTolerance = number | 'halvedShortestWord';
+
 export interface MockServerConfig {
   baseUrl?: BaseUrl;
   rest?: {
@@ -28,4 +30,7 @@ export interface MockServerConfig {
   staticPath?: StaticPath;
   interceptors?: import('./interceptors').Interceptors;
   cors?: Cors;
+  pathSuggestions?: {
+    typoTolerance: TypoTolerance;
+  };
 }

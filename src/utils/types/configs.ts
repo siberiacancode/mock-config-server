@@ -26,8 +26,11 @@ export interface RestRouteConfig<Method extends RestMethod> {
 }
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch';
+
+export type RequestPath = string | RegExp;
+
 export interface BaseRestRequestConfig<Method extends RestMethod> {
-  path: string | RegExp;
+  path: RequestPath;
   method: Method;
   routes: RestRouteConfig<Method>[];
   interceptors?: import('./interceptors').Interceptors;
@@ -67,9 +70,12 @@ export interface GraphQLRouteConfig {
   interceptors?: Pick<import('./interceptors').Interceptors, 'response'>;
 }
 
-export interface GraphQLRequestConfig {
+export interface GraphQLQuery {
   operationType: GraphQLOperationType;
   operationName: GraphQLOperationName;
+}
+
+export interface GraphQLRequestConfig extends GraphQLQuery {
   routes: GraphQLRouteConfig[];
   interceptors?: import('./interceptors').Interceptors;
 }
