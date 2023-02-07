@@ -5,7 +5,7 @@ import type { Cors } from '../../utils/types';
 import { getAllowedOrigins } from '../getOrigins/getAllowedOrigins';
 
 export const corsMiddleware = async (server: Express, cors: Cors) => {
-  server.use(async (req, res, next) => {
+  server.options('/*', async (req, res, next) => {
     if (Array.isArray(cors.origin) && !cors.origin.length) {
       return next();
     }
@@ -35,6 +35,6 @@ export const corsMiddleware = async (server: Express, cors: Cors) => {
       res.setHeader('Access-Control-Max-Age', cors.maxAge ?? DEFAULT.CORS.MAX_AGE);
     }
 
-    next();
+    res.sendStatus(200);
   });
 };
