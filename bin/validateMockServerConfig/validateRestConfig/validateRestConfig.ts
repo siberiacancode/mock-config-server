@@ -41,8 +41,8 @@ export const validateRestConfig = (restConfig: unknown) => {
   const isRestConfigObject = isPlainObject(restConfig);
   if (isRestConfigObject) {
     try {
-    validateBaseUrl(restConfig.baseUrl);
-    validateConfigs(restConfig.configs);
+      validateBaseUrl(restConfig.baseUrl);
+      validateConfigs(restConfig.configs);
     } catch (e: any) {
       throw new Error(`rest.${e.message}`);
     }
