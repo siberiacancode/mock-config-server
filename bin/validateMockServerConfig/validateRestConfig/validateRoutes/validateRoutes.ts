@@ -35,7 +35,7 @@ const validateQuery = (query: unknown, entity: string) => {
       if (isQueryValueArray) {
         queryValue.forEach((queryValueElement, index) => {
           if (typeof queryValueElement !== 'string') {
-            throw new Error(`${entity}.${queryKey}${index}`);
+            throw new Error(`${entity}.${queryKey}[${index}]`);
           }
         });
         return;
@@ -90,12 +90,23 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
   const isRoutesArray = Array.isArray(routes);
   if (isRoutesArray) {
     routes.forEach((route, index) => {
-      try {
-        validateEntities(route.entities, method);
-        validateInterceptors(route.interceptors);
-      } catch (e: any) {
-        throw new Error(`routes[${index}].${e.message}`);
+      const isRouteObject = isPlainObject(route);
+      if (isRouteObject) {
+        const isRouteHasDataProperty = 'data' in route;
+        if (!isRouteHasDataProperty) {
+          throw new Error(`routes[${index}].data`);
+        }
+
+        try {
+          validateEntities(route.entities, method);
+          validateInterceptors(route.interceptors);
+        } catch (e: any) {
+          throw new Error(`routes[${index}].${e.message}`);
+        }
+        return;
       }
+
+      throw new Error(`routes[${index}]`);
     });
     return;
   }
