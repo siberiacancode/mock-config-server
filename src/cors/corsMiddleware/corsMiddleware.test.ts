@@ -7,9 +7,8 @@ import { corsMiddleware } from './corsMiddleware';
 
 describe('corsMiddleware', () => {
   const testOrigin = 'https://test.com';
-  const methods = ['get', 'post', 'put', 'patch', 'options'] as const;
 
-  test('Should set default cors for request if does not set custom cors settings', () => {
+  test('Should set default cors for OPTIONS preflight request if does not set custom cors settings', async () => {
     const server = express();
 
     const cors: Cors = {
@@ -18,31 +17,48 @@ describe('corsMiddleware', () => {
 
     corsMiddleware(server, cors);
 
-    methods.forEach(async (method) => {
+    const response = await request(server).options('/').set({ origin: testOrigin });
+
+    expect(response.headers).toMatchObject({
+      'access-control-allow-headers': '*',
+      'access-control-allow-methods': '*',
+      'access-control-allow-origin': 'https://test.com',
+      'access-control-max-age': '3600',
+      'access-control-allow-credentials': 'true'
+    });
+  });
+
+  const methods = ['get', 'post', 'put', 'patch', 'delete'] as const;
+
+  methods.forEach((method) => {
+    test(`Should set default cors for ${method.toLocaleUpperCase()} request if does not set custom cors settings`, async () => {
+      const server = express();
+
+      const cors: Cors = {
+        origin: testOrigin
+      };
+
+      corsMiddleware(server, cors);
+
       const response = await request(server)[method]('/').set({ origin: testOrigin });
 
       expect(response.headers).toMatchObject({
-        'access-control-allow-headers': '*',
-        'access-control-allow-methods': '*',
         'access-control-allow-origin': 'https://test.com',
-        'access-control-max-age': '3600',
         'access-control-allow-credentials': 'true'
       });
     });
   });
 
-  test('Should not set cors for request if origin does not match', () => {
-    const server = express();
+  methods.forEach((method) => {
+    test(`Should not set cors for ${method.toLocaleUpperCase()} request if origin does not match`, async () => {
+      const server = express();
 
-    const cors: Cors = {
-      origin: 'https://uncorrectDomain.com'
-    };
+      const cors: Cors = {
+        origin: 'https://uncorrectDomain.com'
+      };
 
-    corsMiddleware(server, cors);
+      corsMiddleware(server, cors);
 
-    const methods = ['get', 'options'] as const;
-
-    methods.forEach(async (method) => {
       const response = await request(server)[method]('/').set({ origin: testOrigin });
 
       const headerNames = [
@@ -100,11 +116,9 @@ describe('corsMiddleware', () => {
 
       corsMiddleware(server, cors);
 
-      methods.forEach(async (method) => {
-        const response = await request(server)[method]('/').set({ origin: testOrigin });
+      const response = await request(server).options('/').set({ origin: testOrigin });
 
-        expect(response.headers).toMatchObject(headers);
-      });
+      expect(response.headers).toMatchObject(headers);
     });
   });
 });

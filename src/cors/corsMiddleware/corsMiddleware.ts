@@ -18,30 +18,26 @@ export const corsMiddleware = async (server: Express, cors: Cors) => {
     }
 
     const isAllowedOrigin = allowedOrigins.some((allowedOrigin) => {
-      if (typeof allowedOrigin === 'string') {
-        return allowedOrigin.includes(origin);
+      if (allowedOrigin instanceof RegExp) {
+        return new RegExp(allowedOrigin).test(origin);
       }
-      return allowedOrigin.test(origin);
+      return allowedOrigin.includes(origin);
     });
 
     if (isAllowedOrigin) {
       res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Access-Control-Allow-Methods', cors.methods ?? DEFAULT.CORS.METHODS);
-      res.setHeader('Access-Control-Allow-Headers', cors.headers ?? DEFAULT.CORS.HEADERS);
       res.setHeader(
         'Access-Control-Allow-Credentials',
         `${cors.credentials ?? DEFAULT.CORS.CREDENTIALS}`
       );
-      res.setHeader('Access-Control-Max-Age', cors.maxAge ?? DEFAULT.CORS.MAX_AGE);
-    }
 
-    if (req.method === 'OPTIONS') {
-      // ✅ important:
-      // Safari (and potentially other browsers) need content-length 0,
-      // for 204 or they just hang waiting for a body
-      res.setHeader('Content-Length', '0');
-      res.sendStatus(204);
-      return res.end();
+      if (req.method === 'OPTIONS') {
+        res.setHeader('Access-Control-Allow-Methods', cors.methods ?? DEFAULT.CORS.METHODS);
+        res.setHeader('Access-Control-Allow-Headers', cors.headers ?? DEFAULT.CORS.HEADERS);
+        res.setHeader('Access-Control-Max-Age', cors.maxAge ?? DEFAULT.CORS.MAX_AGE);
+        res.sendStatus(204);
+        return res.end();
+      }
     }
 
     next();
