@@ -5,8 +5,7 @@ export const addBaseUrlsToUrl = (url: string, ...baseUrls: (string | undefined)[
 
   // ✅ important: ignore undefined or empty base urls
   const baseUrlsWithoutLeadingAndTrailingSlashes = baseUrls.reduce((acc, baseUrl) => {
-    if (!baseUrl) return acc;
-    acc.push(removeLeadingAndTrailingSlash(baseUrl));
+    if (baseUrl) acc.push(removeLeadingAndTrailingSlash(baseUrl));
     return acc;
   }, [] as string[]);
 

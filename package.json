@@ -34,8 +34,6 @@
   },
   "scripts": {
     "build": "rimraf dist && tsc -p ./tsconfig.json",
-    "start": "yarn build && node ./dist/bin/mock-config-server.js",
-    "dev": "nodemon --watch src --watch bin --watch mock-server.config.ts -e js,ts --exec \"yarn start\"",
     "prepare": "yarn build",
     "test": "jest",
     "lint": "eslint . --ext ts --no-error-on-unmatched-pattern",

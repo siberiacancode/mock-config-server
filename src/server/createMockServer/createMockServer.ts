@@ -14,6 +14,10 @@ import type { MockServerConfig } from '../../utils/types';
 export const createMockServer = ({
   cors,
   staticPath,
+  rest,
+  graphql,
+  interceptors,
+  pathSuggestions,
   ...mockServerConfig
 }: Omit<MockServerConfig, 'port'>) => {
   const server: Express = express();
@@ -32,29 +36,31 @@ export const createMockServer = ({
   if (staticPath) {
     staticMiddleware(server, baseUrl, staticPath);
   }
-  if (mockServerConfig.rest) {
-    const routerWithRestRoutes = createRestRoutes(
-      express.Router(),
-      mockServerConfig.rest.configs,
-      mockServerConfig.interceptors
-    );
+  if (rest) {
+    const routerWithRestRoutes = createRestRoutes(express.Router(), rest.configs, interceptors);
 
-    const restBaseUrl = path.join(baseUrl, mockServerConfig.rest.baseUrl ?? '/');
+    const restBaseUrl = path.join(baseUrl, rest.baseUrl ?? '/');
     server.use(restBaseUrl, routerWithRestRoutes);
   }
 
-  if (mockServerConfig.graphql) {
+  if (graphql) {
     const routerWithGraphQLRoutes = createGraphQLRoutes(
       express.Router(),
-      mockServerConfig.graphql.configs,
-      mockServerConfig.interceptors
+      graphql.configs,
+      interceptors
     );
 
-    const graphqlBaseUrl = path.join(baseUrl, mockServerConfig.graphql.baseUrl ?? '/');
+    const graphqlBaseUrl = path.join(baseUrl, graphql.baseUrl ?? '/');
     server.use(graphqlBaseUrl, routerWithGraphQLRoutes);
   }
 
-  notFoundMiddleware(server, mockServerConfig);
+  notFoundMiddleware({
+    server,
+    serverBaseUrl: baseUrl,
+    rest,
+    graphql,
+    pathSuggestions
+  });
 
   return server;
 };
