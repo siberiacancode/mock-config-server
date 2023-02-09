@@ -5,7 +5,7 @@ import type { Cors } from '../../utils/types';
 import { getAllowedOrigins } from '../getOrigins/getAllowedOrigins';
 
 export const corsMiddleware = async (server: Express, cors: Cors) => {
-  server.options('/*', async (req, res, next) => {
+  server.use(async (req, res, next) => {
     if (Array.isArray(cors.origin) && !cors.origin.length) {
       return next();
     }
@@ -35,6 +35,15 @@ export const corsMiddleware = async (server: Express, cors: Cors) => {
       res.setHeader('Access-Control-Max-Age', cors.maxAge ?? DEFAULT.CORS.MAX_AGE);
     }
 
-    res.sendStatus(200);
+    if (req.method === 'OPTIONS') {
+      // ✅ important:
+      // Safari (and potentially other browsers) need content-length 0,
+      // for 204 or they just hang waiting for a body
+      res.setHeader('Content-Length', '0');
+      res.sendStatus(204);
+      return res.end();
+    }
+
+    next();
   });
 };
