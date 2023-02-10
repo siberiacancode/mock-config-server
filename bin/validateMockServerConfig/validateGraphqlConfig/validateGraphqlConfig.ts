@@ -10,11 +10,11 @@ const validateConfigs = (configs: unknown) => {
     configs.forEach((config, index) => {
       const { operationType, operationName } = config;
 
-      if (operationType !== 'query' || operationType !== 'mutation') {
+      if (operationType !== 'query' && operationType !== 'mutation') {
         throw new Error(`configs[${index}].operationType`);
       }
 
-      const isOperationNameStringOrRegExp = typeof operationName === 'string' || operationType instanceof RegExp;
+      const isOperationNameStringOrRegExp = typeof operationName === 'string' || operationName instanceof RegExp;
       if (!isOperationNameStringOrRegExp) {
         throw new Error(`configs[${index}].operationName`);
       }
@@ -32,19 +32,19 @@ const validateConfigs = (configs: unknown) => {
   throw new Error('configs');
 };
 
-export const validateGraphQLConfig = (graphQLConfig: unknown) => {
-  const isGraphQLConfigObject = isPlainObject(graphQLConfig);
-  if (isGraphQLConfigObject) {
+export const validateGraphqlConfig = (graphqlConfig: unknown) => {
+  const isGraphqlConfigObject = isPlainObject(graphqlConfig);
+  if (isGraphqlConfigObject) {
     try {
-      validateBaseUrl(graphQLConfig.baseUrl);
-      validateConfigs(graphQLConfig.configs);
+      validateBaseUrl(graphqlConfig.baseUrl);
+      validateConfigs(graphqlConfig.configs);
     } catch (e: any) {
       throw new Error(`graphql.${e.message}`);
     }
     return;
   }
 
-  if (typeof graphQLConfig !== 'undefined') {
+  if (typeof graphqlConfig !== 'undefined') {
     throw new Error('graphql');
   }
 };

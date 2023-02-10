@@ -3,7 +3,7 @@ import { isPlainObject } from '../../src/utils/helpers';
 import { createValidationErrorMessage } from './createValidationErrorMessage/createValidationErrorMessage';
 import { validateBaseUrl } from './validateBaseUrl/validateBaseUrl';
 import { validateCors } from './validateCors/validateCors';
-import { validateGraphQLConfig } from './validateGraphQLConfig/validateGraphQLConfig';
+import { validateGraphqlConfig } from './validateGraphqlConfig/validateGraphqlConfig';
 import { validateInterceptors } from './validateInterceptors/validateInterceptors';
 import { validatePort } from './validatePort/validatePort';
 import { validateRestConfig } from './validateRestConfig/validateRestConfig';
@@ -24,7 +24,7 @@ export const validateMockServerConfig = (mockServerConfig: unknown) => {
 
   try {
     if (mockServerConfig.rest) validateRestConfig(mockServerConfig.rest);
-    if (mockServerConfig.graphql) validateGraphQLConfig(mockServerConfig.graphql);
+    if (mockServerConfig.graphql) validateGraphqlConfig(mockServerConfig.graphql);
 
     validateBaseUrl(mockServerConfig.baseUrl);
     validatePort(mockServerConfig.port);
