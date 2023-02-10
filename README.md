@@ -137,7 +137,10 @@ Now you can make a request with an additional header and get the desired result
 
 ```javascript
 fetch('http://localhost:31299/api/user', {
-  headers: { 'name-header': 'Nursultan', 'Content-Type", "application/json' },
+  headers: {
+    'name-header': 'Nursultan',
+    'Content-Type': 'application/json'
+  }
 })
   .then((response) => response.json())
   .then((data) => console.log(data)); // {  emoji: '🦁', name: 'Nursultan' }
@@ -185,7 +188,10 @@ const body = JSON.stringify({
 
 fetch('http://localhost:31299/graphql', {
   method: 'POST',
-  headers: { 'name-header': 'Nursultan', 'Content-Type", "application/json' },
+  headers: {
+    'name-header': 'Nursultan',
+    'Content-Type': 'application/json'
+  },
   body
 })
   .then((response) => response.json())
