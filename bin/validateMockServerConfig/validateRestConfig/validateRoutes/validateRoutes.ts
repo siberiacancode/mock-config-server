@@ -94,7 +94,7 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
       if (isRouteObject) {
         const isRouteHasDataProperty = 'data' in route;
         if (!isRouteHasDataProperty) {
-          throw new Error(`routes[${index}].data`);
+          throw new Error(`routes[${index}]`);
         }
 
         try {

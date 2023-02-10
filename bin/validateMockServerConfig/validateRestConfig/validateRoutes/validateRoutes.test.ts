@@ -4,12 +4,36 @@ describe('validateRoutes (rest)', () => {
   test('Should correctly handle routes only with correct type', () => {
     expect(() => validateRoutes([{ data: null }], 'get')).not.toThrow(Error);
 
-    expect(() => validateRoutes({ data: null }, 'get')).toThrow(new Error('routes'));
-    expect(() => validateRoutes([{}], 'get')).toThrow(new Error('routes[0].data'));
+    const incorrectRouteArrayValues = ['string', true, 3000, null, undefined, {}, () => {}];
+    incorrectRouteArrayValues.forEach((incorrectRouteArrayValue) => {
+      expect(() => validateRoutes(incorrectRouteArrayValue, 'get')).toThrow(new Error('routes'));
+    });
 
-    const incorrectRouteValues = ['string', true, 3000, null, undefined, [], () => {}];
+    const incorrectRouteValues = ['string', true, 3000, null, undefined, {}, [], () => {}];
     incorrectRouteValues.forEach((incorrectRouteValue) => {
       expect(() => validateRoutes([incorrectRouteValue], 'get')).toThrow(new Error('routes[0]'));
+    });
+  });
+
+  test('Should correctly handle entities only with correct type', () => {
+    const correctEntitiesValues = [{}, { headers: { key: 'value' } }, undefined];
+    correctEntitiesValues.forEach((correctEntitiesValue) => {
+      expect(() => validateRoutes([
+        {
+          entities: correctEntitiesValue,
+          data: null
+        }
+      ], 'get')).not.toThrow(Error);
+    });
+
+    const incorrectEntitiesValues = ['string', true, 3000, null, [], () => {}];
+    incorrectEntitiesValues.forEach((incorrectEntitiesValue) => {
+      expect(() => validateRoutes([
+        {
+          entities: incorrectEntitiesValue,
+          data: null
+        }
+      ], 'get')).toThrow(new Error('routes[0].entities'));
     });
   });
 
@@ -104,7 +128,7 @@ describe('validateRoutes (rest)', () => {
       ], 'get')).not.toThrow(Error);
     });
 
-    const incorrectHeadersValues = [true, 3000, null, undefined, [], () => {}];
+    const incorrectHeadersValues = ['string', true, 3000, null, undefined, [], () => {}];
     incorrectHeadersValues.forEach((incorrectHeaderValue) => {
       expect(() => validateRoutes([
         {
@@ -118,7 +142,7 @@ describe('validateRoutes (rest)', () => {
     incorrectHeadersObjectValues.forEach((incorrectHeadersObjectValue) => {
       expect(() => validateRoutes([
         {
-          entities: { headers: { key: incorrectHeadersObjectValue} },
+          entities: { headers: { key: incorrectHeadersObjectValue } },
           data: null
         }
       ], 'get')).toThrow(new Error('routes[0].entities.headers.key'));
@@ -136,7 +160,7 @@ describe('validateRoutes (rest)', () => {
       ], 'get')).not.toThrow(Error);
     });
 
-    const incorrectParamsValues = [true, 3000, null, undefined, [], () => {}];
+    const incorrectParamsValues = ['string', true, 3000, null, undefined, [], () => {}];
     incorrectParamsValues.forEach((incorrectParamValue) => {
       expect(() => validateRoutes([
         {
@@ -168,7 +192,7 @@ describe('validateRoutes (rest)', () => {
       ], 'get')).not.toThrow(Error);
     });
 
-    const incorrectQueryValues = [true, 3000, null, undefined, [], () => {}];
+    const incorrectQueryValues = ['string', true, 3000, null, undefined, [], () => {}];
     incorrectQueryValues.forEach((incorrectQueryValue) => {
       expect(() => validateRoutes([
         {

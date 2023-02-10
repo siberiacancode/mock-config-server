@@ -52,7 +52,7 @@ describe('validateRestConfig', () => {
       })).not.toThrow(Error);
     });
 
-    const incorrectConfigMethodValues = ['other', true, 3000, null, undefined, {}, [], () => {}];
+    const incorrectConfigMethodValues = ['string', true, 3000, null, undefined, {}, [], () => {}];
     incorrectConfigMethodValues.forEach((incorrectConfigMethodValue) => {
       expect(() => validateRestConfig({
         configs: [{
