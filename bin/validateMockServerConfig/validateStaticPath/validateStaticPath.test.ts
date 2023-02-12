@@ -21,18 +21,22 @@ describe('validateStaticPath', () => {
 
     const incorrectPrefixObjectStaticPaths = [true, 3000, null, undefined, {}, [], () => {}];
     incorrectPrefixObjectStaticPaths.forEach((incorrectPrefixObjectStaticPath) => {
-      expect(() => validateStaticPath({
-        prefix: incorrectPrefixObjectStaticPath,
-        path: 'string'
-      })).toThrow(new Error('staticPath.prefix'));
+      expect(() =>
+        validateStaticPath({
+          prefix: incorrectPrefixObjectStaticPath,
+          path: 'string'
+        })
+      ).toThrow(new Error('staticPath.prefix'));
     });
 
     const incorrectPathObjectStaticPaths = [true, 3000, null, undefined, {}, [], () => {}];
     incorrectPathObjectStaticPaths.forEach((incorrectPathObjectStaticPath) => {
-      expect(() => validateStaticPath({
-        prefix: 'string',
-        path: incorrectPathObjectStaticPath
-      })).toThrow(new Error('staticPath.path'));
+      expect(() =>
+        validateStaticPath({
+          prefix: 'string',
+          path: incorrectPathObjectStaticPath
+        })
+      ).toThrow(new Error('staticPath.path'));
     });
   });
 
@@ -44,23 +48,33 @@ describe('validateStaticPath', () => {
 
     const incorrectArrayStaticPaths = [true, 3000, null, undefined, [], () => {}];
     incorrectArrayStaticPaths.forEach((incorrectArrayStaticPath) => {
-      expect(() => validateStaticPath([incorrectArrayStaticPath])).toThrow(new Error('staticPath[0]'));
+      expect(() => validateStaticPath([incorrectArrayStaticPath])).toThrow(
+        new Error('staticPath[0]')
+      );
     });
 
     const incorrectArrayPrefixObjectStaticPaths = [true, 3000, null, undefined, {}, [], () => {}];
     incorrectArrayPrefixObjectStaticPaths.forEach((incorrectArrayPrefixObjectStaticPath) => {
-      expect(() => validateStaticPath([{
-        prefix: incorrectArrayPrefixObjectStaticPath,
-        path: 'string'
-      }])).toThrow(new Error('staticPath[0].prefix'));
+      expect(() =>
+        validateStaticPath([
+          {
+            prefix: incorrectArrayPrefixObjectStaticPath,
+            path: 'string'
+          }
+        ])
+      ).toThrow(new Error('staticPath[0].prefix'));
     });
 
     const incorrectArrayPathObjectStaticPaths = [true, 3000, null, undefined, {}, [], () => {}];
     incorrectArrayPathObjectStaticPaths.forEach((incorrectArrayPathObjectStaticPath) => {
-      expect(() => validateStaticPath([{
-        prefix: 'string',
-        path: incorrectArrayPathObjectStaticPath
-      }])).toThrow(new Error('staticPath[0].path'));
+      expect(() =>
+        validateStaticPath([
+          {
+            prefix: 'string',
+            path: incorrectArrayPathObjectStaticPath
+          }
+        ])
+      ).toThrow(new Error('staticPath[0].path'));
     });
   });
 });

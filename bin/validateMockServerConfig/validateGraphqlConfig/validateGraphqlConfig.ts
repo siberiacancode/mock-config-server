@@ -14,7 +14,8 @@ const validateConfigs = (configs: unknown) => {
         throw new Error(`configs[${index}].operationType`);
       }
 
-      const isOperationNameStringOrRegExp = typeof operationName === 'string' || operationName instanceof RegExp;
+      const isOperationNameStringOrRegExp =
+        typeof operationName === 'string' || operationName instanceof RegExp;
       if (!isOperationNameStringOrRegExp) {
         throw new Error(`configs[${index}].operationName`);
       }

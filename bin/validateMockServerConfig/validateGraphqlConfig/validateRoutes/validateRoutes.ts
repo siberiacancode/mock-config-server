@@ -3,7 +3,7 @@ import { isPlainObject } from '../../../../src/utils/helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
 type AllowedEntitiesByOperationType = {
-  [Key in keyof GraphQLOperationsEntities]: GraphQLOperationsEntities[Key][]
+  [Key in keyof GraphQLOperationsEntities]: GraphQLOperationsEntities[Key][];
 };
 const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntitiesByOperationType = {
   query: ['headers', 'query', 'variables'],
@@ -28,7 +28,9 @@ const validateEntities = (entities: unknown, operationType: GraphQLOperationType
   const isEntitiesObject = isPlainObject(entities);
   if (isEntitiesObject) {
     Object.keys(entities).forEach((entity) => {
-      const isEntityAllowed = ALLOWED_ENTITIES_BY_OPERATION_TYPE[operationType].includes(entity as any);
+      const isEntityAllowed = ALLOWED_ENTITIES_BY_OPERATION_TYPE[operationType].includes(
+        entity as any
+      );
       if (!isEntityAllowed) {
         throw new Error(`entities.${entity}`);
       }

@@ -3,7 +3,7 @@ import { isPlainObject } from '../../../../src/utils/helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
 type AllowedEntitiesByMethod = {
-  [Key in keyof RestMethodsEntities]: RestMethodsEntities[Key][]
+  [Key in keyof RestMethodsEntities]: RestMethodsEntities[Key][];
 };
 const ALLOWED_ENTITIES_BY_METHOD: AllowedEntitiesByMethod = {
   get: ['headers', 'query', 'params'],

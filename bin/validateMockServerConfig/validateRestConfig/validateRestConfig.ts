@@ -35,7 +35,7 @@ const validateConfigs = (configs: unknown) => {
   }
 
   throw new Error('configs');
-}
+};
 
 export const validateRestConfig = (restConfig: unknown) => {
   const isRestConfigObject = isPlainObject(restConfig);
