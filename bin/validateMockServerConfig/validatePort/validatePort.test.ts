@@ -1,29 +1,15 @@
-import { createValidationErrorMessage } from '../createValidationErrorMessage/createValidationErrorMessage';
-
 import { validatePort } from './validatePort';
 
 describe('validatePort', () => {
-  test('Should correctly handle value only with type number | undefined', () => {
-    expect(() => validatePort(undefined)).not.toThrow(Error);
-    expect(() => validatePort(3000)).not.toThrow(Error);
+  test('Should correctly handle port only with correct type', () => {
+    const correctPortValues = [3000, undefined];
+    correctPortValues.forEach((correctPortValue) => {
+      expect(() => validatePort(correctPortValue)).not.toThrow(Error);
+    });
+  });
 
-    expect(() => validatePort(true)).toThrow(
-      new Error(createValidationErrorMessage('port', 'number | undefined'))
-    );
-    expect(() => validatePort('port')).toThrow(
-      new Error(createValidationErrorMessage('port', 'number | undefined'))
-    );
-    expect(() => validatePort(null)).toThrow(
-      new Error(createValidationErrorMessage('port', 'number | undefined'))
-    );
-    expect(() => validatePort({})).toThrow(
-      new Error(createValidationErrorMessage('port', 'number | undefined'))
-    );
-    expect(() => validatePort([])).toThrow(
-      new Error(createValidationErrorMessage('port', 'number | undefined'))
-    );
-    expect(() => validatePort(() => {})).toThrow(
-      new Error(createValidationErrorMessage('port', 'number | undefined'))
-    );
+  const incorrectPortValues = ['string', true, null, {}, [], () => {}];
+  incorrectPortValues.forEach((incorrectPortValue) => {
+    expect(() => validatePort(incorrectPortValue)).toThrow(new Error('port'));
   });
 });

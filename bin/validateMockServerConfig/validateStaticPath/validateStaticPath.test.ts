@@ -1,127 +1,66 @@
-import { createValidationErrorMessage } from '../createValidationErrorMessage/createValidationErrorMessage';
-
 import { validateStaticPath } from './validateStaticPath';
 
 describe('validateStaticPath', () => {
-  test('Should correctly handle primitive values only with type string | undefined', () => {
-    expect(() => validateStaticPath('staticPath')).not.toThrow(Error);
-    expect(() => validateStaticPath(undefined)).not.toThrow(Error);
+  test('Should correctly handle static path (except arrays and plain objects) only with correct type', () => {
+    const correctStaticPaths = ['string', undefined];
+    correctStaticPaths.forEach((correctStaticPath) => {
+      expect(() => validateStaticPath(correctStaticPath)).not.toThrow(Error);
+    });
 
-    expect(() => validateStaticPath(true)).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'staticPath',
-          'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[] | undefined'
-        )
-      )
-    );
-    expect(() => validateStaticPath(3000)).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'staticPath',
-          'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[] | undefined'
-        )
-      )
-    );
-    expect(() => validateStaticPath(null)).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'staticPath',
-          'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[] | undefined'
-        )
-      )
-    );
+    const incorrectStaticPaths = [true, 3000, null, () => {}];
+    incorrectStaticPaths.forEach((incorrectStaticPath) => {
+      expect(() => validateStaticPath(incorrectStaticPath)).toThrow(new Error('staticPath'));
+    });
   });
 
-  test('Should correctly handle plain object values only with type { prefix: string; path: string }', () => {
-    expect(() => validateStaticPath({ prefix: 'prefix', path: 'path' })).not.toThrow(Error);
+  test('Should correctly handle plain object static path only with correct type', () => {
+    const correctObjectStaticPaths = [{ prefix: 'string', path: 'string' }];
+    correctObjectStaticPaths.forEach((correctObjectStaticPath) => {
+      expect(() => validateStaticPath(correctObjectStaticPath)).not.toThrow(Error);
+    });
 
-    expect(() => validateStaticPath({ prefix: true, path: undefined })).toThrow(
-      new Error(createValidationErrorMessage('staticPath.prefix', 'string'))
-    );
-    expect(() => validateStaticPath({ prefix: 3000, path: undefined })).toThrow(
-      new Error(createValidationErrorMessage('staticPath.prefix', 'string'))
-    );
-    expect(() => validateStaticPath({ prefix: null, path: undefined })).toThrow(
-      new Error(createValidationErrorMessage('staticPath.prefix', 'string'))
-    );
-    expect(() => validateStaticPath({ prefix: undefined, path: undefined })).toThrow(
-      new Error(createValidationErrorMessage('staticPath.prefix', 'string'))
-    );
+    const incorrectPrefixObjectStaticPaths = [true, 3000, null, undefined, {}, [], () => {}];
+    incorrectPrefixObjectStaticPaths.forEach((incorrectPrefixObjectStaticPath) => {
+      expect(() => validateStaticPath({
+        prefix: incorrectPrefixObjectStaticPath,
+        path: 'string'
+      })).toThrow(new Error('staticPath.prefix'));
+    });
 
-    expect(() => validateStaticPath({ prefix: 'prefix', path: true })).toThrow(
-      new Error(createValidationErrorMessage('staticPath.path', 'string'))
-    );
-    expect(() => validateStaticPath({ prefix: 'prefix', path: 3000 })).toThrow(
-      new Error(createValidationErrorMessage('staticPath.path', 'string'))
-    );
-    expect(() => validateStaticPath({ prefix: 'prefix', path: null })).toThrow(
-      new Error(createValidationErrorMessage('staticPath.path', 'string'))
-    );
-    expect(() => validateStaticPath({ prefix: 'prefix', path: undefined })).toThrow(
-      new Error(createValidationErrorMessage('staticPath.path', 'string'))
-    );
-
-    expect(() => validateStaticPath(() => {})).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'staticPath',
-          'string | { prefix: string; path: string } | (string | { prefix: string; path: string })[] | undefined'
-        )
-      )
-    );
+    const incorrectPathObjectStaticPaths = [true, 3000, null, undefined, {}, [], () => {}];
+    incorrectPathObjectStaticPaths.forEach((incorrectPathObjectStaticPath) => {
+      expect(() => validateStaticPath({
+        prefix: 'string',
+        path: incorrectPathObjectStaticPath
+      })).toThrow(new Error('staticPath.path'));
+    });
   });
 
-  test('Should correctly handle array values only with type (string | { prefix: string; path: string })[]', () => {
-    expect(() =>
-      validateStaticPath(['staticPath', { prefix: 'prefix', path: 'path' }])
-    ).not.toThrow(Error);
+  test('Should correctly handle array static path only with correct type', () => {
+    const correctArrayStaticPaths = ['string', { prefix: 'string', path: 'string' }];
+    correctArrayStaticPaths.forEach((correctArrayStaticPath) => {
+      expect(() => validateStaticPath([correctArrayStaticPath])).not.toThrow(Error);
+    });
 
-    expect(() => validateStaticPath(['staticPath', true])).toThrow(
-      new Error(
-        createValidationErrorMessage('staticPath[1]', 'string | { prefix: string; path: string }')
-      )
-    );
-    expect(() => validateStaticPath(['staticPath', 3000])).toThrow(
-      new Error(
-        createValidationErrorMessage('staticPath[1]', 'string | { prefix: string; path: string }')
-      )
-    );
-    expect(() => validateStaticPath(['staticPath', null])).toThrow(
-      new Error(
-        createValidationErrorMessage('staticPath[1]', 'string | { prefix: string; path: string }')
-      )
-    );
-    expect(() => validateStaticPath(['staticPath', undefined])).toThrow(
-      new Error(
-        createValidationErrorMessage('staticPath[1]', 'string | { prefix: string; path: string }')
-      )
-    );
+    const incorrectArrayStaticPaths = [true, 3000, null, undefined, [], () => {}];
+    incorrectArrayStaticPaths.forEach((incorrectArrayStaticPath) => {
+      expect(() => validateStaticPath([incorrectArrayStaticPath])).toThrow(new Error('staticPath[0]'));
+    });
 
-    expect(() => validateStaticPath(['staticPath', { prefix: true, path: undefined }])).toThrow(
-      new Error(createValidationErrorMessage('staticPath[1].prefix', 'string'))
-    );
-    expect(() => validateStaticPath(['staticPath', { prefix: 3000, path: undefined }])).toThrow(
-      new Error(createValidationErrorMessage('staticPath[1].prefix', 'string'))
-    );
-    expect(() => validateStaticPath(['staticPath', { prefix: null, path: undefined }])).toThrow(
-      new Error(createValidationErrorMessage('staticPath[1].prefix', 'string'))
-    );
-    expect(() =>
-      validateStaticPath(['staticPath', { prefix: undefined, path: undefined }])
-    ).toThrow(new Error(createValidationErrorMessage('staticPath[1].prefix', 'string')));
+    const incorrectArrayPrefixObjectStaticPaths = [true, 3000, null, undefined, {}, [], () => {}];
+    incorrectArrayPrefixObjectStaticPaths.forEach((incorrectArrayPrefixObjectStaticPath) => {
+      expect(() => validateStaticPath([{
+        prefix: incorrectArrayPrefixObjectStaticPath,
+        path: 'string'
+      }])).toThrow(new Error('staticPath[0].prefix'));
+    });
 
-    expect(() => validateStaticPath(['staticPath', { prefix: 'prefix', path: true }])).toThrow(
-      new Error(createValidationErrorMessage('staticPath[1].path', 'string'))
-    );
-    expect(() => validateStaticPath(['staticPath', { prefix: 'prefix', path: 3000 }])).toThrow(
-      new Error(createValidationErrorMessage('staticPath[1].path', 'string'))
-    );
-    expect(() => validateStaticPath(['staticPath', { prefix: 'prefix', path: null }])).toThrow(
-      new Error(createValidationErrorMessage('staticPath[1].path', 'string'))
-    );
-    expect(() => validateStaticPath(['staticPath', { prefix: 'prefix', path: undefined }])).toThrow(
-      new Error(createValidationErrorMessage('staticPath[1].path', 'string'))
-    );
+    const incorrectArrayPathObjectStaticPaths = [true, 3000, null, undefined, {}, [], () => {}];
+    incorrectArrayPathObjectStaticPaths.forEach((incorrectArrayPathObjectStaticPath) => {
+      expect(() => validateStaticPath([{
+        prefix: 'string',
+        path: incorrectArrayPathObjectStaticPath
+      }])).toThrow(new Error('staticPath[0].path'));
+    });
   });
 });
