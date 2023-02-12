@@ -1,241 +1,120 @@
-import { createValidationErrorMessage } from '../createValidationErrorMessage/createValidationErrorMessage';
-
 import { validateCors } from './validateCors';
 
 describe('validateCors', () => {
-  test('Should correctly handle cors only with type Cors', () => {
-    expect(() => validateCors({ origin: 'origin' })).not.toThrow(Error);
-    expect(() => validateCors(undefined)).not.toThrow(Error);
+  test('Should correctly handle cors only with correct type', () => {
+    const correctCorsValues = [{ origin: 'string'}, undefined];
+    correctCorsValues.forEach((correctCorsValue) => {
+      expect(() => validateCors(correctCorsValue)).not.toThrow(Error);
+    });
 
-    expect(() => validateCors(true)).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors',
-          'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
-        )
-      )
-    );
-    expect(() => validateCors('cors')).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors',
-          'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
-        )
-      )
-    );
-    expect(() => validateCors(3000)).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors',
-          'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
-        )
-      )
-    );
-    expect(() => validateCors(null)).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors',
-          'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
-        )
-      )
-    );
-    expect(() => validateCors([])).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors',
-          'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
-        )
-      )
-    );
-    expect(() => validateCors(() => {})).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors',
-          'Cors (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
-        )
-      )
-    );
+    const incorrectCorsValues = ['string', true, 3000, null, [], () => {}];
+    incorrectCorsValues.forEach((incorrectCorsValue) => {
+      expect(() => validateCors(incorrectCorsValue)).toThrow(new Error('cors'));
+    });
   });
 
-  test('Should correctly handle cors.origin only with type CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin)', () => {
-    // TODO should throw error
-    expect(() => validateCors({ origin: () => {} })).not.toThrow(Error);
+  test('Should correctly handle cors.origin only with correct type', () => {
+    const correctOrigins = ['string', /string/, ['string', /string/]];
+    correctOrigins.forEach((correctOrigin) => {
+      expect(() => validateCors({ origin: correctOrigin })).not.toThrow(Error);
+    });
 
-    expect(() => validateCors({ origin: 'origin' })).not.toThrow(Error);
-    expect(() => validateCors({ origin: /origin/gi })).not.toThrow(Error);
-    expect(() => validateCors({ origin: ['origin', /origin/gi] })).not.toThrow(Error);
+    const incorrectOrigins = [true, 3000, null, undefined, {}];
+    incorrectOrigins.forEach((incorrectOrigin) => {
+      expect(() => validateCors({ origin: incorrectOrigin })).toThrow(new Error('cors.origin'));
+    });
 
-    expect(() => validateCors({ origin: () => 'origin' })).not.toThrow(Error);
-    expect(() => validateCors({ origin: () => /origin/gi })).not.toThrow(Error);
-    expect(() => validateCors({ origin: () => ['origin', /origin/gi] })).not.toThrow(Error);
-    expect(() => validateCors({ origin: () => Promise.resolve('origin') })).not.toThrow(Error);
-    expect(() => validateCors({ origin: () => Promise.resolve(/origin/gi) })).not.toThrow(Error);
-    expect(() =>
-      validateCors({ origin: () => Promise.resolve(['origin', /origin/gi]) })
-    ).not.toThrow(Error);
-
-    expect(() => validateCors({ origin: true })).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors.origin',
-          'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'
-        )
-      )
-    );
-    expect(() => validateCors({ origin: 3000 })).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors.origin',
-          'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'
-        )
-      )
-    );
-    expect(() => validateCors({ origin: null })).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors.origin',
-          'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'
-        )
-      )
-    );
-    expect(() => validateCors({ origin: undefined })).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors.origin',
-          'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'
-        )
-      )
-    );
-    expect(() => validateCors({ origin: {} })).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors.origin',
-          'CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin) (see our doc: https://github.com/siberiacancode/mock-config-server)'
-        )
-      )
-    );
+    const incorrectArrayOrigins = [true, 3000, null, undefined, {}, [], () => {}];
+    incorrectArrayOrigins.forEach((incorrectArrayOrigin) => {
+      expect(() => validateCors({ origin: [incorrectArrayOrigin] })).toThrow('cors.origin[0]');
+    });
   });
 
-  test('Should correctly handle cors.methods only with type RestMethod[]', () => {
-    expect(() =>
-      validateCors({ origin: 'origin', methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] })
-    ).not.toThrow(Error);
-    expect(() => validateCors({ origin: 'origin', methods: undefined })).not.toThrow(Error);
+  test('Should correctly handle cors.methods only with correct type', () => {
+    const correctMethodsValues = [['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], [], undefined];
+    correctMethodsValues.forEach((correctMethodsValue) => {
+      expect(() => validateCors({
+        origin: 'string',
+        methods: correctMethodsValue
+      })).not.toThrow(Error);
+    });
 
-    expect(() => validateCors({ origin: 'origin', methods: true })).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors.methods',
-          'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
-        )
-      )
-    );
-    expect(() => validateCors({ origin: 'origin', methods: 'methods' })).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors.methods',
-          'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
-        )
-      )
-    );
-    expect(() => validateCors({ origin: 'origin', methods: 3000 })).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors.methods',
-          'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
-        )
-      )
-    );
-    expect(() => validateCors({ origin: 'origin', methods: null })).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors.methods',
-          'RestMethod[] (see our doc: https://github.com/siberiacancode/mock-config-server) | undefined'
-        )
-      )
-    );
-    expect(() => validateCors({ origin: 'origin', methods: ['string'] })).toThrow(
-      new Error(
-        createValidationErrorMessage(
-          'cors.methods[0]',
-          'RestMethod (see our doc: https://github.com/siberiacancode/mock-config-server)'
-        )
-      )
-    );
+    const incorrectMethodsValues = ['string', true, 3000, null, {}, () => {}];
+    incorrectMethodsValues.forEach((incorrectMethodsValue) => {
+      expect(() => validateCors({
+        origin: 'string',
+        methods: incorrectMethodsValue
+      })).toThrow(new Error('cors.methods'));
+    });
+
+    const incorrectArrayMethodsValues = ['string', true, 3000, null, undefined, {}, [], () => {}];
+    incorrectArrayMethodsValues.forEach((incorrectArrayMethodsValue) => {
+      expect(() => validateCors({
+        origin: 'string',
+        methods: [incorrectArrayMethodsValue]
+      })).toThrow(new Error('cors.methods[0]'));
+    });
   });
 
-  test('Should correctly handle cors.headers only with type string[] | undefined', () => {
-    expect(() => validateCors({ origin: 'origin', headers: ['string'] })).not.toThrow(Error);
-    expect(() => validateCors({ origin: 'origin', headers: undefined })).not.toThrow(Error);
+  test('Should correctly handle cors.headers only with correct type', () => {
+    const correctHeadersValues = [['string'], [], undefined];
+    correctHeadersValues.forEach((correctHeadersValue) => {
+      expect(() => validateCors({
+        origin: 'string',
+        headers: correctHeadersValue
+      })).not.toThrow(Error);
+    });
 
-    expect(() => validateCors({ origin: 'origin', headers: true })).toThrow(
-      new Error(createValidationErrorMessage('cors.headers', 'string[] | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', headers: 'headers' })).toThrow(
-      new Error(createValidationErrorMessage('cors.headers', 'string[] | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', headers: 3000 })).toThrow(
-      new Error(createValidationErrorMessage('cors.headers', 'string[] | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', headers: null })).toThrow(
-      new Error(createValidationErrorMessage('cors.headers', 'string[] | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', headers: {} })).toThrow(
-      new Error(createValidationErrorMessage('cors.headers', 'string[] | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', headers: () => {} })).toThrow(
-      new Error(createValidationErrorMessage('cors.headers', 'string[] | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', headers: [3000] })).toThrow(
-      new Error(createValidationErrorMessage('cors.headers[0]', 'string'))
-    );
+    const incorrectHeadersValues = ['string', true, 3000, null, {}, () => {}];
+    incorrectHeadersValues.forEach((incorrectHeadersValue) => {
+      expect(() => validateCors({
+        origin: 'string',
+        headers: incorrectHeadersValue
+      })).toThrow(new Error('cors.headers'));
+    });
+
+    const incorrectArrayHeadersValues = [true, 3000, null, undefined, {}, [], () => {}];
+    incorrectArrayHeadersValues.forEach((incorrectArrayHeadersValue) => {
+      expect(() => validateCors({
+        origin: 'string',
+        headers: [incorrectArrayHeadersValue]
+      })).toThrow(new Error('cors.headers[0]'));
+    });
   });
 
-  test('Should correctly handle cors.credentials only with type boolean | undefined', () => {
-    expect(() => validateCors({ origin: 'origin', credentials: true })).not.toThrow(Error);
-    expect(() => validateCors({ origin: 'origin', credentials: undefined })).not.toThrow(Error);
+  test('Should correctly handle cors.credentials only with correct type', () => {
+    const correctCredentialsValues = [true, false, undefined];
+    correctCredentialsValues.forEach((correctCredentialsValue) => {
+      expect(() => validateCors({
+        origin: 'string',
+        credentials: correctCredentialsValue
+      })).not.toThrow(Error);
+    });
 
-    expect(() => validateCors({ origin: 'origin', credentials: 'credentials' })).toThrow(
-      new Error(createValidationErrorMessage('cors.credentials', 'boolean | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', credentials: 3000 })).toThrow(
-      new Error(createValidationErrorMessage('cors.credentials', 'boolean | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', credentials: null })).toThrow(
-      new Error(createValidationErrorMessage('cors.credentials', 'boolean | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', credentials: {} })).toThrow(
-      new Error(createValidationErrorMessage('cors.credentials', 'boolean | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', credentials: [] })).toThrow(
-      new Error(createValidationErrorMessage('cors.credentials', 'boolean | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', credentials: () => {} })).toThrow(
-      new Error(createValidationErrorMessage('cors.credentials', 'boolean | undefined'))
-    );
+    const incorrectCredentialsValues = ['string', 3000, null, {}, [], () => {}];
+    incorrectCredentialsValues.forEach((incorrectCredentialsValue) => {
+      expect(() => validateCors({
+        origin: 'string',
+        credentials: incorrectCredentialsValue
+      })).toThrow(new Error('cors.credentials'));
+    });
   });
 
-  test('Should correctly handle cors.maxAge only with type number | undefined', () => {
-    expect(() => validateCors({ origin: 'origin', maxAge: 3000 })).not.toThrow(Error);
-    expect(() => validateCors({ origin: 'origin', maxAge: undefined })).not.toThrow(Error);
+  test('Should correctly handle cors.maxAge only with correct type', () => {
+    const correctMaxAgeValues = [3000, undefined];
+    correctMaxAgeValues.forEach((correctMaxAgeValue) => {
+      expect(() => validateCors({
+        origin: 'string',
+        maxAge: correctMaxAgeValue
+      })).not.toThrow(Error);
+    });
 
-    expect(() => validateCors({ origin: 'origin', maxAge: true })).toThrow(
-      new Error(createValidationErrorMessage('cors.maxAge', 'number | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', maxAge: 'maxAge' })).toThrow(
-      new Error(createValidationErrorMessage('cors.maxAge', 'number | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', maxAge: null })).toThrow(
-      new Error(createValidationErrorMessage('cors.maxAge', 'number | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', maxAge: {} })).toThrow(
-      new Error(createValidationErrorMessage('cors.maxAge', 'number | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', maxAge: [] })).toThrow(
-      new Error(createValidationErrorMessage('cors.maxAge', 'number | undefined'))
-    );
-    expect(() => validateCors({ origin: 'origin', maxAge: () => {} })).toThrow(
-      new Error(createValidationErrorMessage('cors.maxAge', 'number | undefined'))
-    );
+    const incorrectMaxAgeValues = ['string', true, null, {}, [], () => {}];
+    incorrectMaxAgeValues.forEach((incorrectMaxAgeValue) => {
+      expect(() => validateCors({
+        origin: 'string',
+        maxAge: incorrectMaxAgeValue
+      })).toThrow(new Error('cors.maxAge'));
+    });
   });
 });
