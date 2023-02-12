@@ -1,6 +1,6 @@
 import { isPlainObject } from '../../src/utils/helpers';
 
-import { createValidationErrorMessage } from './createValidationErrorMessage/createValidationErrorMessage';
+import { createConfigPropertyTypeErrorMessage } from './createConfigPropertyTypeErrorMessage/createConfigPropertyTypeErrorMessage';
 import { validateBaseUrl } from './validateBaseUrl/validateBaseUrl';
 import { validateCors } from './validateCors/validateCors';
 import { validateGraphqlConfig } from './validateGraphqlConfig/validateGraphqlConfig';
@@ -32,6 +32,6 @@ export const validateMockServerConfig = (mockServerConfig: unknown) => {
     validateInterceptors(mockServerConfig.interceptors);
     validateCors(mockServerConfig.cors);
   } catch (e: any) {
-    throw new Error(createValidationErrorMessage(e.message));
+    throw new Error(createConfigPropertyTypeErrorMessage(e.message));
   }
 };

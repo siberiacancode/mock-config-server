@@ -9,29 +9,43 @@ describe('validateInterceptors', () => {
 
     const incorrectInterceptorsValues = ['string', true, 3000, null, [], () => {}];
     incorrectInterceptorsValues.forEach((incorrectInterceptorsValue) => {
-      expect(() => validateInterceptors(incorrectInterceptorsValue)).toThrow(new Error('interceptors'));
+      expect(() => validateInterceptors(incorrectInterceptorsValue)).toThrow(
+        new Error('interceptors')
+      );
     });
   });
 
   test('Should correctly handle interceptors request and response only with correctType', () => {
     const correctRequestOrResponseInterceptorsValues = [() => {}, undefined];
-    correctRequestOrResponseInterceptorsValues.forEach((correctRequestOrResponseInterceptorsValue) => {
-      expect(() => validateInterceptors({
-        request: correctRequestOrResponseInterceptorsValue
-      })).not.toThrow(Error);
-      expect(() => validateInterceptors({
-        response: correctRequestOrResponseInterceptorsValue
-      })).not.toThrow(Error);
-    });
+    correctRequestOrResponseInterceptorsValues.forEach(
+      (correctRequestOrResponseInterceptorsValue) => {
+        expect(() =>
+          validateInterceptors({
+            request: correctRequestOrResponseInterceptorsValue
+          })
+        ).not.toThrow(Error);
+        expect(() =>
+          validateInterceptors({
+            response: correctRequestOrResponseInterceptorsValue
+          })
+        ).not.toThrow(Error);
+      }
+    );
 
     const incorrectRequestOrResponseInterceptorsValues = ['string', true, 3000, null, {}, []];
-    incorrectRequestOrResponseInterceptorsValues.forEach((incorrectRequestOrResponseInterceptorsValue) => {
-      expect(() => validateInterceptors({
-        request: incorrectRequestOrResponseInterceptorsValue
-      })).toThrow(new Error('interceptors.request'));
-      expect(() => validateInterceptors({
-        response: incorrectRequestOrResponseInterceptorsValue
-      })).toThrow(new Error('interceptors.response'));
-    });
+    incorrectRequestOrResponseInterceptorsValues.forEach(
+      (incorrectRequestOrResponseInterceptorsValue) => {
+        expect(() =>
+          validateInterceptors({
+            request: incorrectRequestOrResponseInterceptorsValue
+          })
+        ).toThrow(new Error('interceptors.request'));
+        expect(() =>
+          validateInterceptors({
+            response: incorrectRequestOrResponseInterceptorsValue
+          })
+        ).toThrow(new Error('interceptors.response'));
+      }
+    );
   });
 });
