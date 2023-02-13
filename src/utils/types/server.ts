@@ -30,7 +30,4 @@ export interface MockServerConfig {
   staticPath?: StaticPath;
   interceptors?: import('./interceptors').Interceptors;
   cors?: Cors;
-  pathSuggestions?: {
-    typoTolerance: TypoTolerance;
-  };
 }

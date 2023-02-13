@@ -1,42 +1,20 @@
-import { addBaseUrlsToUrl, getUrlParts } from '../../../utils/helpers';
-import type { BaseUrl, TypoTolerance } from '../../../utils/types';
-import { RequestPath } from '../../../utils/types';
+import { getUrlParts } from '../../../utils/helpers';
 import { getLevenshteinDistance } from '../getLevenshteinDistance/getLevenshteinDistance';
 
-import {
-  getRestUrlPatternMeaningfulString,
-  getRestUrlPatternTypoToleranceByHalvedShortestWord
-} from './helpers';
+import { getRestUrlPatternMeaningfulString } from './getRestUrlPatternMeaningfulString';
 
 interface GetRestUrlSuggestionsParams {
   url: string;
-  patternPaths: RequestPath[];
-  serverBaseUrl?: BaseUrl;
-  restBaseUrl?: BaseUrl;
-  typoTolerance?: TypoTolerance;
+  patternUrls: string[];
 }
 
 export const getRestUrlSuggestions = ({
   url,
-  patternPaths,
-  serverBaseUrl,
-  restBaseUrl,
-  typoTolerance = 'halvedShortestWord'
+  patternUrls
 }: GetRestUrlSuggestionsParams) => {
-  const patternUrls = Array.from(
-    patternPaths.reduce((acc, patternPath) => {
-      if (typeof patternPath === 'string')
-        acc.add(addBaseUrlsToUrl(patternPath, serverBaseUrl, restBaseUrl));
-      return acc;
-    }, new Set<string>())
-  );
-
-  let tolerance = typoTolerance;
-  if (typoTolerance === 'halvedShortestWord')
-    tolerance = getRestUrlPatternTypoToleranceByHalvedShortestWord(patternUrls);
-
   const { urlParts: actualUrlParts, queryParts: actualQueryParts } = getUrlParts(url);
 
+  let exactMatchSuggestion = '';
   const restUrlSuggestions = patternUrls.reduce((acc, patternUrl) => {
     const { urlParts: patternUrlParts } = getUrlParts(patternUrl);
     // ignore patterns with different amount of parts
@@ -49,6 +27,7 @@ export const getRestUrlSuggestions = ({
     const actualUrlMeaningfulString = actualUrlPartsWithoutParams.join('');
     const patternUrlMeaningfulString = getRestUrlPatternMeaningfulString(patternUrl);
 
+    const tolerance = Math.floor(patternUrlMeaningfulString.length / 2);
     const distance = getLevenshteinDistance(actualUrlMeaningfulString, patternUrlMeaningfulString);
 
     if (distance <= tolerance) {
@@ -59,14 +38,17 @@ export const getRestUrlSuggestions = ({
           return patternUrlParts[index];
         })
         .join('/');
+      const suggestionWithQueryParams = `/${urlSuggestion}${
+        actualQueryParts.length ? `?${actualQueryParts.join('&')}` : ''
+      }`;
 
-      acc.push(
-        `/${urlSuggestion}${actualQueryParts.length ? `?${actualQueryParts.join('&')}` : ''}`
-      );
+      if (!distance) exactMatchSuggestion = suggestionWithQueryParams;
+      acc.push(suggestionWithQueryParams);
     }
 
     return acc;
   }, [] as string[]);
 
-  return Array.from(restUrlSuggestions);
+  if (exactMatchSuggestion) return [exactMatchSuggestion];
+  return restUrlSuggestions;
 };

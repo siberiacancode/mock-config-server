@@ -3,87 +3,24 @@ import { getGraphqlUrlSuggestions } from './getGraphqlUrlSuggestions';
 describe('getGraphqlUrlSuggestions', () => {
   const patternOperationNames: string[] = ['GetPosts', 'GetDevelopers', 'CreateDeveloper'];
 
-  test('Should return only exact match if typoTolerance is 0', () => {
-    expect(
-      getGraphqlUrlSuggestions({
-        query: {
-          url: '/',
-          operationName: 'GetPosts'
-        },
-        patternOperationNames,
-        typoTolerance: 0
-      })
-    ).toEqual(['/GetPosts']);
-
-    expect(
-      getGraphqlUrlSuggestions({
-        query: {
-          url: '/',
-          operationName: 'GetPots'
-        },
-        patternOperationNames,
-        typoTolerance: 0
-      })
-    ).toEqual([]);
-  });
-
-  test('Should correctly return suggestions if typoTolerance is 1', () => {
-    expect(
-      getGraphqlUrlSuggestions({
-        query: {
-          url: '/',
-          operationName: 'GetPots'
-        },
-        patternOperationNames,
-        typoTolerance: 1
-      })
-    ).toEqual(['/GetPosts']);
-
-    expect(
-      getGraphqlUrlSuggestions({
-        query: {
-          url: '/',
-          operationName: 'Getpots'
-        },
-        patternOperationNames,
-        typoTolerance: 1
-      })
-    ).toEqual([]);
-  });
-
-  test('Should return all patterns with same number of parts if typoTolerance is Infinity', () => {
-    expect(
-      getGraphqlUrlSuggestions({
-        query: {
-          url: '/bas/graph',
-          operationName: 'getpts'
-        },
-        patternOperationNames,
-        typoTolerance: Infinity
-      })
-    ).toEqual(['/GetPosts', '/GetDevelopers', '/CreateDeveloper']);
-  });
-
-  test('Should correctly return suggestions if typoTolerance is halvedShortestWord', () => {
+  test('Should correctly return suggestions', () => {
     expect(
       getGraphqlUrlSuggestions({
         query: {
           url: '/',
           operationName: 'Getdevoper'
         },
-        patternOperationNames,
-        typoTolerance: 'halvedShortestWord'
+        patternOperationNames
       })
-    ).toEqual(['/GetDevelopers']);
+    ).toEqual(['/GetDevelopers', '/CreateDeveloper']);
 
     expect(
       getGraphqlUrlSuggestions({
         query: {
           url: '/',
-          operationName: 'Getdevope'
+          operationName: 'devel'
         },
-        patternOperationNames,
-        typoTolerance: 'halvedShortestWord'
+        patternOperationNames
       })
     ).toEqual([]);
   });
@@ -96,7 +33,6 @@ describe('getGraphqlUrlSuggestions', () => {
           operationName: 'GetPosts'
         },
         patternOperationNames,
-        typoTolerance: 0,
         serverBaseUrl: '/base',
         graphqlBaseUrl: 'graphql'
       })

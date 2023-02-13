@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { Express } from 'express';
 
 import { parseGraphQLRequest } from '../graphql/parseGraphQLRequest/parseGraphQLRequest';
+import { addBaseUrlsToUrl } from '../utils/helpers';
 import type { BaseUrl, MockServerConfig, RestMethod } from '../utils/types';
 
 import { getNotFoundPage } from './getNotFoundPage';
@@ -12,16 +13,32 @@ interface NotFoundMiddlewareParams {
   serverBaseUrl: BaseUrl;
   rest: MockServerConfig['rest'];
   graphql: MockServerConfig['graphql'];
-  pathSuggestions: MockServerConfig['pathSuggestions'];
 }
 
 export const notFoundMiddleware = ({
   server,
   serverBaseUrl,
   rest,
-  graphql,
-  pathSuggestions
+  graphql
 }: NotFoundMiddlewareParams) => {
+  const operationNames = graphql?.configs.map(({ operationName }) => operationName) ?? [];
+  const graphqlPatternUrlMeaningfulStrings = Array.from(
+    operationNames.reduce((acc, operationName) => {
+      if (typeof operationName === 'string')
+        acc.add(addBaseUrlsToUrl(operationName, serverBaseUrl, graphql?.baseUrl));
+      return acc;
+    }, new Set<string>())
+  );
+
+  const restPaths = rest?.configs.map(({ path }) => path) ?? [];
+  const patternUrls = Array.from(
+    restPaths.reduce((acc, patternPath) => {
+      if (typeof patternPath === 'string')
+        acc.add(addBaseUrlsToUrl(patternPath, serverBaseUrl, rest?.baseUrl));
+      return acc;
+    }, new Set<string>())
+  );
+
   server.use((request: Request, response: Response) => {
     let graphqlUrlSuggestions: string[] = [];
     if (graphql) {
@@ -29,14 +46,9 @@ export const notFoundMiddleware = ({
 
       if (graphqlQuery)
         graphqlUrlSuggestions = getGraphqlUrlSuggestions({
-          query: {
-            url: request.url,
-            operationName: graphqlQuery.operationName
-          },
-          patternOperationNames: graphql.configs.map(({ operationName }) => operationName),
-          serverBaseUrl,
-          graphqlBaseUrl: graphql.baseUrl,
-          typoTolerance: pathSuggestions?.typoTolerance
+          url: request.url,
+          operationName: graphqlQuery.operationName,
+          graphqlPatternUrlMeaningfulStrings
         });
     }
 
@@ -45,10 +57,7 @@ export const notFoundMiddleware = ({
       restUrlSuggestions = getRestUrlSuggestions({
         // ✅ important: pass url with query params
         url: request.originalUrl,
-        patternPaths: rest.configs.map(({ path }) => path),
-        serverBaseUrl,
-        restBaseUrl: rest.baseUrl,
-        typoTolerance: pathSuggestions?.typoTolerance
+        patternUrls
       });
     }
 

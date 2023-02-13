@@ -1,4 +1,4 @@
-import { getUrlParts } from '../../../../utils/helpers';
+import { getUrlParts } from '../../../utils/helpers';
 
 export const getRestUrlPatternMeaningfulString = (urlPattern: string) =>
   getUrlParts(urlPattern)

@@ -1,52 +1,31 @@
-import {
-  addBaseUrlsToUrl,
-  removeLeadingAndTrailingSlash,
-  removeQueryParamsFromUrl
-} from '../../../utils/helpers';
-import type { BaseUrl, GraphQLOperationName, TypoTolerance } from '../../../utils/types';
+import { removeLeadingAndTrailingSlash, removeQueryParamsFromUrl } from '../../../utils/helpers';
+import type { GraphQLOperationName } from '../../../utils/types';
 import { getLevenshteinDistance } from '../getLevenshteinDistance/getLevenshteinDistance';
 
-import { getGraphqlUrlPatternTypoToleranceByHalvedShortestWord } from './helpers';
-
 interface GetGraphqlUrlSuggestionsParams {
-  query: { url: string; operationName: GraphQLOperationName };
-  patternOperationNames: GraphQLOperationName[];
-  serverBaseUrl?: BaseUrl;
-  graphqlBaseUrl?: BaseUrl;
-  typoTolerance?: TypoTolerance;
+  url: string;
+  operationName: GraphQLOperationName
+  graphqlPatternUrlMeaningfulStrings: string[];
 }
 
 export const getGraphqlUrlSuggestions = ({
-  query,
-  patternOperationNames,
-  serverBaseUrl,
-  graphqlBaseUrl,
-  typoTolerance = 'halvedShortestWord'
+  url,
+  operationName,
+  graphqlPatternUrlMeaningfulStrings
 }: GetGraphqlUrlSuggestionsParams) => {
-  const patternUrlMeaningfulStrings = Array.from(
-    patternOperationNames.reduce((acc, operationName) => {
-      if (typeof operationName === 'string')
-        acc.add(addBaseUrlsToUrl(operationName, serverBaseUrl, graphqlBaseUrl));
-      return acc;
-    }, new Set<string>())
-  );
+  const actualUrlPart = removeLeadingAndTrailingSlash(removeQueryParamsFromUrl(url));
+  const actualUrlMeaningfulString = `${actualUrlPart ? `/${actualUrlPart}` : ''}/${operationName}`;
 
-  const actualUrlPart = removeLeadingAndTrailingSlash(removeQueryParamsFromUrl(query.url));
-  const actualUrlMeaningfulString = `${actualUrlPart ? `/${actualUrlPart}` : ''}/${
-    query.operationName
-  }`;
-
-  let tolerance = typoTolerance;
-  if (typoTolerance === 'halvedShortestWord')
-    tolerance = getGraphqlUrlPatternTypoToleranceByHalvedShortestWord(patternUrlMeaningfulStrings);
-
-  const graphqlUrlSuggestions = patternUrlMeaningfulStrings.reduce(
+  let exactMatchSuggestion = '';
+  const graphqlUrlSuggestions = graphqlPatternUrlMeaningfulStrings.reduce(
     (acc, patternUrlMeaningfulString) => {
       const distance = getLevenshteinDistance(
         actualUrlMeaningfulString,
         patternUrlMeaningfulString
       );
 
+      if (!distance) exactMatchSuggestion = actualUrlMeaningfulString;
+      const tolerance = Math.floor(patternUrlMeaningfulString.length / 2);
       if (distance <= tolerance) acc.push(patternUrlMeaningfulString);
 
       return acc;
@@ -54,5 +33,6 @@ export const getGraphqlUrlSuggestions = ({
     [] as string[]
   );
 
+  if (exactMatchSuggestion) return [exactMatchSuggestion];
   return graphqlUrlSuggestions;
 };

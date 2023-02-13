@@ -17,7 +17,6 @@ export const createMockServer = ({
   rest,
   graphql,
   interceptors,
-  pathSuggestions,
   ...mockServerConfig
 }: Omit<MockServerConfig, 'port'>) => {
   const server: Express = express();
@@ -58,8 +57,7 @@ export const createMockServer = ({
     server,
     serverBaseUrl: baseUrl,
     rest,
-    graphql,
-    pathSuggestions
+    graphql
   });
 
   return server;
