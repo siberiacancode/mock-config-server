@@ -12,10 +12,11 @@ export const staticMiddleware = (server: Express, baseUrl: BaseUrl, staticPath: 
     staticPath.forEach((staticPath) => {
       const isPathObject = typeof staticPath === 'object';
       if (isPathObject) {
-        return server.use(
+        server.use(
           path.join(baseUrl, staticPath.prefix),
           express.static(path.join(APP_PATH, staticPath.path))
         );
+        return;
       }
       server.use(baseUrl, express.static(path.join(APP_PATH, staticPath)));
     });

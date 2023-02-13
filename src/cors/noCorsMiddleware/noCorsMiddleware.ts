@@ -2,8 +2,8 @@ import type { Express } from 'express';
 
 import { DEFAULT } from '../../utils/constants';
 
-export const noCorsMiddleware = async (server: Express) => {
-  server.use(async (req, res, next) => {
+export const noCorsMiddleware = (server: Express) => {
+  server.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', DEFAULT.CORS.ORIGIN);
     res.setHeader('Access-Control-Allow-Credentials', `${DEFAULT.CORS.CREDENTIALS}`);
 
