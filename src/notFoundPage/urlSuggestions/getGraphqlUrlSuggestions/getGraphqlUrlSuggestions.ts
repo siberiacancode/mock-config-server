@@ -1,10 +1,10 @@
-import { removeLeadingAndTrailingSlash, removeQueryParamsFromUrl } from '../../../utils/helpers';
-import type { GraphQLOperationName } from '../../../utils/types';
 import { getLevenshteinDistance } from '../getLevenshteinDistance/getLevenshteinDistance';
+
+import { getActualGraphqlUrlMeaningfulString } from './getActualGraphqlUrlMeaningfulString';
 
 interface GetGraphqlUrlSuggestionsParams {
   url: string;
-  operationName: GraphQLOperationName
+  operationName: string;
   graphqlPatternUrlMeaningfulStrings: string[];
 }
 
@@ -13,8 +13,7 @@ export const getGraphqlUrlSuggestions = ({
   operationName,
   graphqlPatternUrlMeaningfulStrings
 }: GetGraphqlUrlSuggestionsParams) => {
-  const actualUrlPart = removeLeadingAndTrailingSlash(removeQueryParamsFromUrl(url));
-  const actualUrlMeaningfulString = `${actualUrlPart ? `/${actualUrlPart}` : ''}/${operationName}`;
+  const actualUrlMeaningfulString = getActualGraphqlUrlMeaningfulString(url, operationName);
 
   let exactMatchSuggestion = '';
   const graphqlUrlSuggestions = graphqlPatternUrlMeaningfulStrings.reduce(

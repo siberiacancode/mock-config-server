@@ -1,10 +1,9 @@
 import { Request } from 'express';
 
-import { GraphQLQuery } from '../../utils/types';
 import { getGraphQLInput } from '../getGraphQLInput/getGraphQLInput';
 import { parseQuery } from '../parseQuery/parseQuery';
 
-export const parseGraphQLRequest = (request: Request): GraphQLQuery | null => {
+export const parseGraphQLRequest = (request: Request): ReturnType<typeof parseQuery> | null => {
   const graphQLInput = getGraphQLInput(request);
   if (!graphQLInput.query) return null;
 

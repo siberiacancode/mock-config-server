@@ -1,7 +1,11 @@
 import { getGraphqlUrlSuggestions } from './getGraphqlUrlSuggestions';
 
 describe('getGraphqlUrlSuggestions', () => {
-  const graphqlPatternUrlMeaningfulStrings: string[] = ['/base/graphql/GetPosts', '/GetDevelopers', '/CreateDeveloper'];
+  const graphqlPatternUrlMeaningfulStrings: string[] = [
+    '/base/graphql/GetPosts',
+    '/GetDevelopers',
+    '/CreateDeveloper'
+  ];
 
   test('Should correctly return suggestions', () => {
     expect(
