@@ -44,12 +44,13 @@ export const notFoundMiddleware = ({
     if (graphql) {
       const graphqlQuery = parseGraphQLRequest(request);
 
-      if (graphqlQuery)
+      if (graphqlQuery) {
         graphqlUrlSuggestions = getGraphqlUrlSuggestions({
           url: request.url,
           operationName: graphqlQuery.operationName,
           graphqlPatternUrlMeaningfulStrings
         });
+      }
     }
 
     let restUrlSuggestions: string[] = [];

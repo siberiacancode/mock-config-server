@@ -2,7 +2,7 @@ import { getUrlParts } from '../../../utils/helpers';
 import { getLevenshteinDistance } from '../getLevenshteinDistance/getLevenshteinDistance';
 
 import { getActualRestUrlMeaningfulString } from './getActualRestUrlMeaningfulString';
-import { getRestUrlPatternMeaningfulString } from './getRestUrlPatternMeaningfulString';
+import { getPatternRestUrlMeaningfulString } from './getPatternRestUrlMeaningfulString';
 
 interface GetRestUrlSuggestionsParams {
   url: string;
@@ -12,17 +12,16 @@ interface GetRestUrlSuggestionsParams {
 export const getRestUrlSuggestions = ({ url, patternUrls }: GetRestUrlSuggestionsParams) => {
   const { urlParts: actualUrlParts, queryParts: actualQueryParts } = getUrlParts(url);
 
-  let exactMatchSuggestion = '';
   const restUrlSuggestions = patternUrls.reduce((acc, patternUrl) => {
     const { urlParts: patternUrlParts } = getUrlParts(patternUrl);
-    // ignore patterns with different amount of parts
+    // ✅ important: ignore patterns with different amount of parts
     if (patternUrlParts.length !== actualUrlParts.length) return acc;
 
     const actualUrlMeaningfulString = getActualRestUrlMeaningfulString(
       actualUrlParts,
       patternUrlParts
     );
-    const patternUrlMeaningfulString = getRestUrlPatternMeaningfulString(patternUrl);
+    const patternUrlMeaningfulString = getPatternRestUrlMeaningfulString(patternUrl);
 
     const tolerance = Math.floor(patternUrlMeaningfulString.length / 2);
     const distance = getLevenshteinDistance(actualUrlMeaningfulString, patternUrlMeaningfulString);
@@ -39,13 +38,11 @@ export const getRestUrlSuggestions = ({ url, patternUrls }: GetRestUrlSuggestion
         actualQueryParts.length ? `?${actualQueryParts.join('&')}` : ''
       }`;
 
-      if (!distance) exactMatchSuggestion = suggestionWithQueryParams;
       acc.push(suggestionWithQueryParams);
     }
 
     return acc;
   }, [] as string[]);
 
-  if (exactMatchSuggestion) return [exactMatchSuggestion];
   return restUrlSuggestions;
 };

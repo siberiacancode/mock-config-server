@@ -9,7 +9,7 @@ export const getUrlParts = (url: string) => {
 
   const queryParts = queryParamsString.length ? queryParamsString.split('&') : [];
 
-  const urlParts = urlString.split('/');
+  const urlParts = removeLeadingAndTrailingSlash(urlString).split('/');
 
   return {
     urlParts,

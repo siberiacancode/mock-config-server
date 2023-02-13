@@ -24,13 +24,13 @@ export const createGraphQLRoutes = (
   const graphqlMiddleware = (request: Request, response: Response, next: NextFunction) => {
     const graphQLInput = getGraphQLInput(request);
     if (!graphQLInput || !graphQLInput.query) {
-      return response.status(400).json(`Query is missing, you must pass a valid GraphQL query`);
+      return response.status(400).json('Query is missing, you must pass a valid GraphQL query');
     }
 
     const query = parseQuery(graphQLInput.query);
 
     if (!query) {
-      return response.status(400).json(`Query is invalid, you must use a valid GraphQL query`);
+      return response.status(400).json('Query is invalid, you must use a valid GraphQL query');
     }
 
     if (!query.operationName || !query.operationType) {

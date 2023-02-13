@@ -15,7 +15,6 @@ export const getGraphqlUrlSuggestions = ({
 }: GetGraphqlUrlSuggestionsParams) => {
   const actualUrlMeaningfulString = getActualGraphqlUrlMeaningfulString(url, operationName);
 
-  let exactMatchSuggestion = '';
   const graphqlUrlSuggestions = graphqlPatternUrlMeaningfulStrings.reduce(
     (acc, patternUrlMeaningfulString) => {
       const distance = getLevenshteinDistance(
@@ -23,7 +22,6 @@ export const getGraphqlUrlSuggestions = ({
         patternUrlMeaningfulString
       );
 
-      if (!distance) exactMatchSuggestion = actualUrlMeaningfulString;
       const tolerance = Math.floor(patternUrlMeaningfulString.length / 2);
       if (distance <= tolerance) acc.push(patternUrlMeaningfulString);
 
@@ -32,6 +30,5 @@ export const getGraphqlUrlSuggestions = ({
     [] as string[]
   );
 
-  if (exactMatchSuggestion) return [exactMatchSuggestion];
   return graphqlUrlSuggestions;
 };

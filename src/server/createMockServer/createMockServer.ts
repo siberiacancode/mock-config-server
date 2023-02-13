@@ -35,6 +35,7 @@ export const createMockServer = ({
   if (staticPath) {
     staticMiddleware(server, baseUrl, staticPath);
   }
+
   if (rest) {
     const routerWithRestRoutes = createRestRoutes(express.Router(), rest.configs, interceptors);
 

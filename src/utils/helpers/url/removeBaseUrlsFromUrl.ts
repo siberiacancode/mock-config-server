@@ -3,7 +3,7 @@ import { BaseUrl } from '../../types';
 import { getUrlParts } from './getUrlParts';
 import { removeLeadingAndTrailingSlash } from './removeLeadingAndTrailingSlash';
 
-export interface BaseUrls {
+interface BaseUrls {
   baseUrl?: BaseUrl;
   restBaseUrl?: BaseUrl;
   graphqlBaseUrl?: BaseUrl;
@@ -22,8 +22,9 @@ export const removeBaseUrlsFromUrl = ({ url, baseUrls }: RemoveBaseUrlsFromUrlPa
   if (
     (restBaseUrl && urlParts[0] === removeLeadingAndTrailingSlash(restBaseUrl)) ||
     (graphqlBaseUrl && urlParts[0] === removeLeadingAndTrailingSlash(graphqlBaseUrl))
-  )
+  ) {
     urlParts.shift();
+  }
 
   return urlParts.join('/');
 };

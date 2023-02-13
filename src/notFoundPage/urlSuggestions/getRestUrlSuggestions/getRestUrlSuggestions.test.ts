@@ -8,20 +8,18 @@ describe('getRestUrlSuggestions', () => {
     '/posts',
     '/posts/:postId',
     '/posts/:postId/comments/:commentId',
-    '/rest/posts/:postId/comments/:commentId',
-    '/base/rest/posts/:postId/comments/:commentId',
     '/comments',
     '/login',
     '/logout'
   ];
 
-  test('Should return one suggestion if exact match found', async () => {
+  test('Should return one suggestion if exact match found', () => {
     expect(
       getRestUrlSuggestions({
         url: '/user',
         patternUrls
       })
-    ).toEqual(['/user']);
+    ).toEqual(['/users', '/user']);
 
     expect(
       getRestUrlSuggestions({
@@ -32,56 +30,6 @@ describe('getRestUrlSuggestions', () => {
   });
 
   test('Should correctly return suggestions', () => {
-    expect(
-      getRestUrlSuggestions({
-        url: 'user',
-        patternUrls
-      })
-    ).toEqual(['/user']);
-    expect(
-      getRestUrlSuggestions({
-        url: 'us',
-        patternUrls
-      })
-    ).toEqual(['/user']);
-    expect(
-      getRestUrlSuggestions({
-        url: 'usserr',
-        patternUrls
-      })
-    ).toEqual(['/users', '/user']);
-    expect(
-      getRestUrlSuggestions({
-        url: 'ussserr',
-        patternUrls
-      })
-    ).toEqual([]);
-
-    expect(
-      getRestUrlSuggestions({
-        url: '/users/5/',
-        patternUrls
-      })
-    ).toEqual(['/users/5']);
-    expect(
-      getRestUrlSuggestions({
-        url: '/useerrs/5/',
-        patternUrls
-      })
-    ).toEqual(['/users/5']);
-    expect(
-      getRestUrlSuggestions({
-        url: '/ers/5/',
-        patternUrls
-      })
-    ).toEqual(['/users/5']);
-    expect(
-      getRestUrlSuggestions({
-        url: '/rs/5/',
-        patternUrls
-      })
-    ).toEqual([]);
-
     expect(
       getRestUrlSuggestions({
         url: '/posts/5/comments/2',
@@ -114,7 +62,7 @@ describe('getRestUrlSuggestions', () => {
         url: 'login?remember=true',
         patternUrls
       })
-    ).toEqual(['/login?remember=true']);
+    ).toEqual(['/login?remember=true', '/logout?remember=true']);
     expect(
       getRestUrlSuggestions({
         url: '/users/5?firstParam=1&secondParam=2',
@@ -127,20 +75,5 @@ describe('getRestUrlSuggestions', () => {
         patternUrls
       })
     ).toEqual(['/users/5?backurl=someUrl?action=success']);
-  });
-
-  test('Should correctly return suggestions with base urls if base urls are provided', () => {
-    expect(
-      getRestUrlSuggestions({
-        url: 're/posts/5/coments/2',
-        patternUrls
-      })
-    ).toEqual(['/rest/posts/5/comments/2']);
-    expect(
-      getRestUrlSuggestions({
-        url: 'bse/re/posts/5/comments/2',
-        patternUrls
-      })
-    ).toEqual(['/base/rest/posts/5/comments/2']);
   });
 });

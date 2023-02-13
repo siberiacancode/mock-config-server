@@ -14,8 +14,6 @@ export type Cors = {
 export type Port = number;
 export type BaseUrl = string;
 
-export type TypoTolerance = number | 'halvedShortestWord';
-
 export interface MockServerConfig {
   baseUrl?: BaseUrl;
   rest?: {
