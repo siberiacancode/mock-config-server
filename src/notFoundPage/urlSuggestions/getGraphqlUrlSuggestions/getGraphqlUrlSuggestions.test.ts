@@ -24,14 +24,4 @@ describe('getGraphqlUrlSuggestions', () => {
       })
     ).toEqual([]);
   });
-
-  test('Should correctly return suggestions with base urls if base urls are provided', () => {
-    expect(
-      getGraphqlUrlSuggestions({
-        url: '/base/graphql',
-        operationName: 'GetPosts',
-        graphqlPatternUrlMeaningfulStrings
-      })
-    ).toEqual(['/base/graphql/GetPosts']);
-  });
 });

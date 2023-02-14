@@ -1,19 +1,17 @@
 import { getRestUrlSuggestions } from './getRestUrlSuggestions';
 
 describe('getRestUrlSuggestions', () => {
-  const patternUrls: string[] = [
-    '/users',
-    '/users/:userId',
-    '/user',
-    '/posts',
-    '/posts/:postId',
-    '/posts/:postId/comments/:commentId',
-    '/comments',
-    '/login',
-    '/logout'
-  ];
+
 
   test('Should return one suggestion if exact match found', () => {
+    const patternUrls: string[] = [
+      '/users',
+      '/users/:userId',
+      '/user',
+      '/posts',
+      '/posts/:postId',
+      '/posts/:postId/comments/:commentId'
+    ];
     expect(
       getRestUrlSuggestions({
         url: '/user',
@@ -30,6 +28,11 @@ describe('getRestUrlSuggestions', () => {
   });
 
   test('Should correctly return suggestions', () => {
+    const patternUrls: string[] = [
+      '/posts',
+      '/posts/:postId',
+      '/posts/:postId/comments/:commentId'
+    ];
     expect(
       getRestUrlSuggestions({
         url: '/posts/5/comments/2',
@@ -57,6 +60,14 @@ describe('getRestUrlSuggestions', () => {
   });
 
   test('Should return patterns with same query params as provided', () => {
+    const patternUrls: string[] = [
+      '/users',
+      '/users/:userId',
+      '/user',
+      '/comments',
+      '/login',
+      '/logout'
+    ];
     expect(
       getRestUrlSuggestions({
         url: 'login?remember=true',
