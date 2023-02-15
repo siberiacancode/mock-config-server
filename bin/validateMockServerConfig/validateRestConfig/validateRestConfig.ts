@@ -27,8 +27,8 @@ const validateConfigs = (configs: unknown) => {
       try {
         validateRoutes(config.routes, method as RestMethod);
         validateInterceptors(config.interceptors);
-      } catch (e: any) {
-        throw new Error(`configs[${index}].${e.message}`);
+      } catch (error: any) {
+        throw new Error(`configs[${index}].${error.message}`);
       }
     });
     return;
@@ -43,8 +43,8 @@ export const validateRestConfig = (restConfig: unknown) => {
     try {
       validateBaseUrl(restConfig.baseUrl);
       validateConfigs(restConfig.configs);
-    } catch (e: any) {
-      throw new Error(`rest.${e.message}`);
+    } catch (error: any) {
+      throw new Error(`rest.${error.message}`);
     }
     return;
   }

@@ -64,8 +64,8 @@ const validateEntities = (entities: unknown, method: RestMethod) => {
         try {
           const headersOrParams = entities[entity];
           return validateHeadersOrParams(headersOrParams, entity);
-        } catch (e: any) {
-          throw new Error(`entities.${e.message}`);
+        } catch (error: any) {
+          throw new Error(`entities.${error.message}`);
         }
       }
 
@@ -73,8 +73,8 @@ const validateEntities = (entities: unknown, method: RestMethod) => {
         try {
           const query = entities[entity];
           return validateQuery(query, entity);
-        } catch (e: any) {
-          throw new Error(`entities.${e.message}`);
+        } catch (error: any) {
+          throw new Error(`entities.${error.message}`);
         }
       }
     });
@@ -100,8 +100,8 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
         try {
           validateEntities(route.entities, method);
           validateInterceptors(route.interceptors);
-        } catch (e: any) {
-          throw new Error(`routes[${index}].${e.message}`);
+        } catch (error: any) {
+          throw new Error(`routes[${index}].${error.message}`);
         }
         return;
       }

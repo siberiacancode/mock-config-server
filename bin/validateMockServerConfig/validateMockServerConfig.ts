@@ -1,6 +1,5 @@
 import { isPlainObject } from '../../src/utils/helpers';
 
-import { createConfigPropertyTypeErrorMessage } from './createConfigPropertyTypeErrorMessage/createConfigPropertyTypeErrorMessage';
 import { validateBaseUrl } from './validateBaseUrl/validateBaseUrl';
 import { validateCors } from './validateCors/validateCors';
 import { validateGraphqlConfig } from './validateGraphqlConfig/validateGraphqlConfig';
@@ -31,7 +30,9 @@ export const validateMockServerConfig = (mockServerConfig: unknown) => {
     validateStaticPath(mockServerConfig.staticPath);
     validateInterceptors(mockServerConfig.interceptors);
     validateCors(mockServerConfig.cors);
-  } catch (e: any) {
-    throw new Error(createConfigPropertyTypeErrorMessage(e.message));
+  } catch (error: any) {
+    throw new Error(
+      `Validation Error: configuration.${error.message} does not match the API schema. Click here to see correct type: https://github.com/siberiacancode/mock-config-server`
+    );
   }
 };

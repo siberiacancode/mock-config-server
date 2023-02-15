@@ -23,8 +23,8 @@ const validateConfigs = (configs: unknown) => {
       try {
         validateRoutes(config.routes, operationType);
         validateInterceptors(config.interceptors);
-      } catch (e: any) {
-        throw new Error(`configs[${index}].${e.message}`);
+      } catch (error: any) {
+        throw new Error(`configs[${index}].${error.message}`);
       }
     });
     return;
@@ -39,8 +39,8 @@ export const validateGraphqlConfig = (graphqlConfig: unknown) => {
     try {
       validateBaseUrl(graphqlConfig.baseUrl);
       validateConfigs(graphqlConfig.configs);
-    } catch (e: any) {
-      throw new Error(`graphql.${e.message}`);
+    } catch (error: any) {
+      throw new Error(`graphql.${error.message}`);
     }
     return;
   }
