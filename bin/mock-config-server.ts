@@ -43,8 +43,8 @@ const start = async () => {
 
     validateMockServerConfig(mockServerConfigExports.default);
     startMockServer(mockServerConfigExports.default);
-  } catch (e: any) {
-    console.error(e.message);
+  } catch (error: any) {
+    console.error(error.message);
   }
 };
 

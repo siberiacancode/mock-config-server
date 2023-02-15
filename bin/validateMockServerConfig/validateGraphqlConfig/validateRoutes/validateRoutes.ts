@@ -39,8 +39,8 @@ const validateEntities = (entities: unknown, operationType: GraphQLOperationType
         try {
           const headersOrQuery = entities[entity];
           return validateHeadersOrQuery(headersOrQuery, entity);
-        } catch (e: any) {
-          throw new Error(`entities.${e.message}`);
+        } catch (error: any) {
+          throw new Error(`entities.${error.message}`);
         }
       }
     });
@@ -66,8 +66,8 @@ export const validateRoutes = (routes: unknown, operationType: GraphQLOperationT
         try {
           validateEntities(route.entities, operationType);
           validateInterceptors(route.interceptors);
-        } catch (e: any) {
-          throw new Error(`routes[${index}].${e.message}`);
+        } catch (error: any) {
+          throw new Error(`routes[${index}].${error.message}`);
         }
         return;
       }

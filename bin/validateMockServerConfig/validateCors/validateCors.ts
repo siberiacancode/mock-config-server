@@ -76,8 +76,8 @@ export const validateCors = (cors: unknown) => {
       validateHeaders(cors.headers);
       validateCredentials(cors.credentials);
       validateMaxAge(cors.maxAge);
-    } catch (e: any) {
-      throw new Error(`cors.${e.message}`);
+    } catch (error: any) {
+      throw new Error(`cors.${error.message}`);
     }
     return;
   }
