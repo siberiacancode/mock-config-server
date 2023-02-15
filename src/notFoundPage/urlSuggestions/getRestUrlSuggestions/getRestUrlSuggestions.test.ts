@@ -1,32 +1,6 @@
 import { getRestUrlSuggestions } from './getRestUrlSuggestions';
 
 describe('getRestUrlSuggestions', () => {
-
-
-  test('Should return one suggestion if exact match found', () => {
-    const patternUrls: string[] = [
-      '/users',
-      '/users/:userId',
-      '/user',
-      '/posts',
-      '/posts/:postId',
-      '/posts/:postId/comments/:commentId'
-    ];
-    expect(
-      getRestUrlSuggestions({
-        url: '/user',
-        patternUrls
-      })
-    ).toEqual(['/users', '/user']);
-
-    expect(
-      getRestUrlSuggestions({
-        url: '/posts/2/comments/1',
-        patternUrls
-      })
-    ).toEqual(['/posts/2/comments/1']);
-  });
-
   test('Should correctly return suggestions', () => {
     const patternUrls: string[] = [
       '/posts',

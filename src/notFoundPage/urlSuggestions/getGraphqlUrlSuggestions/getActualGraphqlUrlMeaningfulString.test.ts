@@ -8,8 +8,6 @@ describe('getActualGraphqlUrlMeaningfulString', () => {
   });
 
   test('Should correctly return actual graphql meaningful string if url is empty', () => {
-    expect(getActualGraphqlUrlMeaningfulString('/', 'Getdevoper')).toEqual(
-      '/Getdevoper'
-    );
+    expect(getActualGraphqlUrlMeaningfulString('/', 'Getdevoper')).toEqual('/Getdevoper');
   });
 });
