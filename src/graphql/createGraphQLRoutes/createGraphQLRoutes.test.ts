@@ -18,13 +18,13 @@ describe('createGraphQLRoutes', () => {
       mockServerConfig.interceptors
     );
 
-    const restBaseUrl = path.join(
+    const graphqlBaseUrl = path.join(
       mockServerConfig.baseUrl ?? '/',
       mockServerConfig.graphql?.baseUrl ?? '/'
     );
 
     server.use(express.json());
-    server.use(restBaseUrl, routerWithRoutes);
+    server.use(graphqlBaseUrl, routerWithRoutes);
     return server;
   };
 

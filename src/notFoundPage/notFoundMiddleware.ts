@@ -5,7 +5,6 @@ import { parseGraphQLRequest } from '../graphql/parseGraphQLRequest/parseGraphQL
 import { addBaseUrlsToUrl } from '../utils/helpers';
 import type { BaseUrl, MockServerConfig, RestMethod } from '../utils/types';
 
-import { getNotFoundPage } from './getNotFoundPage';
 import { getGraphqlUrlSuggestions, getRestUrlSuggestions } from './urlSuggestions';
 
 interface NotFoundMiddlewareParams {
@@ -62,13 +61,11 @@ export const notFoundMiddleware = ({
       });
     }
 
-    response.status(404).send(
-      getNotFoundPage({
-        requestMethod: request.method as RestMethod,
-        url: request.originalUrl,
-        restUrlSuggestions,
-        graphqlUrlSuggestions
-      })
-    );
+    response.status(404).render('notFound/notFound', {
+      requestMethod: request.method as RestMethod,
+      url: request.originalUrl,
+      restUrlSuggestions,
+      graphqlUrlSuggestions
+    });
   });
 };
