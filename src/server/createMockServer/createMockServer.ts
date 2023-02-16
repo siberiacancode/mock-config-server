@@ -6,7 +6,7 @@ import path from 'path';
 import { corsMiddleware } from '../../cors/corsMiddleware/corsMiddleware';
 import { noCorsMiddleware } from '../../cors/noCorsMiddleware/noCorsMiddleware';
 import { createGraphQLRoutes } from '../../graphql/createGraphQLRoutes/createGraphQLRoutes';
-import { notFoundMiddleware } from '../../notFoundPage/notFoundMiddleware';
+import { notFoundMiddleware } from '../../notFound/notFoundMiddleware';
 import { createRestRoutes } from '../../rest/createRestRoutes/createRestRoutes';
 import { staticMiddleware } from '../../static/staticMiddleware/staticMiddleware';
 import type { MockServerConfig } from '../../utils/types';
