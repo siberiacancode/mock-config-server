@@ -1,5 +1,5 @@
-export type StaticPathObject = { prefix: string; path: string };
-export type StaticPath = string | StaticPathObject | (StaticPathObject | string)[];
+export type StaticPathObject = { prefix: `/${string}`; path: `/${string}` };
+export type StaticPath = `/${string}` | StaticPathObject | (StaticPathObject | `/${string}`)[];
 
 export type CorsHeader = string;
 export type CorsOrigin = string | RegExp | (RegExp | string)[];
@@ -12,7 +12,7 @@ export type Cors = {
 };
 
 export type Port = number;
-export type BaseUrl = string;
+export type BaseUrl = `/${string}`;
 
 export interface MockServerConfig {
   baseUrl?: BaseUrl;

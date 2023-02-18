@@ -37,7 +37,7 @@ export interface RestRouteConfig<Method extends RestMethod> {
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch';
 export interface BaseRestRequestConfig<Method extends RestMethod> {
-  path: string | RegExp;
+  path: `/${string}` | RegExp;
   method: Method;
   routes: RestRouteConfig<Method>[];
   interceptors?: import('./interceptors').Interceptors;
