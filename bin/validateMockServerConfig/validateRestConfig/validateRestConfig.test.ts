@@ -17,7 +17,7 @@ describe('validateRestConfig', () => {
   });
 
   test('Should correctly handle config path only with correct type', () => {
-    const correctConfigPathValues = ['/path', /\/path/];
+    const correctConfigPathValues = ['/pathWithForwardSlash', /\/path/];
     correctConfigPathValues.forEach((correctConfigPathValue) => {
       expect(() =>
         validateRestConfig({
@@ -32,7 +32,16 @@ describe('validateRestConfig', () => {
       ).not.toThrow(Error);
     });
 
-    const incorrectConfigPathValues = [true, 3000, null, undefined, {}, [], () => {}];
+    const incorrectConfigPathValues = [
+      'pathWithoutForwardSlash',
+      true,
+      3000,
+      null,
+      undefined,
+      {},
+      [],
+      () => {}
+    ];
     incorrectConfigPathValues.forEach((incorrectConfigPathValue) => {
       expect(() =>
         validateRestConfig({
