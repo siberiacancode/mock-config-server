@@ -47,14 +47,10 @@ describe('corsMiddleware', () => {
         'access-control-expose-headers': '*'
       });
 
-      const preflightHeaderNames = [
-        'access-control-allow-headers',
-        'access-control-allow-methods',
-        'access-control-max-age'
-      ];
-
-      preflightHeaderNames.forEach((headerName) => {
-        expect(response.headers).not.toHaveProperty(headerName);
+      expect(response.headers).not.toMatchObject({
+        'access-control-allow-headers': expect.any(String),
+        'access-control-allow-methods': expect.any(String),
+        'access-control-max-age': expect.any(String)
       });
     });
   });
@@ -76,14 +72,10 @@ describe('corsMiddleware', () => {
         'access-control-expose-headers': '*'
       });
 
-      const preflightHeaderNames = [
-        'access-control-allow-headers',
-        'access-control-allow-methods',
-        'access-control-max-age'
-      ];
-
-      preflightHeaderNames.forEach((headerName) => {
-        expect(response.headers).not.toHaveProperty(headerName);
+      expect(response.headers).not.toMatchObject({
+        'access-control-allow-headers': expect.any(String),
+        'access-control-allow-methods': expect.any(String),
+        'access-control-max-age': expect.any(String)
       });
     });
   });
@@ -98,16 +90,14 @@ describe('corsMiddleware', () => {
       corsMiddleware(server, cors);
 
       const response = await request(server)[method]('/').set({ origin: testOrigin });
-      const headerNames = [
-        'access-control-allow-headers',
-        'access-control-allow-methods',
-        'access-control-allow-origin',
-        'access-control-max-age',
-        'access-control-allow-credentials'
-      ];
 
-      headerNames.forEach((headerName) => {
-        expect(response.headers).not.toHaveProperty(headerName);
+      expect(response.headers).not.toMatchObject({
+        'access-control-allow-headers': expect.any(String),
+        'access-control-allow-methods': expect.any(String),
+        'access-control-allow-origin': expect.any(String),
+        'access-control-max-age': expect.any(String),
+        'access-control-allow-credentials': expect.any(String),
+        'access-control-expose-headers': expect.any(String)
       });
     });
   });

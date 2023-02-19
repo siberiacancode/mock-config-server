@@ -38,14 +38,10 @@ describe('noCorsMiddleware', () => {
         'access-control-expose-headers': '*'
       });
 
-      const preflightHeaderNames = [
-        'access-control-allow-headers',
-        'access-control-allow-methods',
-        'access-control-max-age'
-      ];
-
-      preflightHeaderNames.forEach((headerName) => {
-        expect(response.headers).not.toHaveProperty(headerName);
+      expect(response.headers).not.toMatchObject({
+        'access-control-allow-headers': expect.any(String),
+        'access-control-allow-methods': expect.any(String),
+        'access-control-max-age': expect.any(String)
       });
     });
   });

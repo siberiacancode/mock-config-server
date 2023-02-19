@@ -40,5 +40,5 @@
     ],
     "simple-import-sort/exports": "error"
   },
-  "ignorePatterns": ["jest.config.js", "mock-server.config.js", "*.test.ts"]
+  "ignorePatterns": ["jest.config.js", "mock-server.config.js"]
 }
