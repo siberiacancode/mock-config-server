@@ -12,11 +12,12 @@ describe('noCorsMiddleware', () => {
     const response = await request(server).options('/');
 
     expect(response.headers).toMatchObject({
+      'access-control-allow-origin': '*',
+      'access-control-allow-credentials': 'true',
+      'access-control-expose-headers': '*',
       'access-control-allow-headers': '*',
       'access-control-allow-methods': '*',
-      'access-control-allow-origin': '*',
-      'access-control-max-age': '3600',
-      'access-control-allow-credentials': 'true'
+      'access-control-max-age': '3600'
     });
     expect(response.statusCode).toBe(204);
   });
@@ -33,7 +34,18 @@ describe('noCorsMiddleware', () => {
 
       expect(response.headers).toMatchObject({
         'access-control-allow-origin': '*',
-        'access-control-allow-credentials': 'true'
+        'access-control-allow-credentials': 'true',
+        'access-control-expose-headers': '*'
+      });
+
+      const preflightHeaderNames = [
+        'access-control-allow-headers',
+        'access-control-allow-methods',
+        'access-control-max-age'
+      ];
+
+      preflightHeaderNames.forEach((headerName) => {
+        expect(response.headers).not.toHaveProperty(headerName);
       });
     });
   });

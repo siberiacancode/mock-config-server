@@ -4,9 +4,10 @@ export type StaticPath = string | StaticPathObject | (StaticPathObject | string)
 export type CorsHeader = string;
 export type CorsOrigin = string | RegExp | (RegExp | string)[];
 export type Cors = {
-  origin: CorsOrigin | (() => Promise<CorsOrigin> | CorsOrigin);
+  origin: CorsOrigin | ((request: import('express').Request) => Promise<CorsOrigin> | CorsOrigin);
   methods?: Uppercase<import('./configs').RestMethod>[];
-  headers?: CorsHeader[];
+  allowedHeaders?: CorsHeader[];
+  exposedHeaders?: CorsHeader[];
   credentials?: boolean;
   maxAge?: number;
 };
