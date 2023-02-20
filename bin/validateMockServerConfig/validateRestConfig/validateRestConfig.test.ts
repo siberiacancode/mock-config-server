@@ -17,7 +17,7 @@ describe('validateRestConfig', () => {
   });
 
   test('Should correctly handle config path only with correct type', () => {
-    const correctConfigPathValues = ['/pathWithForwardSlash', /\/path/];
+    const correctConfigPathValues = ['/pathWithLeadingSlash', /\/path/];
     correctConfigPathValues.forEach((correctConfigPathValue) => {
       expect(() =>
         validateRestConfig({
@@ -33,7 +33,7 @@ describe('validateRestConfig', () => {
     });
 
     const incorrectConfigPathValues = [
-      'pathWithoutForwardSlash',
+      'pathWithoutLeadingSlash',
       true,
       3000,
       null,
