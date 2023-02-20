@@ -2,12 +2,12 @@ import { validateStaticPath } from './validateStaticPath';
 
 describe('validateStaticPath', () => {
   test('Should correctly handle static path (except arrays and plain objects) only with correct type', () => {
-    const correctStaticPaths = ['/stringWithForwardSlash', undefined];
+    const correctStaticPaths = ['/stringWithLeadingSlash', undefined];
     correctStaticPaths.forEach((correctStaticPath) => {
       expect(() => validateStaticPath(correctStaticPath)).not.toThrow(Error);
     });
 
-    const incorrectStaticPaths = ['stringWithoutForwardSlash', true, 3000, null, () => {}];
+    const incorrectStaticPaths = ['stringWithoutLeadingSlash', true, 3000, null, () => {}];
     incorrectStaticPaths.forEach((incorrectStaticPath) => {
       expect(() => validateStaticPath(incorrectStaticPath)).toThrow(new Error('staticPath'));
     });
@@ -15,14 +15,14 @@ describe('validateStaticPath', () => {
 
   test('Should correctly handle plain object static path only with correct type', () => {
     const correctObjectStaticPaths = [
-      { prefix: '/stringWithForwardSlash', path: '/stringWithForwardSlash' }
+      { prefix: '/stringWithLeadingSlash', path: '/stringWithLeadingSlash' }
     ];
     correctObjectStaticPaths.forEach((correctObjectStaticPath) => {
       expect(() => validateStaticPath(correctObjectStaticPath)).not.toThrow(Error);
     });
 
     const incorrectPrefixObjectStaticPaths = [
-      'stringWithoutForwardSlash',
+      'stringWithoutLeadingSlash',
       true,
       3000,
       null,
@@ -35,13 +35,13 @@ describe('validateStaticPath', () => {
       expect(() =>
         validateStaticPath({
           prefix: incorrectPrefixObjectStaticPath,
-          path: '/stringWithForwardSlash'
+          path: '/stringWithLeadingSlash'
         })
       ).toThrow(new Error('staticPath.prefix'));
     });
 
     const incorrectPathObjectStaticPaths = [
-      'stringWithoutForwardSlash',
+      'stringWithoutLeadingSlash',
       true,
       3000,
       null,
@@ -53,7 +53,7 @@ describe('validateStaticPath', () => {
     incorrectPathObjectStaticPaths.forEach((incorrectPathObjectStaticPath) => {
       expect(() =>
         validateStaticPath({
-          prefix: '/stringWithForwardSlash',
+          prefix: '/stringWithLeadingSlash',
           path: incorrectPathObjectStaticPath
         })
       ).toThrow(new Error('staticPath.path'));
@@ -62,15 +62,15 @@ describe('validateStaticPath', () => {
 
   test('Should correctly handle array static path only with correct type', () => {
     const correctArrayStaticPaths = [
-      '/stringWithForwardSlash',
-      { prefix: '/stringWithForwardSlash', path: '/stringWithForwardSlash' }
+      '/stringWithLeadingSlash',
+      { prefix: '/stringWithLeadingSlash', path: '/stringWithLeadingSlash' }
     ];
     correctArrayStaticPaths.forEach((correctArrayStaticPath) => {
       expect(() => validateStaticPath([correctArrayStaticPath])).not.toThrow(Error);
     });
 
     const incorrectArrayStaticPaths = [
-      'stringWithoutForwardSlash',
+      'stringWithoutLeadingSlash',
       true,
       3000,
       null,
@@ -85,7 +85,7 @@ describe('validateStaticPath', () => {
     });
 
     const incorrectArrayPrefixObjectStaticPaths = [
-      'stringWithoutForwardSlash',
+      'stringWithoutLeadingSlash',
       true,
       3000,
       null,
@@ -99,14 +99,14 @@ describe('validateStaticPath', () => {
         validateStaticPath([
           {
             prefix: incorrectArrayPrefixObjectStaticPath,
-            path: '/stringWithForwardSlash'
+            path: '/stringWithLeadingSlash'
           }
         ])
       ).toThrow(new Error('staticPath[0].prefix'));
     });
 
     const incorrectArrayPathObjectStaticPaths = [
-      'stringWithoutForwardSlash',
+      'stringWithoutLeadingSlash',
       true,
       3000,
       null,
@@ -119,7 +119,7 @@ describe('validateStaticPath', () => {
       expect(() =>
         validateStaticPath([
           {
-            prefix: '/stringWithForwardSlash',
+            prefix: '/stringWithLeadingSlash',
             path: incorrectArrayPathObjectStaticPath
           }
         ])

@@ -11,8 +11,8 @@ const validateConfigs = (configs: unknown) => {
     configs.forEach((config, index) => {
       const { path, method } = config;
 
-      const isPathStringWithForwardSlash = typeof path === 'string' && path.startsWith('/');
-      if (!isPathStringWithForwardSlash && !(path instanceof RegExp)) {
+      const isPathStringWithLeadingSlash = typeof path === 'string' && path.startsWith('/');
+      if (!isPathStringWithLeadingSlash && !(path instanceof RegExp)) {
         throw new Error(`configs[${index}].path`);
       }
 
