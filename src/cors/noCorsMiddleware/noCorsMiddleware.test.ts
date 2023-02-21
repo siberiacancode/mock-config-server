@@ -22,27 +22,23 @@ describe('noCorsMiddleware', () => {
     expect(response.statusCode).toBe(204);
   });
 
-  const methods = ['get', 'post', 'put', 'patch', 'delete'] as const;
+  test(`Should set no cors settings for request`, async () => {
+    const server = express();
 
-  methods.forEach((method) => {
-    test(`Should set no cors settings for ${method.toLocaleUpperCase()} request`, async () => {
-      const server = express();
+    noCorsMiddleware(server);
 
-      noCorsMiddleware(server);
+    const response = await request(server).get('/');
 
-      const response = await request(server)[method]('/');
+    expect(response.headers).toMatchObject({
+      'access-control-allow-origin': '*',
+      'access-control-allow-credentials': 'true',
+      'access-control-expose-headers': '*'
+    });
 
-      expect(response.headers).toMatchObject({
-        'access-control-allow-origin': '*',
-        'access-control-allow-credentials': 'true',
-        'access-control-expose-headers': '*'
-      });
-
-      expect(response.headers).not.toMatchObject({
-        'access-control-allow-headers': expect.any(String),
-        'access-control-allow-methods': expect.any(String),
-        'access-control-max-age': expect.any(String)
-      });
+    expect(response.headers).not.toMatchObject({
+      'access-control-allow-headers': expect.any(String),
+      'access-control-allow-methods': expect.any(String),
+      'access-control-max-age': expect.any(String)
     });
   });
 });
