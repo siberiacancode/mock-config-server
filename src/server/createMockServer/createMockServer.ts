@@ -11,14 +11,14 @@ import { createRestRoutes } from '../../rest/createRestRoutes/createRestRoutes';
 import { staticMiddleware } from '../../static/staticMiddleware/staticMiddleware';
 import type { MockServerConfig } from '../../utils/types';
 
-export const createMockServer = ({
-  cors,
-  staticPath,
-  rest,
-  graphql,
-  interceptors,
-  ...mockServerConfig
-}: Omit<MockServerConfig, 'port'>) => {
+export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'>) => {
+  const {
+    cors,
+    staticPath,
+    rest,
+    graphql,
+    interceptors
+  } = mockServerConfig;
   const server: Express = express();
 
   server.set('view engine', 'ejs');
@@ -57,9 +57,7 @@ export const createMockServer = ({
 
   notFoundMiddleware({
     server,
-    serverBaseUrl: baseUrl,
-    rest,
-    graphql
+    mockServerConfig
   });
 
   return server;

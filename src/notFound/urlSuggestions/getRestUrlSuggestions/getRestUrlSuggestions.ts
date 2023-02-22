@@ -1,19 +1,18 @@
-import { getUrlParts } from '../../../utils/helpers';
 import { getLevenshteinDistance } from '../getLevenshteinDistance/getLevenshteinDistance';
 
 import { getActualRestUrlMeaningfulString } from './getActualRestUrlMeaningfulString';
 import { getPatternRestUrlMeaningfulString } from './getPatternRestUrlMeaningfulString';
 
 interface GetRestUrlSuggestionsParams {
-  url: string;
+  url: URL;
   patternUrls: string[];
 }
 
 export const getRestUrlSuggestions = ({ url, patternUrls }: GetRestUrlSuggestionsParams) => {
-  const { urlParts: actualUrlParts, queryParts: actualQueryParts } = getUrlParts(url);
+  const actualUrlParts = url.pathname.slice(1).split('/');
 
   const restUrlSuggestions = patternUrls.reduce((acc, patternUrl) => {
-    const { urlParts: patternUrlParts } = getUrlParts(patternUrl);
+    const patternUrlParts = patternUrl.slice(1).split('/');
     // ✅ important: ignore patterns with different amount of parts
     if (patternUrlParts.length !== actualUrlParts.length) return acc;
 
@@ -34,9 +33,7 @@ export const getRestUrlSuggestions = ({ url, patternUrls }: GetRestUrlSuggestion
           return patternUrlParts[index];
         })
         .join('/');
-      const suggestionWithQueryParams = `/${urlSuggestion}${
-        actualQueryParts.length ? `?${actualQueryParts.join('&')}` : ''
-      }`;
+      const suggestionWithQueryParams = `/${urlSuggestion}${url.search}`;
 
       acc.push(suggestionWithQueryParams);
     }

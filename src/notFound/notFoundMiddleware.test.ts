@@ -84,9 +84,7 @@ describe('notFoundMiddleware', () => {
 
     notFoundMiddleware({
       server,
-      serverBaseUrl,
-      rest,
-      graphql
+      mockServerConfig
     });
 
     return server;

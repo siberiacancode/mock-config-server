@@ -1,19 +1,17 @@
 import { getLevenshteinDistance } from '../getLevenshteinDistance/getLevenshteinDistance';
 
-import { getActualGraphqlUrlMeaningfulString } from './getActualGraphqlUrlMeaningfulString';
-
 interface GetGraphqlUrlSuggestionsParams {
-  url: string;
-  operationName: string;
+  url: URL;
   graphqlPatternUrlMeaningfulStrings: string[];
 }
 
 export const getGraphqlUrlSuggestions = ({
   url,
-  operationName,
   graphqlPatternUrlMeaningfulStrings
 }: GetGraphqlUrlSuggestionsParams) => {
-  const actualUrlMeaningfulString = getActualGraphqlUrlMeaningfulString(url, operationName);
+  // ✅ important: operationName is always second word in 'query' query param
+  const operationName = url.searchParams.get('query')?.split(' ')[1];
+  const actualUrlMeaningfulString = `${url.pathname}/${operationName}`;
 
   const graphqlUrlSuggestions = graphqlPatternUrlMeaningfulStrings.reduce(
     (acc, patternUrlMeaningfulString) => {

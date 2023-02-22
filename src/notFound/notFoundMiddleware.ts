@@ -1,30 +1,26 @@
-import type { Request, Response } from 'express';
-import { Express } from 'express';
+import type { Express, Request, Response } from 'express';
 
 import { parseGraphQLRequest } from '../graphql/parseGraphQLRequest/parseGraphQLRequest';
-import { addBaseUrlsToUrl } from '../utils/helpers';
-import type { BaseUrl, MockServerConfig, RestMethod } from '../utils/types';
+import type { MockServerConfig, RestMethod } from '../utils/types';
 
 import { getGraphqlUrlSuggestions, getRestUrlSuggestions } from './urlSuggestions';
 
 interface NotFoundMiddlewareParams {
   server: Express;
-  serverBaseUrl: BaseUrl;
-  rest: MockServerConfig['rest'];
-  graphql: MockServerConfig['graphql'];
+  mockServerConfig: Pick<MockServerConfig, 'baseUrl' | 'rest' | 'graphql'>;
 }
 
 export const notFoundMiddleware = ({
   server,
-  serverBaseUrl,
-  rest,
-  graphql
+  mockServerConfig
 }: NotFoundMiddlewareParams) => {
+  const { baseUrl: serverBaseUrl, rest, graphql } = mockServerConfig;
+
   const operationNames = graphql?.configs.map(({ operationName }) => operationName) ?? [];
   const graphqlPatternUrlMeaningfulStrings = Array.from(
     operationNames.reduce((acc, operationName) => {
       if (typeof operationName === 'string')
-        acc.add(addBaseUrlsToUrl(operationName, serverBaseUrl, graphql?.baseUrl));
+        acc.add(`${serverBaseUrl}${graphql?.baseUrl}/${operationName}`)
       return acc;
     }, new Set<string>())
   );
@@ -33,20 +29,21 @@ export const notFoundMiddleware = ({
   const patternUrls = Array.from(
     restPaths.reduce((acc, patternPath) => {
       if (typeof patternPath === 'string')
-        acc.add(addBaseUrlsToUrl(patternPath, serverBaseUrl, rest?.baseUrl));
+        acc.add(`${serverBaseUrl}${rest?.baseUrl}${patternPath}`)
       return acc;
     }, new Set<string>())
   );
 
   server.use((request: Request, response: Response) => {
+    const url = new URL(`${request.protocol}://${request.get('host')}${request.originalUrl}`);
+
     let graphqlUrlSuggestions: string[] = [];
     if (graphql) {
       const graphqlQuery = parseGraphQLRequest(request);
 
       if (graphqlQuery) {
         graphqlUrlSuggestions = getGraphqlUrlSuggestions({
-          url: request.url,
-          operationName: graphqlQuery.operationName,
+          url,
           graphqlPatternUrlMeaningfulStrings
         });
       }
@@ -55,15 +52,14 @@ export const notFoundMiddleware = ({
     let restUrlSuggestions: string[] = [];
     if (rest) {
       restUrlSuggestions = getRestUrlSuggestions({
-        // ✅ important: pass url with query params
-        url: request.originalUrl,
+        url,
         patternUrls
       });
     }
 
     response.status(404).render('notFound/notFound', {
       requestMethod: request.method as RestMethod,
-      url: request.originalUrl,
+      url: `${url.pathname}${url.search}`,
       restUrlSuggestions,
       graphqlUrlSuggestions
     });

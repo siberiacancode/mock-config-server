@@ -1,6 +1,3 @@
-import { getUrlParts } from '../../../utils/helpers';
-
 export const getPatternRestUrlMeaningfulString = (urlPattern: string) =>
-  getUrlParts(urlPattern)
-    .urlParts.filter((urlPatternPart) => !urlPatternPart.startsWith(':'))
-    .join('');
+  urlPattern.slice(1).split('/').filter((urlPatternPart) =>
+    !urlPatternPart.startsWith(':')).join('');
