@@ -1,3 +1,2 @@
-export const getPatternRestUrlMeaningfulString = (urlPattern: string) =>
-  urlPattern.slice(1).split('/').filter((urlPatternPart) =>
-    !urlPatternPart.startsWith(':')).join('');
+export const getPatternRestUrlMeaningfulString = (patternUrlParts: string[]) =>
+  patternUrlParts.filter((urlPatternPart) => !urlPatternPart.startsWith(':')).join('');

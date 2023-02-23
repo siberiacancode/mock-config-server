@@ -2,10 +2,7 @@ import { getGraphqlUrlSuggestions } from './getGraphqlUrlSuggestions';
 
 describe('getGraphqlUrlSuggestions', () => {
   test('Should correctly return suggestions', () => {
-    const graphqlPatternUrlMeaningfulStrings: string[] = [
-      '/GetDevelopers',
-      '/CreateDeveloper'
-    ];
+    const graphqlPatternUrlMeaningfulStrings: string[] = ['/GetDevelopers', '/CreateDeveloper'];
     expect(
       getGraphqlUrlSuggestions({
         url: new URL('http://localhost:31299/?query=query%20Getdevoper%20{%20developers%20}'),

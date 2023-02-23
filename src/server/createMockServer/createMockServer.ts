@@ -12,13 +12,7 @@ import { staticMiddleware } from '../../static/staticMiddleware/staticMiddleware
 import type { MockServerConfig } from '../../utils/types';
 
 export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'>) => {
-  const {
-    cors,
-    staticPath,
-    rest,
-    graphql,
-    interceptors
-  } = mockServerConfig;
+  const { cors, staticPath, rest, graphql, interceptors } = mockServerConfig;
   const server: Express = express();
 
   server.set('view engine', 'ejs');

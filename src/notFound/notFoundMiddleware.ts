@@ -10,17 +10,14 @@ interface NotFoundMiddlewareParams {
   mockServerConfig: Pick<MockServerConfig, 'baseUrl' | 'rest' | 'graphql'>;
 }
 
-export const notFoundMiddleware = ({
-  server,
-  mockServerConfig
-}: NotFoundMiddlewareParams) => {
+export const notFoundMiddleware = ({ server, mockServerConfig }: NotFoundMiddlewareParams) => {
   const { baseUrl: serverBaseUrl, rest, graphql } = mockServerConfig;
 
   const operationNames = graphql?.configs.map(({ operationName }) => operationName) ?? [];
   const graphqlPatternUrlMeaningfulStrings = Array.from(
     operationNames.reduce((acc, operationName) => {
       if (typeof operationName === 'string')
-        acc.add(`${serverBaseUrl}${graphql?.baseUrl}/${operationName}`)
+        acc.add(`${serverBaseUrl}${graphql?.baseUrl}/${operationName}`);
       return acc;
     }, new Set<string>())
   );
@@ -29,7 +26,7 @@ export const notFoundMiddleware = ({
   const patternUrls = Array.from(
     restPaths.reduce((acc, patternPath) => {
       if (typeof patternPath === 'string')
-        acc.add(`${serverBaseUrl}${rest?.baseUrl}${patternPath}`)
+        acc.add(`${serverBaseUrl}${rest?.baseUrl}${patternPath}`);
       return acc;
     }, new Set<string>())
   );

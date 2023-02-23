@@ -1,3 +1,4 @@
+import { getUrlParts } from '../../../utils/helpers';
 import { getLevenshteinDistance } from '../getLevenshteinDistance/getLevenshteinDistance';
 
 import { getActualRestUrlMeaningfulString } from './getActualRestUrlMeaningfulString';
@@ -9,10 +10,10 @@ interface GetRestUrlSuggestionsParams {
 }
 
 export const getRestUrlSuggestions = ({ url, patternUrls }: GetRestUrlSuggestionsParams) => {
-  const actualUrlParts = url.pathname.slice(1).split('/');
+  const actualUrlParts = getUrlParts(url.pathname);
 
   const restUrlSuggestions = patternUrls.reduce((acc, patternUrl) => {
-    const patternUrlParts = patternUrl.slice(1).split('/');
+    const patternUrlParts = getUrlParts(patternUrl);
     // ✅ important: ignore patterns with different amount of parts
     if (patternUrlParts.length !== actualUrlParts.length) return acc;
 
@@ -20,7 +21,7 @@ export const getRestUrlSuggestions = ({ url, patternUrls }: GetRestUrlSuggestion
       actualUrlParts,
       patternUrlParts
     );
-    const patternUrlMeaningfulString = getPatternRestUrlMeaningfulString(patternUrl);
+    const patternUrlMeaningfulString = getPatternRestUrlMeaningfulString(patternUrlParts);
 
     const tolerance = Math.floor(patternUrlMeaningfulString.length / 2);
     const distance = getLevenshteinDistance(actualUrlMeaningfulString, patternUrlMeaningfulString);
