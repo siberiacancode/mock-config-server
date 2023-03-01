@@ -54,7 +54,7 @@ export const notFoundMiddleware = ({ server, mockServerConfig }: NotFoundMiddlew
       });
     }
 
-    response.status(404).render('notFound/notFound', {
+    response.status(404).render('notFound', {
       requestMethod: request.method as RestMethod,
       url: `${url.pathname}${url.search}`,
       restUrlSuggestions,
