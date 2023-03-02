@@ -6,18 +6,21 @@ import type { Cors } from '../../utils/types';
 import { corsMiddleware } from './corsMiddleware';
 
 describe('corsMiddleware', () => {
-  test('Should set default cors for request if does not set custom cors settings', async () => {
-    const server = express();
+  const testOrigin = 'https://test.com';
 
+  test('Should set default cors for OPTIONS preflight request if does not set custom cors settings', async () => {
+    const server = express();
     const cors: Cors = {
-      origin: [/test.com/g, 'https://test.com', 'https://uncorrectDomain.com']
+      origin: testOrigin
     };
 
     corsMiddleware(server, cors);
-    const response = await request(server).get('/').set({ origin: 'https://test.com' });
+
+    const response = await request(server).options('/').set({ origin: testOrigin });
 
     expect(response.headers).toMatchObject({
       'access-control-allow-headers': '*',
+      'access-control-expose-headers': '*',
       'access-control-allow-methods': '*',
       'access-control-allow-origin': 'https://test.com',
       'access-control-max-age': '3600',
@@ -25,84 +28,125 @@ describe('corsMiddleware', () => {
     });
   });
 
-  test('Should not set cors for request if origin does not match', async () => {
+  test(`Should set default cors for request if does not set custom cors settings`, async () => {
     const server = express();
-
     const cors: Cors = {
-      origin: 'https://uncorrectDomain.com'
+      origin: testOrigin
     };
 
     corsMiddleware(server, cors);
-    const response = await request(server).get('/').set({ origin: 'https://test.com' });
 
-    expect(response.headers).not.toHaveProperty('access-control-allow-headers');
-    expect(response.headers).not.toHaveProperty('access-control-allow-methods');
-    expect(response.headers).not.toHaveProperty('access-control-allow-origin');
-    expect(response.headers).not.toHaveProperty('access-control-max-age');
-    expect(response.headers).not.toHaveProperty('access-control-allow-credentials');
-  });
-
-  test('Should set allow headers to access-control-allow-headers', async () => {
-    const server = express();
-
-    const cors: Cors = {
-      origin: 'https://test.com',
-      headers: ['header1', 'header2']
-    };
-
-    corsMiddleware(server, cors);
-    const response = await request(server).get('/').set({ origin: 'https://test.com' });
+    const response = await request(server).get('/').set({ origin: testOrigin });
 
     expect(response.headers).toMatchObject({
-      'access-control-allow-headers': 'header1, header2'
+      'access-control-allow-origin': 'https://test.com',
+      'access-control-allow-credentials': 'true',
+      'access-control-expose-headers': '*'
+    });
+
+    expect(response.headers).not.toMatchObject({
+      'access-control-allow-headers': expect.any(String),
+      'access-control-allow-methods': expect.any(String),
+      'access-control-max-age': expect.any(String)
     });
   });
 
-  test('Should set methods to access-control-allow-methods', async () => {
-    const server = express();
+  const unsuitableOrigins = [
+    'https://uncorrectDomain.com',
+    [],
+    /https:\/\/uncorrectDomain.com/g,
+    () => 'https://uncorrectDomain.com',
+    () => Promise.resolve('https://uncorrectDomain.com')
+  ];
 
-    const cors: Cors = {
-      origin: 'https://test.com',
-      methods: ['GET', 'POST']
-    };
+  unsuitableOrigins.forEach((unsuitableOrigin) => {
+    test('Should not set default cors for OPTIONS preflight request if origin does not match', async () => {
+      const server = express();
+      const cors: Cors = {
+        origin: unsuitableOrigin
+      };
 
-    corsMiddleware(server, cors);
-    const response = await request(server).get('/').set({ origin: 'https://test.com' });
+      corsMiddleware(server, cors);
 
-    expect(response.headers).toMatchObject({
-      'access-control-allow-methods': 'GET, POST'
+      const response = await request(server).options('/').set({ origin: testOrigin });
+
+      expect(response.headers).not.toMatchObject({
+        'access-control-allow-headers': expect.any(String),
+        'access-control-expose-headers': expect.any(String),
+        'access-control-allow-methods': expect.any(String),
+        'access-control-allow-origin': expect.any(String),
+        'access-control-max-age': expect.any(String),
+        'access-control-allow-credentials': expect.any(String)
+      });
+    });
+
+    test(`Should not set cors for request if origin does not match`, async () => {
+      const server = express();
+      const cors: Cors = {
+        origin: unsuitableOrigin
+      };
+
+      corsMiddleware(server, cors);
+
+      const response = await request(server).get('/').set({ origin: testOrigin });
+
+      expect(response.headers).not.toMatchObject({
+        'access-control-allow-origin': expect.any(String),
+        'access-control-allow-credentials': expect.any(String),
+        'access-control-expose-headers': expect.any(String)
+      });
     });
   });
 
-  test('Should set methods to access-control-allow-credentials', async () => {
-    const server = express();
+  const corsParamsAndHeaders: { params: Omit<Cors, 'origin'>; headers: Record<string, string> }[] =
+    [
+      {
+        params: { allowedHeaders: ['header1', 'header2'] },
+        headers: {
+          'access-control-allow-headers': 'header1, header2'
+        }
+      },
+      {
+        params: { exposedHeaders: ['header1', 'header2'] },
+        headers: {
+          'access-control-expose-headers': 'header1, header2'
+        }
+      },
+      {
+        params: { maxAge: 10000 },
+        headers: {
+          'access-control-max-age': '10000'
+        }
+      },
+      {
+        params: { methods: ['GET', 'POST'] },
+        headers: {
+          'access-control-allow-methods': 'GET, POST'
+        }
+      },
+      {
+        params: { credentials: false },
+        headers: {
+          'access-control-allow-credentials': 'false'
+        }
+      }
+    ];
 
-    const cors: Cors = {
-      origin: 'https://test.com',
-      credentials: false
-    };
+  corsParamsAndHeaders.forEach(({ params, headers }) =>
+    test(`Should set allow param(s) ${Object.keys(params).join(', ')} to header(s) ${Object.keys(
+      headers
+    ).join(', ')}`, async () => {
+      const server = express();
+      const cors: Cors = {
+        origin: testOrigin,
+        ...params
+      };
 
-    corsMiddleware(server, cors);
-    const response = await request(server).get('/').set({ origin: 'https://test.com' });
+      corsMiddleware(server, cors);
 
-    expect(response.headers).toMatchObject({
-      'access-control-allow-credentials': 'false'
-    });
-  });
+      const response = await request(server).options('/').set({ origin: testOrigin });
 
-  test('Should set max-age to access-control-max-age', async () => {
-    const server = express();
-
-    const cors: Cors = {
-      origin: 'https://test.com',
-      maxAge: 10000
-    };
-
-    corsMiddleware(server, cors);
-    const response = await request(server).get('/').set({ origin: 'https://test.com' });
-
-    expect(response.headers).toMatchObject({
-      'access-control-max-age': '10000'
-    });
-  });
+      expect(response.headers).toMatchObject(headers);
+    })
+  );
 });

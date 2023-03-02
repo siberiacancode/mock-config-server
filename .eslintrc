@@ -19,10 +19,12 @@
   ],
   "plugins": ["@typescript-eslint", "simple-import-sort", "prettier"],
   "rules": {
-    "no-await-in-loop": "off",
     "no-shadow": "off",
-    "import/no-extraneous-dependencies": "off",
     "@typescript-eslint/no-shadow": "off",
+    "require-await": "off",
+    "@typescript-eslint/require-await": "error",
+    "import/no-extraneous-dependencies": "off",
+    "import/prefer-default-export": "off",
     "simple-import-sort/imports": [
       "error",
       {
@@ -36,9 +38,7 @@
         ]
       }
     ],
-    "simple-import-sort/exports": "error",
-    "import/prefer-default-export": "off",
-    "consistent-return": "off"
+    "simple-import-sort/exports": "error"
   },
   "ignorePatterns": ["jest.config.js"]
 }

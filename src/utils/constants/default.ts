@@ -3,7 +3,8 @@ export const DEFAULT = {
   CORS: {
     ORIGIN: '*',
     METHODS: '*',
-    HEADERS: '*',
+    ALLOWED_HEADERS: '*',
+    EXPOSED_HEADERS: '*',
     CREDENTIALS: true,
     MAX_AGE: 3600
   }
