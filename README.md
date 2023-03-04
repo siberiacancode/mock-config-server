@@ -19,7 +19,8 @@ $ yarn add mock-config-server --dev
 ## Features
 
 - **TypeScript support out of the box** - full typed package
-- **Full Rest Api support** - using simple configs of a certain format, you can easily simulate the operation of servers
+- **Full Rest Api support** - using simple configs of a certain format, you can easily simulate rest operation of servers
+- **GraphQL support** - using simple configs of a certain format, you can easily simulate graphlql operation of servers
 - **CORS setup** - turn on and off CORS, fully customizable when CORS is turned on
 - **Support for any kind of static** - server can return any type of static file if needed. Images, HTML, CSS, JSON, etc
 
@@ -36,15 +37,18 @@ $ yarn add mock-config-server --dev
 Create a `mock-server.config.js` file with server configuration
 
 ```javascript
-/** @type {import('mock-config-server').Mock.ServerConfig} */
+/** @type {import('mock-config-server').MockServerConfig} */
 const mockServerConfig = {
-  configs: [
-    {
-      path: '/user',
-      method: 'get',
-      routes: [{ data: { emoji: '🦁', name: 'Nursultan' } }]
-    }
-  ]
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/user',
+        method: 'get',
+        routes: [{ data: { emoji: '🦁', name: 'Nursultan' } }]
+      }
+    ]
+  }
 };
 
 export default mockServerConfig;
@@ -60,7 +64,12 @@ $ npx mock-config-server
 
 ## 🎭 Parameters for mock-server.config.(js|ts)
 
-- `configs` {Array<RequestConfig>} configs for mock requests, [read](#configs)
+- `rest?` Rest configs for mock requests
+  - `baseUrl?` {string} part of the url that will be substituted at the beginning of rest request url (default: `'/'`)
+  - `configs` {Array<RestRequestConfig>} configs for mock requests, [read](#configs)
+- `graphql?` GraphQL configs for mock requests
+  - `baseUrl?` {string} part of the url that will be substituted at the beginning of graphql request url (default: `'/'`)
+  - `configs` {Array<GraphQLRequestConfig>} configs for mock requests, [read](#configs)
 - `staticPath?` {StaticPath} entity for working with static files, [read](#static-path)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `cors?` {Cors} CORS settings object (default: `CORS is turn off`), [read](#cors)
@@ -69,57 +78,56 @@ $ npx mock-config-server
 
 ### Configs
 
-Configs are the fundamental part of the mock server. These configs are easy to fill and maintain. Config entities is an object with which you can emulate various application behaviors. You can specify `headers` | `query` | `params` | `body` to define what contract data you need to get. Using this mechanism, you can easily simulate the operation of the server and emulate various cases
+Configs are the fundamental part of the mock server. These configs are easy to fill and maintain. Config entities is an object with which you can emulate various application behaviors. You can specify `headers` | `query` | `params` | `body` for Rest request or `headers` | `query` | `variables` for GraphQL request to define what contract data you need to get. Using this mechanism, you can easily simulate the operation of the server and emulate various cases
 
-##### request config
+##### Rest request config
 
 - `path` {string | RegExp} request path
 - `method` {GET | POST | DELETE | PUT | PATCH} rest api method
-- `routes` {RouteConfig} request routes
+- `routes` {RestRouteConfig[]} request routes
+  - `data` {any} mock data of request
+  - `entities?` Object<headers | query | params | body> object that helps in data retrieval
+  - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 
-##### route config
+##### GraphQL request config
 
-- `data` {any} mock data of request
-- `entities?` Object<headers | query | params | body> object that helps in data retrieval
+- `operationType` {query | mutation} graphql operation type
+- `operationName` {string} graphql operation name
+- `routes` {GraphQLRouteConfig[]} request routes
+  - `data` {any} mock data of request
+  - `entities?` Object<headers | query | variables> object that helps in data retrieval
+  - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 
-##### entities
-
-```typescript
-interface Entities {
-  headers?: { [string]: string | number };
-  query?: { [string]: string | number };
-  params?: { [string]: string | number };
-  body?: any;
-}
-```
-
-##### Example
+##### Rest example
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
 const mockServerConfig = {
-  configs: [
-    {
-      path: '/user',
-      method: 'get',
-      routes: [
-        {
-          entities: {
-            headers: { 'name-header': 'Nursultan' }
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/user',
+        method: 'get',
+        routes: [
+          {
+            entities: {
+              headers: { 'name-header': 'Nursultan' }
+            },
+            data: { emoji: '🦁', name: 'Nursultan' }
           },
-          data: { emoji: '🦁', name: 'Nursultan' }
-        },
-        {
-          entities: {
-            headers: { 'name-header': 'Dmitriy' }
-          },
-          data: { emoji: '☄', name: 'Dmitriy' }
-        }
-      ]
-    }
-  ]
+          {
+            entities: {
+              headers: { 'name-header': 'Dmitriy' }
+            },
+            data: { emoji: '☄', name: 'Dmitriy' }
+          }
+        ]
+      }
+    ]
+  }
 };
 
 module.exports = mockServerConfig;
@@ -128,8 +136,63 @@ module.exports = mockServerConfig;
 Now you can make a request with an additional header and get the desired result
 
 ```javascript
-fetch('http://localhost:31299/user', {
-  headers: { 'name-header': 'Nursultan' }
+fetch('http://localhost:31299/api/user', {
+  headers: {
+    'name-header': 'Nursultan',
+    'Content-Type': 'application/json'
+  }
+})
+  .then((response) => response.json())
+  .then((data) => console.log(data)); // {  emoji: '🦁', name: 'Nursultan' }
+```
+
+##### GraphQL example
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  graphql: {
+    baseUrl: '/graphql',
+    configs: [
+      {
+        operationType: 'query',
+        operationName: 'GetUser',
+        routes: [
+          {
+            entities: {
+              headers: { 'name-header': 'Nursultan' }
+            },
+            data: { emoji: '🦁', name: 'Nursultan' }
+          },
+          {
+            entities: {
+              headers: { 'name-header': 'Dmitriy' }
+            },
+            data: { emoji: '☄', name: 'Dmitriy' }
+          }
+        ]
+      }
+    ]
+  }
+};
+
+module.exports = mockServerConfig;
+```
+
+Now you can make a request with an additional header and get the desired result
+
+```javascript
+const body = JSON.stringify({
+  query: 'query GetUser { name }'
+});
+
+fetch('http://localhost:31299/graphql', {
+  method: 'POST',
+  headers: {
+    'name-header': 'Nursultan',
+    'Content-Type': 'application/json'
+  },
+  body
 })
   .then((response) => response.json())
   .then((data) => console.log(data)); // {  emoji: '🦁', name: 'Nursultan' }
@@ -151,7 +214,8 @@ Object with settings for [CORS](https://developer.mozilla.org/en-US/docs/Web/HTT
 
 - `origin` {string | RegExp | Array<string | RegExp> | Function | Promise } available origins from which requests can be made
 - `methods?` {Array<GET | POST | DELETE | PUT | PATCH>} available methods (default: `*`)
-- `headers?` {Array<string>} available methods (default: `*`)
+- `allowedHeaders?` {Array<string>} allowed headers (default: `*`)
+- `exposedHeaders?` {Array<string>} exposed headers (default: `*`)
 - `credentials?` {boolean} param tells browsers whether to expose the response to the frontend JavaScript code (default: `true`)
 - `maxAge?` {number} how long the results can be cached (default: `3600`)
 

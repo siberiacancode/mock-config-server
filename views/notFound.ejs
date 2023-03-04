@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <body class="container">
+        <h1>404</h1>
+        <div>
+            Seems to be your config does not have data for '<%= requestMethod %>
+            <%= decodeURIComponent(url) %> request, or you have typo in it.
+        </div>
+
+        <% if (restUrlSuggestions.length || graphqlUrlSuggestions.length) { %>
+            <h2>
+                Maybe you are looking for one of these paths?
+            </h2>
+        <% } %>
+
+        <% if (restUrlSuggestions.length) { %>
+            <div>
+                <h3>REST</h3>
+                <ul>
+                    <% restUrlSuggestions.forEach((restUrlSuggestion) => { %>
+                        <li>
+                            <a href=<%= restUrlSuggestion %>><%= decodeURIComponent(restUrlSuggestion) %></a>
+                        </li>
+                    <% }) %>
+                </ul>
+            </div>
+        <% } %>
+
+        <% if (graphqlUrlSuggestions.length) { %>
+            <div>
+                <h3>GraphQL</h3>
+                <ul>
+                    <% graphqlUrlSuggestions.forEach((graphqlUrlSuggestion) => { %>
+                        <li>
+                            <%= decodeURIComponent(graphqlUrlSuggestion) %>
+                        </li>
+                    <% }) %>
+                </ul>
+            </div>
+        <% } %>
+    </body>
+</html>

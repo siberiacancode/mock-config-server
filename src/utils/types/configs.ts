@@ -1,46 +1,89 @@
 export type PlainObject = Record<string, string | number>;
 export type PlainFunction = (...args: any[]) => any;
 
-export type Entities = 'headers' | 'query' | 'params' | 'body';
 export type BodyValue = any;
+export type VariablesValue = any;
+export type QueryValue = Record<string, string | string[]>;
+export type HeadersOrParamsValue = Record<string, string>;
 
-export type EntitiesValues = {
-  [Key in Entities]: Key extends 'body' ? BodyValue : PlainObject;
+export type RestEntities = 'headers' | 'query' | 'params' | 'body';
+export type RestEntitiesValue = BodyValue | QueryValue | HeadersOrParamsValue;
+
+export type RestEntitiesValues = {
+  [Key in RestEntities]: Key extends 'body'
+    ? BodyValue
+    : Key extends 'query'
+      ? QueryValue
+      : Key extends 'headers' | 'params'
+        ? HeadersOrParamsValue
+        : never;
 };
 
-export interface HttpMethodsEntities {
-  get: Extract<Entities, 'headers' | 'query' | 'params'>;
-  delete: Extract<Entities, 'headers' | 'query' | 'params'>;
-  post: Entities;
-  put: Entities;
-  patch: Entities;
+export interface RestMethodsEntities {
+  get: Extract<RestEntities, 'headers' | 'query' | 'params'>;
+  delete: Extract<RestEntities, 'headers' | 'query' | 'params'>;
+  post: RestEntities;
+  put: RestEntities;
+  patch: RestEntities;
 }
 
-export interface RouteConfig<Method extends RestMethod> {
+export interface RestRouteConfig<Method extends RestMethod> {
   entities?: {
-    [Key in HttpMethodsEntities[Method]]?: EntitiesValues[Key];
+    [Key in RestMethodsEntities[Method]]?: RestEntitiesValues[Key];
   };
   data: any;
   interceptors?: Pick<import('./interceptors').Interceptors, 'response'>;
 }
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch';
-export interface RestRequestConfig<Method extends RestMethod> {
-  path: string | RegExp;
+
+export interface BaseRestRequestConfig<Method extends RestMethod> {
+  path: `/${string}` | RegExp;
   method: Method;
-  routes: RouteConfig<Method>[];
+  routes: RestRouteConfig<Method>[];
   interceptors?: import('./interceptors').Interceptors;
 }
 
-export type RestGetRequestConfig = RestRequestConfig<'get'>;
-export type RestPostRequestConfig = RestRequestConfig<'post'>;
-export type RestPutRequestConfig = RestRequestConfig<'put'>;
-export type RestDeleteRequestConfig = RestRequestConfig<'delete'>;
-export type RestPatchRequestConfig = RestRequestConfig<'patch'>;
+export type RestGetRequestConfig = BaseRestRequestConfig<'get'>;
+export type RestPostRequestConfig = BaseRestRequestConfig<'post'>;
+export type RestPutRequestConfig = BaseRestRequestConfig<'put'>;
+export type RestDeleteRequestConfig = BaseRestRequestConfig<'delete'>;
+export type RestPatchRequestConfig = BaseRestRequestConfig<'patch'>;
 
-export type RequestConfig =
+export type RestRequestConfig =
   | RestGetRequestConfig
   | RestPostRequestConfig
   | RestPutRequestConfig
   | RestDeleteRequestConfig
   | RestPatchRequestConfig;
+
+export type GraphQLEntities = 'headers' | 'query' | 'variables';
+
+export type GraphQLEntitiesValues = {
+  [Key in GraphQLEntities]: Key extends 'variables' ? VariablesValue : PlainObject;
+};
+
+export interface GraphQLOperationsEntities {
+  query: GraphQLEntities;
+  mutation: GraphQLEntities;
+}
+
+export type GraphQLOperationType = 'query' | 'mutation';
+export type GraphQLOperationName = string | RegExp;
+export interface GraphQLRouteConfig {
+  entities?: {
+    [Key in GraphQLOperationsEntities[GraphQLOperationType]]?: GraphQLEntitiesValues[Key];
+  };
+  data: any;
+  interceptors?: Pick<import('./interceptors').Interceptors, 'response'>;
+}
+
+export interface GraphQLQuery {
+  operationType: GraphQLOperationType;
+  operationName: GraphQLOperationName;
+}
+
+export interface GraphQLRequestConfig extends GraphQLQuery {
+  routes: GraphQLRouteConfig[];
+  interceptors?: import('./interceptors').Interceptors;
+}

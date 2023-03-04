@@ -14,6 +14,6 @@ export interface InterceptorResponseParams {
 export type InterceptorResponse = <Data>(data: Data, params: InterceptorResponseParams) => any;
 
 export interface Interceptors {
-  response?: InterceptorResponse;
   request?: InterceptorRequest;
+  response?: InterceptorResponse;
 }

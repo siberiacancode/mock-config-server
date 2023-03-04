@@ -1,3 +1,5 @@
+import color from 'ansi-colors';
+
 import { DEFAULT } from '../../utils/constants';
 import type { MockServerConfig } from '../../utils/types';
 import { createMockServer } from '../createMockServer/createMockServer';
@@ -7,6 +9,6 @@ export const startMockServer = (mockServerConfig: MockServerConfig) => {
   const port = mockServerConfig.port ?? DEFAULT.PORT;
 
   mockServer.listen(port, () => {
-    console.log(`🎉 Mock Server is running at http://localhost:${port}`);
+    console.log(color.green(`🎉 Mock Server is running at http://localhost:${port}`));
   });
 };

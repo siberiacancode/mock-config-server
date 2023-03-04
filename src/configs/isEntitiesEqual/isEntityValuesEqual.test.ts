@@ -1,9 +1,12 @@
 import { isEntityValuesEqual } from './isEntityValuesEqual';
 
 describe('isEntityValuesEqual', () => {
-  test('Primitive values should compare independent of their types', () => {
-    expect(isEntityValuesEqual(13, '13')).toBe(true);
+  test('All Primitive values should compare independent of their types', () => {
+    expect(isEntityValuesEqual(12, '12')).toBe(true);
     expect(isEntityValuesEqual(true, 'true')).toBe(true);
+    expect(isEntityValuesEqual(null, 'null')).toBe(true);
+    expect(isEntityValuesEqual(undefined, 'undefined')).toBe(true);
+    expect(isEntityValuesEqual('string', 'string')).toBe(true);
   });
 
   test('Arrays should be full equal with nested objects (independent of primitive values types)', () => {
