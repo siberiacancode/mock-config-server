@@ -1,9 +1,9 @@
 import express from 'express';
-import path from 'path';
 import request from 'supertest';
 
 import { createGraphQLRoutes } from '../graphql/createGraphQLRoutes/createGraphQLRoutes';
 import { createRestRoutes } from '../rest/createRestRoutes/createRestRoutes';
+import { urlJoin } from '../utils/helpers';
 import type { MockServerConfig } from '../utils/types';
 
 import { notFoundMiddleware } from './notFoundMiddleware';
@@ -63,7 +63,7 @@ describe('notFoundMiddleware', () => {
 
     const serverBaseUrl = baseUrl ?? '/';
 
-    const restBaseUrl = path.join(serverBaseUrl, rest?.baseUrl ?? '/');
+    const restBaseUrl = urlJoin(serverBaseUrl, rest?.baseUrl ?? '/');
     const routerWithRestRoutes = createRestRoutes(
       express.Router(),
       rest?.configs ?? [],
@@ -71,7 +71,7 @@ describe('notFoundMiddleware', () => {
     );
     server.use(restBaseUrl, routerWithRestRoutes);
 
-    const graphqlBaseUrl = path.join(serverBaseUrl, graphql?.baseUrl ?? '/');
+    const graphqlBaseUrl = urlJoin(serverBaseUrl, graphql?.baseUrl ?? '/');
     const routerWithGraphqlRoutes = createGraphQLRoutes(
       express.Router(),
       graphql?.configs ?? [],
