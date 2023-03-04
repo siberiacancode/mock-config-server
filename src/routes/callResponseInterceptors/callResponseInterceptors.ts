@@ -14,7 +14,9 @@ interface CallResponseInterceptorsParams<T> {
   };
 }
 
-export const callResponseInterceptors = <T = any>(params: CallResponseInterceptorsParams<T>) => {
+export const callResponseInterceptors = <T = unknown>(
+  params: CallResponseInterceptorsParams<T>
+) => {
   const { data, request, response, interceptors } = params;
   const setDelay = async (delay: number) => {
     await sleep(delay === Infinity ? 100000 : delay);

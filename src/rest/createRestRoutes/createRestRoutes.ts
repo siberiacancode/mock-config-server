@@ -17,7 +17,7 @@ export const createRestRoutes = (
   interceptors?: Interceptors
 ) => {
   prepareRestRequestConfigs(configs).forEach((requestConfig) => {
-    router.route(requestConfig.path)[requestConfig.method]((request, response) => {
+    router.route(requestConfig.path)[requestConfig.method]((request, response, next) => {
       callRequestInterceptors({
         request,
         interceptors: {
@@ -34,9 +34,7 @@ export const createRestRoutes = (
       });
 
       if (!matchedRouteConfig) {
-        return response
-          .status(404)
-          .json(`No data for ${request.method}:${request.baseUrl}${request.path}`);
+        return next();
       }
 
       const data = callResponseInterceptors({

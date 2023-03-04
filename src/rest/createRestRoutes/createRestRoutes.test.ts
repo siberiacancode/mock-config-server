@@ -148,7 +148,6 @@ describe('createRestRoutes', () => {
     const response = await request(server).get('/users').set({ key2: 'value2' });
 
     expect(response.statusCode).toBe(404);
-    expect(response.body).toBe('No data for GET:/users');
   });
 
   test('Should compare non plain object body by full equal behavior', async () => {
@@ -188,7 +187,6 @@ describe('createRestRoutes', () => {
       .set('Content-Type', 'application/json')
       .send([{ key1: 'value1', key2: { nestedKey1: 'nestedValue1', nestedKey2: 'nestedValue2' } }]);
     expect(failedResponse.statusCode).toBe(404);
-    expect(failedResponse.body).toBe('No data for POST:/users');
   });
 
   test('Should compare plain object body by "includes" behavior', async () => {

@@ -18,13 +18,13 @@ describe('createGraphQLRoutes', () => {
       mockServerConfig.interceptors
     );
 
-    const restBaseUrl = path.join(
+    const graphqlBaseUrl = path.join(
       mockServerConfig.baseUrl ?? '/',
       mockServerConfig.graphql?.baseUrl ?? '/'
     );
 
     server.use(express.json());
-    server.use(restBaseUrl, routerWithRoutes);
+    server.use(graphqlBaseUrl, routerWithRoutes);
     return server;
   };
 
@@ -224,14 +224,12 @@ describe('createGraphQLRoutes', () => {
       .set({ key2: 'value2' });
 
     expect(postResponse.statusCode).toBe(404);
-    expect(postResponse.body).toBe('No data for POST:/');
 
     const getResponse = await request(server).get('/').set({ key2: 'value2' }).query({
       query: 'query GetUsers { users { name } }'
     });
 
     expect(getResponse.statusCode).toBe(404);
-    expect(getResponse.body).toBe('No data for GET:/');
   });
 
   test('Should compare non plain object variables by full equal behavior', async () => {
@@ -292,7 +290,6 @@ describe('createGraphQLRoutes', () => {
       });
 
     expect(failedPostResponse.statusCode).toBe(404);
-    expect(failedPostResponse.body).toBe('No data for POST:/');
 
     const failedGetResponse = await request(server)
       .get('/')
@@ -304,7 +301,6 @@ describe('createGraphQLRoutes', () => {
       });
 
     expect(failedGetResponse.statusCode).toBe(404);
-    expect(failedGetResponse.body).toBe('No data for GET:/');
   });
 
   test('Should compare plain object variables by "includes" behavior', async () => {
