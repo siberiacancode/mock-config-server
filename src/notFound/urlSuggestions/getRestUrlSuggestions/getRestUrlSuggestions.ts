@@ -1,8 +1,7 @@
 import { getUrlParts } from '../../../utils/helpers';
 import { getLevenshteinDistance } from '../getLevenshteinDistance/getLevenshteinDistance';
 
-import { getActualRestUrlMeaningfulString } from './getActualRestUrlMeaningfulString';
-import { getPatternRestUrlMeaningfulString } from './getPatternRestUrlMeaningfulString';
+import { getActualRestUrlMeaningfulString, getPatternRestUrlMeaningfulString } from './helpers';
 
 interface GetRestUrlSuggestionsParams {
   url: URL;
