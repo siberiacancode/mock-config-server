@@ -4,7 +4,7 @@ const convertWin32PathToUnix = (win32Path: string) => {
   // handle the edge-case of Window's long file names
   // See: https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#short-vs-long-names
   let unixPath = win32Path.replace(/^\\\\\?\\/, '');
-  
+
   // convert the separators, valid since both \ and / can't be in a windows filename
   unixPath = unixPath.replace(/\\/g, '/');
 
@@ -22,7 +22,5 @@ export const urlJoin = (...paths: string[]) => {
     pathsToJoin = paths.map((path) => convertWin32PathToUnix(path));
   }
 
-  const joinedPaths = path.posix.join(...pathsToJoin);
-
-  return joinedPaths.startsWith('/') ? joinedPaths : `/${joinedPaths}`;
+  return path.posix.join(...pathsToJoin);
 };
