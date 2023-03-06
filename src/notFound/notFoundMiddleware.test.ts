@@ -22,7 +22,7 @@ describe('notFoundMiddleware', () => {
       {
         path: '/posts/:postId',
         method: 'get',
-        routes: [{ data: {}, entities: { params: { postId: 1 } } }]
+        routes: [{ data: {}, entities: { params: { postId: '1' } } }]
       },
 
       {
@@ -33,7 +33,7 @@ describe('notFoundMiddleware', () => {
       {
         path: '/developers/:developerId',
         method: 'get',
-        routes: [{ data: {}, entities: { params: { developerId: 1 } } }]
+        routes: [{ data: {}, entities: { params: { developerId: '1' } } }]
       }
     ]
   };
@@ -79,6 +79,7 @@ describe('notFoundMiddleware', () => {
     );
     server.use(graphqlBaseUrl, routerWithGraphqlRoutes);
 
+    server.set('views', urlJoin(__dirname, '../static/views'));
     server.set('view engine', 'ejs');
     server.use(express.json());
 
