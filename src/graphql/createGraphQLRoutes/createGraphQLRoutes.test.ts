@@ -1,7 +1,7 @@
 import express from 'express';
-import path from 'path';
 import request from 'supertest';
 
+import { urlJoin } from '../../utils/helpers';
 import type { MockServerConfig } from '../../utils/types';
 
 import { createGraphQLRoutes } from './createGraphQLRoutes';
@@ -18,7 +18,7 @@ describe('createGraphQLRoutes', () => {
       mockServerConfig.interceptors
     );
 
-    const graphqlBaseUrl = path.join(
+    const graphqlBaseUrl = urlJoin(
       mockServerConfig.baseUrl ?? '/',
       mockServerConfig.graphql?.baseUrl ?? '/'
     );

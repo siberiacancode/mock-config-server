@@ -1,7 +1,7 @@
 import express from 'express';
-import path from 'path';
 import request from 'supertest';
 
+import { urlJoin } from '../../utils/helpers';
 import type { MockServerConfig } from '../../utils/types';
 
 import { createRestRoutes } from './createRestRoutes';
@@ -18,7 +18,7 @@ describe('createRestRoutes', () => {
       mockServerConfig.interceptors
     );
 
-    const restBaseUrl = path.join(
+    const restBaseUrl = urlJoin(
       mockServerConfig.baseUrl ?? '/',
       mockServerConfig.rest?.baseUrl ?? '/'
     );

@@ -1,7 +1,6 @@
 import bodyParser from 'body-parser';
 import type { Express } from 'express';
 import express from 'express';
-import path from 'path';
 
 import { corsMiddleware } from '../../cors/corsMiddleware/corsMiddleware';
 import { noCorsMiddleware } from '../../cors/noCorsMiddleware/noCorsMiddleware';
@@ -9,12 +8,14 @@ import { createGraphQLRoutes } from '../../graphql/createGraphQLRoutes/createGra
 import { notFoundMiddleware } from '../../notFound/notFoundMiddleware';
 import { createRestRoutes } from '../../rest/createRestRoutes/createRestRoutes';
 import { staticMiddleware } from '../../static/staticMiddleware/staticMiddleware';
+import { urlJoin } from '../../utils/helpers';
 import type { MockServerConfig } from '../../utils/types';
 
 export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'>) => {
   const { cors, staticPath, rest, graphql, interceptors } = mockServerConfig;
   const server: Express = express();
 
+  server.set('views', urlJoin(__dirname, '../../static/views'));
   server.set('view engine', 'ejs');
   server.use(bodyParser.urlencoded({ extended: false }));
   server.use(bodyParser.json({ limit: '10mb' }));
@@ -34,7 +35,7 @@ export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'
   if (rest) {
     const routerWithRestRoutes = createRestRoutes(express.Router(), rest.configs, interceptors);
 
-    const restBaseUrl = path.join(baseUrl, rest.baseUrl ?? '/');
+    const restBaseUrl = urlJoin(baseUrl, rest.baseUrl ?? '/');
     server.use(restBaseUrl, routerWithRestRoutes);
   }
 
@@ -45,7 +46,7 @@ export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'
       interceptors
     );
 
-    const graphqlBaseUrl = path.join(baseUrl, graphql.baseUrl ?? '/');
+    const graphqlBaseUrl = urlJoin(baseUrl, graphql.baseUrl ?? '/');
     server.use(graphqlBaseUrl, routerWithGraphQLRoutes);
   }
 
