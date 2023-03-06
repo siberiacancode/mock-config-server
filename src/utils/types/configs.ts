@@ -13,10 +13,10 @@ export type RestEntitiesValues = {
   [Key in RestEntities]: Key extends 'body'
     ? BodyValue
     : Key extends 'query'
-      ? QueryValue
-      : Key extends 'headers' | 'params'
-        ? HeadersOrParamsValue
-        : never;
+    ? QueryValue
+    : Key extends 'headers' | 'params'
+    ? HeadersOrParamsValue
+    : never;
 };
 
 export interface RestMethodsEntities {
