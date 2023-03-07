@@ -4,15 +4,12 @@ import request from 'supertest';
 import { createGraphQLRoutes } from '../graphql/createGraphQLRoutes/createGraphQLRoutes';
 import { createRestRoutes } from '../rest/createRestRoutes/createRestRoutes';
 import { urlJoin } from '../utils/helpers';
-import type { MockServerConfig } from '../utils/types';
+import type { BaseUrl, MockServerConfig } from '../utils/types';
 
 import { notFoundMiddleware } from './notFoundMiddleware';
 
 describe('notFoundMiddleware', () => {
-  const baseUrl: MockServerConfig['baseUrl'] = '/base';
-
   const rest: MockServerConfig['rest'] = {
-    baseUrl: '/rest',
     configs: [
       {
         path: '/posts',
@@ -39,7 +36,6 @@ describe('notFoundMiddleware', () => {
   };
 
   const graphql: MockServerConfig['graphql'] = {
-    baseUrl: '/graphql',
     configs: [
       {
         operationName: 'GetPosts',
@@ -93,26 +89,115 @@ describe('notFoundMiddleware', () => {
 
   test('Should send correct REST suggestions', async () => {
     const server = createServer({
-      baseUrl,
-      rest,
+      rest
+    });
+
+    const response = await request(server).get('/pstss');
+
+    expect(response.statusCode).toBe(404);
+    expect(response.text).toContain('<h3>REST</h3>');
+    expect(response.text).toContain('/posts');
+  });
+
+  test('Should send correct GraphQL suggestions', async () => {
+    const server = createServer({
       graphql
     });
 
-    const response = await request(server).get('/bas/rst/pstss');
+    const response = await request(server).get('?query=query posts { posts }');
+
+    expect(response.statusCode).toBe(404);
+    expect(response.text).toContain('<h3>GraphQL</h3>');
+    expect(response.text).toContain('/GetPosts');
+  });
+
+  const baseUrl: MockServerConfig['baseUrl'] = '/base';
+
+  test('Should send correct REST suggestions with serverBaseUrl', async () => {
+    const server = createServer({
+      baseUrl,
+      rest
+    });
+
+    const response = await request(server).get('/bas/pstss');
+
+    expect(response.statusCode).toBe(404);
+    expect(response.text).toContain('<h3>REST</h3>');
+    expect(response.text).toContain('/base/posts');
+  });
+
+  test('Should send correct GraphQL suggestions with serverBaseUrl', async () => {
+    const server = createServer({
+      baseUrl,
+      graphql
+    });
+
+    const response = await request(server).get('/bse?query=query posts { posts }');
+
+    expect(response.statusCode).toBe(404);
+    expect(response.text).toContain('<h3>GraphQL</h3>');
+    expect(response.text).toContain('/base/GetPosts');
+  });
+
+  const restBaseUrl: BaseUrl = '/rest';
+  const graphqlBaseUrl: BaseUrl = '/graphql';
+
+  test('Should send correct REST suggestions with restBaseUrl', async () => {
+    const server = createServer({
+      rest: {
+        ...rest,
+        baseUrl: restBaseUrl
+      }
+    });
+
+    const response = await request(server).get('/res/pstss');
+
+    expect(response.statusCode).toBe(404);
+    expect(response.text).toContain('<h3>REST</h3>');
+    expect(response.text).toContain('/rest/posts');
+  });
+
+  test('Should send correct GraphQL suggestions with graphqlBaseUrl', async () => {
+    const server = createServer({
+      graphql: {
+        ...graphql,
+        baseUrl: graphqlBaseUrl
+      }
+    });
+
+    const response = await request(server).get('/graph?query=query posts { posts }');
+
+    expect(response.statusCode).toBe(404);
+    expect(response.text).toContain('<h3>GraphQL</h3>');
+    expect(response.text).toContain('/graphql/GetPosts');
+  });
+
+  test('Should send correct REST suggestions with serverBaseUrl and restBaseUrl', async () => {
+    const server = createServer({
+      baseUrl,
+      rest: {
+        ...rest,
+        baseUrl: restBaseUrl
+      }
+    });
+
+    const response = await request(server).get('/bas/res/post');
 
     expect(response.statusCode).toBe(404);
     expect(response.text).toContain('<h3>REST</h3>');
     expect(response.text).toContain('/base/rest/posts');
   });
 
-  test('Should send correct GraphQL suggestions', async () => {
+  test('Should send correct GraphQL suggestions with serverBaseUrl and graphqlBaseUrl', async () => {
     const server = createServer({
       baseUrl,
-      rest,
-      graphql
+      graphql: {
+        ...graphql,
+        baseUrl: graphqlBaseUrl
+      }
     });
 
-    const response = await request(server).get('/bse/graql?query=query posts { posts }');
+    const response = await request(server).get('/bas/graphq?query=query posts { posts }');
 
     expect(response.statusCode).toBe(404);
     expect(response.text).toContain('<h3>GraphQL</h3>');

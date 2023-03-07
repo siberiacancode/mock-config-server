@@ -17,7 +17,7 @@ export const notFoundMiddleware = ({ server, mockServerConfig }: NotFoundMiddlew
   const graphqlPatternUrlMeaningfulStrings = Array.from(
     operationNames.reduce((acc, operationName) => {
       if (typeof operationName === 'string')
-        acc.add(`${serverBaseUrl}${graphql?.baseUrl}/${operationName}`);
+        acc.add(`${serverBaseUrl ?? ''}${graphql?.baseUrl ?? ''}/${operationName}`);
       return acc;
     }, new Set<string>())
   );
@@ -26,7 +26,7 @@ export const notFoundMiddleware = ({ server, mockServerConfig }: NotFoundMiddlew
   const patternUrls = Array.from(
     restPaths.reduce((acc, patternPath) => {
       if (typeof patternPath === 'string')
-        acc.add(`${serverBaseUrl}${rest?.baseUrl}${patternPath}`);
+        acc.add(`${serverBaseUrl ?? ''}${rest?.baseUrl ?? ''}${patternPath}`);
       return acc;
     }, new Set<string>())
   );
