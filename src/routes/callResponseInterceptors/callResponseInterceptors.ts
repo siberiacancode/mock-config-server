@@ -18,6 +18,7 @@ export const callResponseInterceptors = <T = unknown>(
   params: CallResponseInterceptorsParams<T>
 ) => {
   const { data, request, response, interceptors } = params;
+
   const setDelay = async (delay: number) => {
     await sleep(delay === Infinity ? 100000 : delay);
   };
@@ -25,11 +26,33 @@ export const callResponseInterceptors = <T = unknown>(
     response.statusCode = statusCode;
   };
 
+  const setHeader = (...args: Parameters<InterceptorResponseParams['setHeader']>) => {
+    response.header(...args);
+  };
+  const appendHeader = (...args: Parameters<InterceptorResponseParams['appendHeader']>) => {
+    response.append(...args);
+  };
+  const setCookie = (...args: Parameters<InterceptorResponseParams['setCookie']>) => {
+    response.cookie(...args);
+  };
+  const clearCookie = (...args: Parameters<InterceptorResponseParams['clearCookie']>) => {
+    response.clearCookie(...args);
+  };
+
+  const attachment = (...args: Parameters<InterceptorResponseParams['attachment']>) => {
+    response.attachment(...args);
+  };
+
   const interceptorResponseParams: InterceptorResponseParams = {
     request,
     response,
     setDelay,
-    setStatusCode
+    setStatusCode,
+    setHeader,
+    appendHeader,
+    setCookie,
+    clearCookie,
+    attachment
   };
 
   let updatedData = data;
