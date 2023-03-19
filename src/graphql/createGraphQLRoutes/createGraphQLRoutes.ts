@@ -95,6 +95,10 @@ export const createGraphQLRoutes = (
       }
     });
 
+    // ✅ important:
+    // set 'Cache-Control' header for explicit browsers response revalidate
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+    response.set('Cache-control', 'max-age=0, must-revalidate');
     return response.status(response.statusCode).json(data);
   };
 
