@@ -63,7 +63,7 @@ const validateEntities = (entities: unknown, method: RestMethod) => {
       if (entity === 'headers' || entity === 'params') {
         try {
           const headersOrParams = entities[entity];
-          return validateHeadersOrParams(headersOrParams, entity);
+          validateHeadersOrParams(headersOrParams, entity);
         } catch (error: any) {
           throw new Error(`entities.${error.message}`);
         }
@@ -72,7 +72,7 @@ const validateEntities = (entities: unknown, method: RestMethod) => {
       if (entity === 'query') {
         try {
           const query = entities[entity];
-          return validateQuery(query, entity);
+          validateQuery(query, entity);
         } catch (error: any) {
           throw new Error(`entities.${error.message}`);
         }

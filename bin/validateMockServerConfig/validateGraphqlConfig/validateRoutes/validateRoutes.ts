@@ -38,7 +38,7 @@ const validateEntities = (entities: unknown, operationType: GraphQLOperationType
       if (entity === 'headers' || entity === 'query') {
         try {
           const headersOrQuery = entities[entity];
-          return validateHeadersOrQuery(headersOrQuery, entity);
+          validateHeadersOrQuery(headersOrQuery, entity);
         } catch (error: any) {
           throw new Error(`entities.${error.message}`);
         }
