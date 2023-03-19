@@ -1,5 +1,7 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
+const { pathsToModuleNameMapper } = require('ts-jest');
+const { compilerOptions } = require('./tsconfig.dev.json');
 
+/** @type {import('ts-jest').JestConfigWithTsJest} */
 const jestConfig = {
   rootDir: './',
   preset: 'ts-jest',
@@ -7,14 +9,6 @@ const jestConfig = {
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { tsconfig: './tsconfig.dev.json' }]
   },
-  moduleNameMapper: {
-    '@/server': '<rootDir>/src/utils/helpers',
-    '@/core/rest': '<rootDir>/src/core/rest',
-    '@/core/graphql': '<rootDir>/src/core/graphql',
-    '@/core/middlewares': '<rootDir>/src/core/middlewares',
-    '@/utils/helpers': '<rootDir>/src/utils/helpers',
-    '@/utils/types': '<rootDir>/src/utils/types',
-    '@/utils/constants': '<rootDir>/src/utils/constants'
-  }
+  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' })
 };
 module.exports = jestConfig;
