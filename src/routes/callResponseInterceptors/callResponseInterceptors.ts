@@ -26,21 +26,21 @@ export const callResponseInterceptors = <T = unknown>(
     response.statusCode = statusCode;
   };
 
-  const setHeader = (...args: Parameters<InterceptorResponseParams['setHeader']>) => {
-    response.header(...args);
+  const setHeader = (...params: Parameters<InterceptorResponseParams['setHeader']>) => {
+    response.header(...params);
   };
-  const appendHeader = (...args: Parameters<InterceptorResponseParams['appendHeader']>) => {
-    response.append(...args);
+  const appendHeader = (...params: Parameters<InterceptorResponseParams['appendHeader']>) => {
+    response.append(...params);
   };
-  const setCookie = (...args: Parameters<InterceptorResponseParams['setCookie']>) => {
-    response.cookie(...args);
+  const setCookie = (...params: Parameters<InterceptorResponseParams['setCookie']>) => {
+    response.cookie(...params);
   };
-  const clearCookie = (...args: Parameters<InterceptorResponseParams['clearCookie']>) => {
-    response.clearCookie(...args);
+  const clearCookie = (...params: Parameters<InterceptorResponseParams['clearCookie']>) => {
+    response.clearCookie(...params);
   };
 
-  const attachment = (...args: Parameters<InterceptorResponseParams['attachment']>) => {
-    response.attachment(...args);
+  const attachment = (...params: Parameters<InterceptorResponseParams['attachment']>) => {
+    response.attachment(...params);
   };
 
   const interceptorResponseParams: InterceptorResponseParams = {

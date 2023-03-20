@@ -11,11 +11,11 @@ export interface InterceptorResponseParams {
   response: Response;
   setDelay: (delay: number) => Promise<void>;
   setStatusCode: (statusCode: number) => void;
-  setHeader: (...args: Parameters<Response['header']>) => void;
-  appendHeader: (...args: Parameters<Response['append']>) => void;
-  setCookie: (...args: Parameters<Response['cookie']>) => void;
-  clearCookie: (...args: Parameters<Response['clearCookie']>) => void;
-  attachment: (...args: Parameters<Response['attachment']>) => void;
+  setHeader: (...params: Parameters<Response['header']>) => void;
+  appendHeader: (...params: Parameters<Response['append']>) => void;
+  setCookie: (...params: Parameters<Response['cookie']>) => void;
+  clearCookie: (...params: Parameters<Response['clearCookie']>) => void;
+  attachment: (...params: Parameters<Response['attachment']>) => void;
 }
 
 export type InterceptorResponse = <Data>(data: Data, params: InterceptorResponseParams) => any;
