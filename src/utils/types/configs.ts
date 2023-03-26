@@ -69,7 +69,7 @@ export interface GraphQLOperationsEntities {
 }
 
 export type GraphQLOperationType = 'query' | 'mutation';
-export type GraphQLOperationName = string | RegExp;
+export type GraphQLOperationName = `${Uppercase<string>}${string}` | RegExp;
 export interface GraphQLRouteConfig {
   entities?: {
     [Key in GraphQLOperationsEntities[GraphQLOperationType]]?: GraphQLEntitiesValues[Key];

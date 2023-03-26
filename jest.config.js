@@ -4,11 +4,13 @@ const jestConfig = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   transform: {
-    '^.+\\.tsx?$': [
+    '^.*\.ts$': [
       'ts-jest',
       { tsconfig: './tsconfig.dev.json' }
     ],
-  }
+  },
+  collectCoverage: true,
+  coverageDirectory: 'coverage',
 };
 
 module.exports = jestConfig;
