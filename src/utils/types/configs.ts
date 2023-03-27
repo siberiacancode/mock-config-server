@@ -1,5 +1,6 @@
+import type { Interceptors } from './interceptors';
+
 export type PlainObject = Record<string, string | number>;
-export type PlainFunction = (...args: any[]) => any;
 
 export type BodyValue = any;
 export type VariablesValue = any;
@@ -32,7 +33,7 @@ export interface RestRouteConfig<Method extends RestMethod> {
     [Key in RestMethodsEntities[Method]]?: RestEntitiesValues[Key];
   };
   data: any;
-  interceptors?: Pick<import('./interceptors').Interceptors, 'response'>;
+  interceptors?: Pick<Interceptors, 'response'>;
 }
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch';
@@ -41,7 +42,7 @@ export interface BaseRestRequestConfig<Method extends RestMethod> {
   path: `/${string}` | RegExp;
   method: Method;
   routes: RestRouteConfig<Method>[];
-  interceptors?: import('./interceptors').Interceptors;
+  interceptors?: Interceptors;
 }
 
 export type RestGetRequestConfig = BaseRestRequestConfig<'get'>;
@@ -75,7 +76,7 @@ export interface GraphQLRouteConfig {
     [Key in GraphQLOperationsEntities[GraphQLOperationType]]?: GraphQLEntitiesValues[Key];
   };
   data: any;
-  interceptors?: Pick<import('./interceptors').Interceptors, 'response'>;
+  interceptors?: Pick<Interceptors, 'response'>;
 }
 
 export interface GraphQLQuery {
@@ -85,5 +86,5 @@ export interface GraphQLQuery {
 
 export interface GraphQLRequestConfig extends GraphQLQuery {
   routes: GraphQLRouteConfig[];
-  interceptors?: import('./interceptors').Interceptors;
+  interceptors?: Interceptors;
 }
