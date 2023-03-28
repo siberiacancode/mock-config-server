@@ -34,7 +34,11 @@ export const callResponseInterceptors = <T = unknown>(
   };
 
   const setCookie = (name: string, value: string, options?: CookieOptions) => {
-    response.cookie(name, value, options);
+    if (options) {
+      response.cookie(name, value, options);
+      return;
+    }
+    response.cookie(name, value);
   };
   const clearCookie = (name: string, options?: CookieOptions) => {
     response.clearCookie(name, options);

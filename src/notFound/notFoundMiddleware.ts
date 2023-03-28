@@ -19,7 +19,7 @@ export const notFoundMiddleware = ({ server, mockServerConfig }: NotFoundMiddlew
       if (typeof operationName === 'string')
         acc.add(`${serverBaseUrl ?? ''}${graphql?.baseUrl ?? ''}/${operationName}`);
       return acc;
-    }, new Set<string>())
+    }, new Set<string>()) as Set<string>
   );
 
   const restPaths = rest?.configs.map(({ path }) => path) ?? [];
@@ -28,7 +28,7 @@ export const notFoundMiddleware = ({ server, mockServerConfig }: NotFoundMiddlew
       if (typeof patternPath === 'string')
         acc.add(`${serverBaseUrl ?? ''}${rest?.baseUrl ?? ''}${patternPath}`);
       return acc;
-    }, new Set<string>())
+    }, new Set<string>()) as Set<string>
   );
 
   server.use((request: Request, response: Response) => {

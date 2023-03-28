@@ -1,7 +1,8 @@
 import type { Request } from 'express';
 
-import type { GraphQLRequestConfig, RestMethod, RestRequestConfig } from './configs';
+import { GraphQLRequestConfig } from './graphql';
 import type { Interceptors } from './interceptors';
+import { RestMethod, RestRequestConfig } from './rest';
 
 export type StaticPathObject = { prefix: `/${string}`; path: `/${string}` };
 export type StaticPath = `/${string}` | StaticPathObject | (StaticPathObject | `/${string}`)[];
