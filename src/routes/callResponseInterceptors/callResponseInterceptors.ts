@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express';
+import type { CookieOptions, Request, Response } from 'express';
 
 import { sleep } from '../../utils/helpers';
 import type { InterceptorResponse, InterceptorResponseParams } from '../../utils/types';
@@ -26,21 +26,22 @@ export const callResponseInterceptors = <T = unknown>(
     response.statusCode = statusCode;
   };
 
-  const setHeader = (...params: Parameters<InterceptorResponseParams['setHeader']>) => {
-    response.header(...params);
+  const setHeader = (field: string, value?: string | string[]) => {
+    response.header(field, value);
   };
-  const appendHeader = (...params: Parameters<InterceptorResponseParams['appendHeader']>) => {
-    response.append(...params);
-  };
-  const setCookie = (...params: Parameters<InterceptorResponseParams['setCookie']>) => {
-    response.cookie(...params);
-  };
-  const clearCookie = (...params: Parameters<InterceptorResponseParams['clearCookie']>) => {
-    response.clearCookie(...params);
+  const appendHeader = (field: string, value?: string[] | string) => {
+    response.append(field, value);
   };
 
-  const attachment = (...params: Parameters<InterceptorResponseParams['attachment']>) => {
-    response.attachment(...params);
+  const setCookie = (name: string, value: string, options?: CookieOptions) => {
+    response.cookie(name, value, options);
+  };
+  const clearCookie = (name: string, options?: CookieOptions) => {
+    response.clearCookie(name, options);
+  };
+
+  const attachment = (filename: string) => {
+    response.attachment(filename);
   };
 
   const interceptorResponseParams: InterceptorResponseParams = {
