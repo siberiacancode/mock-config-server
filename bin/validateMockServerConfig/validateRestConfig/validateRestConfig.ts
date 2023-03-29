@@ -1,5 +1,6 @@
-import type { RestMethod } from '../../../src';
-import { isPlainObject } from '../../../src/utils/helpers';
+import { isPlainObject } from '@/utils/helpers';
+import type { RestMethod } from '@/utils/types';
+
 import { validateBaseUrl } from '../validateBaseUrl/validateBaseUrl';
 import { validateInterceptors } from '../validateInterceptors/validateInterceptors';
 

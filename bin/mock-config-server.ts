@@ -9,6 +9,7 @@ import { startMockServer } from '@/server';
 import { resolveExportsFromSourceCode } from './resolveExportsFromSourceCode';
 import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
 
+console.log('@');
 const start = async () => {
   try {
     const appPath = process.cwd();

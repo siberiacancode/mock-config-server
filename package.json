@@ -35,15 +35,14 @@
   "scripts": {
     "build": "shx rm -rf dist && tsc -p tsconfig.production.json && tsc-alias -p tsconfig.production.json && shx cp -R src/static dist/src/static",
     "test": "jest",
+    "type": "tsc --noEmit",
     "lint": "eslint . --ext ts --no-error-on-unmatched-pattern",
-    "format": "prettier --write {src,bin}/**/*.ts"
+    "format": "prettier --write {src,bin}/**/*.ts",
+    "pretty": "yarn type && yarn format && yarn lint --fix"
   },
   "lint-staged": {
     "*.js": "yarn format",
-    "*.ts": [
-      "yarn format",
-      "yarn lint --fix"
-    ]
+    "*.ts": "yarn pretty"
   },
   "dependencies": {
     "@types/body-parser": "^1.19.2",

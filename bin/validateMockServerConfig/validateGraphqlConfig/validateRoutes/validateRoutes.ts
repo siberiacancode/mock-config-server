@@ -1,5 +1,6 @@
-import type { GraphQLOperationsEntities, GraphQLOperationType } from '../../../../src';
-import { isPlainObject } from '../../../../src/utils/helpers';
+import { isPlainObject } from '@/utils/helpers';
+import type { GraphQLOperationsEntities, GraphQLOperationType } from '@/utils/types';
+
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
 type AllowedEntitiesByOperationType = {
