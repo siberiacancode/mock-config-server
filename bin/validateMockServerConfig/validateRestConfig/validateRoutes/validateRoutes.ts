@@ -10,7 +10,8 @@ const ALLOWED_ENTITIES_BY_METHOD: AllowedEntitiesByMethod = {
   delete: ['headers', 'query', 'params'],
   post: ['headers', 'query', 'params', 'body'],
   put: ['headers', 'query', 'params', 'body'],
-  patch: ['headers', 'query', 'params', 'body']
+  patch: ['headers', 'query', 'params', 'body'],
+  options: ['headers', 'query', 'params']
 };
 
 const validateHeadersOrParams = (headersOrParams: unknown, entity: string) => {

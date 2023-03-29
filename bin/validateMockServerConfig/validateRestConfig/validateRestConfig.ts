@@ -18,7 +18,7 @@ const validateConfigs = (configs: unknown) => {
 
       // ✅ important:
       // compare without 'toLowerCase' because Express methods names is case-sensitive
-      const allowedMethods = ['get', 'post', 'delete', 'put', 'patch'];
+      const allowedMethods = ['get', 'post', 'delete', 'put', 'patch', 'options'];
       const isMethodAllowed = typeof method === 'string' && allowedMethods.includes(method);
       if (!isMethodAllowed) {
         throw new Error(`configs[${index}].method`);

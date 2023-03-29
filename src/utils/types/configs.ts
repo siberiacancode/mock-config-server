@@ -25,6 +25,7 @@ export interface RestMethodsEntities {
   post: RestEntities;
   put: RestEntities;
   patch: RestEntities;
+  options: Extract<RestEntities, 'headers' | 'query' | 'params'>;
 }
 
 export interface RestRouteConfig<Method extends RestMethod> {
@@ -35,7 +36,7 @@ export interface RestRouteConfig<Method extends RestMethod> {
   interceptors?: Pick<import('./interceptors').Interceptors, 'response'>;
 }
 
-export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch';
+export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options';
 
 export interface BaseRestRequestConfig<Method extends RestMethod> {
   path: `/${string}` | RegExp;
