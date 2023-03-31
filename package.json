@@ -33,6 +33,7 @@
     "node": ">=14"
   },
   "scripts": {
+    "prepare": "husky install",
     "build": "shx rm -rf dist && tsc -p tsconfig.production.json && tsc-alias -p tsconfig.production.json && shx cp -R src/static dist/src/static",
     "test": "jest",
     "type": "tsc --noEmit",
