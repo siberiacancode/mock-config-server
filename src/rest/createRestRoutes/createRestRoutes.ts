@@ -1,4 +1,4 @@
-import { IRouter } from 'express';
+import type { IRouter } from 'express';
 
 import { isEntityValuesEqual } from '../../configs/isEntitiesEqual/isEntityValuesEqual';
 import { callRequestInterceptors } from '../../routes/callRequestInterceptors/callRequestInterceptors';

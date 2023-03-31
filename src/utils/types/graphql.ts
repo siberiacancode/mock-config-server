@@ -1,4 +1,4 @@
-import { Interceptors } from './interceptors';
+import type { Interceptors } from './interceptors';
 
 export type GraphQLVariables = Record<string, any>;
 export interface GraphQLInput {

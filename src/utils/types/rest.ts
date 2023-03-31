@@ -1,4 +1,4 @@
-import { Interceptors } from './interceptors';
+import type { Interceptors } from './interceptors';
 
 export type BodyValue = any;
 export type QueryValue = Record<string, string | string[]>;

@@ -17,6 +17,7 @@
     "noFallthroughCasesInSwitch": true // Report errors for fallthrough cases in switch statement
   },
   "exclude": [
+    "dist",
     "node_modules",
     "jest.config.js"
   ]
