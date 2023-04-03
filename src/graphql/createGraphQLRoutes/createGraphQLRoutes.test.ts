@@ -83,8 +83,7 @@ describe('createGraphQLRoutes', () => {
                 entities: {
                   query: { key1: 'value1' }
                 },
-                data: ({ query }) =>
-                  `data function used with query: ${JSON.stringify(query)}`
+                data: ({ query }) => `data function used with query: ${JSON.stringify(query)}`
               }
             ]
           }
@@ -92,15 +91,15 @@ describe('createGraphQLRoutes', () => {
       }
     });
 
-    const response = await request(server)
-      .get('/')
-      .query({
-        query: 'query GetUsers { users { name } }',
-        key1: 'value1',
-      });
+    const response = await request(server).get('/').query({
+      query: 'query GetUsers { users { name } }',
+      key1: 'value1'
+    });
 
     expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual('data function used with query: {"query":"query GetUsers { users { name } }","key1":"value1"}');
+    expect(response.body).toStrictEqual(
+      'data function used with query: {"query":"query GetUsers { users { name } }","key1":"value1"}'
+    );
   });
 
   test('Should return 400 and description text for invalid query', async () => {

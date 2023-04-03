@@ -97,8 +97,7 @@ describe('createRestRoutes', () => {
             method: 'get',
             routes: [
               {
-                data: ({ query }) =>
-                  `data function used with query: ${JSON.stringify(query)}`
+                data: ({ query }) => `data function used with query: ${JSON.stringify(query)}`
               }
             ]
           }
@@ -106,9 +105,7 @@ describe('createRestRoutes', () => {
       }
     });
 
-    const response = await request(server)
-      .get('/users')
-      .query({ key1: 'value1' });
+    const response = await request(server).get('/users').query({ key1: 'value1' });
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toStrictEqual('data function used with query: {"key1":"value1"}');
