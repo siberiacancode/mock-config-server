@@ -1,10 +1,13 @@
-export type PlainObject = Record<string, string | number>;
+import { ParsedQs } from 'qs';
+
+export type PlainObject = Record<string, any>;
 export type PlainFunction = (...args: any[]) => any;
 
 export type BodyValue = any;
 export type VariablesValue = any;
-export type QueryValue = Record<string, string | string[]>;
-export type HeadersOrParamsValue = Record<string, string>;
+export type QueryValue = ParsedQs;
+export type HeadersOrParamsValue = Record<string, string | string[] | undefined>;
+export type Data = boolean | number | string | any[] | Record<any, any> | null | undefined;
 
 export type RestEntities = 'headers' | 'query' | 'params' | 'body';
 export type RestEntitiesValue = BodyValue | QueryValue | HeadersOrParamsValue;
@@ -27,11 +30,13 @@ export interface RestMethodsEntities {
   patch: RestEntities;
 }
 
+export type RestRouteConfigEntities<Method extends RestMethod> = {
+  [Key in RestMethodsEntities[Method]]?: RestEntitiesValues[Key];
+};
+
 export interface RestRouteConfig<Method extends RestMethod> {
-  entities?: {
-    [Key in RestMethodsEntities[Method]]?: RestEntitiesValues[Key];
-  };
-  data: any;
+  entities?: RestRouteConfigEntities<Method>;
+  data: ((entities: RestRouteConfigEntities<Method>) => Data) | Data;
   interceptors?: Pick<import('./interceptors').Interceptors, 'response'>;
 }
 
@@ -70,11 +75,14 @@ export interface GraphQLOperationsEntities {
 
 export type GraphQLOperationType = 'query' | 'mutation';
 export type GraphQLOperationName = string | RegExp;
+
+export type GraphQLRouteConfigEntities = {
+  [Key in GraphQLOperationsEntities[GraphQLOperationType]]?: GraphQLEntitiesValues[Key];
+};
+
 export interface GraphQLRouteConfig {
-  entities?: {
-    [Key in GraphQLOperationsEntities[GraphQLOperationType]]?: GraphQLEntitiesValues[Key];
-  };
-  data: any;
+  entities?: GraphQLRouteConfigEntities;
+  data: ((entities: GraphQLRouteConfigEntities) => Data) | Data;
   interceptors?: Pick<import('./interceptors').Interceptors, 'response'>;
 }
 

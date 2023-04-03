@@ -7,8 +7,10 @@ import type {
   Interceptors,
   RestEntities,
   RestEntitiesValue,
+  RestMethod,
   RestRequestConfig
 } from '../../utils/types';
+import { RestRouteConfigEntities } from '../../utils/types';
 import { prepareRestRequestConfigs } from '../prepareRestRequestConfigs/prepareRestRequestConfigs';
 
 export const createRestRoutes = (
@@ -37,8 +39,18 @@ export const createRestRoutes = (
         return next();
       }
 
+      const entities: RestRouteConfigEntities<RestMethod> = {
+        headers: request.headers,
+        params: request.params,
+        query: request.query,
+        body: request.body
+      };
+
       const data = callResponseInterceptors({
-        data: matchedRouteConfig.data,
+        data:
+          typeof matchedRouteConfig.data === 'function'
+            ? matchedRouteConfig.data(entities)
+            : matchedRouteConfig.data,
         request,
         response,
         interceptors: {

@@ -22,6 +22,8 @@
   "exclude": [
     "node_modules",
     "./**/*.test.ts",
-    "jest.config.js"
+    "jest.config.js",
+    "mock-server.config.ts",
+    "mock-server.config.js"
   ]
 }

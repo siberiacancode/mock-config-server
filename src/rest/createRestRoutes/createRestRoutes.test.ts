@@ -88,6 +88,32 @@ describe('createRestRoutes', () => {
     expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
+  test('Should correctly use data function', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                data: ({ query }) =>
+                  `data function used with query: ${JSON.stringify(query)}`
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .get('/users')
+      .query({ key1: 'value1' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual('data function used with query: {"key1":"value1"}');
+  });
+
   test('Should give priority to more specific route config', async () => {
     const server = createServer({
       rest: {

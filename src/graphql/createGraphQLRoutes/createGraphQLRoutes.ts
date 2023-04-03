@@ -10,6 +10,7 @@ import type {
   PlainObject,
   VariablesValue
 } from '../../utils/types';
+import { RestMethod, RestRouteConfigEntities } from '../../utils/types';
 import { getGraphQLInput } from '../getGraphQLInput/getGraphQLInput';
 import { parseQuery } from '../parseQuery/parseQuery';
 import { prepareGraphQLRequestConfigs } from '../prepareGraphQLRequestConfigs/prepareGraphQLRequestConfigs';
@@ -84,8 +85,18 @@ export const createGraphQLRoutes = (
       return next();
     }
 
+    const entities: RestRouteConfigEntities<RestMethod> = {
+      headers: request.headers,
+      params: request.params,
+      query: request.query,
+      body: request.body
+    };
+
     const data = callResponseInterceptors({
-      data: matchedRouteConfig.data,
+      data:
+        typeof matchedRouteConfig.data === 'function'
+          ? matchedRouteConfig.data(entities)
+          : matchedRouteConfig.data,
       request,
       response,
       interceptors: {

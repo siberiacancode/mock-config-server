@@ -18,7 +18,9 @@
   },
   "exclude": [
     "node_modules",
-    "jest.config.js"
+    "jest.config.js",
+    "mock-server.config.ts",
+    "mock-server.config.js"
   ]
 }
 
