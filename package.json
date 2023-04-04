@@ -24,7 +24,8 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "mock-config-server": "dist/bin/mock-config-server.js"
+    "mock-config-server": "dist/bin/mock-config-server.js",
+    "mcs": "dist/bin/mock-config-server.js"
   },
   "files": [
     "dist/**/*"

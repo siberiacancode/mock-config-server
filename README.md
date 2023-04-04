@@ -57,7 +57,7 @@ export default mockServerConfig;
 Start **🎉 Mock Config Server**
 
 ```bash
-$ npx mock-config-server
+$ npx mcs
 
 # 🎉 Mock Config Server is running at http://localhost:31299
 ```
