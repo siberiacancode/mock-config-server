@@ -8,7 +8,8 @@ import type {
   RestEntities,
   RestEntitiesValue,
   RestMethod,
-  RestRequestConfig
+  RestRequestConfig,
+  RestRouteConfig
 } from '../../utils/types';
 import { RestRouteConfigEntities } from '../../utils/types';
 import { prepareRestRequestConfigs } from '../prepareRestRequestConfigs/prepareRestRequestConfigs';
@@ -19,7 +20,7 @@ export const createRestRoutes = (
   interceptors?: Interceptors
 ) => {
   prepareRestRequestConfigs(configs).forEach((requestConfig) => {
-    router.route(requestConfig.path)[requestConfig.method]((request, response, next) => {
+    router.route(requestConfig.path)[requestConfig.method](async (request, response, next) => {
       callRequestInterceptors({
         request,
         interceptors: {
@@ -33,24 +34,26 @@ export const createRestRoutes = (
         return (Object.entries(entities) as [RestEntities, RestEntitiesValue][]).every(
           ([entity, entityValue]) => isEntityValuesEqual(entityValue, request[entity])
         );
-      });
+      }) as RestRouteConfig<RestMethod>;
 
       if (!matchedRouteConfig) {
         return next();
       }
 
       const entities: RestRouteConfigEntities<RestMethod> = {
-        headers: request.headers,
-        params: request.params,
-        query: request.query,
-        body: request.body
+        headers: matchedRouteConfig.entities?.headers,
+        params: matchedRouteConfig.entities?.params,
+        query: matchedRouteConfig.entities?.query,
+        body: matchedRouteConfig.entities?.body
       };
 
+      const matchedRouteConfigData =
+        typeof matchedRouteConfig.data === 'function'
+          ? await matchedRouteConfig.data(request, entities)
+          : matchedRouteConfig.data;
+
       const data = callResponseInterceptors({
-        data:
-          typeof matchedRouteConfig.data === 'function'
-            ? matchedRouteConfig.data(entities)
-            : matchedRouteConfig.data,
+        data: matchedRouteConfigData,
         request,
         response,
         interceptors: {

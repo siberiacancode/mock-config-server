@@ -1,4 +1,7 @@
+import { Request } from 'express';
 import { ParsedQs } from 'qs';
+
+import { Interceptors } from './interceptors';
 
 export type PlainObject = Record<string, any>;
 export type PlainFunction = (...args: any[]) => any;
@@ -34,10 +37,13 @@ export type RestRouteConfigEntities<Method extends RestMethod> = {
   [Key in RestMethodsEntities[Method]]?: RestEntitiesValues[Key];
 };
 
-export interface RestRouteConfig<Method extends RestMethod> {
-  entities?: RestRouteConfigEntities<Method>;
-  data: ((entities: RestRouteConfigEntities<Method>) => Data) | Data;
-  interceptors?: Pick<import('./interceptors').Interceptors, 'response'>;
+export interface RestRouteConfig<
+  Method extends RestMethod,
+  Entities extends RestRouteConfigEntities<Method> = RestRouteConfigEntities<Method>
+> {
+  entities?: Entities;
+  data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
+  interceptors?: Pick<Interceptors, 'response'>;
 }
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch';
@@ -46,7 +52,7 @@ export interface BaseRestRequestConfig<Method extends RestMethod> {
   path: `/${string}` | RegExp;
   method: Method;
   routes: RestRouteConfig<Method>[];
-  interceptors?: import('./interceptors').Interceptors;
+  interceptors?: Interceptors;
 }
 
 export type RestGetRequestConfig = BaseRestRequestConfig<'get'>;
@@ -80,10 +86,12 @@ export type GraphQLRouteConfigEntities = {
   [Key in GraphQLOperationsEntities[GraphQLOperationType]]?: GraphQLEntitiesValues[Key];
 };
 
-export interface GraphQLRouteConfig {
-  entities?: GraphQLRouteConfigEntities;
-  data: ((entities: GraphQLRouteConfigEntities) => Data) | Data;
-  interceptors?: Pick<import('./interceptors').Interceptors, 'response'>;
+export interface GraphQLRouteConfig<
+  Entities extends GraphQLRouteConfigEntities = GraphQLRouteConfigEntities
+> {
+  entities?: Entities;
+  data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
+  interceptors?: Pick<Interceptors, 'response'>;
 }
 
 export interface GraphQLQuery {
@@ -93,5 +101,5 @@ export interface GraphQLQuery {
 
 export interface GraphQLRequestConfig extends GraphQLQuery {
   routes: GraphQLRouteConfig[];
-  interceptors?: import('./interceptors').Interceptors;
+  interceptors?: Interceptors;
 }
