@@ -1,3 +1,4 @@
+import type { MockServerConfigArgv, PlainObject } from '../../src';
 import { isPlainObject } from '../../src/utils/helpers';
 
 import { validateBaseUrl } from './validateBaseUrl/validateBaseUrl';
@@ -8,7 +9,7 @@ import { validatePort } from './validatePort/validatePort';
 import { validateRestConfig } from './validateRestConfig/validateRestConfig';
 import { validateStaticPath } from './validateStaticPath/validateStaticPath';
 
-export const validateMockServerConfig = (mockServerConfig: unknown) => {
+export const validateMockServerConfig = (mockServerConfig: unknown, argv: MockServerConfigArgv) => {
   if (!isPlainObject(mockServerConfig)) {
     throw new Error(
       'configuration should be plain object; see our doc (https://www.npmjs.com/package/mock-config-server) for more information'
@@ -22,14 +23,19 @@ export const validateMockServerConfig = (mockServerConfig: unknown) => {
   }
 
   try {
-    if (mockServerConfig.rest) validateRestConfig(mockServerConfig.rest);
-    if (mockServerConfig.graphql) validateGraphqlConfig(mockServerConfig.graphql);
+    const mergedMockServerConfig = {
+      ...mockServerConfig,
+      ...argv
+    } as PlainObject;
 
-    validateBaseUrl(mockServerConfig.baseUrl);
-    validatePort(mockServerConfig.port);
-    validateStaticPath(mockServerConfig.staticPath);
-    validateInterceptors(mockServerConfig.interceptors);
-    validateCors(mockServerConfig.cors);
+    if (mergedMockServerConfig.rest) validateRestConfig(mergedMockServerConfig.rest);
+    if (mergedMockServerConfig.graphql) validateGraphqlConfig(mergedMockServerConfig.graphql);
+
+    validateBaseUrl(mergedMockServerConfig.baseUrl);
+    validatePort(mergedMockServerConfig.port);
+    validateStaticPath(mergedMockServerConfig.staticPath);
+    validateInterceptors(mergedMockServerConfig.interceptors);
+    validateCors(mergedMockServerConfig.cors);
   } catch (error: any) {
     throw new Error(
       `Validation Error: configuration.${error.message} does not match the API schema. Click here to see correct type: https://github.com/siberiacancode/mock-config-server`

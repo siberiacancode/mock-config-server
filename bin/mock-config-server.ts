@@ -3,12 +3,13 @@
 import { build } from 'esbuild';
 import * as fs from 'fs';
 
+import type { MockServerConfigArgv } from '../src';
 import { startMockServer } from '../src';
 
 import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
 import { resolveExportsFromSourceCode } from './resolveExportsFromSourceCode';
 
-const start = async () => {
+export const start = async (argv: MockServerConfigArgv) => {
   try {
     const appPath = process.cwd();
 
@@ -41,11 +42,9 @@ const start = async () => {
       throw new Error('Cannot handle exports of mock-server.config.(ts|js)');
     }
 
-    validateMockServerConfig(mockServerConfigExports.default);
+    validateMockServerConfig(mockServerConfigExports.default, argv);
     startMockServer(mockServerConfigExports.default);
   } catch (error: any) {
     console.error(error.message);
   }
 };
-
-start();

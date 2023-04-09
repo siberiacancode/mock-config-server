@@ -30,3 +30,5 @@ export interface MockServerConfig {
   interceptors?: import('./interceptors').Interceptors;
   cors?: Cors;
 }
+
+export type MockServerConfigArgv = Pick<MockServerConfig, 'baseUrl' | 'port' | 'staticPath'>;
