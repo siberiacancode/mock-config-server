@@ -23,7 +23,7 @@ const validateOrigin = (origin: unknown) => {
 const validateMethods = (methods: unknown) => {
   const isMethodsArray = Array.isArray(methods);
   if (isMethodsArray) {
-    const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'];
     methods.forEach((method, index) => {
       // ✅ important:
       // compare without 'toUpperCase' because 'Access-Control-Allow-Methods' value is case-sensitive

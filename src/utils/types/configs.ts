@@ -50,13 +50,15 @@ export type RestPostRequestConfig = BaseRestRequestConfig<'post'>;
 export type RestPutRequestConfig = BaseRestRequestConfig<'put'>;
 export type RestDeleteRequestConfig = BaseRestRequestConfig<'delete'>;
 export type RestPatchRequestConfig = BaseRestRequestConfig<'patch'>;
+export type RestOptionsRequestConfig = BaseRestRequestConfig<'options'>;
 
 export type RestRequestConfig =
   | RestGetRequestConfig
   | RestPostRequestConfig
   | RestPutRequestConfig
   | RestDeleteRequestConfig
-  | RestPatchRequestConfig;
+  | RestPatchRequestConfig
+  | RestOptionsRequestConfig;
 
 export type GraphQLEntities = 'headers' | 'query' | 'variables';
 
