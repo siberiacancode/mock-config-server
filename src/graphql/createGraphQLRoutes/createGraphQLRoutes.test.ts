@@ -496,4 +496,28 @@ describe('createGraphQLRoutes', () => {
     expect(requestInterceptor.mock.calls.length).toBe(1);
     expect(serverInterceptor.mock.calls.length).toBe(2);
   });
+
+  test('Should have response Cache-Control header equals to max-age=0, must-revalidate', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            operationName: 'GetUsers',
+            operationType: 'query',
+            routes: [{ data: { name: 'John', surname: 'Doe' } }]
+          }
+        ]
+      }
+    });
+
+    const postResponse = await request(server)
+      .post('/')
+      .send({ query: 'query GetUsers { users { name } }' });
+    expect(postResponse.headers['cache-control']).toBe('max-age=0, must-revalidate');
+
+    const getResponse = await request(server)
+      .get('/')
+      .query({ query: 'query GetUsers { users { name } }' });
+    expect(getResponse.headers['cache-control']).toBe('max-age=0, must-revalidate');
+  });
 });

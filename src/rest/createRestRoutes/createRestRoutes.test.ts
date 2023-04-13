@@ -355,4 +355,21 @@ describe('createRestRoutes', () => {
     expect(requestInterceptor.mock.calls.length).toBe(1);
     expect(serverInterceptor.mock.calls.length).toBe(2);
   });
+
+  test('Should have response Cache-Control header equals to max-age=0, must-revalidate', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [{ data: { name: 'John', surname: 'Doe' } }]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+    expect(response.headers['cache-control']).toBe('max-age=0, must-revalidate');
+  });
 });
