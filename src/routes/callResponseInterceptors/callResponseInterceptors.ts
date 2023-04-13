@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express';
+import type { CookieOptions, Request, Response } from 'express';
 
 import { sleep } from '../../utils/helpers';
 import type { InterceptorResponse, InterceptorResponseParams } from '../../utils/types';
@@ -18,6 +18,7 @@ export const callResponseInterceptors = <T = unknown>(
   params: CallResponseInterceptorsParams<T>
 ) => {
   const { data, request, response, interceptors } = params;
+
   const setDelay = async (delay: number) => {
     await sleep(delay === Infinity ? 100000 : delay);
   };
@@ -25,11 +26,38 @@ export const callResponseInterceptors = <T = unknown>(
     response.statusCode = statusCode;
   };
 
+  const setHeader = (field: string, value?: string | string[]) => {
+    response.header(field, value);
+  };
+  const appendHeader = (field: string, value?: string[] | string) => {
+    response.append(field, value);
+  };
+
+  const setCookie = (name: string, value: string, options?: CookieOptions) => {
+    if (options) {
+      response.cookie(name, value, options);
+      return;
+    }
+    response.cookie(name, value);
+  };
+  const clearCookie = (name: string, options?: CookieOptions) => {
+    response.clearCookie(name, options);
+  };
+
+  const attachment = (filename: string) => {
+    response.attachment(filename);
+  };
+
   const interceptorResponseParams: InterceptorResponseParams = {
     request,
     response,
     setDelay,
-    setStatusCode
+    setStatusCode,
+    setHeader,
+    appendHeader,
+    setCookie,
+    clearCookie,
+    attachment
   };
 
   let updatedData = data;

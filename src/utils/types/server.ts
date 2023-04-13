@@ -1,11 +1,17 @@
+import type { Request } from 'express';
+
+import type { GraphQLRequestConfig } from './graphql';
+import type { Interceptors } from './interceptors';
+import type { RestMethod, RestRequestConfig } from './rest';
+
 export type StaticPathObject = { prefix: `/${string}`; path: `/${string}` };
 export type StaticPath = `/${string}` | StaticPathObject | (StaticPathObject | `/${string}`)[];
 
 export type CorsHeader = string;
 export type CorsOrigin = string | RegExp | (RegExp | string)[];
 export type Cors = {
-  origin: CorsOrigin | ((request: import('express').Request) => Promise<CorsOrigin> | CorsOrigin);
-  methods?: Uppercase<import('./configs').RestMethod>[];
+  origin: CorsOrigin | ((request: Request) => Promise<CorsOrigin> | CorsOrigin);
+  methods?: Uppercase<RestMethod>[];
   allowedHeaders?: CorsHeader[];
   exposedHeaders?: CorsHeader[];
   credentials?: boolean;
@@ -19,14 +25,14 @@ export interface MockServerConfig {
   baseUrl?: BaseUrl;
   rest?: {
     baseUrl?: BaseUrl;
-    configs: import('./configs').RestRequestConfig[];
+    configs: RestRequestConfig[];
   };
   graphql?: {
     baseUrl?: BaseUrl;
-    configs: import('./configs').GraphQLRequestConfig[];
+    configs: GraphQLRequestConfig[];
   };
   port?: Port;
   staticPath?: StaticPath;
-  interceptors?: import('./interceptors').Interceptors;
+  interceptors?: Interceptors;
   cors?: Cors;
 }

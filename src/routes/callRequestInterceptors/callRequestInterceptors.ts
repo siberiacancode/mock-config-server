@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 
-import { InterceptorRequest } from '../../utils/types';
+import type { InterceptorRequest } from '../../utils/types';
 
 interface CallRequestInterceptorsParams {
   request: Request;

@@ -241,6 +241,21 @@ Functions to change request or response parameters
     - `delay` {number} seconds of delay time
   - `setStatusCode` (statusCode) => void
     - `statusCode` {number} status code for response
+  - `setHeader` (name, value) => void
+    - `name` {string} name of response header
+    - `value` {string | string[] | undefined} value of response header
+  - `appendHeader` (name, value) => void
+    - `name` {string} name of response header
+    - `value` {string | string[] | undefined} value of response header
+  - `setCookie` (name, value, options) => void
+    - `name` {string} name of cookie
+    - `value` {string} value of cookie
+    - `options` {[CookieOptions](https://expressjs.com/en/resources/middleware/cookie-session.html) | undefined} cookie options (like path, expires, etc.)
+  - `clearCookie` (name, options) => void
+    - `name` {string} name of cookie
+    - `options` {[CookieOptions](https://expressjs.com/en/resources/middleware/cookie-session.html) | undefined} cookie options (like path, expires, etc.)
+  - `attachment` (filename) => void
+    - `filename` {string} name of file in 'Content-Disposition' header
 
 ## ✨ Contributors
 

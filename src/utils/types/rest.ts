@@ -1,8 +1,6 @@
-export type PlainObject = Record<string, string | number>;
-export type PlainFunction = (...args: any[]) => any;
+import type { Interceptors } from './interceptors';
 
 export type BodyValue = any;
-export type VariablesValue = any;
 export type QueryValue = Record<string, string | string[]>;
 export type HeadersOrParamsValue = Record<string, string>;
 
@@ -13,10 +11,10 @@ export type RestEntitiesValues = {
   [Key in RestEntities]: Key extends 'body'
     ? BodyValue
     : Key extends 'query'
-    ? QueryValue
-    : Key extends 'headers' | 'params'
-    ? HeadersOrParamsValue
-    : never;
+      ? QueryValue
+      : Key extends 'headers' | 'params'
+        ? HeadersOrParamsValue
+        : never;
 };
 
 export interface RestMethodsEntities {
@@ -32,7 +30,7 @@ export interface RestRouteConfig<Method extends RestMethod> {
     [Key in RestMethodsEntities[Method]]?: RestEntitiesValues[Key];
   };
   data: any;
-  interceptors?: Pick<import('./interceptors').Interceptors, 'response'>;
+  interceptors?: Pick<Interceptors, 'response'>;
 }
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch';
@@ -41,7 +39,7 @@ export interface BaseRestRequestConfig<Method extends RestMethod> {
   path: `/${string}` | RegExp;
   method: Method;
   routes: RestRouteConfig<Method>[];
-  interceptors?: import('./interceptors').Interceptors;
+  interceptors?: Interceptors;
 }
 
 export type RestGetRequestConfig = BaseRestRequestConfig<'get'>;
@@ -56,34 +54,3 @@ export type RestRequestConfig =
   | RestPutRequestConfig
   | RestDeleteRequestConfig
   | RestPatchRequestConfig;
-
-export type GraphQLEntities = 'headers' | 'query' | 'variables';
-
-export type GraphQLEntitiesValues = {
-  [Key in GraphQLEntities]: Key extends 'variables' ? VariablesValue : PlainObject;
-};
-
-export interface GraphQLOperationsEntities {
-  query: GraphQLEntities;
-  mutation: GraphQLEntities;
-}
-
-export type GraphQLOperationType = 'query' | 'mutation';
-export type GraphQLOperationName = string | RegExp;
-export interface GraphQLRouteConfig {
-  entities?: {
-    [Key in GraphQLOperationsEntities[GraphQLOperationType]]?: GraphQLEntitiesValues[Key];
-  };
-  data: any;
-  interceptors?: Pick<import('./interceptors').Interceptors, 'response'>;
-}
-
-export interface GraphQLQuery {
-  operationType: GraphQLOperationType;
-  operationName: GraphQLOperationName;
-}
-
-export interface GraphQLRequestConfig extends GraphQLQuery {
-  routes: GraphQLRouteConfig[];
-  interceptors?: import('./interceptors').Interceptors;
-}
