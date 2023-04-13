@@ -9,19 +9,22 @@ export type PlainFunction = (...args: any[]) => any;
 export type BodyValue = any;
 export type VariablesValue = any;
 export type QueryValue = ParsedQs;
-export type HeadersOrParamsValue = Record<string, string | string[] | undefined>;
+export type HeadersValue = Record<string, string | string[] | undefined>;
+export type ParamsValue = Record<string, string | string[] | undefined>;
 export type Data = boolean | number | string | any[] | Record<any, any> | null | undefined;
 
 export type RestEntities = 'headers' | 'query' | 'params' | 'body';
-export type RestEntitiesValue = BodyValue | QueryValue | HeadersOrParamsValue;
+export type RestEntitiesValue = BodyValue | QueryValue | HeadersValue | ParamsValue;
 
 export type RestEntitiesValues = {
   [Key in RestEntities]: Key extends 'body'
     ? BodyValue
     : Key extends 'query'
     ? QueryValue
-    : Key extends 'headers' | 'params'
-    ? HeadersOrParamsValue
+    : Key extends 'headers'
+    ? HeadersValue
+    : Key extends 'params'
+    ? ParamsValue
     : never;
 };
 

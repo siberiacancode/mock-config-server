@@ -97,7 +97,13 @@ describe('createRestRoutes', () => {
             method: 'get',
             routes: [
               {
-                data: ({ query }) => `data function used with query: ${JSON.stringify(query)}`
+                entities: {
+                  query: { key1: 'value1' }
+                },
+                data: ({ url }, { query }) => ({
+                  url,
+                  query
+                })
               }
             ]
           }
@@ -108,7 +114,10 @@ describe('createRestRoutes', () => {
     const response = await request(server).get('/users').query({ key1: 'value1' });
 
     expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual('data function used with query: {"key1":"value1"}');
+    expect(response.body).toEqual({
+      url: '/users?key1=value1',
+      query: { key1: 'value1' }
+    });
   });
 
   test('Should give priority to more specific route config', async () => {

@@ -10,7 +10,7 @@ import type {
   PlainObject,
   VariablesValue
 } from '../../utils/types';
-import { RestMethod, RestRouteConfigEntities } from '../../utils/types';
+import { GraphQLRouteConfigEntities } from '../../utils/types';
 import { getGraphQLInput } from '../getGraphQLInput/getGraphQLInput';
 import { parseQuery } from '../parseQuery/parseQuery';
 import { prepareGraphQLRequestConfigs } from '../prepareGraphQLRequestConfigs/prepareGraphQLRequestConfigs';
@@ -85,11 +85,10 @@ export const createGraphQLRoutes = (
       return next();
     }
 
-    const entities: RestRouteConfigEntities<RestMethod> = {
-      headers: request.headers,
-      params: request.params,
-      query: request.query,
-      body: request.body
+    const entities: GraphQLRouteConfigEntities = {
+      headers: matchedRouteConfig.entities?.headers,
+      query: matchedRouteConfig.entities?.query,
+      variables: matchedRouteConfig.entities?.variables
     };
 
     const matchedRouteConfigData =
