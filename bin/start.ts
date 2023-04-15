@@ -6,8 +6,8 @@ import * as fs from 'fs';
 import type { MockServerConfigArgv } from '../src';
 import { startMockServer } from '../src';
 
+import { resolveExportsFromSourceCode } from './resolveExportsFromSourceCode/resolveExportsFromSourceCode';
 import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
-import { resolveExportsFromSourceCode } from './resolveExportsFromSourceCode';
 
 export const start = async (argv: MockServerConfigArgv) => {
   try {
