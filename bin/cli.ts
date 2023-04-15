@@ -3,9 +3,9 @@ import { hideBin } from 'yargs/helpers';
 
 import type { MockServerConfigArgv } from '../src';
 
-import { start } from './mock-config-server';
+import { start } from './start';
 
-export const parseCli = () => {
+export const cli = () => {
   const argv = yargs(hideBin(process.argv))
     .options({
       baseurl: {

@@ -5,8 +5,8 @@ const packageJson = require('../../package.json');
 
 pleaseUpgradeNode(packageJson);
 
-const { parseCli } = require('./cli');
+const { cli } = require('./cli');
 
-parseCli();
+cli();
 
 export {}
