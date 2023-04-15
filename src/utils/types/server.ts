@@ -31,4 +31,4 @@ export interface MockServerConfig {
   cors?: Cors;
 }
 
-export type MockServerConfigArgv = Pick<MockServerConfig, 'baseUrl' | 'port' | 'staticPath'>;
+export type MockServerConfigArgv = Partial<Pick<MockServerConfig, 'baseUrl' | 'port' | 'staticPath'>>;

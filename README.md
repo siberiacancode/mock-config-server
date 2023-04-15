@@ -247,12 +247,12 @@ Functions to change request or response parameters
 mcs [options]
 
 Options:
-  --baseurl, -b     Set base url
-  --port, -p        Set port
-  --static, -s      Set static path
+  --baseUrl, -b         Set base url
+  --port, -p            Set port
+  --staticPath, -s      Set static path
 
-  --version, -v     Show version number
-  --help, -h        Show help
+  --version, -v         Show version number
+  --help, -h            Show help
   
 Examples:
   mcs --baseurl /base/url --port 3000

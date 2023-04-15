@@ -3,8 +3,9 @@
 import { build } from 'esbuild';
 import * as fs from 'fs';
 
-import type { MockServerConfigArgv } from '../src';
+import type { MockServerConfigArgv, PlainObject } from '../src';
 import { startMockServer } from '../src';
+import { isPlainObject } from '../src/utils/helpers';
 
 import { resolveExportsFromSourceCode } from './resolveExportsFromSourceCode/resolveExportsFromSourceCode';
 import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
@@ -41,9 +42,15 @@ export const start = async (argv: MockServerConfigArgv) => {
     if (!mockServerConfigExports?.default) {
       throw new Error('Cannot handle exports of mock-server.config.(ts|js)');
     }
+    if (!isPlainObject(mockServerConfigExports.default)) {
+      throw new Error(
+        'configuration should be plain object; see our doc (https://www.npmjs.com/package/mock-config-server) for more information'
+      );
+    }
 
-    validateMockServerConfig(mockServerConfigExports.default, argv);
-    startMockServer(mockServerConfigExports.default);
+    const mergedMockServerConfig = { ...mockServerConfigExports.default, ...argv } as PlainObject;
+    validateMockServerConfig(mergedMockServerConfig);
+    startMockServer(mergedMockServerConfig);
   } catch (error: any) {
     console.error(error.message);
   }

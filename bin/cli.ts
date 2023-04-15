@@ -8,7 +8,7 @@ import { start } from './start';
 export const cli = () => {
   const argv = yargs(hideBin(process.argv))
     .options({
-      baseurl: {
+      baseUrl: {
         alias: 'b',
         description: 'Set base url for mock server',
         type: 'string'
@@ -18,9 +18,9 @@ export const cli = () => {
         description: 'Set port for server',
         type: 'number'
       },
-      static: {
+      staticPath: {
         alias: 's',
-        description: 'Set static url for mock server',
+        description: 'Set static path for mock server',
         type: 'string'
       }
     })
