@@ -242,6 +242,23 @@ Functions to change request or response parameters
   - `setStatusCode` (statusCode) => void
     - `statusCode` {number} status code for response
 
+## CLI usage
+```
+mcs [options]
+
+Options:
+  --baseurl, -b     Set base url
+  --port, -p        Set port
+  --static, -s      Set static path
+
+  --version, -v     Show version number
+  --help, -h        Show help
+  
+Examples:
+  mcs --baseurl /base/url --port 3000
+  mcs --help
+```
+
 ## ✨ Contributors
 
 <table>
