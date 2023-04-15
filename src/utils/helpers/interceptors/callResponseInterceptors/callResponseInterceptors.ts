@@ -1,7 +1,8 @@
 import type { Request, Response } from 'express';
 
-import { sleep } from '@/utils/helpers';
 import type { InterceptorResponse, InterceptorResponseParams } from '@/utils/types';
+
+import { sleep } from '../../sleep';
 
 interface CallResponseInterceptorsParams<T> {
   data: T;
