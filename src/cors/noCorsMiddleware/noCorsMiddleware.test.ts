@@ -10,8 +10,8 @@ describe('noCorsMiddleware', () => {
     noCorsMiddleware(server);
 
     const preflightHeaders = {
-      'access-control-request-method': 'access-control-request-method',
-      'access-control-request-headers': 'access-control-request-headers',
+      'access-control-request-method': '*',
+      'access-control-request-headers': '*',
       origin: '/'
     };
     const response = await request(server).options('/').set(preflightHeaders);
