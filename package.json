@@ -37,7 +37,7 @@
     "prepare": "yarn build",
     "test": "jest",
     "lint": "eslint . --ext ts --no-error-on-unmatched-pattern",
-    "format": "prettier --write '**/*.ts'"
+    "format": "prettier --write **/*.ts"
   },
   "lint-staged": {
     "*.js": "yarn format",

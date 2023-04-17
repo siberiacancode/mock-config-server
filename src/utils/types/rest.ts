@@ -11,10 +11,10 @@ export type RestEntitiesValues = {
   [Key in RestEntities]: Key extends 'body'
     ? BodyValue
     : Key extends 'query'
-      ? QueryValue
-      : Key extends 'headers' | 'params'
-        ? HeadersOrParamsValue
-        : never;
+    ? QueryValue
+    : Key extends 'headers' | 'params'
+    ? HeadersOrParamsValue
+    : never;
 };
 
 export interface RestMethodsEntities {
@@ -23,6 +23,7 @@ export interface RestMethodsEntities {
   post: RestEntities;
   put: RestEntities;
   patch: RestEntities;
+  options: Extract<RestEntities, 'headers' | 'query' | 'params'>;
 }
 
 export interface RestRouteConfig<Method extends RestMethod> {
@@ -33,7 +34,7 @@ export interface RestRouteConfig<Method extends RestMethod> {
   interceptors?: Pick<Interceptors, 'response'>;
 }
 
-export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch';
+export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options';
 
 export interface BaseRestRequestConfig<Method extends RestMethod> {
   path: `/${string}` | RegExp;
@@ -47,10 +48,12 @@ export type RestPostRequestConfig = BaseRestRequestConfig<'post'>;
 export type RestPutRequestConfig = BaseRestRequestConfig<'put'>;
 export type RestDeleteRequestConfig = BaseRestRequestConfig<'delete'>;
 export type RestPatchRequestConfig = BaseRestRequestConfig<'patch'>;
+export type RestOptionsRequestConfig = BaseRestRequestConfig<'options'>;
 
 export type RestRequestConfig =
   | RestGetRequestConfig
   | RestPostRequestConfig
   | RestPutRequestConfig
   | RestDeleteRequestConfig
-  | RestPatchRequestConfig;
+  | RestPatchRequestConfig
+  | RestOptionsRequestConfig;

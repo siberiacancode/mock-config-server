@@ -47,7 +47,7 @@ describe('validateRoutes (rest)', () => {
     });
   });
 
-  test('Should correctly handle get|delete method entities only with correct type', () => {
+  test('Should correctly handle get|delete|options method entities only with correct type', () => {
     const correctEntities = ['headers', 'params', 'query'];
     correctEntities.forEach((correctEntity) => {
       expect(() =>
@@ -70,6 +70,17 @@ describe('validateRoutes (rest)', () => {
             }
           ],
           'delete'
+        )
+      ).not.toThrow(Error);
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { [correctEntity]: { key: 'value' } },
+              data: null
+            }
+          ],
+          'options'
         )
       ).not.toThrow(Error);
     });
