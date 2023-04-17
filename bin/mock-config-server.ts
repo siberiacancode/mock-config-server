@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
-import { build } from 'esbuild';
 import * as fs from 'fs';
 
-import { startMockServer } from '../src';
+import { build } from 'esbuild';
 
-import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
+import { startMockServer } from '@/server';
+
 import { resolveExportsFromSourceCode } from './resolveExportsFromSourceCode';
+import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
 
 const start = async () => {
   try {

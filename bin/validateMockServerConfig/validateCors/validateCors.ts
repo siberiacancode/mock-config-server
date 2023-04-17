@@ -1,4 +1,4 @@
-import { isPlainObject } from '../../../src/utils/helpers';
+import { isPlainObject } from '@/utils/helpers';
 
 const validateOrigin = (origin: unknown) => {
   const isOriginArray = Array.isArray(origin);

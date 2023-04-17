@@ -1,5 +1,6 @@
-import type { RestMethod, RestMethodsEntities } from '../../../../src';
-import { isPlainObject } from '../../../../src/utils/helpers';
+import { isPlainObject } from '@/utils/helpers';
+import type { RestMethod, RestMethodsEntities } from '@/utils/types';
+
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
 type AllowedEntitiesByMethod = {

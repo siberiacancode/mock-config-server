@@ -2,27 +2,32 @@
   "compilerOptions": {
     "outDir": "dist",
     "declaration": true,
-    "target": "esnext", // Specify ECMAScript target version
-    "lib": ["dom", "es2021"], // List of library files to be included in the compilation
-    "allowJs": true, // Allow JavaScript files to be compiled
-    "skipLibCheck": true, // Skip type checking of all declaration files
-    "esModuleInterop": true, // Disables namespace imports (import * as fs from "fs") and enables CJS/AMD/UMD style imports (import fs from "fs")
-    "allowSyntheticDefaultImports": true, // Allow default imports from modules with no default export
-    "strict": true, // Enable all strict type checking options
-    "forceConsistentCasingInFileNames": true, // Disallow inconsistently-cased references to the same file.
-    "module": "commonjs", // Specify module code generation
-    "moduleResolution": "node", // Resolve modules using Node.js style
-    "isolatedModules": true, // Unconditionally emit imports for unresolved files
-    "resolveJsonModule": true, // Include modules imported with .json extension
-    "sourceMap": false, // Generate corresponding .map file
-    "noUnusedLocals": true, // Report errors on unused locals
-    "noUnusedParameters": true, // Report errors on unused parameters
-    "noFallthroughCasesInSwitch": true // Report errors for fallthrough cases in switch statement
+    "target": "esnext",
+    "lib": ["dom", "es2021"],
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "sourceMap": false,
+    "newLine": "lf",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/server": ["./src/server"],
+      "@/core/rest": ["./src/core/rest"],
+      "@/core/graphql": ["./src/core/graphql"],
+      "@/core/middlewares": ["./src/core/middlewares"],
+      "@/utils/helpers": ["./src/utils/helpers"],
+      "@/utils/types": ["./src/utils/types"],
+      "@/utils/constants": ["./src/utils/constants"]
+    }
   },
-  "exclude": [
-    "dist",
-    "node_modules",
-    "./**/*.test.ts",
-    "jest.config.js"
-  ]
+  "exclude": ["dist", "node_modules", "./**/*.test.ts", "jest.config.js"]
 }
