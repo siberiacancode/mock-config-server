@@ -6,11 +6,11 @@ import { callResponseInterceptors } from '../../routes/callResponseInterceptors/
 import type {
   GraphQLEntities,
   GraphQLRequestConfig,
+  GraphQLRouteConfigEntities,
   Interceptors,
   PlainObject,
   VariablesValue
 } from '../../utils/types';
-import { GraphQLRouteConfigEntities } from '../../utils/types';
 import { getGraphQLInput } from '../getGraphQLInput/getGraphQLInput';
 import { parseQuery } from '../parseQuery/parseQuery';
 import { prepareGraphQLRequestConfigs } from '../prepareGraphQLRequestConfigs/prepareGraphQLRequestConfigs';

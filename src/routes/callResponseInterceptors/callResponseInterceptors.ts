@@ -1,10 +1,10 @@
 import type { Request, Response } from 'express';
 
 import { sleep } from '../../utils/helpers';
-import type { InterceptorResponse, InterceptorResponseParams } from '../../utils/types';
+import type { Data, InterceptorResponse, InterceptorResponseParams } from '../../utils/types';
 
-interface CallResponseInterceptorsParams<T> {
-  data: T;
+interface CallResponseInterceptorsParams<DataType> {
+  data: DataType;
   request: Request;
   response: Response;
   interceptors?: {
@@ -14,8 +14,8 @@ interface CallResponseInterceptorsParams<T> {
   };
 }
 
-export const callResponseInterceptors = <T = unknown>(
-  params: CallResponseInterceptorsParams<T>
+export const callResponseInterceptors = <DataType extends Data = Data>(
+  params: CallResponseInterceptorsParams<DataType>
 ) => {
   const { data, request, response, interceptors } = params;
   const setDelay = async (delay: number) => {

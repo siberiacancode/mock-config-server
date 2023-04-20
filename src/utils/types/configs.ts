@@ -1,17 +1,17 @@
 import { Request } from 'express';
-import { ParsedQs } from 'qs';
 
 import { Interceptors } from './interceptors';
+import {
+  BodyValue,
+  Data,
+  HeadersValue,
+  ParamsValue,
+  QueryValue,
+  VariablesValue
+} from './values';
 
 export type PlainObject = Record<string, any>;
 export type PlainFunction = (...args: any[]) => any;
-
-export type BodyValue = any;
-export type VariablesValue = any;
-export type QueryValue = ParsedQs;
-export type HeadersValue = Record<string, string | string[] | undefined>;
-export type ParamsValue = Record<string, string | string[] | undefined>;
-export type Data = boolean | number | string | any[] | Record<any, any> | null | undefined;
 
 export type RestEntities = 'headers' | 'query' | 'params' | 'body';
 export type RestEntitiesValue = BodyValue | QueryValue | HeadersValue | ParamsValue;

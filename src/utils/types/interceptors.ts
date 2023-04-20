@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 
+import { Data } from './values';
+
 export interface InterceptorRequestParams {
   request: Request;
 }
@@ -13,9 +15,9 @@ export interface InterceptorResponseParams {
   setStatusCode: (statusCode: number) => void;
 }
 
-export type InterceptorResponse = <Data>(data: Data, params: InterceptorResponseParams) => any;
+export type InterceptorResponse<DataType extends Data = Data> = (data: DataType, params: InterceptorResponseParams) => any;
 
-export interface Interceptors {
+export interface Interceptors<DataType extends Data = Data> {
   request?: InterceptorRequest;
-  response?: InterceptorResponse;
+  response?: InterceptorResponse<DataType>;
 }
