@@ -15,7 +15,7 @@ export interface InterceptorResponseParams {
   setStatusCode: (statusCode: number) => void;
 }
 
-export type InterceptorResponse = (data: Data, params: InterceptorResponseParams) => any;
+export type InterceptorResponse<DataType extends Data = Data> = (data: DataType, params: InterceptorResponseParams) => any;
 
 export interface Interceptors {
   request?: InterceptorRequest;
