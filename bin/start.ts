@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 
-import { build } from 'esbuild';
 import * as fs from 'fs';
 
+import { build } from 'esbuild';
+
+import { startMockServer } from '@/server';
+import { isPlainObject } from '@/utils/helpers';
+
 import type { MockServerConfigArgv, PlainObject } from '../src';
-import { startMockServer } from '../src';
-import { isPlainObject } from '../src/utils/helpers';
 
 import { resolveExportsFromSourceCode } from './resolveExportsFromSourceCode/resolveExportsFromSourceCode';
 import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';

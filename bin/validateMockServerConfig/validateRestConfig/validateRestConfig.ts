@@ -1,5 +1,6 @@
-import type { RestMethod } from '../../../src';
-import { isPlainObject } from '../../../src/utils/helpers';
+import { isPlainObject } from '@/utils/helpers';
+import type { RestMethod } from '@/utils/types';
+
 import { validateBaseUrl } from '../validateBaseUrl/validateBaseUrl';
 import { validateInterceptors } from '../validateInterceptors/validateInterceptors';
 
@@ -18,7 +19,7 @@ const validateConfigs = (configs: unknown) => {
 
       // ✅ important:
       // compare without 'toLowerCase' because Express methods names is case-sensitive
-      const allowedMethods = ['get', 'post', 'delete', 'put', 'patch'];
+      const allowedMethods = ['get', 'post', 'delete', 'put', 'patch', 'options'];
       const isMethodAllowed = typeof method === 'string' && allowedMethods.includes(method);
       if (!isMethodAllowed) {
         throw new Error(`configs[${index}].method`);
