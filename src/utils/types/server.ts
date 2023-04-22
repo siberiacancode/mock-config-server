@@ -36,3 +36,7 @@ export interface MockServerConfig {
   interceptors?: Interceptors;
   cors?: Cors;
 }
+
+export type MockServerConfigArgv = Partial<
+  Pick<MockServerConfig, 'baseUrl' | 'port' | 'staticPath'>
+>;
