@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import type { Request } from 'express';
 
 import { getGraphQLInput } from '../getGraphQLInput/getGraphQLInput';
 import { parseQuery } from '../parseQuery/parseQuery';

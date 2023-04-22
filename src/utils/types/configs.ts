@@ -1,7 +1,7 @@
-import { Request } from 'express';
+import type { Request } from 'express';
 
-import { Interceptors } from './interceptors';
-import {
+import type { Interceptors } from './interceptors';
+import type {
   BodyValue,
   Data,
   HeadersValue,

@@ -1,4 +1,4 @@
-import { IRouter } from 'express';
+import type { IRouter } from 'express';
 
 import { isEntityValuesEqual } from '../../configs/isEntitiesEqual/isEntityValuesEqual';
 import { callRequestInterceptors } from '../../routes/callRequestInterceptors/callRequestInterceptors';
@@ -7,11 +7,8 @@ import type {
   Interceptors,
   RestEntities,
   RestEntitiesValue,
-  RestMethod,
-  RestRequestConfig,
-  RestRouteConfig
+  RestRequestConfig
 } from '../../utils/types';
-import { RestRouteConfigEntities } from '../../utils/types';
 import { prepareRestRequestConfigs } from '../prepareRestRequestConfigs/prepareRestRequestConfigs';
 
 export const createRestRoutes = (
@@ -34,22 +31,15 @@ export const createRestRoutes = (
         return (Object.entries(entities) as [RestEntities, RestEntitiesValue][]).every(
           ([entity, entityValue]) => isEntityValuesEqual(entityValue, request[entity])
         );
-      }) as RestRouteConfig<RestMethod>;
+      });
 
       if (!matchedRouteConfig) {
         return next();
       }
 
-      const entities: RestRouteConfigEntities<RestMethod> = {
-        headers: matchedRouteConfig.entities?.headers,
-        params: matchedRouteConfig.entities?.params,
-        query: matchedRouteConfig.entities?.query,
-        body: matchedRouteConfig.entities?.body
-      };
-
       const matchedRouteConfigData =
         typeof matchedRouteConfig.data === 'function'
-          ? await matchedRouteConfig.data(request, entities)
+          ? await matchedRouteConfig.data(request, matchedRouteConfig.entities ?? {})
           : matchedRouteConfig.data;
 
       const data = callResponseInterceptors({

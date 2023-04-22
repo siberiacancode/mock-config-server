@@ -1,4 +1,4 @@
-import { IRouter, NextFunction, Request, Response } from 'express';
+import type { IRouter, NextFunction, Request, Response } from 'express';
 
 import { isEntityValuesEqual } from '../../configs/isEntitiesEqual/isEntityValuesEqual';
 import { callRequestInterceptors } from '../../routes/callRequestInterceptors/callRequestInterceptors';
@@ -6,7 +6,6 @@ import { callResponseInterceptors } from '../../routes/callResponseInterceptors/
 import type {
   GraphQLEntities,
   GraphQLRequestConfig,
-  GraphQLRouteConfigEntities,
   Interceptors,
   PlainObject,
   VariablesValue
@@ -85,15 +84,9 @@ export const createGraphQLRoutes = (
       return next();
     }
 
-    const entities: GraphQLRouteConfigEntities = {
-      headers: matchedRouteConfig.entities?.headers,
-      query: matchedRouteConfig.entities?.query,
-      variables: matchedRouteConfig.entities?.variables
-    };
-
     const matchedRouteConfigData =
       typeof matchedRouteConfig.data === 'function'
-        ? await matchedRouteConfig.data(request, entities)
+        ? await matchedRouteConfig.data(request, matchedRouteConfig.entities ?? {})
         : matchedRouteConfig.data;
 
     const data = callResponseInterceptors({
