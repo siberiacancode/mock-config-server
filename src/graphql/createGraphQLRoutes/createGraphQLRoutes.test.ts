@@ -101,7 +101,7 @@ describe('createGraphQLRoutes', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toEqual({
-      url: encodeURI('/?query=query GetUsers { users { name } }&key1=value1'),
+      url: `/?query=${encodeURIComponent('query GetUsers { users { name } }')}&key1=value1`,
       query: { key1: 'value1' }
     });
   });
