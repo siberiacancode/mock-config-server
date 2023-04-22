@@ -24,7 +24,7 @@ export const createGraphQLRoutes = (
 ) => {
   const preparedGraphQLRequestConfig = prepareGraphQLRequestConfigs(configs);
 
-  const graphqlMiddleware = (request: Request, response: Response, next: NextFunction) => {
+  const graphqlMiddleware = async (request: Request, response: Response, next: NextFunction) => {
     const graphQLInput = getGraphQLInput(request);
     if (!graphQLInput || !graphQLInput.query) {
       return response.status(400).json('Query is missing, you must pass a valid GraphQL query');
@@ -87,8 +87,13 @@ export const createGraphQLRoutes = (
       return next();
     }
 
+    const matchedRouteConfigData =
+      typeof matchedRouteConfig.data === 'function'
+        ? await matchedRouteConfig.data(request, matchedRouteConfig.entities ?? {})
+        : matchedRouteConfig.data;
+
     const data = callResponseInterceptors({
-      data: matchedRouteConfig.data,
+      data: matchedRouteConfigData,
       request,
       response,
       interceptors: {

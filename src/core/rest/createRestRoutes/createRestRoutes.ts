@@ -20,7 +20,7 @@ export const createRestRoutes = (
   interceptors?: Interceptors
 ) => {
   prepareRestRequestConfigs(configs).forEach((requestConfig) => {
-    router.route(requestConfig.path)[requestConfig.method]((request, response, next) => {
+    router.route(requestConfig.path)[requestConfig.method](async (request, response, next) => {
       callRequestInterceptors({
         request,
         interceptors: {
@@ -40,8 +40,13 @@ export const createRestRoutes = (
         return next();
       }
 
+      const matchedRouteConfigData =
+        typeof matchedRouteConfig.data === 'function'
+          ? await matchedRouteConfig.data(request, matchedRouteConfig.entities ?? {})
+          : matchedRouteConfig.data;
+
       const data = callResponseInterceptors({
-        data: matchedRouteConfig.data,
+        data: matchedRouteConfigData,
         request,
         response,
         interceptors: {

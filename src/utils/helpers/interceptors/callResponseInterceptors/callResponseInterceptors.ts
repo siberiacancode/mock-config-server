@@ -1,11 +1,11 @@
 import type { CookieOptions, Request, Response } from 'express';
 
-import type { InterceptorResponse, InterceptorResponseParams } from '@/utils/types';
+import type { Data, InterceptorResponse, InterceptorResponseParams } from '@/utils/types';
 
 import { sleep } from '../../sleep';
 
-interface CallResponseInterceptorsParams<T> {
-  data: T;
+interface CallResponseInterceptorsParams {
+  data: Data;
   request: Request;
   response: Response;
   interceptors?: {
@@ -15,9 +15,7 @@ interface CallResponseInterceptorsParams<T> {
   };
 }
 
-export const callResponseInterceptors = <T = unknown>(
-  params: CallResponseInterceptorsParams<T>
-) => {
+export const callResponseInterceptors = (params: CallResponseInterceptorsParams) => {
   const { data, request, response, interceptors } = params;
 
   const setDelay = async (delay: number) => {

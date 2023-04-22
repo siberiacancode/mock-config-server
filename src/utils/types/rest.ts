@@ -1,19 +1,20 @@
-import type { Interceptors } from './interceptors';
+import type { Request } from 'express';
 
-export type BodyValue = any;
-export type QueryValue = Record<string, string | string[]>;
-export type HeadersOrParamsValue = Record<string, string>;
+import type { Interceptors } from './interceptors';
+import type { BodyValue, Data, HeadersValue, ParamsValue, QueryValue } from './values';
 
 export type RestEntities = 'headers' | 'query' | 'params' | 'body';
-export type RestEntitiesValue = BodyValue | QueryValue | HeadersOrParamsValue;
+export type RestEntitiesValue = BodyValue | QueryValue | HeadersValue | ParamsValue;
 
 export type RestEntitiesValues = {
   [Key in RestEntities]: Key extends 'body'
     ? BodyValue
     : Key extends 'query'
     ? QueryValue
-    : Key extends 'headers' | 'params'
-    ? HeadersOrParamsValue
+    : Key extends 'headers'
+    ? HeadersValue
+    : Key extends 'params'
+    ? ParamsValue
     : never;
 };
 
@@ -26,11 +27,16 @@ export interface RestMethodsEntities {
   options: Extract<RestEntities, 'headers' | 'query' | 'params'>;
 }
 
-export interface RestRouteConfig<Method extends RestMethod> {
-  entities?: {
-    [Key in RestMethodsEntities[Method]]?: RestEntitiesValues[Key];
-  };
-  data: any;
+export type RestRouteConfigEntities<Method extends RestMethod> = {
+  [Key in RestMethodsEntities[Method]]?: RestEntitiesValues[Key];
+};
+
+export interface RestRouteConfig<
+  Method extends RestMethod,
+  Entities extends RestRouteConfigEntities<Method> = RestRouteConfigEntities<Method>
+> {
+  entities?: Entities;
+  data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
   interceptors?: Pick<Interceptors, 'response'>;
 }
 
