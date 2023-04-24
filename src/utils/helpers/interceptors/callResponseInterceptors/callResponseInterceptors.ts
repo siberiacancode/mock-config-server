@@ -15,12 +15,13 @@ interface CallResponseInterceptorsParams {
   };
 }
 
-export const callResponseInterceptors = (params: CallResponseInterceptorsParams) => {
+export const callResponseInterceptors = async (params: CallResponseInterceptorsParams) => {
   const { data, request, response, interceptors } = params;
 
   const setDelay = async (delay: number) => {
     await sleep(delay === Infinity ? 100000 : delay);
   };
+
   const setStatusCode = (statusCode: number) => {
     response.statusCode = statusCode;
   };
@@ -61,13 +62,13 @@ export const callResponseInterceptors = (params: CallResponseInterceptorsParams)
 
   let updatedData = data;
   if (interceptors?.routeInterceptor) {
-    updatedData = interceptors.routeInterceptor(updatedData, interceptorResponseParams);
+    updatedData = await interceptors.routeInterceptor(updatedData, interceptorResponseParams);
   }
   if (interceptors?.requestInterceptor) {
-    updatedData = interceptors.requestInterceptor(updatedData, interceptorResponseParams);
+    updatedData = await interceptors.requestInterceptor(updatedData, interceptorResponseParams);
   }
   if (interceptors?.serverInterceptor) {
-    updatedData = interceptors.serverInterceptor(updatedData, interceptorResponseParams);
+    updatedData = await interceptors.serverInterceptor(updatedData, interceptorResponseParams);
   }
 
   return updatedData;
