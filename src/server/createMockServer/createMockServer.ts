@@ -2,14 +2,16 @@ import bodyParser from 'body-parser';
 import type { Express } from 'express';
 import express from 'express';
 
-import { corsMiddleware } from '../../cors/corsMiddleware/corsMiddleware';
-import { noCorsMiddleware } from '../../cors/noCorsMiddleware/noCorsMiddleware';
-import { createGraphQLRoutes } from '../../graphql/createGraphQLRoutes/createGraphQLRoutes';
-import { notFoundMiddleware } from '../../notFound/notFoundMiddleware';
-import { createRestRoutes } from '../../rest/createRestRoutes/createRestRoutes';
-import { staticMiddleware } from '../../static/staticMiddleware/staticMiddleware';
-import { urlJoin } from '../../utils/helpers';
-import type { MockServerConfig } from '../../utils/types';
+import { createGraphQLRoutes } from '@/core/graphql';
+import {
+  corsMiddleware,
+  noCorsMiddleware,
+  notFoundMiddleware,
+  staticMiddleware
+} from '@/core/middlewares';
+import { createRestRoutes } from '@/core/rest';
+import { urlJoin } from '@/utils/helpers';
+import type { MockServerConfig } from '@/utils/types';
 
 export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'>) => {
   const { cors, staticPath, rest, graphql, interceptors } = mockServerConfig;

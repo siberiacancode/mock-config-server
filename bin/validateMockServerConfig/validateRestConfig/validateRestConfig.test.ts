@@ -58,7 +58,7 @@ describe('validateRestConfig', () => {
   });
 
   test('Should correctly handle config method only with correct type', () => {
-    const correctConfigMethodValues = ['get', 'post', 'put', 'patch', 'delete'];
+    const correctConfigMethodValues = ['get', 'post', 'put', 'patch', 'delete', 'options'];
     correctConfigMethodValues.forEach((correctConfigMethodValue) => {
       expect(() =>
         validateRestConfig({

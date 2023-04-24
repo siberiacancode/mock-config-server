@@ -1,5 +1,6 @@
-import type { GraphQLOperationsEntities, GraphQLOperationType } from '../../../../src';
-import { isPlainObject } from '../../../../src/utils/helpers';
+import { isPlainObject } from '@/utils/helpers';
+import type { GraphQLOperationsEntities, GraphQLOperationType } from '@/utils/types';
+
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
 type AllowedEntitiesByOperationType = {
@@ -38,7 +39,7 @@ const validateEntities = (entities: unknown, operationType: GraphQLOperationType
       if (entity === 'headers' || entity === 'query') {
         try {
           const headersOrQuery = entities[entity];
-          return validateHeadersOrQuery(headersOrQuery, entity);
+          validateHeadersOrQuery(headersOrQuery, entity);
         } catch (error: any) {
           throw new Error(`entities.${error.message}`);
         }
