@@ -57,7 +57,7 @@ export default mockServerConfig;
 Start **🎉 Mock Config Server**
 
 ```bash
-$ npx mock-config-server
+$ npx mcs
 
 # 🎉 Mock Config Server is running at http://localhost:31299
 ```
@@ -241,6 +241,38 @@ Functions to change request or response parameters
     - `delay` {number} seconds of delay time
   - `setStatusCode` (statusCode) => void
     - `statusCode` {number} status code for response
+  - `setHeader` (name, value) => void
+    - `name` {string} name of response header
+    - `value` {string | string[] | undefined} value of response header
+  - `appendHeader` (name, value) => void
+    - `name` {string} name of response header
+    - `value` {string | string[] | undefined} value of response header
+  - `setCookie` (name, value, options) => void
+    - `name` {string} name of cookie
+    - `value` {string} value of cookie
+    - `options` {[CookieOptions](https://expressjs.com/en/resources/middleware/cookie-session.html) | undefined} cookie options (like path, expires, etc.)
+  - `clearCookie` (name, options) => void
+    - `name` {string} name of cookie
+    - `options` {[CookieOptions](https://expressjs.com/en/resources/middleware/cookie-session.html) | undefined} cookie options (like path, expires, etc.)
+  - `attachment` (filename) => void
+    - `filename` {string} name of file in 'Content-Disposition' header
+
+## CLI usage
+```
+mcs [options]
+
+Options:
+  --baseUrl, -b         Set base url
+  --port, -p            Set port
+  --staticPath, -s      Set static path
+
+  --version, -v         Show version number
+  --help, -h            Show help
+  
+Examples:
+  mcs --baseurl /base/url --port 3000
+  mcs --help
+```
 
 ## ✨ Contributors
 

@@ -1,4 +1,4 @@
-import { isPlainObject } from '../../../src/utils/helpers';
+import { isPlainObject } from '@/utils/helpers';
 
 export const validateInterceptors = (interceptors: unknown) => {
   const isInterceptorsObject = isPlainObject(interceptors);

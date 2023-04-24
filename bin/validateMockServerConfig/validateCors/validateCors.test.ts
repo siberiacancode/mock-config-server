@@ -31,7 +31,11 @@ describe('validateCors', () => {
   });
 
   test('Should correctly handle cors.methods only with correct type', () => {
-    const correctMethodsValues = [['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], [], undefined];
+    const correctMethodsValues = [
+      ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      [],
+      undefined
+    ];
     correctMethodsValues.forEach((correctMethodsValue) => {
       expect(() =>
         validateCors({

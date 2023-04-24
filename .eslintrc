@@ -4,41 +4,54 @@
     "es2021": true
   },
   "extends": ["airbnb-base", "airbnb-typescript/base", "prettier"],
-  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": "latest",
-    "sourceType": "module"
+    "sourceType": "module",
+    "project": "./tsconfig.json"
   },
-  "overrides": [
-    {
-      "files": ["*.ts"],
-      "parserOptions": {
-        "project": ["./tsconfig.dev.json"]
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "project": "./tsconfig.json"
       }
-    }
-  ],
-  "plugins": ["@typescript-eslint", "simple-import-sort", "prettier"],
+    },
+  },
   "rules": {
+    "consistent-return": "off",
     "no-shadow": "off",
     "@typescript-eslint/no-shadow": "off",
     "require-await": "off",
     "@typescript-eslint/require-await": "error",
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      { "prefer": "type-imports", "disallowTypeAnnotations": false }
+    ],
     "import/no-extraneous-dependencies": "off",
     "import/prefer-default-export": "off",
-    "simple-import-sort/imports": [
+    "import/extensions": "off",
+    "import/no-cycle": "error",
+    "import/order": [
       "error",
       {
-        "groups": [
-          ["^"],
-          ["^@"],
-          ["^\\u0000"],
-          ["^\\.\\.(?!/?$)", "^\\.\\./?$"],
-          ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"],
-          ["^.+\\.s?css$"]
-        ]
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
+        "newlines-between": "always",
+        "pathGroups": [
+          {
+            "pattern": "@/**",
+            "group": "internal"
+          }
+        ],
+        "alphabetize": {
+          "order": "asc"
+        }
       }
-    ],
-    "simple-import-sort/exports": "error"
+    ]
   },
-  "ignorePatterns": ["jest.config.js"]
+  "ignorePatterns": [
+    "dist",
+    "jest.config.js"
+  ]
 }

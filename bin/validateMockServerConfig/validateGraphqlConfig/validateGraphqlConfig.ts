@@ -1,4 +1,5 @@
-import { isPlainObject } from '../../../src/utils/helpers';
+import { isPlainObject } from '@/utils/helpers';
+
 import { validateBaseUrl } from '../validateBaseUrl/validateBaseUrl';
 import { validateInterceptors } from '../validateInterceptors/validateInterceptors';
 

@@ -1,5 +1,6 @@
-import type { RestMethod, RestMethodsEntities } from '../../../../src';
-import { isPlainObject } from '../../../../src/utils/helpers';
+import { isPlainObject } from '@/utils/helpers';
+import type { RestMethod, RestMethodsEntities } from '@/utils/types';
+
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
 type AllowedEntitiesByMethod = {
@@ -10,7 +11,8 @@ const ALLOWED_ENTITIES_BY_METHOD: AllowedEntitiesByMethod = {
   delete: ['headers', 'query', 'params'],
   post: ['headers', 'query', 'params', 'body'],
   put: ['headers', 'query', 'params', 'body'],
-  patch: ['headers', 'query', 'params', 'body']
+  patch: ['headers', 'query', 'params', 'body'],
+  options: ['headers', 'query', 'params']
 };
 
 const validateHeadersOrParams = (headersOrParams: unknown, entity: string) => {
@@ -63,7 +65,7 @@ const validateEntities = (entities: unknown, method: RestMethod) => {
       if (entity === 'headers' || entity === 'params') {
         try {
           const headersOrParams = entities[entity];
-          return validateHeadersOrParams(headersOrParams, entity);
+          validateHeadersOrParams(headersOrParams, entity);
         } catch (error: any) {
           throw new Error(`entities.${error.message}`);
         }
@@ -72,7 +74,7 @@ const validateEntities = (entities: unknown, method: RestMethod) => {
       if (entity === 'query') {
         try {
           const query = entities[entity];
-          return validateQuery(query, entity);
+          validateQuery(query, entity);
         } catch (error: any) {
           throw new Error(`entities.${error.message}`);
         }
