@@ -238,7 +238,7 @@ Functions to change request or response parameters
   - `request` request object
   - `response` response object
   - `setDelay` (delay) => Promise<void>
-    - `delay` {number} seconds of delay time
+    - `delay` {number} milliseconds of delay time
   - `setStatusCode` (statusCode) => void
     - `statusCode` {number} status code for response
   - `setHeader` (name, value) => void
@@ -258,6 +258,7 @@ Functions to change request or response parameters
     - `filename` {string} name of file in 'Content-Disposition' header
 
 ## CLI usage
+
 ```
 mcs [options]
 
@@ -268,7 +269,7 @@ Options:
 
   --version, -v         Show version number
   --help, -h            Show help
-  
+
 Examples:
   mcs --baseurl /base/url --port 3000
   mcs --help
