@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 
 import { callResponseInterceptors } from './callResponseInterceptors';
 
-describe('await callResponseInterceptors', () => {
+describe('callResponseInterceptors', () => {
   test('Should call all passed response interceptors in order: route -> request -> server', async () => {
     const initialData = '';
     const request = {} as Request;
