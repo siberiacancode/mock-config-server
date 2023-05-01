@@ -1,9 +1,10 @@
 import type { Express } from 'express';
 
 import { parseGraphQLRequest } from '@/utils/helpers';
-import type { MockServerConfig, RestMethod } from '@/utils/types';
+import type { MockServerConfig, RestPathString } from '@/utils/types';
 
 import { getGraphqlUrlSuggestions, getRestUrlSuggestions } from './helpers';
+import type { RestRequestSuggestionConfigs, GraphqlRequestSuggestionConfigs } from './helpers';
 
 export const notFoundMiddleware = (
   server: Express,
@@ -11,52 +12,58 @@ export const notFoundMiddleware = (
 ) => {
   const { baseUrl: serverBaseUrl, rest, graphql } = mockServerConfig;
 
-  const operationNames = graphql?.configs.map(({ operationName }) => operationName) ?? [];
-  const graphqlPatternUrlMeaningfulStrings = Array.from(
-    operationNames.reduce((acc, operationName) => {
-      if (typeof operationName === 'string')
-        acc.add(`${serverBaseUrl ?? ''}${graphql?.baseUrl ?? ''}/${operationName}`);
-      return acc;
-    }, new Set<string>()) as Set<string>
-  );
+  const restRequestConfigs =
+    rest?.configs
+      .filter(({ path }) => !(path instanceof RegExp))
+      .map((request) => ({
+        method: request.method,
+        path: `${serverBaseUrl ?? ''}${rest?.baseUrl ?? ''}${request.path}` as RestPathString
+      })) ?? [];
 
-  const restPaths = rest?.configs.map(({ path }) => path) ?? [];
-  const patternUrls = Array.from(
-    restPaths.reduce((acc, patternPath) => {
-      if (typeof patternPath === 'string')
-        acc.add(`${serverBaseUrl ?? ''}${rest?.baseUrl ?? ''}${patternPath}`);
-      return acc;
-    }, new Set<string>()) as Set<string>
-  );
+  const graphqlRequestConfigs =
+    graphql?.configs
+      .filter(({ operationName }) => !(operationName instanceof RegExp))
+      .map((request) => ({
+        operationType: request.operationType,
+        operationName: `${serverBaseUrl ?? ''}${graphql?.baseUrl ?? ''} ${
+          request.operationName
+        }` as string
+      })) ?? [];
 
   server.use((request, response) => {
     const url = new URL(`${request.protocol}://${request.get('host')}${request.originalUrl}`);
 
-    let graphqlUrlSuggestions: string[] = [];
-    if (graphql) {
-      const graphqlQuery = parseGraphQLRequest(request);
-
-      if (graphqlQuery) {
-        graphqlUrlSuggestions = getGraphqlUrlSuggestions({
-          url,
-          graphqlPatternUrlMeaningfulStrings
-        });
-      }
-    }
-
-    let restUrlSuggestions: string[] = [];
+    let restRequestSuggestions: RestRequestSuggestionConfigs = [];
     if (rest) {
-      restUrlSuggestions = getRestUrlSuggestions({
+      restRequestSuggestions = getRestUrlSuggestions({
         url,
-        patternUrls
+        requestConfigs: restRequestConfigs
       });
     }
 
-    response.status(404).render('notFound', {
-      requestMethod: request.method as RestMethod,
-      url: `${url.pathname}${url.search}`,
-      restUrlSuggestions,
-      graphqlUrlSuggestions
-    });
+    let graphqlRequestSuggestions: GraphqlRequestSuggestionConfigs = [];
+    if (graphql) {
+      const graphqlQuery = parseGraphQLRequest(request);
+      if (graphqlQuery) {
+        graphqlRequestSuggestions = getGraphqlUrlSuggestions({
+          url,
+          requestConfigs: graphqlRequestConfigs
+        });
+      }
+    }
+    if (request.headers.accept?.includes('text/html')) {
+      response.status(404).render('pages/404/index', {
+        restRequestSuggestions,
+        graphqlRequestSuggestions
+      });
+    } else {
+      response.status(404).json({
+        message: 'Request or page not found. Similar requests in body',
+        body: {
+          restRequestSuggestions,
+          graphqlRequestSuggestions
+        }
+      });
+    }
   });
 };

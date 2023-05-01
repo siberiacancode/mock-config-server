@@ -1,19 +1,24 @@
 import { getUrlParts } from '@/utils/helpers';
+import type { RestRequestConfig, RestPathString } from '@/utils/types';
 
 import { getLevenshteinDistance } from '../getLevenshteinDistance/getLevenshteinDistance';
 
 import { getActualRestUrlMeaningfulString, getPatternRestUrlMeaningfulString } from './helpers';
 
+export type RestRequestSuggestionConfigs = Array<
+  Pick<RestRequestConfig, 'method'> & { path: RestPathString }
+>;
+
 interface GetRestUrlSuggestionsParams {
   url: URL;
-  patternUrls: string[];
+  requestConfigs: RestRequestSuggestionConfigs;
 }
 
-export const getRestUrlSuggestions = ({ url, patternUrls }: GetRestUrlSuggestionsParams) => {
+export const getRestUrlSuggestions = ({ url, requestConfigs }: GetRestUrlSuggestionsParams) => {
   const actualUrlParts = getUrlParts(url.pathname);
 
-  const restUrlSuggestions = patternUrls.reduce((acc, patternUrl) => {
-    const patternUrlParts = getUrlParts(patternUrl);
+  const restUrlSuggestions = requestConfigs.reduce((acc, requestConfig) => {
+    const patternUrlParts = getUrlParts(requestConfig.path);
     // ✅ important: ignore patterns with different amount of parts
     if (patternUrlParts.length !== actualUrlParts.length) return acc;
 
@@ -34,13 +39,13 @@ export const getRestUrlSuggestions = ({ url, patternUrls }: GetRestUrlSuggestion
           return patternUrlParts[index];
         })
         .join('/');
-      const suggestionWithQueryParams = `/${urlSuggestion}${url.search}`;
+      const suggestionWithQueryParams = `/${urlSuggestion}${url.search}` as RestPathString;
 
-      acc.push(suggestionWithQueryParams);
+      acc.push({ ...requestConfig, path: suggestionWithQueryParams });
     }
 
     return acc;
-  }, [] as string[]);
+  }, [] as RestRequestSuggestionConfigs);
 
   return restUrlSuggestions;
 };

@@ -132,14 +132,18 @@ describe('createGraphQLRoutes', () => {
     const postResponse = await request(server).post('/').send({ query: 'invalid query' });
 
     expect(postResponse.statusCode).toBe(400);
-    expect(postResponse.body).toBe('Query is invalid, you must use a valid GraphQL query');
+    expect(postResponse.body).toStrictEqual({
+      message: 'Query is invalid, you must use a valid GraphQL query'
+    });
 
     const getResponse = await request(server).get('/').query({
       query: 'invalid query'
     });
 
     expect(postResponse.statusCode).toBe(400);
-    expect(getResponse.body).toBe('Query is invalid, you must use a valid GraphQL query');
+    expect(getResponse.body).toStrictEqual({
+      message: 'Query is invalid, you must use a valid GraphQL query'
+    });
   });
 
   test('Should match config by entities "includes" behavior with operationName regexp', async () => {
