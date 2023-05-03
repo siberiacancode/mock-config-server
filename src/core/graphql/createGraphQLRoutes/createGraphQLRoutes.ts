@@ -92,7 +92,7 @@ export const createGraphQLRoutes = (
         ? await matchedRouteConfig.data(request, matchedRouteConfig.entities ?? {})
         : matchedRouteConfig.data;
 
-    const data = callResponseInterceptors({
+    const data = await callResponseInterceptors({
       data: matchedRouteConfigData,
       request,
       response,

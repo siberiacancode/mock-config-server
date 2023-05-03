@@ -18,7 +18,10 @@ export interface InterceptorResponseParams {
   attachment: (filename: string) => void;
 }
 
-export type InterceptorResponse<DataType extends any = any> = (data: DataType, params: InterceptorResponseParams) => any;
+export type InterceptorResponse<DataType extends any = any> = (
+  data: DataType,
+  params: InterceptorResponseParams
+) => any;
 
 export interface Interceptors {
   request?: InterceptorRequest;

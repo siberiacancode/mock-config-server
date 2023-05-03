@@ -3,7 +3,7 @@ import type { Request, Response } from 'express';
 import { callResponseInterceptors } from './callResponseInterceptors';
 
 describe('callResponseInterceptors', () => {
-  test('Should call all passed response interceptors in order: route -> request -> server', () => {
+  test('Should call all passed response interceptors in order: route -> request -> server', async () => {
     const initialData = '';
     const request = {} as Request;
     const response = {} as Response;
@@ -12,7 +12,7 @@ describe('callResponseInterceptors', () => {
     const serverInterceptor = jest.fn((data) => `${data}serverInterceptor`);
 
     expect(
-      callResponseInterceptors({
+      await callResponseInterceptors({
         data: initialData,
         request,
         response
@@ -23,7 +23,7 @@ describe('callResponseInterceptors', () => {
     expect(serverInterceptor.mock.calls.length).toBe(0);
 
     expect(
-      callResponseInterceptors({
+      await callResponseInterceptors({
         data: initialData,
         request,
         response,
