@@ -8,7 +8,11 @@ export const startMockServer = (mockServerConfig: MockServerConfig) => {
   const mockServer = createMockServer(mockServerConfig);
   const port = mockServerConfig.port ?? DEFAULT.PORT;
 
-  mockServer.listen(port, () => {
+  const instance = mockServer.listen(port, () => {
     console.log(color.green(`🎉 Mock Server is running at http://localhost:${port}`));
   });
+  return {
+    mockServer,
+    instance
+  };
 };

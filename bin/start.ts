@@ -52,7 +52,7 @@ export const start = async (argv: MockServerConfigArgv) => {
 
     const mergedMockServerConfig = { ...mockServerConfigExports.default, ...argv } as PlainObject;
     validateMockServerConfig(mergedMockServerConfig);
-    startMockServer(mergedMockServerConfig);
+    return startMockServer(mergedMockServerConfig);
   } catch (error: any) {
     console.error(error.message);
   }
