@@ -62,7 +62,7 @@ describe('notFoundMiddleware', () => {
     const restBaseUrl = urlJoin(serverBaseUrl, rest?.baseUrl ?? '/');
     const routerWithRestRoutes = createRestRoutes(
       express.Router(),
-      rest?.configs ?? [],
+      rest ?? { configs: [] },
       interceptors
     );
     server.use(restBaseUrl, routerWithRestRoutes);
@@ -70,7 +70,7 @@ describe('notFoundMiddleware', () => {
     const graphqlBaseUrl = urlJoin(serverBaseUrl, graphql?.baseUrl ?? '/');
     const routerWithGraphqlRoutes = createGraphQLRoutes(
       express.Router(),
-      graphql?.configs ?? [],
+      graphql ?? { configs: [] },
       interceptors
     );
     server.use(graphqlBaseUrl, routerWithGraphqlRoutes);

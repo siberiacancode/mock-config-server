@@ -14,7 +14,7 @@ describe('createRestRoutes', () => {
     const routerBase = express.Router();
     const routerWithRoutes = createRestRoutes(
       routerBase,
-      mockServerConfig.rest?.configs ?? [],
+      mockServerConfig.rest ?? { configs: [] },
       mockServerConfig.interceptors
     );
 

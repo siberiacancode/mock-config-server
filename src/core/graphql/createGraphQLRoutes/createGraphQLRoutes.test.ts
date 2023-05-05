@@ -14,7 +14,7 @@ describe('createGraphQLRoutes', () => {
     const routerBase = express.Router();
     const routerWithRoutes = createGraphQLRoutes(
       routerBase,
-      mockServerConfig.graphql?.configs ?? [],
+      mockServerConfig.graphql ?? { configs: [] },
       mockServerConfig.interceptors
     );
 

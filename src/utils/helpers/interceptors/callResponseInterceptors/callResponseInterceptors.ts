@@ -1,6 +1,6 @@
 import type { CookieOptions, Request, Response } from 'express';
 
-import type { Data, InterceptorResponse, InterceptorResponseParams } from '@/utils/types';
+import type { Data, ResponseInterceptor, ResponseInterceptorParams } from '@/utils/types';
 
 import { sleep } from '../../sleep';
 
@@ -9,9 +9,10 @@ interface CallResponseInterceptorsParams {
   request: Request;
   response: Response;
   interceptors?: {
-    routeInterceptor?: InterceptorResponse | undefined;
-    requestInterceptor?: InterceptorResponse | undefined;
-    serverInterceptor?: InterceptorResponse | undefined;
+    routeInterceptor?: ResponseInterceptor;
+    requestInterceptor?: ResponseInterceptor;
+    apiInterceptor?: ResponseInterceptor;
+    serverInterceptor?: ResponseInterceptor;
   };
 }
 
@@ -47,7 +48,7 @@ export const callResponseInterceptors = (params: CallResponseInterceptorsParams)
     response.attachment(filename);
   };
 
-  const interceptorResponseParams: InterceptorResponseParams = {
+  const ResponseInterceptorParams: ResponseInterceptorParams = {
     request,
     response,
     setDelay,
@@ -61,13 +62,16 @@ export const callResponseInterceptors = (params: CallResponseInterceptorsParams)
 
   let updatedData = data;
   if (interceptors?.routeInterceptor) {
-    updatedData = interceptors.routeInterceptor(updatedData, interceptorResponseParams);
+    updatedData = interceptors.routeInterceptor(updatedData, ResponseInterceptorParams);
   }
   if (interceptors?.requestInterceptor) {
-    updatedData = interceptors.requestInterceptor(updatedData, interceptorResponseParams);
+    updatedData = interceptors.requestInterceptor(updatedData, ResponseInterceptorParams);
+  }
+  if (interceptors?.apiInterceptor) {
+    updatedData = interceptors.apiInterceptor(updatedData, ResponseInterceptorParams);
   }
   if (interceptors?.serverInterceptor) {
-    updatedData = interceptors.serverInterceptor(updatedData, interceptorResponseParams);
+    updatedData = interceptors.serverInterceptor(updatedData, ResponseInterceptorParams);
   }
 
   return updatedData;
