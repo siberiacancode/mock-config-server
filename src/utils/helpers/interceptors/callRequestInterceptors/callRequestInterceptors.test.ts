@@ -3,15 +3,15 @@ import type { Request } from 'express';
 import { callRequestInterceptors } from './callRequestInterceptors';
 
 describe('callRequestInterceptors', () => {
-  test('Should call all passed request interceptors in order: route -> api -> request -> server', () => {
+  test('Should call all passed request interceptors in order: request -> api -> server', () => {
     const request = {} as Request;
-    const apiInterceptor = jest.fn();
     const requestInterceptor = jest.fn();
+    const apiInterceptor = jest.fn();
     const serverInterceptor = jest.fn();
 
     callRequestInterceptors({ request });
-    expect(apiInterceptor.mock.calls.length).toBe(0);
     expect(requestInterceptor.mock.calls.length).toBe(0);
+    expect(apiInterceptor.mock.calls.length).toBe(0);
     expect(serverInterceptor.mock.calls.length).toBe(0);
 
     callRequestInterceptors({

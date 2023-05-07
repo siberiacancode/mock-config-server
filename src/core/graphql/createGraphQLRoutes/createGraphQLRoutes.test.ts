@@ -2,19 +2,21 @@ import express from 'express';
 import request from 'supertest';
 
 import { urlJoin } from '@/utils/helpers';
-import type { MockServerConfig } from '@/utils/types';
+import type { GraphqlConfig, MockServerConfig } from '@/utils/types';
 
 import { createGraphQLRoutes } from './createGraphQLRoutes';
 
 describe('createGraphQLRoutes', () => {
   const createServer = (
-    mockServerConfig: Pick<MockServerConfig, 'graphql' | 'interceptors' | 'baseUrl'>
+    mockServerConfig: Pick<MockServerConfig, 'interceptors' | 'baseUrl'> & {
+      graphql: GraphqlConfig;
+    }
   ) => {
     const server = express();
     const routerBase = express.Router();
     const routerWithRoutes = createGraphQLRoutes(
       routerBase,
-      mockServerConfig.graphql ?? { configs: [] },
+      mockServerConfig.graphql,
       mockServerConfig.interceptors
     );
 
