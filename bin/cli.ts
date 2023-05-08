@@ -35,5 +35,5 @@ export const cli = async () => {
     .alias('help', 'h')
     .parse() as MockServerConfigArgv;
 
-  await configWatcher(argv);
+  configWatcher(argv);
 }

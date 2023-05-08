@@ -34,8 +34,5 @@ export const startMockServer = (mockServerConfig: MockServerConfig) => {
     return instance;
   };
 
-  return {
-    instance,
-    destroy
-  };
+  return destroy;
 };

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 import type { OutputFile } from 'esbuild';
 
 import { startMockServer } from '@/server';

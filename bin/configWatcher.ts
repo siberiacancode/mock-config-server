@@ -12,18 +12,20 @@ export const configWatcher = async (argv: MockServerConfigArgv) => {
     throw new Error('Cannot find config file mock-server.config.(ts|mts|cts|js|mjs|cjs)');
   }
 
-  let server: Awaited<ReturnType<typeof start>>;
-
   const watchPlugin: Plugin = {
-    name: 'watchPlugin',
+    name: 'watch',
     setup: (build) => {
+      let destroy: Awaited<ReturnType<typeof start>>;
+
       build.onStart(() => {
-        server?.destroy();
+        if (destroy) {
+          destroy();
+        }
       })
 
       build.onEnd((result) => {
         if (!result.errors.length) {
-          server = start(argv, result.outputFiles ?? []);
+          destroy = start(argv, result.outputFiles ?? []);
         }
       })
     }
@@ -42,5 +44,5 @@ export const configWatcher = async (argv: MockServerConfigArgv) => {
     plugins: [watchPlugin]
   });
 
-  await ctx.watch();
+  ctx.watch();
 }
