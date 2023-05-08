@@ -165,7 +165,11 @@ Temporary Items
 dist
 mock-server-build
 mock-server.config.ts
+mock-server.config.mts
+mock-server.config.cts
 mock-server.config.js
+mock-server.config.cjs
+mock-server.config.mjs
 
 # Logs
 logs

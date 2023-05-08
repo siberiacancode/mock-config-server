@@ -37,7 +37,7 @@
     "prepare": "husky install",
     "build": "shx rm -rf dist && tsc -p tsconfig.production.json && tsc-alias -p tsconfig.production.json && shx cp -R src/static dist/src/static",
     "start": "yarn build && node ./dist/bin/bin.js",
-    "dev": "nodemon --watch src --watch bin --watch mock-server.config.js --watch mock-server.config.ts -e js,ts,ejs --exec \"yarn start\"",
+    "dev": "nodemon --watch src --watch bin -e js,ts,ejs --exec \"yarn start\"",
     "test": "jest",
     "type": "tsc --noEmit",
     "lint": "eslint . --ext ts --no-error-on-unmatched-pattern",
