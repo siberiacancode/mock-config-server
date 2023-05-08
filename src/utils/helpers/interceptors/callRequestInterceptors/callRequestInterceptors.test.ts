@@ -17,8 +17,8 @@ describe('callRequestInterceptors', () => {
     callRequestInterceptors({
       request,
       interceptors: {
-        apiInterceptor,
         requestInterceptor,
+        apiInterceptor,
         serverInterceptor
       }
     });
