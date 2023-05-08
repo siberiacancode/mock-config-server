@@ -21,10 +21,6 @@ export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'
   server.set('view engine', 'ejs');
   server.use(bodyParser.urlencoded({ extended: false }));
   server.use(bodyParser.json({ limit: '10mb' }));
-  server.use((_, res, next) => {
-    res.setHeader('Connection', 'close');
-    next();
-  });
 
   const baseUrl = mockServerConfig.baseUrl ?? '/';
 

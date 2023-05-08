@@ -18,7 +18,7 @@ export const configWatcher = async (argv: MockServerConfigArgv) => {
     name: 'watchPlugin',
     setup: (build) => {
       build.onStart(() => {
-        server?.close();
+        server?.destroy();
       })
 
       build.onEnd((result) => {
