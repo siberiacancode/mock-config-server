@@ -22,6 +22,11 @@ export const cli = () => {
         alias: 's',
         description: 'Set static path for mock server',
         type: 'string'
+      },
+      config: {
+        alias: 'c',
+        description: 'Set path to config file',
+        type: 'string'
       }
     })
     .version()

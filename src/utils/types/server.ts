@@ -38,5 +38,5 @@ export interface MockServerConfig {
 }
 
 export type MockServerConfigArgv = Partial<
-  Pick<MockServerConfig, 'baseUrl' | 'port' | 'staticPath'>
+  Pick<MockServerConfig, 'baseUrl' | 'port' | 'staticPath'> & { config: string }
 >;
