@@ -67,9 +67,11 @@ $ npx mcs
 - `rest?` Rest configs for mock requests
   - `baseUrl?` {string} part of the url that will be substituted at the beginning of rest request url (default: `'/'`)
   - `configs` {Array<RestRequestConfig>} configs for mock requests, [read](#configs)
+  - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `graphql?` GraphQL configs for mock requests
   - `baseUrl?` {string} part of the url that will be substituted at the beginning of graphql request url (default: `'/'`)
   - `configs` {Array<GraphQLRequestConfig>} configs for mock requests, [read](#configs)
+  - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `staticPath?` {StaticPath} entity for working with static files, [read](#static-path)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `cors?` {Cors} CORS settings object (default: `CORS is turn off`), [read](#cors)

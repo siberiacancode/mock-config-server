@@ -35,18 +35,14 @@ export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'
   }
 
   if (rest) {
-    const routerWithRestRoutes = createRestRoutes(express.Router(), rest.configs, interceptors);
+    const routerWithRestRoutes = createRestRoutes(express.Router(), rest, interceptors);
 
     const restBaseUrl = urlJoin(baseUrl, rest.baseUrl ?? '/');
     server.use(restBaseUrl, routerWithRestRoutes);
   }
 
   if (graphql) {
-    const routerWithGraphQLRoutes = createGraphQLRoutes(
-      express.Router(),
-      graphql.configs,
-      interceptors
-    );
+    const routerWithGraphQLRoutes = createGraphQLRoutes(express.Router(), graphql, interceptors);
 
     const graphqlBaseUrl = urlJoin(baseUrl, graphql.baseUrl ?? '/');
     server.use(graphqlBaseUrl, routerWithGraphQLRoutes);

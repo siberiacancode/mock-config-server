@@ -2,19 +2,21 @@ import express from 'express';
 import request from 'supertest';
 
 import { urlJoin } from '@/utils/helpers';
-import type { MockServerConfig } from '@/utils/types';
+import type { MockServerConfig, RestConfig } from '@/utils/types';
 
 import { createRestRoutes } from './createRestRoutes';
 
 describe('createRestRoutes', () => {
   const createServer = (
-    mockServerConfig: Pick<MockServerConfig, 'rest' | 'interceptors' | 'baseUrl'>
+    mockServerConfig: Pick<MockServerConfig, 'interceptors' | 'baseUrl'> & {
+      rest: RestConfig;
+    }
   ) => {
     const server = express();
     const routerBase = express.Router();
     const routerWithRoutes = createRestRoutes(
       routerBase,
-      mockServerConfig.rest?.configs ?? [],
+      mockServerConfig.rest,
       mockServerConfig.interceptors
     );
 

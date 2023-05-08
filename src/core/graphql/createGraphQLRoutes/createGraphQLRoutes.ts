@@ -9,7 +9,7 @@ import {
 } from '@/utils/helpers';
 import type {
   GraphQLEntities,
-  GraphQLRequestConfig,
+  GraphqlConfig,
   Interceptors,
   PlainObject,
   VariablesValue
@@ -19,10 +19,10 @@ import { prepareGraphQLRequestConfigs } from './helpers';
 
 export const createGraphQLRoutes = (
   router: IRouter,
-  configs: GraphQLRequestConfig[],
-  interceptors?: Interceptors
+  graphqlConfig: GraphqlConfig,
+  serverInterceptors?: Interceptors
 ) => {
-  const preparedGraphQLRequestConfig = prepareGraphQLRequestConfigs(configs);
+  const preparedGraphQLRequestConfig = prepareGraphQLRequestConfigs(graphqlConfig.configs);
 
   const graphqlMiddleware = async (request: Request, response: Response, next: NextFunction) => {
     const graphQLInput = getGraphQLInput(request);
@@ -66,7 +66,8 @@ export const createGraphQLRoutes = (
       request,
       interceptors: {
         requestInterceptor: matchedRequestConfig.interceptors?.request,
-        serverInterceptor: interceptors?.request
+        apiInterceptor: graphqlConfig.interceptors?.request,
+        serverInterceptor: serverInterceptors?.request
       }
     });
 
@@ -99,7 +100,8 @@ export const createGraphQLRoutes = (
       interceptors: {
         routeInterceptor: matchedRouteConfig.interceptors?.response,
         requestInterceptor: matchedRequestConfig.interceptors?.response,
-        serverInterceptor: interceptors?.response
+        apiInterceptor: graphqlConfig.interceptors?.response,
+        serverInterceptor: serverInterceptors?.response
       }
     });
 

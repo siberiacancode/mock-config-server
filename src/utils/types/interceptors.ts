@@ -1,12 +1,12 @@
 import type { CookieOptions, Request, Response } from 'express';
 
-export interface InterceptorRequestParams {
+export interface RequestInterceptorParams {
   request: Request;
 }
 
-export type InterceptorRequest = (params: InterceptorRequestParams) => void;
+export type RequestInterceptor = (params: RequestInterceptorParams) => void;
 
-export interface InterceptorResponseParams {
+export interface ResponseInterceptorParams {
   request: Request;
   response: Response;
   setDelay: (delay: number) => Promise<void>;
@@ -18,12 +18,12 @@ export interface InterceptorResponseParams {
   attachment: (filename: string) => void;
 }
 
-export type InterceptorResponse<DataType extends any = any> = (
-  data: DataType,
-  params: InterceptorResponseParams
+export type ResponseInterceptor<Data extends any = any> = (
+  data: Data,
+  params: ResponseInterceptorParams
 ) => any;
 
 export interface Interceptors {
-  request?: InterceptorRequest;
-  response?: InterceptorResponse;
+  request?: RequestInterceptor;
+  response?: ResponseInterceptor;
 }

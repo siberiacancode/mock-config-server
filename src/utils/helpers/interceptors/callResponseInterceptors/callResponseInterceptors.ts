@@ -1,6 +1,6 @@
 import type { CookieOptions, Request, Response } from 'express';
 
-import type { Data, InterceptorResponse, InterceptorResponseParams } from '@/utils/types';
+import type { Data, ResponseInterceptor, ResponseInterceptorParams } from '@/utils/types';
 
 import { sleep } from '../../sleep';
 
@@ -9,9 +9,10 @@ interface CallResponseInterceptorsParams {
   request: Request;
   response: Response;
   interceptors?: {
-    routeInterceptor?: InterceptorResponse | undefined;
-    requestInterceptor?: InterceptorResponse | undefined;
-    serverInterceptor?: InterceptorResponse | undefined;
+    routeInterceptor?: ResponseInterceptor;
+    requestInterceptor?: ResponseInterceptor;
+    apiInterceptor?: ResponseInterceptor;
+    serverInterceptor?: ResponseInterceptor;
   };
 }
 
@@ -48,7 +49,7 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
     response.attachment(filename);
   };
 
-  const interceptorResponseParams: InterceptorResponseParams = {
+  const ResponseInterceptorParams: ResponseInterceptorParams = {
     request,
     response,
     setDelay,
@@ -62,13 +63,16 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
 
   let updatedData = data;
   if (interceptors?.routeInterceptor) {
-    updatedData = await interceptors.routeInterceptor(updatedData, interceptorResponseParams);
+    updatedData = await interceptors.routeInterceptor(updatedData, ResponseInterceptorParams);
   }
   if (interceptors?.requestInterceptor) {
-    updatedData = await interceptors.requestInterceptor(updatedData, interceptorResponseParams);
+    updatedData = await interceptors.requestInterceptor(updatedData, ResponseInterceptorParams);
+  }
+  if (interceptors?.apiInterceptor) {
+    updatedData = await interceptors.apiInterceptor(updatedData, ResponseInterceptorParams);
   }
   if (interceptors?.serverInterceptor) {
-    updatedData = await interceptors.serverInterceptor(updatedData, interceptorResponseParams);
+    updatedData = await interceptors.serverInterceptor(updatedData, ResponseInterceptorParams);
   }
 
   return updatedData;
