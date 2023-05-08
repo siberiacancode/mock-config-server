@@ -265,12 +265,13 @@ Options:
   --baseUrl, -b         Set base url
   --port, -p            Set port
   --staticPath, -s      Set static path
+  --config, -c          Set path to config file
 
   --version, -v         Show version number
   --help, -h            Show help
   
 Examples:
-  mcs --baseurl /base/url --port 3000
+  mcs --baseurl /base/url --port 3000 --config ./path/to/config.ts
   mcs --help
 ```
 
