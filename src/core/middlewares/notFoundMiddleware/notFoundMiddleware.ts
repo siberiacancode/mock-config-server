@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from 'express';
+import type { Express } from 'express';
 
 import { parseGraphQLRequest } from '@/utils/helpers';
 import type { MockServerConfig, RestMethod } from '@/utils/types';
@@ -31,7 +31,7 @@ export const notFoundMiddleware = ({ server, mockServerConfig }: NotFoundMiddlew
     }, new Set<string>()) as Set<string>
   );
 
-  server.use((request: Request, response: Response) => {
+  server.use((request, response) => {
     const url = new URL(`${request.protocol}://${request.get('host')}${request.originalUrl}`);
 
     let graphqlUrlSuggestions: string[] = [];

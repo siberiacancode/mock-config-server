@@ -255,9 +255,8 @@ describe('createRestRoutes', () => {
     expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should call request interceptors in order: request -> server', async () => {
+  test('Should call request interceptor', async () => {
     const requestInterceptor = jest.fn();
-    const serverInterceptor = jest.fn();
     const server = createServer({
       rest: {
         configs: [
@@ -293,8 +292,7 @@ describe('createRestRoutes', () => {
             ]
           }
         ]
-      },
-      interceptors: { request: serverInterceptor }
+      }
     });
 
     await request(server)
@@ -302,17 +300,12 @@ describe('createRestRoutes', () => {
       .set('Content-Type', 'application/json')
       .send({ key1: 'value1', key2: 'value2' });
     expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(serverInterceptor.mock.calls.length).toBe(1);
-    expect(requestInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
-      serverInterceptor.mock.invocationCallOrder[0]
-    );
 
     await request(server)
       .post('/settings')
       .set('Content-Type', 'application/json')
       .send({ key1: 'value1', key2: 'value2' });
     expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(serverInterceptor.mock.calls.length).toBe(2);
   });
 
   test('Should call response interceptors in order: route -> request -> server', async () => {

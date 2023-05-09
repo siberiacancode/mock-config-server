@@ -1,7 +1,13 @@
 import type { CookieOptions, Request, Response } from 'express';
 
+export type RequestInterceptorCookie = string | undefined;
+export type RequestInterceptorHeader = string | number | string[] | undefined;
 export interface RequestInterceptorParams {
   request: Request;
+  setDelay: (delay: number) => Promise<void>;
+  getCookie: (name: string) => RequestInterceptorCookie;
+  getHeader: (field: string) => RequestInterceptorHeader;
+  getHeaders: (delay: number) => Record<string, RequestInterceptorHeader>;
 }
 
 export type RequestInterceptor = (params: RequestInterceptorParams) => void;

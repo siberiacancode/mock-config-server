@@ -2,10 +2,10 @@ import type { IRouter, NextFunction, Request, Response } from 'express';
 
 import {
   isEntityValuesEqual,
-  callRequestInterceptors,
   callResponseInterceptors,
   getGraphQLInput,
-  parseQuery
+  parseQuery,
+  callRequestInterceptor
 } from '@/utils/helpers';
 import type {
   GraphQLEntities,
@@ -62,14 +62,10 @@ export const createGraphQLRoutes = (
       return next();
     }
 
-    callRequestInterceptors({
-      request,
-      interceptors: {
-        requestInterceptor: matchedRequestConfig.interceptors?.request,
-        apiInterceptor: graphqlConfig.interceptors?.request,
-        serverInterceptor: serverInterceptors?.request
-      }
-    });
+    const requestInterceptor = matchedRequestConfig.interceptors?.request;
+    if (requestInterceptor) {
+      await callRequestInterceptor({ request, interceptor: requestInterceptor });
+    }
 
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
       if (!entities) return true;

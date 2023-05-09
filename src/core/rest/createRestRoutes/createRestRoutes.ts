@@ -2,8 +2,8 @@ import type { IRouter } from 'express';
 
 import {
   isEntityValuesEqual,
-  callRequestInterceptors,
-  callResponseInterceptors
+  callResponseInterceptors,
+  callRequestInterceptor
 } from '@/utils/helpers';
 import type { Interceptors, RestConfig, RestEntities, RestEntitiesValue } from '@/utils/types';
 
@@ -16,14 +16,10 @@ export const createRestRoutes = (
 ) => {
   prepareRestRequestConfigs(restConfig.configs).forEach((requestConfig) => {
     router.route(requestConfig.path)[requestConfig.method](async (request, response, next) => {
-      callRequestInterceptors({
-        request,
-        interceptors: {
-          requestInterceptor: requestConfig.interceptors?.request,
-          apiInterceptor: restConfig.interceptors?.request,
-          serverInterceptor: serverInterceptors?.request
-        }
-      });
+      const requestInterceptor = requestConfig.interceptors?.request;
+      if (requestInterceptor) {
+        await callRequestInterceptor({ request, interceptor: requestInterceptor });
+      }
 
       const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
         if (!entities) return true;
