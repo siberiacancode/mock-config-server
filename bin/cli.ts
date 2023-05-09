@@ -7,6 +7,8 @@ import { start } from './start';
 
 export const cli = () => {
   const argv = yargs(hideBin(process.argv))
+    .usage('mcs [options]')
+    .epilogue('More info: https://github.com/siberiacancode/mock-config-server#readme')
     .options({
       baseUrl: {
         alias: 'b',
