@@ -1,6 +1,8 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
+import { DEFAULT } from '@/utils/constants';
+
 import type { MockServerConfigArgv } from '../src';
 
 import { configWatcher } from './configWatcher';
@@ -11,12 +13,14 @@ export const cli = () => {
       baseUrl: {
         alias: 'b',
         description: 'Set base url for mock server',
-        type: 'string'
+        type: 'string',
+        default: '/'
       },
       port: {
         alias: 'p',
         description: 'Set port for server',
-        type: 'number'
+        type: 'number',
+        default: DEFAULT.PORT
       },
       staticPath: {
         alias: 's',
@@ -26,7 +30,8 @@ export const cli = () => {
       config: {
         alias: 'c',
         description: 'Set path to config file',
-        type: 'string'
+        type: 'string',
+        default: './mock-server.config.(?:ts|mts|cts|js|mjs|cjs)'
       },
       noWatch: {
         alias: 'nw',
