@@ -30,8 +30,7 @@ export const cli = () => {
       config: {
         alias: 'c',
         description: 'Set path to config file',
-        type: 'string',
-        default: './mock-server.config.(?:ts|mts|cts|js|mjs|cjs)'
+        type: 'string'
       },
       noWatch: {
         alias: 'nw',
