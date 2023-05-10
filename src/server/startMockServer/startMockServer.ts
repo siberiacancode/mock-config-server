@@ -14,7 +14,7 @@ export const startMockServer = (mockServerConfig: MockServerConfig) => {
 
   const instance = mockServer.listen(port, () => {
     console.log(color.green(`🎉 Mock Server is running at http://localhost:${port}`));
-  });
+  }) as Server & { destroy: Server['close'] };
 
   const connections: Record<string, Socket> = {};
 
@@ -26,7 +26,7 @@ export const startMockServer = (mockServerConfig: MockServerConfig) => {
     });
   });
 
-  const destroy: Server['close'] = (callback) => {
+  instance.destroy = (callback) => {
     instance.close(callback);
     Object.values(connections).forEach((connection) => {
       connection.destroy();
@@ -34,5 +34,5 @@ export const startMockServer = (mockServerConfig: MockServerConfig) => {
     return instance;
   };
 
-  return destroy;
+  return instance;
 };

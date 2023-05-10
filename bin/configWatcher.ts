@@ -12,24 +12,24 @@ export const configWatcher = async (argv: MockServerConfigArgv) => {
     throw new Error('Cannot find config file mock-server.config.(ts|mts|cts|js|mjs|cjs)');
   }
 
-  const watchPlugin: Plugin = {
+  const plugins: Plugin[] = [];
+
+  if (!argv.noWatch) plugins.push({
     name: 'watch',
     setup: (build) => {
-      let destroy: Awaited<ReturnType<typeof start>>;
+      let instance: Awaited<ReturnType<typeof start>>;
 
       build.onStart(() => {
-        if (destroy) {
-          destroy();
-        }
+        instance?.destroy();
       })
 
       build.onEnd((result) => {
         if (!result.errors.length) {
-          destroy = start(argv, result.outputFiles ?? []);
+          instance = start(argv, result.outputFiles ?? []);
         }
       })
     }
-  }
+  });
 
   const ctx = await context({
     entryPoints: [configFilePath],
@@ -41,8 +41,13 @@ export const configWatcher = async (argv: MockServerConfigArgv) => {
     write: false,
     metafile: false,
     logLevel: 'info',
-    plugins: [watchPlugin]
+    plugins
   });
 
-  ctx.watch();
+  if (!argv.noWatch) {
+    ctx.watch();
+    return;
+  }
+  const { outputFiles } = await ctx.rebuild();
+  start(argv, outputFiles ?? []);
 }

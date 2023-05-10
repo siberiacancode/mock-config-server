@@ -5,7 +5,7 @@ import type { MockServerConfigArgv } from '../src';
 
 import { configWatcher } from './configWatcher';
 
-export const cli = async () => {
+export const cli = () => {
   const argv = yargs(hideBin(process.argv))
     .options({
       baseUrl: {
@@ -27,6 +27,11 @@ export const cli = async () => {
         alias: 'c',
         description: 'Set path to config file',
         type: 'string'
+      },
+      noWatch: {
+        description: 'Disables server restart after config file changes',
+        type: 'boolean',
+        default: false
       }
     })
     .version()
