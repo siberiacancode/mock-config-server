@@ -29,6 +29,7 @@ export const cli = () => {
         type: 'string'
       },
       noWatch: {
+        alias: 'nw',
         description: 'Disables server restart after config file changes',
         type: 'boolean',
         default: false
