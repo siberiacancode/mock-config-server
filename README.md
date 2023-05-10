@@ -265,6 +265,7 @@ Options:
   --baseUrl, -b         Set base url
   --port, -p            Set port
   --staticPath, -s      Set static path
+  --noWatch             Disables server restart after config file changes
 
   --version, -v         Show version number
   --help, -h            Show help
