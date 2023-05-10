@@ -17,7 +17,7 @@ describe('createRestRoutes', () => {
     const routerWithRoutes = createRestRoutes(
       routerBase,
       mockServerConfig.rest,
-      mockServerConfig.interceptors
+      mockServerConfig.interceptors?.response
     );
 
     const restBaseUrl = urlJoin(

@@ -26,14 +26,14 @@ export const corsMiddleware = (server: Express, cors: Cors) => {
       return next();
     }
 
-    const isrequestuestOriginAllowed = allowedOrigins.some((allowedOrigin) => {
+    const isRequestOriginAllowed = allowedOrigins.some((allowedOrigin) => {
       if (allowedOrigin instanceof RegExp) {
         return new RegExp(allowedOrigin).test(origin);
       }
       return allowedOrigin === origin;
     });
 
-    if (isrequestuestOriginAllowed) {
+    if (isRequestOriginAllowed) {
       response.setHeader('Access-Control-Allow-Origin', origin);
       response.setHeader(
         'Access-Control-Allow-Credentials',

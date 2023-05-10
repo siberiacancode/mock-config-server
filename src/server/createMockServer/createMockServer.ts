@@ -41,20 +41,24 @@ export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'
   }
 
   if (rest) {
-    const routerWithRestRoutes = createRestRoutes(express.Router(), rest, interceptors);
-
-    const restBaseUrl = urlJoin(baseUrl, rest.baseUrl ?? '/');
+    const routerWithRestRoutes = createRestRoutes(express.Router(), rest, interceptors?.response);
 
     const apiRequestInterceptor = rest.interceptors?.request;
     if (apiRequestInterceptor) {
       requestInterceptorMiddleware(server, apiRequestInterceptor);
     }
 
+    const restBaseUrl = urlJoin(baseUrl, rest.baseUrl ?? '/');
+
     server.use(restBaseUrl, routerWithRestRoutes);
   }
 
   if (graphql) {
-    const routerWithGraphQLRoutes = createGraphQLRoutes(express.Router(), graphql, interceptors);
+    const routerWithGraphQLRoutes = createGraphQLRoutes(
+      express.Router(),
+      graphql,
+      interceptors?.response
+    );
 
     const apiRequestInterceptor = graphql.interceptors?.request;
     if (apiRequestInterceptor) {
@@ -62,6 +66,7 @@ export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'
     }
 
     const graphqlBaseUrl = urlJoin(baseUrl, graphql.baseUrl ?? '/');
+
     server.use(graphqlBaseUrl, routerWithGraphQLRoutes);
   }
 

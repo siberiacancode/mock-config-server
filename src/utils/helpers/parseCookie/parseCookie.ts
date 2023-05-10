@@ -1,9 +1,9 @@
 type Cookies = Record<string, string>;
-export const parseCookie = (cookie: string) => {
+export const parseCookie = (cookieHeader: string) => {
   const cookies = {} as Cookies;
-  const array = cookie.split(';');
+  const cookiePairs = cookieHeader.split(';');
 
-  array.forEach((cookie) => {
+  cookiePairs.forEach((cookie) => {
     const [key, value] = cookie.trim().split('=');
     cookies[key] = value;
   });

@@ -12,7 +12,7 @@ import { prepareRestRequestConfigs } from './helpers';
 export const createRestRoutes = (
   router: IRouter,
   restConfig: RestConfig,
-  serverInterceptors?: Interceptors
+  serverResponseInterceptors?: Interceptors['response']
 ) => {
   prepareRestRequestConfigs(restConfig.configs).forEach((requestConfig) => {
     router.route(requestConfig.path)[requestConfig.method](async (request, response, next) => {
@@ -45,7 +45,7 @@ export const createRestRoutes = (
           routeInterceptor: matchedRouteConfig.interceptors?.response,
           requestInterceptor: requestConfig.interceptors?.response,
           apiInterceptor: restConfig.interceptors?.response,
-          serverInterceptor: serverInterceptors?.response
+          serverInterceptor: serverResponseInterceptors
         }
       });
 

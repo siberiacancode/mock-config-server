@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 
-import type { RequestInterceptor } from '@/utils/types';
+import type { RequestInterceptor, RequestInterceptorParams } from '@/utils/types';
 
 import { parseCookie } from '../../parseCookie/parseCookie';
 import { setDelay } from '../helpers/setDelay';
@@ -24,5 +24,13 @@ export const callRequestInterceptor = async (params: CallRequestInterceptorParam
     }
   };
 
-  await interceptor({ request, setDelay, getHeader, getHeaders, getCookie });
+  const requestInterceptorParams: RequestInterceptorParams = {
+    request,
+    setDelay,
+    getHeader,
+    getHeaders,
+    getCookie
+  };
+
+  await interceptor(requestInterceptorParams);
 };

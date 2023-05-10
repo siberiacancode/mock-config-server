@@ -17,7 +17,7 @@ describe('createGraphQLRoutes', () => {
     const routerWithRoutes = createGraphQLRoutes(
       routerBase,
       mockServerConfig.graphql,
-      mockServerConfig.interceptors
+      mockServerConfig.interceptors?.response
     );
 
     const graphqlBaseUrl = urlJoin(

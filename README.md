@@ -234,10 +234,10 @@ Functions to change request or response parameters
   - `request` request object
   - `setDelay` (delay) => Promise<void>
     - `delay` {number} milliseconds of delay time
-  - `getHeader` (field) => string | number | string[] | undefined;
+  - `getHeader` (field) => string | number | string[] | undefined
     - `field` {string} name of response header
   - `getHeaders` () => Record<string | number | string[] | undefined>
-  - `setCookie` (name) => string | undefined;
+  - `setCookie` (name) => string | undefined
     - `name` {string} name of cookie
 
 ##### Response

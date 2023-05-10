@@ -20,7 +20,7 @@ import { prepareGraphQLRequestConfigs } from './helpers';
 export const createGraphQLRoutes = (
   router: IRouter,
   graphqlConfig: GraphqlConfig,
-  serverInterceptors?: Interceptors
+  serverResponseInterceptors?: Interceptors['response']
 ) => {
   const preparedGraphQLRequestConfig = prepareGraphQLRequestConfigs(graphqlConfig.configs);
 
@@ -97,7 +97,7 @@ export const createGraphQLRoutes = (
         routeInterceptor: matchedRouteConfig.interceptors?.response,
         requestInterceptor: matchedRequestConfig.interceptors?.response,
         apiInterceptor: graphqlConfig.interceptors?.response,
-        serverInterceptor: serverInterceptors?.response
+        serverInterceptor: serverResponseInterceptors
       }
     });
 
