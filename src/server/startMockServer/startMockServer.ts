@@ -1,11 +1,9 @@
-import type { Server } from 'http';
-import type { Socket } from 'net';
-
 import color from 'ansi-colors';
 
 import { DEFAULT } from '@/utils/constants';
 import type { MockServerConfig } from '@/utils/types';
 
+import { addDestroyer } from '../addDestroyer/addDestroyer';
 import { createMockServer } from '../createMockServer/createMockServer';
 
 export const startMockServer = (mockServerConfig: MockServerConfig) => {
@@ -14,25 +12,8 @@ export const startMockServer = (mockServerConfig: MockServerConfig) => {
 
   const instance = mockServer.listen(port, () => {
     console.log(color.green(`🎉 Mock Server is running at http://localhost:${port}`));
-  }) as Server & { destroy: Server['close'] };
-
-  const connections: Record<string, Socket> = {};
-
-  instance.on('connection', (connection) => {
-    const key = `${connection.remoteAddress}:${connection.remotePort}`;
-    connections[key] = connection;
-    connection.on('close', () => {
-      delete connections[key];
-    });
   });
 
-  instance.destroy = (callback) => {
-    instance.close(callback);
-    Object.values(connections).forEach((connection) => {
-      connection.destroy();
-    })
-    return instance;
-  };
-
-  return instance;
+  // ✅ important: add destroy method for closing keep-alive connections after server shutdown
+  return addDestroyer(instance);
 };

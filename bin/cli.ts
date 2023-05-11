@@ -32,9 +32,9 @@ export const cli = () => {
         description: 'Set path to config file',
         type: 'string'
       },
-      noWatch: {
-        alias: 'nw',
-        description: 'Disables server restart after config file changes',
+      watch: {
+        alias: 'w',
+        description: 'Enables server restart after config file changes',
         type: 'boolean',
         default: false
       }

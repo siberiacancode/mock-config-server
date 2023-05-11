@@ -266,13 +266,13 @@ Options:
   --port, -p            Set port (default: 31299)
   --staticPath, -s      Set static path
   --config, -c          Set server config path (default: './mock-server.config.(?:ts|mts|cts|js|mjs|cjs)')
-  --noWatch, --nw       Disables server restart after config file changes (default: false)
+  --watch, -w           Enables server restart after config file changes (default: false)
 
   --version, -v         Show version number
   --help, -h            Show help
   
 Examples:
-  mcs --baseurl /base/url --port 3000
+  mcs --baseurl /base/url --port 3000 -w
   mcs --help
 ```
 
