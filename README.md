@@ -250,10 +250,10 @@ Functions to change request or response parameters
     - `delay` {number} milliseconds of delay time
   - `setStatusCode` (statusCode) => void
     - `statusCode` {number} status code for response
-  - `setHeader` (name, value) => void
+  - `setHeader` (field, value) => void
     - `field` {string} name of response header
     - `value` {string | string[] | undefined} value of response header
-  - `appendHeader` (name, value) => void
+  - `appendHeader` (field, value) => void
     - `field` {string} name of response header
     - `value` {string | string[] | undefined} value of response header
   - `setCookie` (name, value, options) => void
