@@ -1,38 +1,59 @@
-#!/usr/bin/env node
+import type { BuildOptions, Plugin } from 'esbuild';
+import { build, context } from 'esbuild';
 
-import type { OutputFile } from 'esbuild';
+import type { MockServerConfigArgv } from '@/utils/types';
 
-import { startMockServer } from '@/server';
-import { isPlainObject } from '@/utils/helpers';
+import { resolveConfigFilePath } from './resolveConfigFilePath/resolveConfigFilePath';
+import { runServer } from './runServer';
 
-import type { MockServerConfigArgv, PlainObject } from '../src';
-
-import { resolveExportsFromSourceCode } from './resolveExportsFromSourceCode/resolveExportsFromSourceCode';
-import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
-
-export const start = (argv: MockServerConfigArgv, outputFiles: OutputFile[]) => {
-  try {
-    const mockServerConfigSourceCode = outputFiles[0]?.text;
-    if (!mockServerConfigSourceCode) {
-      throw new Error('Cannot handle source code of mock-server.config.(ts|js)');
-    }
-
-    const mockServerConfigExports = resolveExportsFromSourceCode(mockServerConfigSourceCode);
-    if (!mockServerConfigExports?.default) {
-      throw new Error('Cannot handle exports of mock-server.config.(ts|js)');
-    }
-
-    if (!isPlainObject(mockServerConfigExports.default)) {
-      throw new Error(
-        'configuration should be plain object; see our doc (https://www.npmjs.com/package/mock-config-server) for more information'
-      );
-    }
-
-    const mergedMockServerConfig = { ...mockServerConfigExports.default, ...argv } as PlainObject;
-    validateMockServerConfig(mergedMockServerConfig);
-
-    return startMockServer(mergedMockServerConfig);
-  } catch (error: any) {
-    console.error(error.message);
+export const start = async (argv: MockServerConfigArgv) => {
+  const configFilePath = resolveConfigFilePath(argv.config);
+  if (!configFilePath) {
+    throw new Error('Cannot find config file mock-server.config.(ts|mts|cts|js|mjs|cjs)');
   }
-};
+
+  const buildOptions = {
+    entryPoints: [configFilePath],
+    bundle: true,
+    platform: 'node',
+    target: 'esnext',
+    minifySyntax: true,
+    minify: true,
+    write: false,
+    metafile: false,
+    logLevel: 'info',
+    plugins: [] as Plugin[]
+  } satisfies BuildOptions;
+
+  if (argv.watch) {
+    const watchPlugin: Plugin = {
+      name: 'watch',
+      setup: (build) => {
+        let instance: Awaited<ReturnType<typeof runServer>>;
+
+        build.onStart(() => {
+          instance?.destroy();
+        })
+
+        build.onEnd((result) => {
+          if (!result.errors.length) {
+            const mockConfig = result.outputFiles![0];
+            instance = runServer(argv, mockConfig);
+          }
+        })
+      }
+    }
+
+    buildOptions.plugins.push(watchPlugin);
+
+    const ctx = await context(buildOptions);
+
+    ctx.watch();
+    return;
+  }
+
+  const { outputFiles } = await build(buildOptions);
+
+  const mockConfig = outputFiles[0];
+  runServer(argv, mockConfig);
+}

@@ -5,7 +5,7 @@ import { DEFAULT } from '@/utils/constants';
 
 import type { MockServerConfigArgv } from '../src';
 
-import { configWatcher } from './configWatcher';
+import { start } from './start';
 
 export const cli = () => {
   const argv = yargs(hideBin(process.argv))
@@ -45,5 +45,5 @@ export const cli = () => {
     .alias('help', 'h')
     .parse() as MockServerConfigArgv;
 
-  configWatcher(argv);
+  start(argv);
 }
