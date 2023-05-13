@@ -58,6 +58,10 @@ Start **🎉 Mock Config Server**
 
 ```bash
 $ npx mock-config-server
+# or
+npm mcs
+# or
+yarn mcs
 
 # 🎉 Mock Config Server is running at http://localhost:31299
 ```
