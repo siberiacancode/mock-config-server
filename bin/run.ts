@@ -6,7 +6,7 @@ import type { MockServerConfig, MockServerConfigArgv } from '../src';
 
 import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
 
-export const run = (mockConfig: MockServerConfig, argv: MockServerConfigArgv, ) => {
+export const run = (mockConfig: MockServerConfig, argv: MockServerConfigArgv) => {
   try {
     const mergedMockServerConfig = { ...mockConfig, ...argv } as MockServerConfig;
     validateMockServerConfig(mergedMockServerConfig);
