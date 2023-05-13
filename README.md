@@ -58,13 +58,9 @@ Start **🎉 Mock Config Server**
 
 ```bash
 $ npx mock-config-server
-# if your package.json have mock-config-server dependency you can use `mcs` shorthand
-$ npx mcs
-# or
-$ yarn mcs
-
-# 🎉 Mock Config Server is running at http://localhost:31299
 ```
+
+> If the package is already installed you can use short command `mcs`
 
 ## 🎭 Parameters for mock-server.config.(js|ts)
 
