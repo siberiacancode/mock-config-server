@@ -58,6 +58,8 @@ Start **🎉 Mock Config Server**
 
 ```bash
 $ npx mock-config-server
+# if your package.json have mock-config-server dependency you can use `mcs` shorthand
+$ npx mcs
 # or
 $ yarn mcs
 
