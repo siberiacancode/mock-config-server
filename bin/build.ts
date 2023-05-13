@@ -3,8 +3,7 @@ import { build as esBuild, context } from 'esbuild';
 
 import type { MockServerConfigArgv } from '@/utils/types';
 
-import { resolveConfigFile } from './resolveConfigFile/resolveConfigFile';
-import { resolveConfigFilePath } from './resolveConfigFilePath/resolveConfigFilePath';
+import { resolveConfigFile, resolveConfigFilePath } from './helpers';
 import { run } from './run';
 
 export const build = async (argv: MockServerConfigArgv) => {

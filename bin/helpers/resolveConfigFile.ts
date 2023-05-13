@@ -1,7 +1,7 @@
 import { isPlainObject } from '@/utils/helpers';
 import type { MockServerConfig } from '@/utils/types';
 
-import { resolveExportsFromSourceCode } from '../resolveExportsFromSourceCode/resolveExportsFromSourceCode';
+import { resolveExportsFromSourceCode } from './resolveExportsFromSourceCode';
 
 export const resolveConfigFile = (configSourceCode: string): MockServerConfig => {
   if (!configSourceCode) {
