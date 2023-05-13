@@ -7,6 +7,7 @@ import {
   corsMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
+  requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
@@ -22,6 +23,11 @@ export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'
   server.use(bodyParser.urlencoded({ extended: false }));
   server.use(bodyParser.json({ limit: '10mb' }));
 
+  const serverRequestInterceptor = mockServerConfig.interceptors?.request;
+  if (serverRequestInterceptor) {
+    requestInterceptorMiddleware(server, serverRequestInterceptor);
+  }
+
   const baseUrl = mockServerConfig.baseUrl ?? '/';
 
   if (cors) {
@@ -35,16 +41,32 @@ export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'
   }
 
   if (rest) {
-    const routerWithRestRoutes = createRestRoutes(express.Router(), rest, interceptors);
+    const routerWithRestRoutes = createRestRoutes(express.Router(), rest, interceptors?.response);
+
+    const apiRequestInterceptor = rest.interceptors?.request;
+    if (apiRequestInterceptor) {
+      requestInterceptorMiddleware(server, apiRequestInterceptor);
+    }
 
     const restBaseUrl = urlJoin(baseUrl, rest.baseUrl ?? '/');
+
     server.use(restBaseUrl, routerWithRestRoutes);
   }
 
   if (graphql) {
-    const routerWithGraphQLRoutes = createGraphQLRoutes(express.Router(), graphql, interceptors);
+    const routerWithGraphQLRoutes = createGraphQLRoutes(
+      express.Router(),
+      graphql,
+      interceptors?.response
+    );
+
+    const apiRequestInterceptor = graphql.interceptors?.request;
+    if (apiRequestInterceptor) {
+      requestInterceptorMiddleware(server, apiRequestInterceptor);
+    }
 
     const graphqlBaseUrl = urlJoin(baseUrl, graphql.baseUrl ?? '/');
+
     server.use(graphqlBaseUrl, routerWithGraphQLRoutes);
   }
 
