@@ -16,6 +16,8 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "./",
     "paths": {
+      "mock-config-server": ["./dist"],
+      "mock-config-server/*": ["./dist"],
       "@/server": ["./src/server"],
       "@/core/rest": ["./src/core/rest"],
       "@/core/graphql": ["./src/core/graphql"],
