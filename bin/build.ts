@@ -1,12 +1,13 @@
 import type { BuildOptions, Plugin } from 'esbuild';
-import { build, context } from 'esbuild';
+import { build as esBuild, context } from 'esbuild';
 
 import type { MockServerConfigArgv } from '@/utils/types';
 
+import { resolveConfigFile } from './resolveConfigFile/resolveConfigFile';
 import { resolveConfigFilePath } from './resolveConfigFilePath/resolveConfigFilePath';
-import { runServer } from './runServer';
+import { run } from './run';
 
-export const start = async (argv: MockServerConfigArgv) => {
+export const build = async (argv: MockServerConfigArgv) => {
   const configFilePath = resolveConfigFilePath(argv.config);
   if (!configFilePath) {
     throw new Error('Cannot find config file mock-server.config.(ts|mts|cts|js|mjs|cjs)');
@@ -29,7 +30,7 @@ export const start = async (argv: MockServerConfigArgv) => {
     const watchPlugin: Plugin = {
       name: 'watch',
       setup: (build) => {
-        let instance: Awaited<ReturnType<typeof runServer>>;
+        let instance: Awaited<ReturnType<typeof run>>;
 
         build.onStart(() => {
           instance?.destroy();
@@ -37,8 +38,8 @@ export const start = async (argv: MockServerConfigArgv) => {
 
         build.onEnd((result) => {
           if (!result.errors.length) {
-            const mockConfig = result.outputFiles![0];
-            instance = runServer(argv, mockConfig);
+            const mockConfig = resolveConfigFile(result.outputFiles![0].text);
+            instance = run(mockConfig, argv);
           }
         })
       }
@@ -52,8 +53,8 @@ export const start = async (argv: MockServerConfigArgv) => {
     return;
   }
 
-  const { outputFiles } = await build(buildOptions);
+  const { outputFiles } = await esBuild(buildOptions);
 
-  const mockConfig = outputFiles[0];
-  runServer(argv, mockConfig);
+  const mockConfig = resolveConfigFile(outputFiles[0].text);
+  run( mockConfig, argv);
 }

@@ -3,11 +3,11 @@ import type { Socket } from 'net';
 
 type ServerWithDestroyer = Server & { destroy: Server['close'] };
 
-export const addDestroyer = (serverInstance: Server): ServerWithDestroyer => {
-  const instanceWithDestroyer = serverInstance as ServerWithDestroyer;
+export const destroyerMiddleware = (server: Server): ServerWithDestroyer => {
+  const serverWithDestroyer = server as ServerWithDestroyer;
   const connections: Record<string, Socket> = {};
 
-  instanceWithDestroyer.on('connection', (connection) => {
+  serverWithDestroyer.on('connection', (connection) => {
     const key = `${connection.remoteAddress}:${connection.remotePort}`;
     connections[key] = connection;
     connection.on('close', () => {
@@ -15,13 +15,13 @@ export const addDestroyer = (serverInstance: Server): ServerWithDestroyer => {
     });
   });
 
-  instanceWithDestroyer.destroy = (callback) => {
-    serverInstance.close(callback);
+  serverWithDestroyer.destroy = (callback) => {
+    serverWithDestroyer.close(callback);
     Object.values(connections).forEach((connection) => {
       connection.destroy();
     })
-    return serverInstance;
+    return serverWithDestroyer;
   };
 
-  return instanceWithDestroyer;
+  return serverWithDestroyer;
 }

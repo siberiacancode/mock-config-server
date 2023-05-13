@@ -1,11 +1,9 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-import { DEFAULT } from '@/utils/constants';
-
 import type { MockServerConfigArgv } from '../src';
 
-import { start } from './start';
+import { build } from './build';
 
 export const cli = () => {
   const argv = yargs(hideBin(process.argv))
@@ -13,14 +11,12 @@ export const cli = () => {
       baseUrl: {
         alias: 'b',
         description: 'Set base url for mock server',
-        type: 'string',
-        default: '/'
+        type: 'string'
       },
       port: {
         alias: 'p',
         description: 'Set port for server',
-        type: 'number',
-        default: DEFAULT.PORT
+        type: 'number'
       },
       staticPath: {
         alias: 's',
@@ -35,8 +31,7 @@ export const cli = () => {
       watch: {
         alias: 'w',
         description: 'Enables server restart after config file changes',
-        type: 'boolean',
-        default: false
+        type: 'boolean'
       }
     })
     .version()
@@ -45,5 +40,5 @@ export const cli = () => {
     .alias('help', 'h')
     .parse() as MockServerConfigArgv;
 
-  start(argv);
+  build(argv);
 }
