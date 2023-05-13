@@ -56,5 +56,5 @@ export const build = async (argv: MockServerConfigArgv) => {
   const { outputFiles } = await esBuild(buildOptions);
 
   const mockConfig = resolveConfigFile(outputFiles[0].text);
-  run( mockConfig, argv);
+  run(mockConfig, argv);
 }
