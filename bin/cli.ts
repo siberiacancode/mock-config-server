@@ -3,7 +3,7 @@ import { hideBin } from 'yargs/helpers';
 
 import type { MockServerConfigArgv } from '../src';
 
-import { start } from './start';
+import { build } from './build';
 
 export const cli = () => {
   const argv = yargs(hideBin(process.argv))
@@ -29,13 +29,18 @@ export const cli = () => {
         alias: 'c',
         description: 'Set path to config file',
         type: 'string'
+      },
+      watch: {
+        alias: 'w',
+        description: 'Enables server restart after config file changes',
+        type: 'boolean'
       }
     })
     .version()
     .alias('version', 'v')
     .help()
     .alias('help', 'h')
-    .parse();
+    .parse() as MockServerConfigArgv;
 
-  start(argv as MockServerConfigArgv);
-};
+  build(argv);
+}

@@ -48,4 +48,5 @@ export interface MockServerConfigArgv {
   port?: number;
   staticPath?: string;
   config?: string;
+  watch?: boolean;
 }

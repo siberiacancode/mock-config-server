@@ -272,16 +272,17 @@ Functions to change request or response parameters
 mcs [options]
 
 Options:
-  --baseUrl, -b         Set base url
-  --port, -p            Set port
+  --baseUrl, -b         Set base url (default: '/')
+  --port, -p            Set port (default: 31299)
   --staticPath, -s      Set static path
-  --config, -c          Set path to config file
+  --config, -c          Set path to config file (default: './mock-server.config.(?:ts|mts|cts|js|mjs|cjs)')
+  --watch, -w           Enables server restart after config file changes (default: false)
 
   --version, -v         Show version number
   --help, -h            Show help
 
 Examples:
-  mcs --baseurl /base/url --port 3000 --config ./path/to/config.ts
+  mcs --baseurl /base/url --port 3000 --config ./path/to/config.ts -w
   mcs --help
 ```
 
