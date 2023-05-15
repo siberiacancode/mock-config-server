@@ -1,2 +1,2 @@
-export * from './startMockServer/startMockServer';
 export * from './createMockServer/createMockServer';
+export * from './startMockServer/startMockServer';

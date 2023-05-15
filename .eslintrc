@@ -17,7 +17,7 @@
       "typescript": {
         "project": "./tsconfig.json"
       }
-    },
+    }
   },
   "rules": {
     "consistent-return": "off",

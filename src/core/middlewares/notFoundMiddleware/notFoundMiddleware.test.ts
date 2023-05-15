@@ -62,16 +62,16 @@ describe('notFoundMiddleware', () => {
     const restBaseUrl = urlJoin(serverBaseUrl, rest?.baseUrl ?? '/');
     const routerWithRestRoutes = createRestRoutes(
       express.Router(),
-      rest?.configs ?? [],
-      interceptors
+      rest ?? { configs: [] },
+      interceptors?.response
     );
     server.use(restBaseUrl, routerWithRestRoutes);
 
     const graphqlBaseUrl = urlJoin(serverBaseUrl, graphql?.baseUrl ?? '/');
     const routerWithGraphqlRoutes = createGraphQLRoutes(
       express.Router(),
-      graphql?.configs ?? [],
-      interceptors
+      graphql ?? { configs: [] },
+      interceptors?.response
     );
     server.use(graphqlBaseUrl, routerWithGraphqlRoutes);
 

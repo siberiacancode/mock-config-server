@@ -57,19 +57,21 @@ export default mockServerConfig;
 Start **🎉 Mock Config Server**
 
 ```bash
-$ npx mcs
-
-# 🎉 Mock Config Server is running at http://localhost:31299
+$ npx mock-config-server
 ```
+
+> If the package is already installed you can use short command `mcs`
 
 ## 🎭 Parameters for mock-server.config.(js|ts)
 
 - `rest?` Rest configs for mock requests
   - `baseUrl?` {string} part of the url that will be substituted at the beginning of rest request url (default: `'/'`)
   - `configs` {Array<RestRequestConfig>} configs for mock requests, [read](#configs)
+  - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `graphql?` GraphQL configs for mock requests
   - `baseUrl?` {string} part of the url that will be substituted at the beginning of graphql request url (default: `'/'`)
   - `configs` {Array<GraphQLRequestConfig>} configs for mock requests, [read](#configs)
+  - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `staticPath?` {StaticPath} entity for working with static files, [read](#static-path)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `cors?` {Cors} CORS settings object (default: `CORS is turn off`), [read](#cors)
@@ -230,6 +232,13 @@ Functions to change request or response parameters
 
 - `params`
   - `request` request object
+  - `setDelay` (delay) => Promise<void>
+    - `delay` {number} milliseconds of delay time
+  - `getHeader` (field) => string | number | string[] | undefined
+    - `field` {string} name of response header
+  - `getHeaders` () => Record<string | number | string[] | undefined>
+  - `setCookie` (name) => string | undefined
+    - `name` {string} name of cookie
 
 ##### Response
 
@@ -238,14 +247,14 @@ Functions to change request or response parameters
   - `request` request object
   - `response` response object
   - `setDelay` (delay) => Promise<void>
-    - `delay` {number} seconds of delay time
+    - `delay` {number} milliseconds of delay time
   - `setStatusCode` (statusCode) => void
     - `statusCode` {number} status code for response
-  - `setHeader` (name, value) => void
-    - `name` {string} name of response header
+  - `setHeader` (field, value) => void
+    - `field` {string} name of response header
     - `value` {string | string[] | undefined} value of response header
-  - `appendHeader` (name, value) => void
-    - `name` {string} name of response header
+  - `appendHeader` (field, value) => void
+    - `field` {string} name of response header
     - `value` {string | string[] | undefined} value of response header
   - `setCookie` (name, value, options) => void
     - `name` {string} name of cookie
@@ -258,19 +267,22 @@ Functions to change request or response parameters
     - `filename` {string} name of file in 'Content-Disposition' header
 
 ## CLI usage
+
 ```
 mcs [options]
 
 Options:
-  --baseUrl, -b         Set base url
-  --port, -p            Set port
+  --baseUrl, -b         Set base url (default: '/')
+  --port, -p            Set port (default: 31299)
   --staticPath, -s      Set static path
+  --config, -c          Set path to config file (default: './mock-server.config.(?:ts|mts|cts|js|mjs|cjs)')
+  --watch, -w           Enables server restart after config file changes (default: false)
 
   --version, -v         Show version number
   --help, -h            Show help
-  
+
 Examples:
-  mcs --baseurl /base/url --port 3000
+  mcs --baseurl /base/url --port 3000 --config ./path/to/config.ts -w
   mcs --help
 ```
 
