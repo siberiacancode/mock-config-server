@@ -21,22 +21,32 @@ export type Cors = {
 export type Port = number;
 export type BaseUrl = `/${string}`;
 
+export interface RestConfig {
+  baseUrl?: BaseUrl;
+  configs: RestRequestConfig[];
+  interceptors?: Interceptors;
+}
+
+export interface GraphqlConfig {
+  baseUrl?: BaseUrl;
+  configs: GraphQLRequestConfig[];
+  interceptors?: Interceptors;
+}
+
 export interface MockServerConfig {
   baseUrl?: BaseUrl;
-  rest?: {
-    baseUrl?: BaseUrl;
-    configs: RestRequestConfig[];
-  };
-  graphql?: {
-    baseUrl?: BaseUrl;
-    configs: GraphQLRequestConfig[];
-  };
+  rest?: RestConfig;
+  graphql?: GraphqlConfig;
   port?: Port;
   staticPath?: StaticPath;
   interceptors?: Interceptors;
   cors?: Cors;
 }
 
-export type MockServerConfigArgv = Partial<
-  Pick<MockServerConfig, 'baseUrl' | 'port' | 'staticPath'>
->;
+export interface MockServerConfigArgv {
+  baseUrl?: string;
+  port?: number;
+  staticPath?: string;
+  config?: string;
+  watch?: boolean;
+}

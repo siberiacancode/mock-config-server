@@ -2,32 +2,24 @@ import type { IRouter } from 'express';
 
 import {
   isEntityValuesEqual,
-  callRequestInterceptors,
-  callResponseInterceptors
+  callResponseInterceptors,
+  callRequestInterceptor
 } from '@/utils/helpers';
-import type {
-  Interceptors,
-  RestEntities,
-  RestEntitiesValue,
-  RestRequestConfig
-} from '@/utils/types';
+import type { Interceptors, RestConfig, RestEntities, RestEntitiesValue } from '@/utils/types';
 
 import { prepareRestRequestConfigs } from './helpers';
 
 export const createRestRoutes = (
   router: IRouter,
-  configs: RestRequestConfig[],
-  interceptors?: Interceptors
+  restConfig: RestConfig,
+  serverResponseInterceptors?: Interceptors['response']
 ) => {
-  prepareRestRequestConfigs(configs).forEach((requestConfig) => {
+  prepareRestRequestConfigs(restConfig.configs).forEach((requestConfig) => {
     router.route(requestConfig.path)[requestConfig.method](async (request, response, next) => {
-      callRequestInterceptors({
-        request,
-        interceptors: {
-          requestInterceptor: requestConfig.interceptors?.request,
-          serverInterceptor: interceptors?.request
-        }
-      });
+      const requestInterceptor = requestConfig.interceptors?.request;
+      if (requestInterceptor) {
+        await callRequestInterceptor({ request, interceptor: requestInterceptor });
+      }
 
       const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
         if (!entities) return true;
@@ -45,14 +37,15 @@ export const createRestRoutes = (
           ? await matchedRouteConfig.data(request, matchedRouteConfig.entities ?? {})
           : matchedRouteConfig.data;
 
-      const data = callResponseInterceptors({
+      const data = await callResponseInterceptors({
         data: matchedRouteConfigData,
         request,
         response,
         interceptors: {
           routeInterceptor: matchedRouteConfig.interceptors?.response,
           requestInterceptor: requestConfig.interceptors?.response,
-          serverInterceptor: interceptors?.response
+          apiInterceptor: restConfig.interceptors?.response,
+          serverInterceptor: serverResponseInterceptors
         }
       });
 

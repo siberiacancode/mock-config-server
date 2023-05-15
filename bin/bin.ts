@@ -10,4 +10,4 @@ const { cli } = require('./cli');
 
 cli();
 
-export {}
+export {};

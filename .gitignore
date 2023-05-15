@@ -164,8 +164,7 @@ Temporary Items
 .env
 dist
 mock-server-build
-mock-server.config.ts
-mock-server.config.js
+mock-server.config.*
 
 # Logs
 logs
