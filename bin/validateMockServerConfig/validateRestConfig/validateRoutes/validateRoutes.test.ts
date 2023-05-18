@@ -48,7 +48,7 @@ describe('validateRoutes (rest)', () => {
   });
 
   test('Should correctly handle get|delete|options method entities only with correct type', () => {
-    const correctEntities = ['headers', 'params', 'query'];
+    const correctEntities = ['headers', 'cookies', 'params', 'query'];
     correctEntities.forEach((correctEntity) => {
       expect(() =>
         validateRoutes(
@@ -113,7 +113,7 @@ describe('validateRoutes (rest)', () => {
   });
 
   test('Should correctly handle post|put|patch method entities only with correct type', () => {
-    const correctEntities = ['headers', 'params', 'query', 'body'];
+    const correctEntities = ['headers', 'cookies', 'params', 'query', 'body'];
     correctEntities.forEach((correctEntity) => {
       expect(() =>
         validateRoutes(
