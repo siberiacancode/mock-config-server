@@ -16,7 +16,7 @@ describe('validateRoutes (rest)', () => {
   });
 
   test('Should correctly handle entities only with correct type', () => {
-    const correctEntitiesValues = [{}, { headers: { key: 'value' } }, undefined];
+    const correctEntitiesValues = [{}, { headers: { key: 'value' } }, { cookies: { cookieName: 'cookieValue' } }, { params: { paramKey: 'paramValue' } }, undefined];
     correctEntitiesValues.forEach((correctEntitiesValue) => {
       expect(() =>
         validateRoutes(
@@ -232,6 +232,53 @@ describe('validateRoutes (rest)', () => {
           'get'
         )
       ).toThrow(new Error('routes[0].entities.headers.key'));
+    });
+  });
+
+  test('Should correctly handle cookies entity only with correct type', () => {
+    const correctCookiesObjectValues = ['value'];
+    correctCookiesObjectValues.forEach((correctCookiesObjectValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { cookies: { key: correctCookiesObjectValue } },
+              data: null
+            }
+          ],
+          'get'
+        )
+      ).not.toThrow(Error);
+    });
+
+    const incorrectCookiesValues = ['string', true, 3000, null, undefined, [], () => {}];
+    incorrectCookiesValues.forEach((incorrectCookieValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { cookies: incorrectCookieValue },
+              data: null
+            }
+          ],
+          'get'
+        )
+      ).toThrow(new Error('routes[0].entities.cookies'));
+    });
+
+    const incorrectCookiesObjectValues = [true, 3000, null, undefined, {}, [], () => {}];
+    incorrectCookiesObjectValues.forEach((incorrectCookiesObjectValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { cookies: { key: incorrectCookiesObjectValue } },
+              data: null
+            }
+          ],
+          'get'
+        )
+      ).toThrow(new Error('routes[0].entities.cookies.key'));
     });
   });
 

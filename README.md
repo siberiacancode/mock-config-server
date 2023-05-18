@@ -80,7 +80,7 @@ $ npx mock-config-server
 
 ### Configs
 
-Configs are the fundamental part of the mock server. These configs are easy to fill and maintain. Config entities is an object with which you can emulate various application behaviors. You can specify `headers` | `query` | `params` | `body` for Rest request or `headers` | `query` | `variables` for GraphQL request to define what contract data you need to get. Using this mechanism, you can easily simulate the operation of the server and emulate various cases
+Configs are the fundamental part of the mock server. These configs are easy to fill and maintain. Config entities is an object with which you can emulate various application behaviors. You can specify `headers` | `cookies` | `query` | `params` | `body` for Rest request or `headers` | `cookies` | `query` | `variables` for GraphQL request to define what contract data you need to get. Using this mechanism, you can easily simulate the operation of the server and emulate various cases
 
 ##### Rest request config
 

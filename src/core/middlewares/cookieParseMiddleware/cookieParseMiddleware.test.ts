@@ -17,6 +17,6 @@ describe('cookieParseMiddleware', () => {
 
     await request(server).get('/').set({ cookie: 'cookieName=cookieValue' });
 
-    expect(parsedCookies).toMatchObject({ cookieName: 'cookieValue' });
+    expect(parsedCookies).toEqual({ cookieName: 'cookieValue' });
   });
 });
