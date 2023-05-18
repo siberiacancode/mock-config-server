@@ -1,9 +1,9 @@
 import type { Request } from 'express';
 
 import type { Interceptors } from './interceptors';
-import type { BodyValue, Data, HeadersValue, ParamsValue, QueryValue } from './values';
+import type { BodyValue, CookiesValue, Data, HeadersValue, ParamsValue, QueryValue } from './values';
 
-export type RestEntities = 'headers' | 'query' | 'params' | 'body';
+export type RestEntities = 'headers' | 'cookies' | 'query' | 'params' | 'body';
 export type RestEntitiesValue = BodyValue | QueryValue | HeadersValue | ParamsValue;
 
 export type RestEntitiesValues = {
@@ -13,18 +13,20 @@ export type RestEntitiesValues = {
     ? QueryValue
     : Key extends 'headers'
     ? HeadersValue
+    : Key extends 'cookies'
+    ? CookiesValue
     : Key extends 'params'
     ? ParamsValue
     : never;
 };
 
 export interface RestMethodsEntities {
-  get: Extract<RestEntities, 'headers' | 'query' | 'params'>;
-  delete: Extract<RestEntities, 'headers' | 'query' | 'params'>;
+  get: Exclude<RestEntities, 'body'>;
+  delete: Exclude<RestEntities, 'body'>;
   post: RestEntities;
   put: RestEntities;
   patch: RestEntities;
-  options: Extract<RestEntities, 'headers' | 'query' | 'params'>;
+  options: Exclude<RestEntities, 'body'>;
 }
 
 export type RestRouteConfigEntities<Method extends RestMethod> = {

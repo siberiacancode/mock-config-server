@@ -7,12 +7,12 @@ type AllowedEntitiesByMethod = {
   [Key in keyof RestMethodsEntities]: RestMethodsEntities[Key][];
 };
 const ALLOWED_ENTITIES_BY_METHOD: AllowedEntitiesByMethod = {
-  get: ['headers', 'query', 'params'],
-  delete: ['headers', 'query', 'params'],
-  post: ['headers', 'query', 'params', 'body'],
-  put: ['headers', 'query', 'params', 'body'],
-  patch: ['headers', 'query', 'params', 'body'],
-  options: ['headers', 'query', 'params']
+  get: ['headers', 'cookies', 'query', 'params'],
+  delete: ['headers', 'cookies', 'query', 'params'],
+  post: ['headers', 'cookies', 'query', 'params', 'body'],
+  put: ['headers', 'cookies', 'query', 'params', 'body'],
+  patch: ['headers', 'cookies', 'query', 'params', 'body'],
+  options: ['headers', 'cookies', 'query', 'params']
 };
 
 const validateHeadersOrParams = (headersOrParams: unknown, entity: string) => {

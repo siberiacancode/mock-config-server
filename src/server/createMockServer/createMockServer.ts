@@ -5,6 +5,7 @@ import express from 'express';
 import { createGraphQLRoutes } from '@/core/graphql';
 import {
   corsMiddleware,
+  cookiesMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
   requestInterceptorMiddleware,
@@ -22,6 +23,8 @@ export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'
   server.set('view engine', 'ejs');
   server.use(bodyParser.urlencoded({ extended: false }));
   server.use(bodyParser.json({ limit: '10mb' }));
+  
+  cookiesMiddleware(server);
 
   const serverRequestInterceptor = mockServerConfig.interceptors?.request;
   if (serverRequestInterceptor) {

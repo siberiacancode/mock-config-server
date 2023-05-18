@@ -7,8 +7,8 @@ type AllowedEntitiesByOperationType = {
   [Key in keyof GraphQLOperationsEntities]: GraphQLOperationsEntities[Key][];
 };
 const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntitiesByOperationType = {
-  query: ['headers', 'query', 'variables'],
-  mutation: ['headers', 'query', 'variables']
+  query: ['headers', 'cookies', 'query', 'variables'],
+  mutation: ['headers', 'cookies', 'query', 'variables']
 };
 
 const validateHeadersOrQuery = (headersOrQuery: unknown, entity: string) => {
