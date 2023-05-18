@@ -48,7 +48,7 @@ describe('validateRoutes (graphql)', () => {
   });
 
   test('Should correctly handle query operation type entities only with correct type', () => {
-    const correctEntities = ['headers', 'query', 'variables'];
+    const correctEntities = ['headers', 'cookies', 'query', 'variables'];
     correctEntities.forEach((correctEntity) => {
       expect(() =>
         validateRoutes(
@@ -80,7 +80,7 @@ describe('validateRoutes (graphql)', () => {
   });
 
   test('Should correctly handle mutation operation type entities only with correct type', () => {
-    const correctEntities = ['headers', 'query', 'variables'];
+    const correctEntities = ['headers', 'cookies', 'query', 'variables'];
     correctEntities.forEach((correctEntity) => {
       expect(() =>
         validateRoutes(

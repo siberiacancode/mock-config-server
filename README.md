@@ -88,7 +88,7 @@ Configs are the fundamental part of the mock server. These configs are easy to f
 - `method` {GET | POST | DELETE | PUT | PATCH} rest api method
 - `routes` {RestRouteConfig[]} request routes
   - `data` {any} mock data of request
-  - `entities?` Object<headers | query | params | body> object that helps in data retrieval
+  - `entities?` Object<headers | cookies | query | params | body> object that helps in data retrieval
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 
@@ -98,7 +98,7 @@ Configs are the fundamental part of the mock server. These configs are easy to f
 - `operationName` {string} graphql operation name
 - `routes` {GraphQLRouteConfig[]} request routes
   - `data` {any} mock data of request
-  - `entities?` Object<headers | query | variables> object that helps in data retrieval
+  - `entities?` Object<headers | cookies | query | variables> object that helps in data retrieval
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 

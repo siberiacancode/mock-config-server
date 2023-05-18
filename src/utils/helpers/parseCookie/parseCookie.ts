@@ -1,12 +1,10 @@
 type Cookies = Record<string, string>;
 
-export const parseCookie = (cookieHeader: string | string[]) => {
+export const parseCookie = (cookieHeader: string) => {
   if (!cookieHeader) return {};
 
-  const cookieString = Array.isArray(cookieHeader) ? cookieHeader.join('; ') : cookieHeader;
-
   const cookies = {} as Cookies;
-  const cookiePairs = cookieString.split('; ');
+  const cookiePairs = cookieHeader.split('; ');
   cookiePairs.forEach((cookie) => {
     const [name, value] = cookie.trim().split('=');
 
