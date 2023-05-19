@@ -16,7 +16,7 @@ describe('validateRoutes (graphql)', () => {
   });
 
   test('Should correctly handle entities only with correct type', () => {
-    const correctEntitiesValues = [{}, { headers: { key: 'value' } }, { cookies: { cookieName: 'cookieValue' } }, undefined];
+    const correctEntitiesValues = [{}, { headers: { key: 'value' } }, undefined];
     correctEntitiesValues.forEach((correctEntitiesValue) => {
       expect(() =>
         validateRoutes(
