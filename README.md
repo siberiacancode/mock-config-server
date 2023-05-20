@@ -237,7 +237,7 @@ Functions to change request or response parameters
   - `getHeader` (field) => string | number | string[] | undefined
     - `field` {string} name of response header
   - `getHeaders` () => Record<string | number | string[] | undefined>
-  - `setCookie` (name) => string | undefined
+  - `getCookie` (name) => string | undefined
     - `name` {string} name of cookie
 
 ##### Response
@@ -253,13 +253,15 @@ Functions to change request or response parameters
   - `setHeader` (field, value) => void
     - `field` {string} name of response header
     - `value` {string | string[] | undefined} value of response header
-  - `appendHeader` (field, value) => void
+  - `getHeader` (field) => string | number | string[] | undefined
     - `field` {string} name of response header
-    - `value` {string | string[] | undefined} value of response header
+  - `getHeaders` () => Record<string | number | string[] | undefined>
   - `setCookie` (name, value, options) => void
     - `name` {string} name of cookie
     - `value` {string} value of cookie
     - `options` {[CookieOptions](https://expressjs.com/en/resources/middleware/cookie-session.html) | undefined} cookie options (like path, expires, etc.)
+  - `getCookie` (name) => string | undefined
+    - `name` {string} name of cookie
   - `clearCookie` (name, options) => void
     - `name` {string} name of cookie
     - `options` {[CookieOptions](https://expressjs.com/en/resources/middleware/cookie-session.html) | undefined} cookie options (like path, expires, etc.)

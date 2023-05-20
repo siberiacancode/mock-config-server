@@ -2,6 +2,7 @@ import type { CookieOptions, Request, Response } from 'express';
 
 import type { Data, ResponseInterceptor, ResponseInterceptorParams } from '@/utils/types';
 
+import { parseCookie } from '../../parseCookie/parseCookie';
 import { setDelay } from '../helpers/setDelay';
 
 interface CallResponseInterceptorsParams {
@@ -19,12 +20,22 @@ interface CallResponseInterceptorsParams {
 export const callResponseInterceptors = async (params: CallResponseInterceptorsParams) => {
   const { data, request, response, interceptors } = params;
 
+  const getHeader = (field: string) => response.getHeader(field);
+  const getHeaders = () => response.getHeaders();
+
+  const getCookie = (name: string) => {
+    const { cookie } = request.headers;
+    if (cookie) {
+      const cookies = parseCookie(cookie);
+      return cookies[name];
+    }
+  };
+
   const setStatusCode = (statusCode: number) => {
     response.statusCode = statusCode;
   };
 
-  const setHeader = (field: string, value?: string | string[]) => response.header(field, value);
-  const appendHeader = (field: string, value?: string[] | string) => response.append(field, value);
+  const setHeader = (field: string, value?: string | string[]) => response.append(field, value);
 
   const setCookie = (name: string, value: string, options?: CookieOptions) => {
     if (options) {
@@ -43,8 +54,10 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
     setDelay,
     setStatusCode,
     setHeader,
-    appendHeader,
+    getHeader,
+    getHeaders,
     setCookie,
+    getCookie,
     clearCookie,
     attachment
   };

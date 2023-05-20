@@ -18,8 +18,10 @@ export interface ResponseInterceptorParams {
   setDelay: (delay: number) => Promise<void>;
   setStatusCode: (statusCode: number) => void;
   setHeader: (field: string, value?: string | string[]) => void;
-  appendHeader: (field: string, value?: string[] | string) => void;
+  getHeader: (field: string) => RequestInterceptorHeaderValue;
+  getHeaders: () => Record<string, RequestInterceptorHeaderValue>;
   setCookie: (name: string, value: string, options?: CookieOptions) => void;
+  getCookie: (name: string) => RequestInterceptorCookieValue;
   clearCookie: (name: string, options?: CookieOptions) => void;
   attachment: (filename: string) => void;
 }
