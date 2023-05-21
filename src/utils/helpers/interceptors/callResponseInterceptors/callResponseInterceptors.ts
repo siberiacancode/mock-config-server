@@ -35,7 +35,7 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
     response.statusCode = statusCode;
   };
 
-  const setHeader = (field: string, value?: string | string[]) => response.append(field, value);
+  const setHeader = (field: string, value?: string | string[]) => response.set(field, value);
   const appendHeader = (field: string, value?: string[] | string) => response.append(field, value);
 
   const setCookie = (name: string, value: string, options?: CookieOptions) => {

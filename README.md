@@ -253,6 +253,7 @@ Functions to change request or response parameters
   - `setHeader` (field, value) => void
     - `field` {string} name of response header
     - `value` {string | string[] | undefined} value of response header
+  - `appendHeader` (field, value) => void
   - `getHeader` (field) => string | number | string[] | undefined
     - `field` {string} name of response header
   - `getHeaders` () => Record<string | number | string[] | undefined>
