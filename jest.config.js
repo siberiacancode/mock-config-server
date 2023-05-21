@@ -6,6 +6,8 @@ const jestConfig = {
   rootDir: './',
   preset: 'ts-jest',
   testEnvironment: 'node',
+  collectCoverage: true,
+  coverageDirectory: 'coverage',
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' })
 };
 module.exports = jestConfig;
