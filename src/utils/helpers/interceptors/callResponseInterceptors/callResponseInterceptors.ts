@@ -36,6 +36,7 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
   };
 
   const setHeader = (field: string, value?: string | string[]) => response.append(field, value);
+  const appendHeader = (field: string, value?: string[] | string) => response.append(field, value);
 
   const setCookie = (name: string, value: string, options?: CookieOptions) => {
     if (options) {
@@ -54,6 +55,7 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
     setDelay,
     setStatusCode,
     setHeader,
+    appendHeader,
     getHeader,
     getHeaders,
     setCookie,
