@@ -33,10 +33,13 @@ export interface GraphqlConfig {
   interceptors?: Interceptors;
 }
 
+export type DatabaseConfig = Record<string, any>;
+
 export interface MockServerConfig {
   baseUrl?: BaseUrl;
   rest?: RestConfig;
   graphql?: GraphqlConfig;
+  database?: DatabaseConfig;
   port?: Port;
   staticPath?: StaticPath;
   interceptors?: Interceptors;
