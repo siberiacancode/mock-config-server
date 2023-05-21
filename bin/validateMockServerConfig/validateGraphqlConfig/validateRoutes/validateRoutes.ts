@@ -7,16 +7,16 @@ type AllowedEntitiesByOperationType = {
   [Key in keyof GraphQLOperationsEntities]: GraphQLOperationsEntities[Key][];
 };
 const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntitiesByOperationType = {
-  query: ['headers', 'query', 'variables'],
-  mutation: ['headers', 'query', 'variables']
+  query: ['headers', 'cookies', 'query', 'variables'],
+  mutation: ['headers', 'cookies', 'query', 'variables']
 };
 
-const validateHeadersOrQuery = (headersOrQuery: unknown, entity: string) => {
-  const isHeadersOrQueryObject = isPlainObject(headersOrQuery);
-  if (isHeadersOrQueryObject) {
-    Object.entries(headersOrQuery).forEach(([headerOrQueryKey, headerOrQueryValue]) => {
-      if (typeof headerOrQueryValue !== 'string') {
-        throw new Error(`${entity}.${headerOrQueryKey}`);
+const validateHeadersOrCookiesOrQuery = (headersOrCookiesOrQuery: unknown, entity: string) => {
+  const isHeadersOrCookiesOrQueryObject = isPlainObject(headersOrCookiesOrQuery);
+  if (isHeadersOrCookiesOrQueryObject) {
+    Object.entries(headersOrCookiesOrQuery).forEach(([headerOrCookieOrQueryKey, headerOrCookieOrQueryValue]) => {
+      if (typeof headerOrCookieOrQueryValue !== 'string') {
+        throw new Error(`${entity}.${headerOrCookieOrQueryKey}`);
       }
     });
     return;
@@ -36,10 +36,10 @@ const validateEntities = (entities: unknown, operationType: GraphQLOperationType
         throw new Error(`entities.${entity}`);
       }
 
-      if (entity === 'headers' || entity === 'query') {
+      if (entity === 'headers' || entity === 'query' || entity === 'cookies') {
         try {
-          const headersOrQuery = entities[entity];
-          validateHeadersOrQuery(headersOrQuery, entity);
+          const headersOrCookiesOrQuery = entities[entity];
+          validateHeadersOrCookiesOrQuery(headersOrCookiesOrQuery, entity);
         } catch (error: any) {
           throw new Error(`entities.${error.message}`);
         }

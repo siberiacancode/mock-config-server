@@ -48,7 +48,7 @@ describe('validateRoutes (rest)', () => {
   });
 
   test('Should correctly handle get|delete|options method entities only with correct type', () => {
-    const correctEntities = ['headers', 'params', 'query'];
+    const correctEntities = ['headers', 'cookies', 'params', 'query'];
     correctEntities.forEach((correctEntity) => {
       expect(() =>
         validateRoutes(
@@ -113,7 +113,7 @@ describe('validateRoutes (rest)', () => {
   });
 
   test('Should correctly handle post|put|patch method entities only with correct type', () => {
-    const correctEntities = ['headers', 'params', 'query', 'body'];
+    const correctEntities = ['headers', 'cookies', 'params', 'query', 'body'];
     correctEntities.forEach((correctEntity) => {
       expect(() =>
         validateRoutes(
@@ -232,6 +232,53 @@ describe('validateRoutes (rest)', () => {
           'get'
         )
       ).toThrow(new Error('routes[0].entities.headers.key'));
+    });
+  });
+
+  test('Should correctly handle cookies entity only with correct type', () => {
+    const correctCookiesObjectValues = ['value'];
+    correctCookiesObjectValues.forEach((correctCookiesObjectValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { cookies: { key: correctCookiesObjectValue } },
+              data: null
+            }
+          ],
+          'get'
+        )
+      ).not.toThrow(Error);
+    });
+
+    const incorrectCookiesValues = ['string', true, 3000, null, undefined, [], () => {}];
+    incorrectCookiesValues.forEach((incorrectCookieValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { cookies: incorrectCookieValue },
+              data: null
+            }
+          ],
+          'get'
+        )
+      ).toThrow(new Error('routes[0].entities.cookies'));
+    });
+
+    const incorrectCookiesObjectValues = [true, 3000, null, undefined, {}, [], () => {}];
+    incorrectCookiesObjectValues.forEach((incorrectCookiesObjectValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { cookies: { key: incorrectCookiesObjectValue } },
+              data: null
+            }
+          ],
+          'get'
+        )
+      ).toThrow(new Error('routes[0].entities.cookies.key'));
     });
   });
 

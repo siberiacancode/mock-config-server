@@ -80,7 +80,7 @@ $ npx mock-config-server
 
 ### Configs
 
-Configs are the fundamental part of the mock server. These configs are easy to fill and maintain. Config entities is an object with which you can emulate various application behaviors. You can specify `headers` | `query` | `params` | `body` for Rest request or `headers` | `query` | `variables` for GraphQL request to define what contract data you need to get. Using this mechanism, you can easily simulate the operation of the server and emulate various cases
+Configs are the fundamental part of the mock server. These configs are easy to fill and maintain. Config entities is an object with which you can emulate various application behaviors. You can specify `headers` | `cookies` | `query` | `params` | `body` for Rest request or `headers` | `cookies` | `query` | `variables` for GraphQL request to define what contract data you need to get. Using this mechanism, you can easily simulate the operation of the server and emulate various cases
 
 ##### Rest request config
 
@@ -88,7 +88,7 @@ Configs are the fundamental part of the mock server. These configs are easy to f
 - `method` {GET | POST | DELETE | PUT | PATCH} rest api method
 - `routes` {RestRouteConfig[]} request routes
   - `data` {any} mock data of request
-  - `entities?` Object<headers | query | params | body> object that helps in data retrieval
+  - `entities?` Object<headers | cookies | query | params | body> object that helps in data retrieval
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 
@@ -98,7 +98,7 @@ Configs are the fundamental part of the mock server. These configs are easy to f
 - `operationName` {string} graphql operation name
 - `routes` {GraphQLRouteConfig[]} request routes
   - `data` {any} mock data of request
-  - `entities?` Object<headers | query | variables> object that helps in data retrieval
+  - `entities?` Object<headers | cookies | query | variables> object that helps in data retrieval
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 
