@@ -2,7 +2,6 @@ import type { CookieOptions, Request, Response } from 'express';
 
 import type { Data, ResponseInterceptor, ResponseInterceptorParams } from '@/utils/types';
 
-import { parseCookie } from '../../parseCookie/parseCookie';
 import { setDelay } from '../helpers/setDelay';
 
 interface CallResponseInterceptorsParams {
@@ -23,13 +22,7 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
   const getHeader = (field: string) => response.getHeader(field);
   const getHeaders = () => response.getHeaders();
 
-  const getCookie = (name: string) => {
-    const { cookie } = request.headers;
-    if (cookie) {
-      const cookies = parseCookie(cookie);
-      return cookies[name];
-    }
-  };
+  const getCookie = (name: string) => request.cookies[name];
 
   const setStatusCode = (statusCode: number) => {
     response.statusCode = statusCode;
