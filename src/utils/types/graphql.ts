@@ -9,7 +9,7 @@ export interface GraphQLInput {
   variables: GraphQLVariables;
 }
 
-export type GraphQLEntities = 'headers' | 'query' | 'variables';
+export type GraphQLEntities = 'headers' | 'cookies' | 'query' | 'variables';
 
 export type GraphQLEntitiesValues = {
   [Key in GraphQLEntities]: Key extends 'variables' ? VariablesValue : PlainObject;

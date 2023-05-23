@@ -19,11 +19,16 @@ interface CallResponseInterceptorsParams {
 export const callResponseInterceptors = async (params: CallResponseInterceptorsParams) => {
   const { data, request, response, interceptors } = params;
 
+  const getHeader = (field: string) => response.getHeader(field);
+  const getHeaders = () => response.getHeaders();
+
+  const getCookie = (name: string) => request.cookies[name];
+
   const setStatusCode = (statusCode: number) => {
     response.statusCode = statusCode;
   };
 
-  const setHeader = (field: string, value?: string | string[]) => response.header(field, value);
+  const setHeader = (field: string, value?: string | string[]) => response.set(field, value);
   const appendHeader = (field: string, value?: string[] | string) => response.append(field, value);
 
   const setCookie = (name: string, value: string, options?: CookieOptions) => {
@@ -44,7 +49,10 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
     setStatusCode,
     setHeader,
     appendHeader,
+    getHeader,
+    getHeaders,
     setCookie,
+    getCookie,
     clearCookie,
     attachment
   };
