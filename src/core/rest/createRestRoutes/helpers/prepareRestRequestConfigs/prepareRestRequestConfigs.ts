@@ -18,7 +18,7 @@ const calculateRouteConfigWeight = (restRouteConfig: RestRouteConfig<RestMethod>
   if (cookies) routeConfigWeight += Object.keys(cookies).length;
   if (query) routeConfigWeight += Object.keys(query).length;
   if (params) routeConfigWeight += Object.keys(params).length;
-  if (body) routeConfigWeight += isPlainObject(body) ? Object.keys(body).length : 1;
+  if (body) routeConfigWeight += isPlainObject(body.value) ? Object.keys(body.value).length : 1;
 
   return routeConfigWeight;
 };

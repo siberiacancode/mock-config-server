@@ -5,7 +5,13 @@ import {
   callResponseInterceptors,
   callRequestInterceptor
 } from '@/utils/helpers';
-import type { Interceptors, RestConfig, RestEntities, RestEntitiesValue } from '@/utils/types';
+import type {
+  Interceptors,
+  RestConfig,
+  RestEntityName,
+  RestEntity,
+  RestHeaderOrCookieOrQueryOrParamsName
+} from '@/utils/types';
 
 import { prepareRestRequestConfigs } from './helpers';
 
@@ -23,9 +29,18 @@ export const createRestRoutes = (
 
       const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
         if (!entities) return true;
-        return (Object.entries(entities) as [RestEntities, RestEntitiesValue][]).every(
-          ([entity, entityValue]) => isEntityValuesEqual(entityValue, request[entity])
-        );
+        const entries = Object.entries(entities) as [RestEntityName, RestEntity][];
+        return entries.every(([entityName, entities]) => {
+          if (entityName === 'body') {
+            const { value: expectedValue, checkMode } = entities as RestEntity<'body'>;
+            return isEntityValuesEqual(checkMode, request[entityName], expectedValue);
+          }
+          const descriptors = Object.entries(entities) as [RestHeaderOrCookieOrQueryOrParamsName, RestEntity<Exclude<RestEntityName, 'body'>>[RestHeaderOrCookieOrQueryOrParamsName]][];
+          return (descriptors).every(([entityKey, entityDescriptor]) => {
+            const { value: expectedValue, checkMode } = entityDescriptor;
+            return isEntityValuesEqual(checkMode, request[entityName][entityKey], expectedValue);
+          })
+        });
       });
 
       if (!matchedRouteConfig) {

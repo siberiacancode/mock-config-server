@@ -8,11 +8,11 @@ import {
   callRequestInterceptor
 } from '@/utils/helpers';
 import type {
-  GraphQLEntities,
   GraphqlConfig,
   Interceptors,
-  PlainObject,
-  VariablesValue
+  GraphQLEntity,
+  GraphQLEntityName,
+  GraphQLHeaderOrCookieOrQueryName
 } from '@/utils/types';
 
 import { prepareGraphQLRequestConfigs } from './helpers';
@@ -69,13 +69,17 @@ export const createGraphQLRoutes = (
 
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
       if (!entities) return true;
-      return (Object.entries(entities) as [GraphQLEntities, PlainObject | VariablesValue][]).every(
-        ([entity, entityValue]) => {
-          if (entity === 'variables') {
-            return isEntityValuesEqual(entityValue, graphQLInput.variables);
-          }
-
-          return isEntityValuesEqual(entityValue, request[entity]);
+      const entries = Object.entries(entities) as [GraphQLEntityName, GraphQLEntity][];
+      return entries.every(([entityName, entities]) => {
+        if (entityName === 'variables') {
+          const { value: expectedValue, checkMode } = entities as GraphQLEntity<'variables'>;
+          return isEntityValuesEqual(checkMode, graphQLInput.variables, expectedValue);
+        }
+        const descriptors = Object.entries(entities) as [GraphQLHeaderOrCookieOrQueryName, GraphQLEntity<Exclude<GraphQLEntityName, 'variables'>>[GraphQLHeaderOrCookieOrQueryName]][];
+        return (descriptors).every(([entityKey, entityDescriptor]) => {
+          const { value: expectedValue, checkMode } = entityDescriptor;
+          return isEntityValuesEqual(checkMode, request[entityName][entityKey], expectedValue);
+        })
         }
       );
     });

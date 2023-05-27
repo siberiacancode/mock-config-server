@@ -1,10 +1,10 @@
 import { isPlainObject } from '@/utils/helpers';
-import type { RestMethod, RestMethodsEntities } from '@/utils/types';
+import type { RestMethod, RestEntityNameByMethod } from '@/utils/types';
 
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
 type AllowedEntitiesByMethod = {
-  [Key in keyof RestMethodsEntities]: RestMethodsEntities[Key][];
+  [Method in keyof RestEntityNameByMethod]: RestEntityNameByMethod[Method][];
 };
 const ALLOWED_ENTITIES_BY_METHOD: AllowedEntitiesByMethod = {
   get: ['headers', 'cookies', 'query', 'params'],

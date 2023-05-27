@@ -1,10 +1,10 @@
 import { isPlainObject } from '@/utils/helpers';
-import type { GraphQLOperationsEntities, GraphQLOperationType } from '@/utils/types';
+import type { GraphQLEntityNameByOperationType, GraphQLOperationType } from '@/utils/types';
 
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
 type AllowedEntitiesByOperationType = {
-  [Key in keyof GraphQLOperationsEntities]: GraphQLOperationsEntities[Key][];
+  [OperationType in keyof GraphQLEntityNameByOperationType]: GraphQLEntityNameByOperationType[OperationType][];
 };
 const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntitiesByOperationType = {
   query: ['headers', 'cookies', 'query', 'variables'],
