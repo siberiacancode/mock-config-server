@@ -6,7 +6,7 @@ import type { Cors, CorsOrigin } from '@/utils/types';
 import { getAllowedOrigins } from './helpers';
 
 export const corsMiddleware = (server: Express, cors: Cors) => {
-  server.use(async (req, res, next) => {
+  server.use(async (request, response, next) => {
     if (Array.isArray(cors.origin) && !cors.origin.length) {
       return next();
     }
@@ -14,13 +14,13 @@ export const corsMiddleware = (server: Express, cors: Cors) => {
     let allowedOrigins: CorsOrigin[] = [];
 
     if (typeof cors.origin === 'function') {
-      const origins = await cors.origin(req);
+      const origins = await cors.origin(request);
       allowedOrigins = getAllowedOrigins(origins);
     } else {
       allowedOrigins = getAllowedOrigins(cors.origin);
     }
 
-    const { origin } = req.headers;
+    const { origin } = request.headers;
 
     if (!allowedOrigins?.length || !origin) {
       return next();
@@ -34,25 +34,25 @@ export const corsMiddleware = (server: Express, cors: Cors) => {
     });
 
     if (isRequestOriginAllowed) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader(
+      response.setHeader('Access-Control-Allow-Origin', origin);
+      response.setHeader(
         'Access-Control-Allow-Credentials',
         `${cors.credentials ?? DEFAULT.CORS.CREDENTIALS}`
       );
-      res.setHeader(
+      response.setHeader(
         'Access-Control-Expose-Headers',
         cors.exposedHeaders ?? DEFAULT.CORS.EXPOSED_HEADERS
       );
 
-      if (req.method === 'OPTIONS') {
-        res.setHeader('Access-Control-Allow-Methods', cors.methods ?? DEFAULT.CORS.METHODS);
-        res.setHeader(
+      if (request.method === 'OPTIONS') {
+        response.setHeader('Access-Control-Allow-Methods', cors.methods ?? DEFAULT.CORS.METHODS);
+        response.setHeader(
           'Access-Control-Allow-Headers',
           cors.allowedHeaders ?? DEFAULT.CORS.ALLOWED_HEADERS
         );
-        res.setHeader('Access-Control-Max-Age', cors.maxAge ?? DEFAULT.CORS.MAX_AGE);
-        res.sendStatus(204);
-        return res.end();
+        response.setHeader('Access-Control-Max-Age', cors.maxAge ?? DEFAULT.CORS.MAX_AGE);
+        response.sendStatus(204);
+        return response.end();
       }
     }
 

@@ -7,20 +7,20 @@ type AllowedEntitiesByMethod = {
   [Key in keyof RestMethodsEntities]: RestMethodsEntities[Key][];
 };
 const ALLOWED_ENTITIES_BY_METHOD: AllowedEntitiesByMethod = {
-  get: ['headers', 'query', 'params'],
-  delete: ['headers', 'query', 'params'],
-  post: ['headers', 'query', 'params', 'body'],
-  put: ['headers', 'query', 'params', 'body'],
-  patch: ['headers', 'query', 'params', 'body'],
-  options: ['headers', 'query', 'params']
+  get: ['headers', 'cookies', 'query', 'params'],
+  delete: ['headers', 'cookies', 'query', 'params'],
+  post: ['headers', 'cookies', 'query', 'params', 'body'],
+  put: ['headers', 'cookies', 'query', 'params', 'body'],
+  patch: ['headers', 'cookies', 'query', 'params', 'body'],
+  options: ['headers', 'cookies', 'query', 'params']
 };
 
-const validateHeadersOrParams = (headersOrParams: unknown, entity: string) => {
-  const isHeadersOrParamsObject = isPlainObject(headersOrParams);
-  if (isHeadersOrParamsObject) {
-    Object.entries(headersOrParams).forEach(([headerOrParamKey, headerOrParamValue]) => {
-      if (typeof headerOrParamValue !== 'string') {
-        throw new Error(`${entity}.${headerOrParamKey}`);
+const validateHeadersOrCookiesOrParams = (headersOrCookiesOrParams: unknown, entity: string) => {
+  const isHeadersOrCookiesOrParamsObject = isPlainObject(headersOrCookiesOrParams);
+  if (isHeadersOrCookiesOrParamsObject) {
+    Object.entries(headersOrCookiesOrParams).forEach(([headerOrCookieOrParamKey, headerOrCookieOrParamValue]) => {
+      if (typeof headerOrCookieOrParamValue !== 'string') {
+        throw new Error(`${entity}.${headerOrCookieOrParamKey}`);
       }
     });
     return;
@@ -62,10 +62,10 @@ const validateEntities = (entities: unknown, method: RestMethod) => {
         throw new Error(`entities.${entity}`);
       }
 
-      if (entity === 'headers' || entity === 'params') {
+      if (entity === 'headers' || entity === 'params' || entity === 'cookies') {
         try {
-          const headersOrParams = entities[entity];
-          validateHeadersOrParams(headersOrParams, entity);
+          const headersOrCookiesOrParams = entities[entity];
+          validateHeadersOrCookiesOrParams(headersOrCookiesOrParams, entity);
         } catch (error: any) {
           throw new Error(`entities.${error.message}`);
         }

@@ -6,8 +6,16 @@ const calculateRouteConfigWeight = (restRouteConfig: RestRouteConfig<RestMethod>
   if (!entities) return 0;
 
   let routeConfigWeight = 0;
-  const { headers, query, params, body } = entities;
+  const {
+    headers,
+    cookies,
+    query,
+    params,
+    body
+  } = entities;
+
   if (headers) routeConfigWeight += Object.keys(headers).length;
+  if (cookies) routeConfigWeight += Object.keys(cookies).length;
   if (query) routeConfigWeight += Object.keys(query).length;
   if (params) routeConfigWeight += Object.keys(params).length;
   if (body) routeConfigWeight += isPlainObject(body) ? Object.keys(body).length : 1;
