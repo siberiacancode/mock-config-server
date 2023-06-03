@@ -1,5 +1,13 @@
 import { isPlainObject } from '@/utils/helpers';
-import type { RestMethod, RestEntityNameByMethod } from '@/utils/types';
+import type {
+  RestMethod,
+  RestEntityNameByMethod,
+  RestEntityName,
+  RestEntity,
+  CheckOneValueMode,
+  CheckTwoValuesMode,
+  CheckMode
+} from '@/utils/types';
 
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
@@ -15,36 +23,70 @@ const ALLOWED_ENTITIES_BY_METHOD: AllowedEntitiesByMethod = {
   options: ['headers', 'cookies', 'query', 'params']
 };
 
-const validateHeadersOrCookiesOrParams = (headersOrCookiesOrParams: unknown, entity: string) => {
-  const isHeadersOrCookiesOrParamsObject = isPlainObject(headersOrCookiesOrParams);
-  if (isHeadersOrCookiesOrParamsObject) {
-    Object.entries(headersOrCookiesOrParams).forEach(([headerOrCookieOrParamKey, headerOrCookieOrParamValue]) => {
-      if (typeof headerOrCookieOrParamValue !== 'string') {
-        throw new Error(`${entity}.${headerOrCookieOrParamKey}`);
+const ONE_VALUE_CHECK_MODES: CheckOneValueMode[] = [
+  'exists',
+  'notExists',
+  'isBoolean',
+  'isNumber',
+  'isString'
+]
+
+const TWO_VALUES_CHECK_MODES: CheckTwoValuesMode[] = [
+  'equals',
+  'notEquals',
+  'includes',
+  'notIncludes',
+  'startsWith',
+  'notStartsWith',
+  'endsWith',
+  'notEndsWith'
+]
+
+const ALLOWED_CHECK_MODES: CheckMode[] = [
+  ...ONE_VALUE_CHECK_MODES,
+  ...TWO_VALUES_CHECK_MODES,
+  'regExp',
+  'function'
+];
+
+export const isCheckModeValid = (checkMode: unknown) => ALLOWED_CHECK_MODES.includes(checkMode as CheckMode);
+
+const isHeadersOrCookiesOrQueryOrParamsDescriptorValid = (checkMode: unknown, value: unknown) => {
+  console.log('checkMode=', checkMode, 'value=', value)
+  if (ONE_VALUE_CHECK_MODES.includes(checkMode as CheckOneValueMode) && typeof value === 'undefined') return true;
+  if (
+    TWO_VALUES_CHECK_MODES.includes(checkMode as CheckTwoValuesMode) && (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean'
+    )
+  ) return true;
+
+  if (checkMode === 'function' && typeof value === 'function') return true;
+  if (checkMode === 'regExp' && (value instanceof RegExp)) return true;
+
+  return false;
+}
+
+const validateHeadersOrCookiesOrQueryOrParams = (headersOrCookiesOrQueryOrParams: unknown, entity: string) => {
+  const isHeadersOrCookiesOrQueryOrParamsObject = isPlainObject(headersOrCookiesOrQueryOrParams);
+  if (isHeadersOrCookiesOrQueryOrParamsObject) {
+    Object.entries(headersOrCookiesOrQueryOrParams).forEach(([headerOrCookieOrQueryOrParamKey, headerOrCookieOrQueryOrParamDescriptor]) => {
+      const { checkMode, value } = headerOrCookieOrQueryOrParamDescriptor as RestEntity<Exclude<RestEntityName, 'body'>>;
+      if (!isCheckModeValid(checkMode)) {
+        throw new Error(`${entity}.${headerOrCookieOrQueryOrParamKey}.checkMode`);
       }
-    });
-    return;
-  }
-
-  throw new Error(entity);
-};
-
-const validateQuery = (query: unknown, entity: string) => {
-  const isQueryObject = isPlainObject(query);
-  if (isQueryObject) {
-    Object.entries(query).forEach(([queryKey, queryValue]) => {
-      const isQueryValueArray = Array.isArray(queryValue);
-      if (isQueryValueArray) {
-        queryValue.forEach((queryValueElement, index) => {
-          if (typeof queryValueElement !== 'string') {
-            throw new Error(`${entity}.${queryKey}[${index}]`);
+      const isValueArray = Array.isArray(value);
+      if (isValueArray) {
+        value.forEach((element, index) => {
+          if (!isHeadersOrCookiesOrQueryOrParamsDescriptorValid(checkMode, element)) {
+            throw new Error(`${entity}.${headerOrCookieOrQueryOrParamKey}.value[${index}]`);
           }
-        });
+        })
         return;
       }
-
-      if (typeof queryValue !== 'string') {
-        throw new Error(`${entity}.${queryKey}`);
+      if (!isHeadersOrCookiesOrQueryOrParamsDescriptorValid(checkMode, value)) {
+        throw new Error(`${entity}.${headerOrCookieOrQueryOrParamKey}.value`);
       }
     });
     return;
@@ -56,25 +98,21 @@ const validateQuery = (query: unknown, entity: string) => {
 const validateEntities = (entities: unknown, method: RestMethod) => {
   const isEntitiesObject = isPlainObject(entities);
   if (isEntitiesObject) {
-    Object.keys(entities).forEach((entity) => {
-      const isEntityAllowed = ALLOWED_ENTITIES_BY_METHOD[method].includes(entity as any);
+    Object.keys(entities).forEach((entityName) => {
+      const isEntityAllowed = ALLOWED_ENTITIES_BY_METHOD[method].includes(entityName as any);
       if (!isEntityAllowed) {
-        throw new Error(`entities.${entity}`);
+        throw new Error(`entities.${entityName}`);
       }
 
-      if (entity === 'headers' || entity === 'params' || entity === 'cookies') {
+      if (
+        entityName === 'headers' ||
+        entityName === 'cookies' ||
+        entityName === 'query' ||
+        entityName === 'params'
+      ) {
         try {
-          const headersOrCookiesOrParams = entities[entity];
-          validateHeadersOrCookiesOrParams(headersOrCookiesOrParams, entity);
-        } catch (error: any) {
-          throw new Error(`entities.${error.message}`);
-        }
-      }
-
-      if (entity === 'query') {
-        try {
-          const query = entities[entity];
-          validateQuery(query, entity);
+          const headersOrCookiesOrQueryOrParams = entities[entityName];
+          validateHeadersOrCookiesOrQueryOrParams(headersOrCookiesOrQueryOrParams, entityName);
         } catch (error: any) {
           throw new Error(`entities.${error.message}`);
         }

@@ -5,16 +5,17 @@ import type { CheckFunction, CheckMode, CheckOneValueMode, CheckTwoValuesMode, D
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options';
 export type RestEntityName = 'headers' | 'cookies' | 'query' | 'params' | 'body';
+export type RestHeaderOrCookieOrQueryOrParamEntityValue = string | number | boolean;
 
 export type RestEntityValue<EntityName = RestEntityName> =
   EntityName extends 'headers'
-    ? string | number
+    ? RestHeaderOrCookieOrQueryOrParamEntityValue
     : EntityName extends 'cookies'
-      ? string | number
+      ? RestHeaderOrCookieOrQueryOrParamEntityValue
       : EntityName extends 'query'
-        ? string | number
+        ? RestHeaderOrCookieOrQueryOrParamEntityValue
         : EntityName extends 'params'
-          ? string | number
+          ? RestHeaderOrCookieOrQueryOrParamEntityValue
           : EntityName extends 'body'
             ? any
             : never;
@@ -26,7 +27,7 @@ export type RestEntityDescriptor<
   Check extends 'function' ?
     {
       checkMode: Check;
-      value: (actualValue: RestEntityValue<EntityName>, checkValues: CheckFunction) => boolean;
+      value: (actualValue: any, checkValues: CheckFunction) => boolean;
     } :
     Check extends 'regExp' ?
       {

@@ -6,8 +6,7 @@ export type CheckOneValueMode =
   | 'notExists'
   | 'isBoolean'
   | 'isNumber'
-  | 'isString'
-  | 'regExp';
+  | 'isString';
 
 export type CheckTwoValuesMode =
   | 'equals'
@@ -18,11 +17,12 @@ export type CheckTwoValuesMode =
   | 'notStartsWith'
   | 'endsWith'
   | 'notEndsWith'
+  | 'regExp'
+  | 'function';
 
 export type CheckMode =
   | CheckOneValueMode
   | CheckTwoValuesMode
-  | 'function';
 
 export type CheckFunction = (checkMode: Exclude<CheckMode, 'function'>, firstValue: any, secondValue?: any) => boolean;
 

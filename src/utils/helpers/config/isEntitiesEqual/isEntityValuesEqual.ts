@@ -4,7 +4,7 @@ import type { CheckFunction, CheckMode } from '@/utils/types';
 
 import { isPlainObject } from '../../isPlainObject/isPlainObject';
 
-export const checkValues: CheckFunction = (checkMode, firstValue, secondValue) => {
+export const checkFunction: CheckFunction = (checkMode, firstValue: any, secondValue?: any) => {
   const isFirstValueUndefined = typeof firstValue === 'undefined';
 
   if (checkMode === 'exists') return !isFirstValueUndefined;
@@ -16,7 +16,7 @@ export const checkValues: CheckFunction = (checkMode, firstValue, secondValue) =
   const firstValueString = `${firstValue}`;
 
   if (checkMode === 'isBoolean') return firstValueString === 'true' || firstValueString === 'false';
-  if (checkMode === 'isNumber') return !Number.isNaN(parseFloat(firstValueString));
+  if (checkMode === 'isNumber') return /^-?[1-9]\d*(\.\d+)?$/.test(firstValueString) && !Number.isNaN(Number.parseFloat(firstValueString));
   if (checkMode === 'isString') return true;
 
   const isSecondValueUndefined = typeof secondValue === 'undefined';
@@ -44,15 +44,15 @@ export const checkValues: CheckFunction = (checkMode, firstValue, secondValue) =
   throw new Error('Wrong checkMode');
 };
 
-export const isEntityValuesEqual = (checkMode: CheckMode, firstEntityValue: any, secondEntityValue: any) => {
-  if (checkMode === 'function') return secondEntityValue(firstEntityValue, checkValues);
+export const isEntityValuesEqual = (checkMode: CheckMode, firstEntityValue: any, secondEntityValue?: any) => {
+  if (checkMode === 'function') return secondEntityValue(firstEntityValue, checkFunction);
 
   const isValuesArePlainObjects = isPlainObject(firstEntityValue) && isPlainObject(secondEntityValue);
   if (isValuesArePlainObjects) {
     const flattenFirstEntityValue = flatten<any, any>(firstEntityValue);
     const flattenSecondEntityValue = flatten<any, any>(secondEntityValue);
     return Object.keys(flattenSecondEntityValue).every((key) =>
-      checkValues(checkMode, flattenFirstEntityValue[key], flattenSecondEntityValue[key]));
+      checkFunction(checkMode, flattenFirstEntityValue[key], flattenSecondEntityValue[key]));
   }
 
   const isValuesAreArrays = Array.isArray(firstEntityValue) && Array.isArray(secondEntityValue);
@@ -64,9 +64,9 @@ export const isEntityValuesEqual = (checkMode: CheckMode, firstEntityValue: any,
         Object.keys(flattenSecondEntityValue).length &&
       Object.keys(flattenFirstEntityValue).every(
         (key) =>
-          checkValues(checkMode, flattenFirstEntityValue[key], flattenSecondEntityValue[key]))
+          checkFunction(checkMode, flattenFirstEntityValue[key], flattenSecondEntityValue[key]))
     )
   }
 
-  return checkValues(checkMode, firstEntityValue, secondEntityValue);
+  return checkFunction(checkMode, firstEntityValue, secondEntityValue);
 };

@@ -102,6 +102,34 @@ Configs are the fundamental part of the mock server. These configs are easy to f
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 
+##### Entities
+
+`entities` can be considered as parameters to each `route` describing what `entities` client should send to receive corresponding data.
+
+`entities` is an object in which you can describe `headers`, `cookies`, `query`, `params` and `body` for `Rest api` and `headers`, `cookies`, `query` and `variables` for `GraphQL api`.
+
+`headers`, `cookies`, `query` and `params` are represented as an object with the names of the corresponding `entity` and its `descriptor`, `body` and `variables` are represented by `descriptor` only.
+
+`descriptor` is an object with `checkMode` and `value` fields. `value` contains the value against which the `entity` sent by the client will be checked. `checkMode` describes the logic for checking this `entity`.
+
+`checkMode` is divided into two groups: "checking only `actual entity`" and "checking `actual entity` with `value`". The `value` field is not required for the first group.
+
+First group checkModes can be: 'exists' | 'notExists' | 'isBoolean' | 'isNumber' | 'isString'.
+Second group checkModes can be: 'equals' | 'notEquals' | 'includes' | 'notIncludes' | 'startsWith' | 'notStartsWith' | 'endsWith' | 'notEndsWith' | 'regExp' | 'function';
+
+`checkModes` from the second group, except `function` can be arrays, so you can write more complex logic. For example "does not contain these values" or "must be equal to one of these values". You can also use `regExp` to describe any other logic.
+
+`function checkMode` is the most powerful way to describe your `entities` logic, but in most cases you will be fine using other `checkModes`.
+
+`Function value` has the following signature `(actualValue, checkFunction) => boolean`.
+Return `true` if `actualValue` matches your logic or `false` otherwise.
+
+You can use the `checkFunction` function if you want to describe your logic in a more declarative way.
+`checkFunction` has the following signature `(checkMode, firstValue, secondValue?) => boolean`.
+
+If `entities` is omitted, `route` will be taken as default and its data will be returned if no other `routes` match.
+
+
 ##### Rest example
 
 ```javascript
@@ -116,15 +144,56 @@ const mockServerConfig = {
         routes: [
           {
             entities: {
-              headers: { 'name-header': 'Nursultan' }
+              headers: {
+                'name-header': {
+                  checkMode: 'equals',
+                  value: 'Nursultan'
+                },
+                authToken: {
+                  checkMode: 'exists'
+                }
+              }
             },
             data: { emoji: '🦁', name: 'Nursultan' }
           },
           {
             entities: {
-              headers: { 'name-header': 'Dmitriy' }
+              headers: {
+                'name-header': {
+                  checkMode: 'equals',
+                  value: 'Dmitriy'
+                },
+                authToken: {
+                  checkMode: 'startsWith',
+                  value: ['123', 'abc']
+                }
+              }
             },
             data: { emoji: '☄', name: 'Dmitriy' }
+          },
+          {
+            entities: {
+              headers: {
+                'name-header': {
+                  checkMode: 'equals',
+                  value: 'Sergey'
+                },
+                authToken: {
+                  checkMode: 'function',
+                  value: (actualValue, checkFunction) => {
+                    if (!actualValue || !actualValue.includes('_')) return false;
+
+                    const [firstPart, secondPart, thirdPart] = actualValue.split('_');
+                    const condition1 = checkFunction('includes', firstPart, 'abc');
+                    const condition2 = checkFunction('isNumber', secondPart);
+                    const condition3 = checkFunction('regExp', thirdPart, /^def\d{4}$/);
+                    
+                    return condition1 && condition2 && condition3;
+                  } 
+                }
+              }
+            },
+            data: { emoji: '🐘', name: 'Sergey' }
           }
         ]
       }
@@ -140,12 +209,13 @@ Now you can make a request with an additional header and get the desired result
 ```javascript
 fetch('http://localhost:31299/api/user', {
   headers: {
-    'name-header': 'Nursultan',
+    'name-header': 'Sergey',
+    'authToken': 'abcd_12345_def6789',
     'Content-Type': 'application/json'
   }
 })
   .then((response) => response.json())
-  .then((data) => console.log(data)); // {  emoji: '🦁', name: 'Nursultan' }
+  .then((data) => console.log(data)); // { emoji: '🐘', name: 'Sergey' }
 ```
 
 ##### GraphQL example
@@ -162,13 +232,23 @@ const mockServerConfig = {
         routes: [
           {
             entities: {
-              headers: { 'name-header': 'Nursultan' }
+              headers: {
+                'name-header': {
+                  checkMode: 'equals',
+                  value: 'Nursultan'
+                }
+              }
             },
             data: { emoji: '🦁', name: 'Nursultan' }
           },
           {
             entities: {
-              headers: { 'name-header': 'Dmitriy' }
+              headers: {
+                'name-header': {
+                  checkMode: 'equals',
+                  value: 'Dmitriy'
+                }
+              }
             },
             data: { emoji: '☄', name: 'Dmitriy' }
           }

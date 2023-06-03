@@ -19,18 +19,46 @@ describe('notFoundMiddleware', () => {
       {
         path: '/posts/:postId',
         method: 'get',
-        routes: [{ data: {}, entities: { params: { postId: '1' } } }]
+        routes: [
+          {
+            data: {},
+            entities: {
+              params: {
+                postId: {
+                  checkMode: 'equals',
+                  value: 1
+                }
+              }
+            }
+          }
+        ]
       },
 
       {
         path: '/developers',
         method: 'get',
-        routes: [{ data: {} }]
+        routes: [
+          {
+            data: {}
+          }
+        ]
       },
       {
         path: '/developers/:developerId',
         method: 'get',
-        routes: [{ data: {}, entities: { params: { developerId: '1' } } }]
+        routes: [
+          {
+            data: {},
+            entities: {
+              params: {
+                developerId: {
+                  checkMode: 'equals',
+                  value: 1
+                }
+              }
+            }
+          }
+        ]
       }
     ]
   };

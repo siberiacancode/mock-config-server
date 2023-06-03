@@ -1,5 +1,6 @@
 import { isEntityValuesEqual } from './isEntityValuesEqual';
 
+// TODO: add tests for all checkModes
 describe('isEntityValuesEqual', () => {
   test('All Primitive values should compare independent of their types', () => {
     expect(isEntityValuesEqual('equals', 12, '12')).toBe(true);

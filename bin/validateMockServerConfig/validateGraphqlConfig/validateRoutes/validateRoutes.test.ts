@@ -16,7 +16,21 @@ describe('validateRoutes (graphql)', () => {
   });
 
   test('Should correctly handle entities only with correct type', () => {
-    const correctEntitiesValues = [{}, { headers: { key: 'value' } }, undefined];
+    const correctEntitiesValues = [
+      {},
+      {
+        headers: {
+          key: { checkMode: 'equals', value: true }
+        },
+        cookies: {
+          key: { checkMode: 'equals', value: 3000 }
+        },
+        query: {
+          key: { checkMode: 'equals', value: 'value' }
+        }
+      },
+      undefined
+    ];
     correctEntitiesValues.forEach((correctEntitiesValue) => {
       expect(() =>
         validateRoutes(
@@ -54,7 +68,7 @@ describe('validateRoutes (graphql)', () => {
         validateRoutes(
           [
             {
-              entities: { [correctEntity]: { key: 'value' } },
+              entities: { [correctEntity]: { key: { checkMode: 'equals', value: 'value' } } },
               data: null
             }
           ],
@@ -69,7 +83,7 @@ describe('validateRoutes (graphql)', () => {
         validateRoutes(
           [
             {
-              entities: { [incorrectEntity]: { key: 'value' } },
+              entities: { [incorrectEntity]: { key: { checkMode: 'equals', value: 'value' } } },
               data: null
             }
           ],
@@ -86,7 +100,7 @@ describe('validateRoutes (graphql)', () => {
         validateRoutes(
           [
             {
-              entities: { [correctEntity]: { key: 'value' } },
+              entities: { [correctEntity]: { key: { checkMode: 'equals', value: 'value' } } },
               data: null
             }
           ],
@@ -101,7 +115,7 @@ describe('validateRoutes (graphql)', () => {
         validateRoutes(
           [
             {
-              entities: { [incorrectEntity]: { key: 'value' } },
+              entities: { [incorrectEntity]: { key: { checkMode: 'equals', value: 'value' } } },
               data: null
             }
           ],
@@ -118,7 +132,7 @@ describe('validateRoutes (graphql)', () => {
         validateRoutes(
           [
             {
-              entities: { headers: { key: correctHeadersObjectValue } },
+              entities: { headers: { key: { checkMode: 'equals', value: correctHeadersObjectValue } } },
               data: null
             }
           ],
@@ -127,7 +141,7 @@ describe('validateRoutes (graphql)', () => {
       ).not.toThrow(Error);
     });
 
-    const incorrectHeadersValues = [true, 3000, null, undefined, [], () => {}];
+    const incorrectHeadersValues = [true, null, undefined, [], () => {}];
     incorrectHeadersValues.forEach((incorrectHeaderValue) => {
       expect(() =>
         validateRoutes(
@@ -142,30 +156,30 @@ describe('validateRoutes (graphql)', () => {
       ).toThrow(new Error('routes[0].entities.headers'));
     });
 
-    const incorrectHeadersObjectValues = [true, 3000, null, undefined, {}, [], () => {}];
+    const incorrectHeadersObjectValues = [null, undefined, {}, () => {}];
     incorrectHeadersObjectValues.forEach((incorrectHeadersObjectValue) => {
       expect(() =>
         validateRoutes(
           [
             {
-              entities: { headers: { key: incorrectHeadersObjectValue } },
+              entities: { headers: { key: { checkMode: 'equals', value: incorrectHeadersObjectValue } } },
               data: null
             }
           ],
           'query'
         )
-      ).toThrow(new Error('routes[0].entities.headers.key'));
+      ).toThrow(new Error('routes[0].entities.headers.key.value'));
     });
   });
 
   test('Should correctly handle cookies entity only with correct type', () => {
-    const correctCookiesObjectValues = ['string'];
+    const correctCookiesObjectValues = ['string', 3000, true];
     correctCookiesObjectValues.forEach((correctCookiesObjectValue) => {
       expect(() =>
         validateRoutes(
           [
             {
-              entities: { cookies: { key: correctCookiesObjectValue } },
+              entities: { cookies: { key: { checkMode: 'equals', value: correctCookiesObjectValue } } },
               data: null
             }
           ],
@@ -189,30 +203,30 @@ describe('validateRoutes (graphql)', () => {
       ).toThrow(new Error('routes[0].entities.cookies'));
     });
 
-    const incorrectCookiesObjectValues = [true, 3000, null, undefined, {}, [], () => {}];
+    const incorrectCookiesObjectValues = [null, undefined, {}, () => {}];
     incorrectCookiesObjectValues.forEach((incorrectCookiesObjectValue) => {
       expect(() =>
         validateRoutes(
           [
             {
-              entities: { cookies: { key: incorrectCookiesObjectValue } },
+              entities: { cookies: { key: { checkMode: 'equals', value: incorrectCookiesObjectValue } } },
               data: null
             }
           ],
           'query'
         )
-      ).toThrow(new Error('routes[0].entities.cookies.key'));
+      ).toThrow(new Error('routes[0].entities.cookies.key.value'));
     });
   });
 
   test('Should correctly handle query entity only with correct type', () => {
-    const correctQueryObjectValues = ['string'];
+    const correctQueryObjectValues = ['string', 3000, true];
     correctQueryObjectValues.forEach((correctQueryObjectValue) => {
       expect(() =>
         validateRoutes(
           [
             {
-              entities: { query: { key: correctQueryObjectValue } },
+              entities: { query: { key: { checkMode: 'equals', value: correctQueryObjectValue } } },
               data: null
             }
           ],
@@ -236,19 +250,19 @@ describe('validateRoutes (graphql)', () => {
       ).toThrow(new Error('routes[0].entities.query'));
     });
 
-    const incorrectQueryObjectValues = [true, 3000, null, undefined, {}, [], () => {}];
+    const incorrectQueryObjectValues = [null, undefined, {}, () => {}];
     incorrectQueryObjectValues.forEach((incorrectQueryObjectValue) => {
       expect(() =>
         validateRoutes(
           [
             {
-              entities: { query: { key: incorrectQueryObjectValue } },
+              entities: { query: { key: { checkMode: 'equals', value: incorrectQueryObjectValue } } },
               data: null
             }
           ],
           'query'
         )
-      ).toThrow(new Error('routes[0].entities.query.key'));
+      ).toThrow(new Error('routes[0].entities.query.key.value'));
     });
   });
 });

@@ -4,6 +4,7 @@ import type { Interceptors } from './interceptors';
 import type { CheckFunction, CheckMode, CheckOneValueMode, CheckTwoValuesMode, Data } from './values';
 
 export type GraphQLEntityName = 'headers' | 'cookies' | 'query' | 'variables';
+export type GraphQLHeaderOrCookieOrQueryEntityValue = string | number | boolean;
 
 export type GraphQLOperationType = 'query' | 'mutation';
 export type GraphQLOperationName = string | RegExp;
@@ -21,11 +22,11 @@ export interface GraphQLInput {
 
 export type GraphQLEntityValue<EntityName = GraphQLEntityName> =
   EntityName extends 'headers'
-    ? string | number
+    ? GraphQLHeaderOrCookieOrQueryEntityValue
     : EntityName extends 'cookies'
-      ? string | number
+      ? GraphQLHeaderOrCookieOrQueryEntityValue
       : EntityName extends 'query'
-        ? string | number
+        ? GraphQLHeaderOrCookieOrQueryEntityValue
         : EntityName extends 'variables'
           ? any
           : never;
@@ -37,7 +38,7 @@ export type GraphQLEntityDescriptor<
   Check extends 'function' ?
     {
       checkMode: Check;
-      value: (actualValue: GraphQLEntityValue<EntityName>, checkValues: CheckFunction) => boolean;
+      value: (actualValue: any, checkFunction: CheckFunction) => boolean;
     } :
     Check extends 'regExp' ?
       {

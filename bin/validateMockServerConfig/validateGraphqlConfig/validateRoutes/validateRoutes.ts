@@ -1,5 +1,13 @@
 import { isPlainObject } from '@/utils/helpers';
-import type { GraphQLEntityNameByOperationType, GraphQLOperationType } from '@/utils/types';
+import type {
+  GraphQLEntityNameByOperationType,
+  GraphQLOperationType,
+  GraphQLEntity,
+  GraphQLEntityName,
+  CheckOneValueMode,
+  CheckTwoValuesMode,
+  CheckMode
+} from '@/utils/types';
 
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
@@ -11,12 +19,69 @@ const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntitiesByOperationType = {
   mutation: ['headers', 'cookies', 'query', 'variables']
 };
 
+const ONE_VALUE_CHECK_MODES: CheckOneValueMode[] = [
+  'exists',
+  'notExists',
+  'isBoolean',
+  'isNumber',
+  'isString'
+]
+
+const TWO_VALUES_CHECK_MODES: CheckTwoValuesMode[] = [
+  'equals',
+  'notEquals',
+  'includes',
+  'notIncludes',
+  'startsWith',
+  'notStartsWith',
+  'endsWith',
+  'notEndsWith'
+]
+
+const ALLOWED_CHECK_MODES: CheckMode[] = [
+  ...ONE_VALUE_CHECK_MODES,
+  ...TWO_VALUES_CHECK_MODES,
+  'regExp',
+  'function'
+];
+
+export const isCheckModeValid = (checkMode: unknown) => ALLOWED_CHECK_MODES.includes(checkMode as CheckMode);
+
+const isHeadersOrCookiesOrQueryDescriptorValid = (checkMode: unknown, value: unknown) => {
+  if (ONE_VALUE_CHECK_MODES.includes(checkMode as CheckOneValueMode) && typeof value === 'undefined') return true;
+  if (
+    TWO_VALUES_CHECK_MODES.includes(checkMode as CheckTwoValuesMode) && (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean'
+    )
+  ) return true;
+
+  if (checkMode === 'function' && typeof value === 'function') return true;
+  if (checkMode === 'regExp' && (value instanceof RegExp)) return true;
+
+  return false;
+}
+
 const validateHeadersOrCookiesOrQuery = (headersOrCookiesOrQuery: unknown, entity: string) => {
   const isHeadersOrCookiesOrQueryObject = isPlainObject(headersOrCookiesOrQuery);
   if (isHeadersOrCookiesOrQueryObject) {
-    Object.entries(headersOrCookiesOrQuery).forEach(([headerOrCookieOrQueryKey, headerOrCookieOrQueryValue]) => {
-      if (typeof headerOrCookieOrQueryValue !== 'string') {
-        throw new Error(`${entity}.${headerOrCookieOrQueryKey}`);
+    Object.entries(headersOrCookiesOrQuery).forEach(([headerOrCookieOrQueryKey, headerOrCookieOrQueryDescriptor]) => {
+      const { checkMode, value } = headerOrCookieOrQueryDescriptor as GraphQLEntity<Exclude<GraphQLEntityName, 'variables'>>;
+      if (!isCheckModeValid(checkMode)) {
+        throw new Error(`${entity}.${headerOrCookieOrQueryKey}.checkMode`);
+      }
+      const isValueArray = Array.isArray(value);
+      if (isValueArray) {
+        value.forEach((element, index) => {
+          if (!isHeadersOrCookiesOrQueryDescriptorValid(checkMode, element)) {
+            throw new Error(`${entity}.${headerOrCookieOrQueryKey}.value[${index}]`);
+          }
+        })
+        return;
+      }
+      if (!isHeadersOrCookiesOrQueryDescriptorValid(checkMode, value)) {
+        throw new Error(`${entity}.${headerOrCookieOrQueryKey}.value`);
       }
     });
     return;

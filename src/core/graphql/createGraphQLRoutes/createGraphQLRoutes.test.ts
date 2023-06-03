@@ -40,8 +40,22 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  headers: { key1: 'value1', key2: 'value2' },
-                  query: { key1: 'value1' }
+                  headers: {
+                    key1: {
+                      checkMode: 'equals',
+                      value: 'value1'
+                    },
+                    key2: {
+                      checkMode: 'equals',
+                      value: 'value2'
+                    }
+                  },
+                  query: {
+                    key1: {
+                      checkMode: 'equals',
+                      value: 'value1'
+                    }
+                  }
                 },
                 data: { name: 'John', surname: 'Doe' }
               }
@@ -83,7 +97,12 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  query: { key1: 'value1' }
+                  query: {
+                    key1: {
+                      checkMode: 'equals',
+                      value: 'value1'
+                    }
+                  }
                 },
                 data: ({ url }, { query }) => ({
                   url,
@@ -104,7 +123,12 @@ describe('createGraphQLRoutes', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body).toEqual({
       url: `/?query=${encodeURIComponent('query GetUsers { users { name } }')}&key1=value1`,
-      query: { key1: 'value1' }
+      query: {
+        key1: {
+          checkMode: 'equals',
+          value: 'value1'
+        }
+      }
     });
   });
 
@@ -118,8 +142,22 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  headers: { key1: 'value1', key2: 'value2' },
-                  query: { key1: 'value1' }
+                  headers: {
+                    key1: {
+                      checkMode: 'equals',
+                      value: 'value1'
+                    },
+                    key2: {
+                      checkMode: 'equals',
+                      value: 'value2'
+                    }
+                  },
+                  query: {
+                    key1: {
+                      checkMode: 'equals',
+                      value: 'value1'
+                    }
+                  }
                 },
                 data: { name: 'John', surname: 'Doe' }
               }
@@ -152,8 +190,22 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  headers: { key1: 'value1', key2: 'value2' },
-                  query: { key1: 'value1' }
+                  headers: {
+                    key1: {
+                      checkMode: 'equals',
+                      value: 'value1'
+                    },
+                    key2: {
+                      checkMode: 'equals',
+                      value: 'value2'
+                    }
+                  },
+                  query: {
+                    key1: {
+                      checkMode: 'equals',
+                      value: 'value1'
+                    }
+                  }
                 },
                 data: { name: 'John', surname: 'Doe' }
               }
@@ -195,15 +247,47 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  headers: { key1: 'value1', key2: 'value2' },
-                  query: { key1: 'value1' }
+                  headers: {
+                    key1: {
+                      checkMode: 'equals',
+                      value: 'value1'
+                    },
+                    key2: {
+                      checkMode: 'equals',
+                      value: 'value2'
+                    }
+                  },
+                  query: {
+                    key1: {
+                      checkMode: 'equals',
+                      value: 'value1'
+                    }
+                  }
                 },
                 data: { name: 'John', surname: 'Doe' }
               },
               {
                 entities: {
-                  headers: { key1: 'value1', key2: 'value2' },
-                  query: { key1: 'value1', key2: 'value2' }
+                  headers: {
+                    key1: {
+                      checkMode: 'equals',
+                      value: 'value1'
+                    },
+                    key2: {
+                      checkMode: 'equals',
+                      value: 'value2'
+                    }
+                  },
+                  query: {
+                    key1: {
+                      checkMode: 'equals',
+                      value: 'value1'
+                    },
+                    key2: {
+                      checkMode: 'equals',
+                      value: 'value2'
+                    }
+                  }
                 },
                 data: { name: 'John', surname: 'Smith' }
               }
@@ -245,7 +329,12 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  headers: { key1: 'value1' }
+                  headers: {
+                    key1: {
+                      checkMode: 'equals',
+                      value: 'value1'
+                    }
+                  }
                 },
                 data: { name: 'John', surname: 'Doe' }
               }
@@ -279,12 +368,15 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  variables: [
-                    {
-                      key1: 'value1',
-                      key2: { nestedKey1: 'nestedValue1' }
-                    }
-                  ]
+                  variables: {
+                    checkMode: 'equals',
+                    value: [
+                      {
+                        key1: 'value1',
+                        key2: { nestedKey1: 'nestedValue1' }
+                      }
+                    ]
+                  }
                 },
                 data: { name: 'John', surname: 'Doe' }
               }
@@ -351,8 +443,11 @@ describe('createGraphQLRoutes', () => {
               {
                 entities: {
                   variables: {
-                    key1: 'value1',
-                    key2: { nestedKey1: 'nestedValue1' }
+                    checkMode: 'equals',
+                    value: {
+                      key1: 'value1',
+                      key2: { nestedKey1: 'nestedValue1' }
+                    }
                   }
                 },
                 data: { name: 'John', surname: 'Doe' }
@@ -402,8 +497,11 @@ describe('createGraphQLRoutes', () => {
               {
                 entities: {
                   variables: {
-                    key1: 'value1',
-                    key2: 'value2'
+                    checkMode: 'equals',
+                    value: {
+                      key1: 'value1',
+                      key2: 'value2'
+                    }
                   }
                 },
                 data: { name: 'John', surname: 'Doe' }
@@ -418,8 +516,11 @@ describe('createGraphQLRoutes', () => {
               {
                 entities: {
                   variables: {
-                    key1: 'value1',
-                    key2: 'value2'
+                    checkMode: 'equals',
+                    value: {
+                      key1: 'value1',
+                      key2: 'value2'
+                    }
                   }
                 },
                 data: { name: 'John', surname: 'Smith' }
@@ -460,8 +561,11 @@ describe('createGraphQLRoutes', () => {
               {
                 entities: {
                   variables: {
-                    key1: 'value1',
-                    key2: 'value2'
+                    checkMode: 'equals',
+                    value: {
+                      key1: 'value1',
+                      key2: 'value2'
+                    }
                   }
                 },
                 data: { name: 'John', surname: 'Doe' },
@@ -477,8 +581,11 @@ describe('createGraphQLRoutes', () => {
               {
                 entities: {
                   variables: {
-                    key1: 'value1',
-                    key2: 'value2'
+                    checkMode: 'equals',
+                    value: {
+                      key1: 'value1',
+                      key2: 'value2'
+                    }
                   }
                 },
                 data: { name: 'John', surname: 'Smith' }
