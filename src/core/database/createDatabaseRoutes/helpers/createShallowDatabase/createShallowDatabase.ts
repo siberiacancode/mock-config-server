@@ -19,9 +19,9 @@ export const createShallowDatabase = (
     });
 
     router.route(`/${key}`).post((request, response) => {
-      // TODO add location header
       storage.write(key, request.body);
-      response.json(request.body);
+      response.set('Location', request.url);
+      response.status(201).json(request.body);
     });
 
     router.route(`/${key}`).put((request, response) => {
@@ -46,4 +46,6 @@ export const createShallowDatabase = (
       response.json(newResource);
     });
   });
+
+  return router;
 };
