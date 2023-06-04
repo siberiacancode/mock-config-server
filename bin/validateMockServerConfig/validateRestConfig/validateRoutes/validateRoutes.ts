@@ -52,7 +52,6 @@ const ALLOWED_CHECK_MODES: CheckMode[] = [
 export const isCheckModeValid = (checkMode: unknown) => ALLOWED_CHECK_MODES.includes(checkMode as CheckMode);
 
 const isHeadersOrCookiesOrQueryOrParamsDescriptorValid = (checkMode: unknown, value: unknown) => {
-  console.log('checkMode=', checkMode, 'value=', value)
   if (ONE_VALUE_CHECK_MODES.includes(checkMode as CheckOneValueMode) && typeof value === 'undefined') return true;
   if (
     TWO_VALUES_CHECK_MODES.includes(checkMode as CheckTwoValuesMode) && (
