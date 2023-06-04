@@ -7,8 +7,8 @@ export class MemoryStorage<T extends PlainObject = PlainObject> {
   public constructor(initialData: T) {
     this.data = initialData;
   }
-  
-  public read(key: string | string[]) {
+
+  public read(key: string | number | (string | number)[]): T[keyof T] {
     if (!Array.isArray(key)) {
       if (key in this.data) {
         return this.data[key];
@@ -16,7 +16,7 @@ export class MemoryStorage<T extends PlainObject = PlainObject> {
       throw new Error(`Key ${key as string} does not exists`);
     }
 
-    let value: unknown = this.data;
+    let value: any = this.data;
     key.forEach((keyPart) => {
       if (isPlainObject(value) && keyPart in value) {
         value = value[keyPart];
@@ -26,13 +26,13 @@ export class MemoryStorage<T extends PlainObject = PlainObject> {
     });
     return value;
   }
-  
-  public write(key: string | string[], value: unknown) {
+
+  public write(key: string | number | (string | number)[], value: unknown): void {
     if (!Array.isArray(key)) {
       this.data[key as keyof T] = value as T[keyof T];
       return;
     }
-    
+
     let writable: unknown = this.data;
     key.forEach((keyPart, index) => {
       if (!isPlainObject(writable)) {

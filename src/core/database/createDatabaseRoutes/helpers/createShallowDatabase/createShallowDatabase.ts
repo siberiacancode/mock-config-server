@@ -10,7 +10,7 @@ export const createShallowDatabase = (
   storage: MemoryStorage
 ) => {
   Object.keys(shallowDatabase).forEach((key) => {
-    router.route(key).get((_request, response) => {
+    router.route(`/${key}`).get((_request, response) => {
       // ✅ important:
       // set 'Cache-Control' header for explicit browsers response revalidate
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
@@ -18,32 +18,32 @@ export const createShallowDatabase = (
       response.json(storage.read(key));
     });
 
-    router.route(key).post((request, response) => {
+    router.route(`/${key}`).post((request, response) => {
       // TODO add location header
       storage.write(key, request.body);
       response.json(request.body);
     });
 
-    router.route(key).put((request, response) => {
+    router.route(`/${key}`).put((request, response) => {
       storage.write(key, request.body);
       response.json(request.body);
     });
 
-    router.route(key).patch((request, response) => {
-      const currentStorageResource = storage.read(key);
-      
-      if (!isPlainObject(currentStorageResource) || !isPlainObject(request.body)) {
+    router.route(`/${key}`).patch((request, response) => {
+      const currentResource = storage.read(key);
+
+      if (!isPlainObject(currentResource) || !isPlainObject(request.body)) {
         response.status(400).json({
           message: 'Cannot handle PATCH for non-object data or body',
-          data: currentStorageResource,
+          data: currentResource,
           body: request.body
         });
         return;
       }
 
-      const newStorageResource = { ...currentStorageResource, ...request.body };
-      storage.write(key, newStorageResource);
-      response.json(newStorageResource);
+      const newResource = { ...currentResource, ...request.body };
+      storage.write(key, newResource);
+      response.json(newResource);
     });
-  })
+  });
 };

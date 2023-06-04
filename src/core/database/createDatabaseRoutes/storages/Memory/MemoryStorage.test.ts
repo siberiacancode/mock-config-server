@@ -11,23 +11,25 @@ describe('MemoryStorage: read', () => {
   it('Should return correct data for read with valid single key', () => {
     expect(memoryStorage.read('john')).toStrictEqual(initialData.john);
   });
-  
+
   it('Should throw an error for read with invalid single key', () => {
     expect(() => memoryStorage.read('jim')).toThrowError('Key jim does not exists');
   });
-  
+
   it('Should return correct data for read with valid array key', () => {
     expect(memoryStorage.read(['john', 'name'])).toStrictEqual(initialData.john.name);
   });
-  
+
   it('Should throw an error for read with invalid array key', () => {
     expect(() => memoryStorage.read(['jim', 'name'])).toThrowError('Key jim does not exists');
-    expect(() => memoryStorage.read(['john', 'surname'])).toThrowError('Key surname does not exists');
+    expect(() => memoryStorage.read(['john', 'surname'])).toThrowError(
+      'Key surname does not exists'
+    );
   });
 });
 
 describe('MemoryStorage: write', () => {
-  let memoryStorage: MemoryStorage;
+  let memoryStorage: MemoryStorage<typeof initialData>;
   beforeEach(() => {
     memoryStorage = new MemoryStorage(initialData);
   });
@@ -63,7 +65,7 @@ describe('MemoryStorage: write', () => {
 
     expect(memoryStorage.read(['jim', 'name'])).toBe(jimName);
   });
-  
+
   it('Should rewrite non-objects for existent parts of array key', () => {
     const johnFirstName = 'John';
 
