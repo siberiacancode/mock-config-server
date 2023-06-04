@@ -2,6 +2,8 @@ import type { Express } from 'express';
 import express from 'express';
 import request from 'supertest';
 
+import type { ShallowDatabase } from '@/utils/types';
+
 import { MemoryStorage } from '../../storages';
 
 import { createShallowDatabase } from './createShallowDatabase';
@@ -12,7 +14,7 @@ describe('createShallowDatabase', () => {
     jane: { name: 'Jane Smith', age: 30 }
   };
 
-  const createServer = (shallowDatabase: Record<string, unknown>) => {
+  const createServer = (shallowDatabase: ShallowDatabase) => {
     const server = express();
     const routerBase = express.Router();
     const storage = new MemoryStorage(shallowDatabase);

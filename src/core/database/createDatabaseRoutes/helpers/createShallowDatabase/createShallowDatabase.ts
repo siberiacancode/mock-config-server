@@ -1,13 +1,14 @@
 import type { IRouter } from 'express';
 
 import { isPlainObject } from '@/utils/helpers';
+import type { ShallowDatabase } from '@/utils/types';
 
 import type { MemoryStorage } from '../../storages';
 
 export const createShallowDatabase = (
   router: IRouter,
-  shallowDatabase: Record<string, unknown>,
-  storage: MemoryStorage
+  shallowDatabase: ShallowDatabase,
+  storage: MemoryStorage<ShallowDatabase>
 ) => {
   Object.keys(shallowDatabase).forEach((key) => {
     router.route(`/${key}`).get((_request, response) => {

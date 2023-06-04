@@ -8,11 +8,10 @@ import { createShallowDatabase } from './helpers/createShallowDatabase/createSha
 import { MemoryStorage } from './storages';
 
 export const createDatabaseRoutes = (router: IRouter, databaseConfig: DatabaseConfig) => {
-  const memoryStorage = new MemoryStorage(databaseConfig);
   const { shallowDatabase, nestedDatabase } = splitDatabaseByNesting(databaseConfig);
 
-  createShallowDatabase(router, shallowDatabase, memoryStorage);
-  createNestedDatabase(router, nestedDatabase, memoryStorage);
+  createShallowDatabase(router, shallowDatabase, new MemoryStorage(shallowDatabase));
+  createNestedDatabase(router, nestedDatabase, new MemoryStorage(nestedDatabase));
 
   return router;
 };

@@ -1,22 +1,22 @@
 import { isPlainObject } from '@/utils/helpers';
-import type { DatabaseConfig } from '@/utils/types';
+import type { DatabaseConfig, NestedDatabase, ShallowDatabase } from '@/utils/types';
 
 const isAllArrayElementsHaveValidId = (array: unknown[]) =>
   array.every(
     (element) =>
-      isPlainObject(element) && (typeof element.id === 'string' || typeof element.id === 'number')
+      isPlainObject(element) && (typeof element.id === 'number' || typeof element.id === 'string')
   );
 
 export const splitDatabaseByNesting = (databaseConfig: DatabaseConfig) => {
-  const shallowDatabase: Record<string, unknown> = {};
-  const nestedDatabase: Record<string, Record<string, unknown>[]> = {};
+  const shallowDatabase: ShallowDatabase = {};
+  const nestedDatabase: NestedDatabase = {};
 
   Object.entries(databaseConfig).forEach(([databaseEntityKey, databaseEntityValue]) => {
     if (Array.isArray(databaseEntityValue) && isAllArrayElementsHaveValidId(databaseEntityValue)) {
-      shallowDatabase[databaseEntityKey] = databaseEntityValue;
+      nestedDatabase[databaseEntityKey] = databaseEntityValue;
       return;
     }
-    nestedDatabase[databaseEntityKey] = databaseEntityValue;
+    shallowDatabase[databaseEntityKey] = databaseEntityValue;
   });
 
   return { shallowDatabase, nestedDatabase };

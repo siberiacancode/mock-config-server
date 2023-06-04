@@ -1,13 +1,14 @@
 import type { IRouter } from 'express';
 
 import { isPlainObject } from '@/utils/helpers';
+import type { NestedDatabase } from '@/utils/types';
 
 import type { MemoryStorage } from '../../storages';
 
 export const createNestedDatabase = (
   router: IRouter,
-  nestedDatabase: Record<string, Record<string, unknown>[]>,
-  storage: MemoryStorage<typeof nestedDatabase>
+  nestedDatabase: NestedDatabase,
+  storage: MemoryStorage<NestedDatabase>
 ) => {
   Object.keys(nestedDatabase).forEach((key) => {
     router.route(`/${key}`).get((_request, response) => {
