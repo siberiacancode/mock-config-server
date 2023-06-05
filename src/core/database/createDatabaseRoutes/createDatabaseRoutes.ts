@@ -2,9 +2,7 @@ import type { IRouter } from 'express';
 
 import type { DatabaseConfig } from '@/utils/types';
 
-import { splitDatabaseByNesting } from './helpers';
-import { createNestedDatabase } from './helpers/createNestedDatabase/createNestedDatabase';
-import { createShallowDatabase } from './helpers/createShallowDatabase/createShallowDatabase';
+import { splitDatabaseByNesting, createNestedDatabase, createShallowDatabase } from './helpers';
 import { MemoryStorage } from './storages';
 
 export const createDatabaseRoutes = (router: IRouter, databaseConfig: DatabaseConfig) => {

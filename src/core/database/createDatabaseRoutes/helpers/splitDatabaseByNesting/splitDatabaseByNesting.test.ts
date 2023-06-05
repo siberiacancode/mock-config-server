@@ -16,14 +16,11 @@ describe('splitDatabaseByNesting', () => {
     const { shallowDatabase, nestedDatabase } = splitDatabaseByNesting(databaseConfig);
 
     expect(shallowDatabase).toStrictEqual({
-      key: 'value',
-      invalidArray: [{ id: 1, key: 'value' }, null]
+      key: databaseConfig.key,
+      invalidArray: databaseConfig.invalidArray
     });
     expect(nestedDatabase).toStrictEqual({
-      validArray: [
-        { id: 1, key: 'value' },
-        { id: 'string', key: 'value' }
-      ]
+      validArray: databaseConfig.validArray
     });
   });
 });
