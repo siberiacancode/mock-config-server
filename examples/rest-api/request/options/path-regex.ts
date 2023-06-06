@@ -1,11 +1,10 @@
 import type { MockServerConfig } from 'mock-config-server';
-import { createMockServer, startMockServer } from 'mock-config-server';
 
 export const mockServerConfig: MockServerConfig = {
   rest: {
     configs: [
       {
-        method: 'get',
+        method: 'options',
         path: /^\/us(.+?)rs$/,
         routes: [
           {
@@ -25,7 +24,7 @@ export const mockServerConfig: MockServerConfig = {
         ]
       },
       {
-        method: 'get',
+        method: 'options',
         path: '/users/:param([\\s\\S]*)',
         routes: [
           {
@@ -41,6 +40,3 @@ export const mockServerConfig: MockServerConfig = {
     ]
   }
 };
-
-createMockServer(mockServerConfig);
-startMockServer(mockServerConfig);

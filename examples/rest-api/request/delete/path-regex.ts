@@ -5,7 +5,7 @@ export const mockServerConfig: MockServerConfig = {
   rest: {
     configs: [
       {
-        method: 'get',
+        method: 'delete',
         path: /^\/us(.+?)rs$/,
         routes: [
           {
@@ -25,7 +25,7 @@ export const mockServerConfig: MockServerConfig = {
         ]
       },
       {
-        method: 'get',
+        method: 'delete',
         path: '/users/:param([\\s\\S]*)',
         routes: [
           {
