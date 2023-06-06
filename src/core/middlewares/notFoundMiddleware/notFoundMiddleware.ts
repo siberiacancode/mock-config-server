@@ -5,12 +5,10 @@ import type { MockServerConfig, RestMethod } from '@/utils/types';
 
 import { getGraphqlUrlSuggestions, getRestUrlSuggestions } from './helpers';
 
-interface NotFoundMiddlewareParams {
-  server: Express;
-  mockServerConfig: Pick<MockServerConfig, 'baseUrl' | 'rest' | 'graphql'>;
-}
-
-export const notFoundMiddleware = ({ server, mockServerConfig }: NotFoundMiddlewareParams) => {
+export const notFoundMiddleware = (
+  server: Express,
+  mockServerConfig: Pick<MockServerConfig, 'baseUrl' | 'rest' | 'graphql'>
+) => {
   const { baseUrl: serverBaseUrl, rest, graphql } = mockServerConfig;
 
   const operationNames = graphql?.configs.map(({ operationName }) => operationName) ?? [];

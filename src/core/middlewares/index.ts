@@ -5,3 +5,4 @@ export * from './notFoundMiddleware/notFoundMiddleware';
 export * from './requestInterceptorMiddleware/requestInterceptorMiddleware';
 export * from './destroyerMiddleware/destroyerMiddleware';
 export * from './cookieParseMiddleware/cookieParseMiddleware';
+export * from './errorMiddleware/errorMiddleware';

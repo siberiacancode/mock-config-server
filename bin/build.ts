@@ -33,16 +33,16 @@ export const build = async (argv: MockServerConfigArgv) => {
 
         build.onStart(() => {
           instance?.destroy();
-        })
+        });
 
         build.onEnd((result) => {
           if (!result.errors.length) {
             const mockConfig = resolveConfigFile(result.outputFiles![0].text);
             instance = run(mockConfig, argv);
           }
-        })
+        });
       }
-    }
+    };
 
     buildOptions.plugins.push(watchPlugin);
 
@@ -56,4 +56,4 @@ export const build = async (argv: MockServerConfigArgv) => {
 
   const mockConfig = resolveConfigFile(outputFiles[0].text);
   run(mockConfig, argv);
-}
+};
