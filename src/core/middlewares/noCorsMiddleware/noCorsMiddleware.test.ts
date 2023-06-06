@@ -10,7 +10,7 @@ describe('noCorsMiddleware', () => {
     noCorsMiddleware(server);
 
     const preflightHeaders = {
-      'access-control-request-method': '*',
+      'access-control-request-method': 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
       'access-control-request-headers': '*',
       origin: '/'
     };

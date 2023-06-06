@@ -21,7 +21,7 @@ describe('corsMiddleware', () => {
     expect(response.headers).toMatchObject({
       'access-control-allow-headers': '*',
       'access-control-expose-headers': '*',
-      'access-control-allow-methods': '*',
+      'access-control-allow-methods': 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
       'access-control-allow-origin': 'https://test.com',
       'access-control-max-age': '3600',
       'access-control-allow-credentials': 'true'

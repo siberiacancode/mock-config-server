@@ -2,7 +2,7 @@ export const DEFAULT = {
   PORT: 31299,
   CORS: {
     ORIGIN: '*',
-    METHODS: '*',
+    METHODS: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
     ALLOWED_HEADERS: '*',
     EXPOSED_HEADERS: '*',
     CREDENTIALS: true,
