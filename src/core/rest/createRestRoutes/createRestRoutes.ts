@@ -3,14 +3,15 @@ import type { IRouter } from 'express';
 import {
   isEntityValuesEqual,
   callResponseInterceptors,
-  callRequestInterceptor
+  callRequestInterceptor,
 } from '@/utils/helpers';
 import type {
   Interceptors,
   RestConfig,
   RestEntityName,
   RestEntity,
-  RestHeaderOrCookieOrQueryOrParamsName
+  RestHeaderOrCookieOrQueryOrParamsName,
+  RestEntityDescriptorOnly
 } from '@/utils/types';
 
 import { prepareRestRequestConfigs } from './helpers';
@@ -30,12 +31,13 @@ export const createRestRoutes = (
       const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
         if (!entities) return true;
         const entries = Object.entries(entities) as [RestEntityName, RestEntity][];
-        return entries.every(([entityName, entities]) => {
+        return entries.every(([entityName, rawEntities]) => {
+          const entitiesDescriptor = rawEntities && typeof rawEntities === 'object' && 'checkMode' in rawEntities ? rawEntities : { checkMode: 'equals', value: rawEntities };
           if (entityName === 'body') {
-            const { value: expectedValue, checkMode } = entities as RestEntity<'body'>;
+            const { value: expectedValue, checkMode } = entitiesDescriptor as RestEntityDescriptorOnly<'body'>;
             return isEntityValuesEqual(checkMode, request[entityName], expectedValue);
           }
-          const descriptors = Object.entries(entities) as [RestHeaderOrCookieOrQueryOrParamsName, RestEntity<Exclude<RestEntityName, 'body'>>[RestHeaderOrCookieOrQueryOrParamsName]][];
+          const descriptors = Object.entries(entitiesDescriptor) as [RestHeaderOrCookieOrQueryOrParamsName, RestEntity<Exclude<RestEntityDescriptorOnly, 'body'>>[RestHeaderOrCookieOrQueryOrParamsName]][];
           return (descriptors).every(([entityKey, entityDescriptor]) => {
             const { value: expectedValue, checkMode } = entityDescriptor;
             return isEntityValuesEqual(checkMode, request[entityName][entityKey], expectedValue);

@@ -7,6 +7,8 @@ export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options'
 export type RestEntityName = 'headers' | 'cookies' | 'query' | 'params' | 'body';
 export type RestHeaderOrCookieOrQueryOrParamEntityValue = string | number | boolean;
 
+type AnyValue = boolean | number | string | Record<any, any> | any[] | null | undefined;
+
 export type RestEntityValue<EntityName = RestEntityName> =
   EntityName extends 'headers'
     ? RestHeaderOrCookieOrQueryOrParamEntityValue
@@ -17,7 +19,7 @@ export type RestEntityValue<EntityName = RestEntityName> =
         : EntityName extends 'params'
           ? RestHeaderOrCookieOrQueryOrParamEntityValue
           : EntityName extends 'body'
-            ? any
+            ? AnyValue
             : never;
 
 export type RestEntityDescriptor<
@@ -44,17 +46,31 @@ export type RestEntityDescriptor<
             checkMode: Check;
             value?: undefined;
           } :
-          never
+          never;
 
 export type RestHeaderOrCookieOrQueryOrParamsName = string;
 
-export type RestHeadersEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'headers'>>;
-export type RestCookiesEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'cookies'>>;
-export type RestQueryEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'query'>>;
-export type RestParamsEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'params'>>;
-export type RestBodyEntity = RestEntityDescriptor<'body'>;
+export type RestEntityDescriptorOrValue<EntityName extends RestEntityName = RestEntityName> =
+  EntityName extends 'body'
+    ? RestEntityDescriptor<'body'> | RestEntityValue<'body'>
+    : Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<EntityName> | RestEntityValue<EntityName> | RestEntityValue<EntityName>[]>
 
-export type RestEntity<EntityName = RestEntityName> =
+export type RestHeadersEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'headers'>>;
+export type RestHeadersEntityDescriptorOrValue = RestEntityDescriptorOrValue<'headers'>;
+
+export type RestCookiesEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'cookies'>>;
+export type RestCookiesEntityDescriptorOrValue = RestEntityDescriptorOrValue<'cookies'>;
+
+export type RestQueryEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'query'>>;
+export type RestQueryEntityDescriptorOrValue = RestEntityDescriptorOrValue<'query'>;
+
+export type RestParamsEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'params'>>;
+export type RestParamsEntityDescriptorOrValue = RestEntityDescriptorOrValue<'params'>;
+
+export type RestBodyEntity = RestEntityDescriptor<'body'>;
+export type RestBodyEntityDescriptorOrValue = RestEntityDescriptorOrValue<'body'>;
+
+export type RestEntityDescriptorOnly<EntityName = RestEntityName> =
   EntityName extends 'headers'
     ? RestHeadersEntity
     : EntityName extends 'cookies'
@@ -65,6 +81,19 @@ export type RestEntity<EntityName = RestEntityName> =
           ? RestParamsEntity
           : EntityName extends 'body'
             ? RestBodyEntity
+            : never;
+
+export type RestEntity<EntityName = RestEntityName> =
+  EntityName extends 'headers'
+    ? RestHeadersEntityDescriptorOrValue
+    : EntityName extends 'cookies'
+      ? RestCookiesEntityDescriptorOrValue
+      : EntityName extends 'query'
+        ? RestQueryEntityDescriptorOrValue
+        : EntityName extends 'params'
+          ? RestParamsEntityDescriptorOrValue
+          : EntityName extends 'body'
+            ? RestBodyEntityDescriptorOrValue
             : never;
 
 export type RestEntityByName = {
