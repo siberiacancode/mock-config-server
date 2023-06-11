@@ -1,3 +1,3 @@
-export * from './createNestedDatabase/createNestedDatabase';
-export * from './createShallowDatabase/createShallowDatabase';
+export * from './createNestedDatabaseRoutes/createNestedDatabaseRoutes';
+export * from './createShallowDatabaseRoutes/createShallowDatabaseRoutes';
 export * from './splitDatabaseByNesting/splitDatabaseByNesting';

@@ -5,7 +5,7 @@ import type { ShallowDatabase } from '@/utils/types';
 
 import type { MemoryStorage } from '../../storages';
 
-export const createShallowDatabase = (
+export const createShallowDatabaseRoutes = (
   router: IRouter,
   shallowDatabase: ShallowDatabase,
   storage: MemoryStorage<ShallowDatabase>

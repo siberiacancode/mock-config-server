@@ -5,7 +5,7 @@ import type { NestedDatabase } from '@/utils/types';
 
 import type { MemoryStorage } from '../../storages';
 
-export const createNestedDatabase = (
+export const createNestedDatabaseRoutes = (
   router: IRouter,
   nestedDatabase: NestedDatabase,
   storage: MemoryStorage<NestedDatabase>
@@ -30,8 +30,9 @@ export const createNestedDatabase = (
 
       // TODO create normal id
       const resourceLastIndex = storage.read(key).length - 1;
-      const newResource = { ...request.body, id: resourceLastIndex };
+      const newResource = { ...request.body, id: resourceLastIndex + 2 };
       storage.write([key, resourceLastIndex + 1], newResource);
+      response.set('Location', `${request.url}/${resourceLastIndex + 2}`);
       response.status(201).json(newResource);
     });
 
@@ -39,8 +40,15 @@ export const createNestedDatabase = (
       // ✅ important:
       // set 'Cache-Control' header for explicit browsers response revalidate
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+      const collection = storage.read(key);
+      const indexOfItemById = collection.findIndex((item) => +item.id === +request.params.id);
+      if (indexOfItemById === -1) {
+        response.status(404).send();
+        return;
+      }
+
       response.set('Cache-control', 'max-age=0, must-revalidate');
-      response.json(storage.read([key, request.params.id]));
+      response.json(storage.read([key, indexOfItemById]));
     });
 
     router.route(`/${key}/:id`).put((request, response) => {
@@ -92,4 +100,6 @@ export const createNestedDatabase = (
       response.status(204).send();
     });
   });
+
+  return router;
 };

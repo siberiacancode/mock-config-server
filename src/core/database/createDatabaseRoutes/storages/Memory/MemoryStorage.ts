@@ -1,53 +1,40 @@
-import { isPlainObject } from '@/utils/helpers';
-import type { PlainObject } from '@/utils/types';
+type Index = string | number;
+type MemoryObject = Record<Index, any>;
 
-export class MemoryStorage<T extends PlainObject = PlainObject> {
+export class MemoryStorage<T extends MemoryObject = MemoryObject> {
   private readonly data: T;
 
   public constructor(initialData: T) {
     this.data = initialData;
   }
 
-  public read(key: string | number | (string | number)[]): T[keyof T] {
-    if (!Array.isArray(key)) {
-      if (key in this.data) {
-        return this.data[key];
-      }
-      throw new Error(`Key ${key as string} does not exists`);
+  public read(baseKey: Index | Index[]): any {
+    const key = Array.isArray(baseKey) ? baseKey : [baseKey];
+    let readable: any = this.data;
+    let index = 0;
+    while ((typeof readable === 'object' && readable !== null) && index < key.length) {
+      readable = readable[key[index]];
+      index += 1;
     }
-
-    let value: any = this.data;
-    key.forEach((keyPart) => {
-      if (isPlainObject(value) && keyPart in value) {
-        value = value[keyPart];
-        return;
-      }
-      throw new Error(`Key ${keyPart as string} does not exists`);
-    });
-    return value;
+    return index === key.length ? readable : undefined;
   }
 
-  public write(key: string | number | (string | number)[], value: unknown): void {
-    if (!Array.isArray(key)) {
-      this.data[key as keyof T] = value as T[keyof T];
-      return;
-    }
-
-    let writable: unknown = this.data;
-    key.forEach((keyPart, index) => {
-      if (!isPlainObject(writable)) {
-        throw new Error(`Key ${keyPart as string} cannot be created`);
-      }
-
+  public write<V>(baseKey: Index | Index[], value: V): V {
+    const key = Array.isArray(baseKey) ? baseKey : [baseKey];
+    let writable: any = this.data;
+    let index = 0;
+    while (true) {
       if (index === key.length - 1) {
-        writable[keyPart] = value;
-        return;
+        writable[key[index]] = value;
+        return value;
       }
-
-      if (!(keyPart in writable) || !isPlainObject(writable[keyPart])) {
-        writable[keyPart] = {};
+      const isCurrentKeyPartObject = typeof writable[key[index]] === 'object' && writable[key[index]] !== null;
+      if (!isCurrentKeyPartObject) {
+        const isNextKeyPartArrayIndex = Number.isInteger(key[index + 1]) && key[index + 1] >= 0
+        writable[key[index]] = isNextKeyPartArrayIndex ? [] : {};
       }
-      writable = writable[keyPart];
-    });
+      writable = writable[key[index]];
+      index += 1;
+    }
   }
 }

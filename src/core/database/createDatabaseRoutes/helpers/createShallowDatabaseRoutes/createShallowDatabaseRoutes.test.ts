@@ -6,20 +6,20 @@ import type { ShallowDatabase } from '@/utils/types';
 
 import { MemoryStorage } from '../../storages';
 
-import { createShallowDatabase } from './createShallowDatabase';
+import { createShallowDatabaseRoutes } from './createShallowDatabaseRoutes';
 
-describe('createShallowDatabase', () => {
-  const shallowDatabase = {
+describe('createShallowDatabaseRoutes', () => {
+  const createShallowDatabase = () => ({
     john: { name: 'John Doe', age: 25 },
     jane: { name: 'Jane Smith', age: 30 }
-  };
+  });
 
   const createServer = (shallowDatabase: ShallowDatabase) => {
     const server = express();
     const routerBase = express.Router();
     const storage = new MemoryStorage(shallowDatabase);
 
-    const routerWithRoutesForShallowDatabase = createShallowDatabase(
+    const routerWithRoutesForShallowDatabase = createShallowDatabaseRoutes(
       routerBase,
       shallowDatabase,
       storage
@@ -32,7 +32,8 @@ describe('createShallowDatabase', () => {
     return server;
   };
 
-  describe('createShallowDatabase: get method', () => {
+  describe('createShallowDatabaseRoutes: get method', () => {
+    const shallowDatabase = createShallowDatabase();
     const server = createServer(shallowDatabase);
 
     test('Should return correct data for valid key', async () => {
@@ -49,10 +50,12 @@ describe('createShallowDatabase', () => {
     });
   });
 
-  describe('createShallowDatabase: post method', () => {
+  describe('createShallowDatabaseRoutes: post method', () => {
+    let shallowDatabase: ReturnType<typeof createShallowDatabase>;
     let server: Express;
     beforeEach(() => {
-      server = createServer({ ...shallowDatabase });
+      shallowDatabase = createShallowDatabase();
+      server = createServer(shallowDatabase);
     });
 
     test('Should return correct data for valid key and successfully update database', async () => {
@@ -73,10 +76,12 @@ describe('createShallowDatabase', () => {
     });
   });
 
-  describe('createShallowDatabase: put', () => {
+  describe('createShallowDatabaseRoutes: put', () => {
+    let shallowDatabase: ReturnType<typeof createShallowDatabase>;
     let server: Express;
     beforeEach(() => {
-      server = createServer({ ...shallowDatabase });
+      shallowDatabase = createShallowDatabase();
+      server = createServer(shallowDatabase);
     });
 
     test('Should return correct data for valid key and successfully update database', async () => {
@@ -91,10 +96,12 @@ describe('createShallowDatabase', () => {
     });
   });
 
-  describe('createShallowDatabase: patch', () => {
+  describe('createShallowDatabaseRoutes: patch', () => {
+    let shallowDatabase: ReturnType<typeof createShallowDatabase>;
     let server: Express;
     beforeEach(() => {
-      server = createServer({ ...shallowDatabase });
+      shallowDatabase = createShallowDatabase();
+      server = createServer(shallowDatabase);
     });
 
     test('Should return correct data for valid key and successfully update database', async () => {
