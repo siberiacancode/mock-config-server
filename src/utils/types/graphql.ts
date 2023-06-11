@@ -21,15 +21,11 @@ export interface GraphQLInput {
 }
 
 export type GraphQLEntityValue<EntityName = GraphQLEntityName> =
-  EntityName extends 'headers'
+  EntityName extends 'headers' | 'cookies' | 'query'
     ? GraphQLHeaderOrCookieOrQueryEntityValue
-    : EntityName extends 'cookies'
-      ? GraphQLHeaderOrCookieOrQueryEntityValue
-      : EntityName extends 'query'
-        ? GraphQLHeaderOrCookieOrQueryEntityValue
-        : EntityName extends 'variables'
-          ? any
-          : never;
+    : EntityName extends 'variables'
+      ? any
+      : never;
 
 export type GraphQLEntityDescriptor<
   EntityName extends GraphQLEntityName = GraphQLEntityName,

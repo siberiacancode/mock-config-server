@@ -1,3 +1,8 @@
+import {
+  ALLOWED_CHECK_MODES,
+  ONE_VALUE_CHECK_MODES,
+  TWO_VALUES_CHECK_MODES
+} from '@/utils/constants';
 import { isPlainObject } from '@/utils/helpers';
 import type {
   GraphQLEntityNameByOperationType,
@@ -19,31 +24,7 @@ const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntitiesByOperationType = {
   mutation: ['headers', 'cookies', 'query', 'variables']
 };
 
-const ONE_VALUE_CHECK_MODES: CheckOneValueMode[] = [
-  'exists',
-  'notExists',
-  'isBoolean',
-  'isNumber',
-  'isString'
-]
 
-const TWO_VALUES_CHECK_MODES: CheckTwoValuesMode[] = [
-  'equals',
-  'notEquals',
-  'includes',
-  'notIncludes',
-  'startsWith',
-  'notStartsWith',
-  'endsWith',
-  'notEndsWith'
-]
-
-const ALLOWED_CHECK_MODES: CheckMode[] = [
-  ...ONE_VALUE_CHECK_MODES,
-  ...TWO_VALUES_CHECK_MODES,
-  'regExp',
-  'function'
-];
 
 export const isCheckModeValid = (checkMode: unknown) => ALLOWED_CHECK_MODES.includes(checkMode as CheckMode);
 

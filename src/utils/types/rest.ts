@@ -8,17 +8,11 @@ export type RestEntityName = 'headers' | 'cookies' | 'query' | 'params' | 'body'
 export type RestHeaderOrCookieOrQueryOrParamEntityValue = string | number | boolean;
 
 export type RestEntityValue<EntityName = RestEntityName> =
-  EntityName extends 'headers'
+  EntityName extends 'headers' | 'cookies' | 'query' | 'params'
     ? RestHeaderOrCookieOrQueryOrParamEntityValue
-    : EntityName extends 'cookies'
-      ? RestHeaderOrCookieOrQueryOrParamEntityValue
-      : EntityName extends 'query'
-        ? RestHeaderOrCookieOrQueryOrParamEntityValue
-        : EntityName extends 'params'
-          ? RestHeaderOrCookieOrQueryOrParamEntityValue
-          : EntityName extends 'body'
-            ? any
-            : never;
+    : EntityName extends 'body'
+      ? any
+      : never;
 
 export type RestEntityDescriptor<
   EntityName extends RestEntityName = RestEntityName,
@@ -52,8 +46,9 @@ export type RestHeadersEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, Re
 export type RestCookiesEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'cookies'>>;
 export type RestQueryEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'query'>>;
 export type RestParamsEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'params'>>;
-export type RestBodyEntity = RestEntityDescriptor<'body'>;
-
+export type RestBodyEntity = RestEntityDescriptor<'body'> | RestEntityValue<'body'>;
+// { checkMode: CheckMode, value: any } | any ==> any
+// { checkMode: CheckMode, value: any } | Record<string, any> ==> Record<string, any>
 export type RestEntity<EntityName = RestEntityName> =
   EntityName extends 'headers'
     ? RestHeadersEntity

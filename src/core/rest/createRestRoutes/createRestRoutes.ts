@@ -36,7 +36,7 @@ export const createRestRoutes = (
             return isEntityValuesEqual(checkMode, request[entityName], expectedValue);
           }
           const descriptors = Object.entries(entities) as [RestHeaderOrCookieOrQueryOrParamsName, RestEntity<Exclude<RestEntityName, 'body'>>[RestHeaderOrCookieOrQueryOrParamsName]][];
-          return (descriptors).every(([entityKey, entityDescriptor]) => {
+          return descriptors.every(([entityKey, entityDescriptor]) => {
             const { value: expectedValue, checkMode } = entityDescriptor;
             return isEntityValuesEqual(checkMode, request[entityName][entityKey], expectedValue);
           })

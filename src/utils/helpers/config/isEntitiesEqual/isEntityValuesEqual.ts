@@ -13,7 +13,7 @@ export const checkFunction: CheckFunction = (checkMode, firstValue: any, secondV
 
   // ✅ important:
   // cast values to string for ignore types of values
-  const firstValueString = `${firstValue}`;
+  const firstValueString = String(firstValue);
 
   if (checkMode === 'isBoolean') return firstValueString === 'true' || firstValueString === 'false';
   if (checkMode === 'isNumber') return /^-?[1-9]\d*(\.\d+)?$/.test(firstValueString) && !Number.isNaN(Number.parseFloat(firstValueString));
@@ -29,17 +29,17 @@ export const checkFunction: CheckFunction = (checkMode, firstValue: any, secondV
 
   if (checkMode === 'regExp') return secondValuesArray.some((value: RegExp) => value.test(firstValueString));
 
-  if (checkMode === 'equals') return secondValuesArray.some((value: any) => `${value}` === firstValueString);
-  if (checkMode === 'notEquals') return secondValuesArray.every((value: any) => `${value}` !== firstValueString);
+  if (checkMode === 'equals') return secondValuesArray.some((value: any) => String(value) === firstValueString);
+  if (checkMode === 'notEquals') return secondValuesArray.every((value: any) => String(value) !== firstValueString);
 
-  if (checkMode === 'includes') return secondValuesArray.some((value: any) => firstValueString.includes(`${value}`));
-  if (checkMode === 'notIncludes') return secondValuesArray.every((value: any) => !firstValueString.includes(`${value}`));
+  if (checkMode === 'includes') return secondValuesArray.some((value: any) => firstValueString.includes(String(value)));
+  if (checkMode === 'notIncludes') return secondValuesArray.every((value: any) => !firstValueString.includes(String(value)));
 
-  if (checkMode === 'startsWith') return secondValuesArray.some((value: any) => firstValueString.startsWith(`${value}`));
-  if (checkMode === 'notStartsWith') return secondValuesArray.every((value: any) => !firstValueString.startsWith(`${value}`));
+  if (checkMode === 'startsWith') return secondValuesArray.some((value: any) => firstValueString.startsWith(String(value)));
+  if (checkMode === 'notStartsWith') return secondValuesArray.every((value: any) => !firstValueString.startsWith(String(value)));
 
-  if (checkMode === 'endsWith') return secondValuesArray.some((value: any) => firstValueString.endsWith(`${value}`));
-  if (checkMode === 'notEndsWith') return secondValuesArray.every((value: any) => !firstValueString.endsWith(`${value}`));
+  if (checkMode === 'endsWith') return secondValuesArray.some((value: any) => firstValueString.endsWith(String(value)));
+  if (checkMode === 'notEndsWith') return secondValuesArray.every((value: any) => !firstValueString.endsWith(String(value)));
 
   throw new Error('Wrong checkMode');
 };
