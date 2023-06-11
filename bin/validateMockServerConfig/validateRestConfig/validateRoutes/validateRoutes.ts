@@ -18,11 +18,13 @@ const ALLOWED_ENTITIES_BY_METHOD: AllowedEntitiesByMethod = {
 const validateHeadersOrCookiesOrParams = (headersOrCookiesOrParams: unknown, entity: string) => {
   const isHeadersOrCookiesOrParamsObject = isPlainObject(headersOrCookiesOrParams);
   if (isHeadersOrCookiesOrParamsObject) {
-    Object.entries(headersOrCookiesOrParams).forEach(([headerOrCookieOrParamKey, headerOrCookieOrParamValue]) => {
-      if (typeof headerOrCookieOrParamValue !== 'string') {
-        throw new Error(`${entity}.${headerOrCookieOrParamKey}`);
+    Object.entries(headersOrCookiesOrParams).forEach(
+      ([headerOrCookieOrParamKey, headerOrCookieOrParamValue]) => {
+        if (typeof headerOrCookieOrParamValue !== 'string') {
+          throw new Error(`${entity}.${headerOrCookieOrParamKey}`);
+        }
       }
-    });
+    );
     return;
   }
 
