@@ -7,20 +7,19 @@ export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options'
 export type RestEntityName = 'headers' | 'cookies' | 'query' | 'params' | 'body';
 export type RestHeaderOrCookieOrQueryOrParamEntityValue = string | number | boolean;
 
-type AnyValue = boolean | number | string | Record<any, any> | any[] | null | undefined;
-
 export type RestEntityValue<EntityName = RestEntityName> =
-  EntityName extends 'headers'
+  EntityName extends 'headers' | 'cookies' | 'query' | 'params'
     ? RestHeaderOrCookieOrQueryOrParamEntityValue
-    : EntityName extends 'cookies'
-      ? RestHeaderOrCookieOrQueryOrParamEntityValue
-      : EntityName extends 'query'
-        ? RestHeaderOrCookieOrQueryOrParamEntityValue
-        : EntityName extends 'params'
-          ? RestHeaderOrCookieOrQueryOrParamEntityValue
-          : EntityName extends 'body'
-            ? AnyValue
-            : never;
+    : EntityName extends 'body'
+      ?
+      | boolean
+      | number
+      | string
+      | { checkMode?: undefined; [key: string]: any }
+      | any[]
+      | null
+      | undefined
+      : never;
 
 export type RestEntityDescriptor<
   EntityName extends RestEntityName = RestEntityName,
@@ -52,7 +51,7 @@ export type RestHeaderOrCookieOrQueryOrParamsName = string;
 
 export type RestEntityDescriptorOrValue<EntityName extends RestEntityName = RestEntityName> =
   EntityName extends 'body'
-    ? RestEntityDescriptor<'body'> | RestEntityValue<'body'>
+    ? RestEntityDescriptor<EntityName> | RestEntityValue<EntityName>
     : Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<EntityName> | RestEntityValue<EntityName> | RestEntityValue<EntityName>[]>
 
 export type RestHeadersEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'headers'>>;

@@ -12,7 +12,8 @@ import type {
   Interceptors,
   GraphQLEntity,
   GraphQLEntityName,
-  GraphQLHeaderOrCookieOrQueryName
+  GraphQLHeaderOrCookieOrQueryName,
+  GraphQLEntityDescriptorOnly
 } from '@/utils/types';
 
 import { prepareGraphQLRequestConfigs } from './helpers';
@@ -70,12 +71,13 @@ export const createGraphQLRoutes = (
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
       if (!entities) return true;
       const entries = Object.entries(entities) as [GraphQLEntityName, GraphQLEntity][];
-      return entries.every(([entityName, entities]) => {
+      return entries.every(([entityName, rawEntities]) => {
+        const entitiesDescriptor = rawEntities && typeof rawEntities === 'object' && 'checkMode' in rawEntities ? rawEntities : { checkMode: 'equals', value: rawEntities };
         if (entityName === 'variables') {
-          const { value: expectedValue, checkMode } = entities as GraphQLEntity<'variables'>;
+          const { value: expectedValue, checkMode } = entitiesDescriptor as GraphQLEntityDescriptorOnly<'variables'>;
           return isEntityValuesEqual(checkMode, graphQLInput.variables, expectedValue);
         }
-        const descriptors = Object.entries(entities) as [GraphQLHeaderOrCookieOrQueryName, GraphQLEntity<Exclude<GraphQLEntityName, 'variables'>>[GraphQLHeaderOrCookieOrQueryName]][];
+        const descriptors = Object.entries(entities) as [GraphQLHeaderOrCookieOrQueryName, GraphQLEntityDescriptorOnly<Exclude<GraphQLEntityName, 'variables'>>[GraphQLHeaderOrCookieOrQueryName]][];
         return (descriptors).every(([entityKey, entityDescriptor]) => {
           const { value: expectedValue, checkMode } = entityDescriptor;
           return isEntityValuesEqual(checkMode, request[entityName][entityKey], expectedValue);

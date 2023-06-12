@@ -67,7 +67,8 @@ const validateHeadersOrCookiesOrQuery = (headersOrCookiesOrQuery: unknown, entit
   const isHeadersOrCookiesOrQueryObject = isPlainObject(headersOrCookiesOrQuery);
   if (isHeadersOrCookiesOrQueryObject) {
     Object.entries(headersOrCookiesOrQuery).forEach(([headerOrCookieOrQueryKey, headerOrCookieOrQueryDescriptor]) => {
-      const { checkMode, value } = headerOrCookieOrQueryDescriptor as GraphQLEntity<Exclude<GraphQLEntityName, 'variables'>>;
+      const entitiesDescriptor = headerOrCookieOrQueryDescriptor && typeof headerOrCookieOrQueryDescriptor === 'object' && 'checkMode' in headerOrCookieOrQueryDescriptor ? headerOrCookieOrQueryDescriptor : { checkMode: 'equals', value: headerOrCookieOrQueryDescriptor };
+      const { checkMode, value } = entitiesDescriptor as GraphQLEntity<Exclude<GraphQLEntityName, 'variables'>>;
       if (!isCheckModeValid(checkMode)) {
         throw new Error(`${entity}.${headerOrCookieOrQueryKey}.checkMode`);
       }

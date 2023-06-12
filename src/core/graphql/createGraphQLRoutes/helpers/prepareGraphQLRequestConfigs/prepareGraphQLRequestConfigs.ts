@@ -11,7 +11,10 @@ const calculateRouteConfigWeight = (graphQLRouteConfig: GraphQLRouteConfig) => {
   if (headers) routeConfigWeight += Object.keys(headers).length;
   if (cookies) routeConfigWeight += Object.keys(cookies).length;
   if (query) routeConfigWeight += Object.keys(query).length;
-  if (variables) routeConfigWeight += isPlainObject(variables.value) ? Object.keys(variables.value).length : 1;
+  if (variables) {
+    const descriptorValue = isPlainObject(variables) && variables.checkMode ? variables.value : variables;
+    routeConfigWeight += isPlainObject(descriptorValue) ? Object.keys(descriptorValue).length : 1;
+  }
 
   return routeConfigWeight;
 };

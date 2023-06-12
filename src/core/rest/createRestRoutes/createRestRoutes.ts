@@ -8,8 +8,8 @@ import {
 import type {
   Interceptors,
   RestConfig,
-  RestEntityName,
   RestEntity,
+  RestEntityName,
   RestHeaderOrCookieOrQueryOrParamsName,
   RestEntityDescriptorOnly
 } from '@/utils/types';
@@ -37,8 +37,8 @@ export const createRestRoutes = (
             const { value: expectedValue, checkMode } = entitiesDescriptor as RestEntityDescriptorOnly<'body'>;
             return isEntityValuesEqual(checkMode, request[entityName], expectedValue);
           }
-          const descriptors = Object.entries(entitiesDescriptor) as [RestHeaderOrCookieOrQueryOrParamsName, RestEntity<Exclude<RestEntityDescriptorOnly, 'body'>>[RestHeaderOrCookieOrQueryOrParamsName]][];
-          return (descriptors).every(([entityKey, entityDescriptor]) => {
+          const descriptors = Object.entries(entitiesDescriptor) as [RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptorOnly<Exclude<RestEntityName, 'body'>>[RestHeaderOrCookieOrQueryOrParamsName]][];
+          return descriptors.every(([entityKey, entityDescriptor]) => {
             const { value: expectedValue, checkMode } = entityDescriptor;
             return isEntityValuesEqual(checkMode, request[entityName][entityKey], expectedValue);
           })
