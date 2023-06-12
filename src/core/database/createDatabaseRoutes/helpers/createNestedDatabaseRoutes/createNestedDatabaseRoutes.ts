@@ -1,7 +1,7 @@
 import type { IRouter } from 'express';
 
 import { isPlainObject } from '@/utils/helpers';
-import type { NestedDatabase } from '@/utils/types';
+import type { NestedDatabase, NestedDatabaseItem } from '@/utils/types';
 
 import type { MemoryStorage } from '../../storages';
 
@@ -41,7 +41,9 @@ export const createNestedDatabaseRoutes = (
       // set 'Cache-Control' header for explicit browsers response revalidate
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
       const collection = storage.read(key);
-      const indexOfItemById = collection.findIndex((item) => +item.id === +request.params.id);
+      const indexOfItemById = collection.findIndex(
+        (item: NestedDatabaseItem) => +item.id === +request.params.id
+      );
       if (indexOfItemById === -1) {
         response.status(404).send();
         return;
@@ -65,7 +67,7 @@ export const createNestedDatabaseRoutes = (
 
       const currentResourceIndex = storage
         .read(key)
-        .findIndex((resource) => resource.id === request.params.id);
+        .findIndex((resource: NestedDatabaseItem) => resource.id === request.params.id);
       const newResource = { ...request.body, id: currentResource.id };
       storage.write([key, currentResourceIndex], newResource);
       response.json(newResource);
@@ -85,7 +87,7 @@ export const createNestedDatabaseRoutes = (
 
       const currentResourceIndex = storage
         .read(key)
-        .findIndex((resource) => resource.id === request.params.id);
+        .findIndex((resource: NestedDatabaseItem) => resource.id === request.params.id);
       const newResource = { ...currentResource, ...request.body, id: currentResource.id };
       storage.write([key, currentResourceIndex], newResource);
       response.json(newResource);
@@ -94,7 +96,7 @@ export const createNestedDatabaseRoutes = (
     router.route(`/${key}/:id`).delete((request, response) => {
       const currentResourceArray = storage.read(key);
       const currentResourceIndex = currentResourceArray.findIndex(
-        (resource) => resource.id === request.params.id
+        (resource: NestedDatabaseItem) => resource.id === request.params.id
       );
       currentResourceArray.splice(currentResourceIndex, 1);
       response.status(204).send();

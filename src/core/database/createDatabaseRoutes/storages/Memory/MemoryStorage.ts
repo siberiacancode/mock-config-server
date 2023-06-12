@@ -12,7 +12,7 @@ export class MemoryStorage<T extends MemoryObject = MemoryObject> {
     const key = Array.isArray(baseKey) ? baseKey : [baseKey];
     let readable: any = this.data;
     let index = 0;
-    while ((typeof readable === 'object' && readable !== null) && index < key.length) {
+    while (typeof readable === 'object' && readable !== null && index < key.length) {
       readable = readable[key[index]];
       index += 1;
     }
@@ -28,9 +28,10 @@ export class MemoryStorage<T extends MemoryObject = MemoryObject> {
         writable[key[index]] = value;
         return value;
       }
-      const isCurrentKeyPartObject = typeof writable[key[index]] === 'object' && writable[key[index]] !== null;
+      const isCurrentKeyPartObject =
+        typeof writable[key[index]] === 'object' && writable[key[index]] !== null;
       if (!isCurrentKeyPartObject) {
-        const isNextKeyPartArrayIndex = Number.isInteger(key[index + 1]) && key[index + 1] >= 0
+        const isNextKeyPartArrayIndex = Number.isInteger(key[index + 1]) && key[index + 1] >= 0;
         writable[key[index]] = isNextKeyPartArrayIndex ? [] : {};
       }
       writable = writable[key[index]];
