@@ -24,8 +24,14 @@ export type GraphQLEntityValue<EntityName = GraphQLEntityName> =
   EntityName extends 'headers' | 'cookies' | 'query'
     ? GraphQLHeaderOrCookieOrQueryEntityValue
     : EntityName extends 'variables'
-      ? any
+          ?
+          | boolean
+          | number
+          | string
+          | { checkMode?: undefined; [key: string]: any }
+          | any[]
       : never;
+
 
 export type GraphQLEntityDescriptor<
   EntityName extends GraphQLEntityName = GraphQLEntityName,
@@ -55,12 +61,25 @@ export type GraphQLEntityDescriptor<
 
 export type GraphQLHeaderOrCookieOrQueryName = string;
 
-export type GraphQLHeadersEntity = Record<GraphQLHeaderOrCookieOrQueryName, GraphQLEntityDescriptor<'headers'>>;
-export type GraphQLCookiesEntity = Record<GraphQLHeaderOrCookieOrQueryName, GraphQLEntityDescriptor<'cookies'>>;
-export type GraphQLQueryEntity = Record<GraphQLHeaderOrCookieOrQueryName, GraphQLEntityDescriptor<'query'>>;
-export type GraphQLVariablesEntity = GraphQLEntityDescriptor<'variables'>;
+export type GraphQLEntityDescriptorOrValue<EntityName extends GraphQLEntityName = GraphQLEntityName> =
+  EntityName extends 'variables'
+    ? GraphQLEntityDescriptor<EntityName> | GraphQLEntityValue<EntityName>
+    : Record<GraphQLHeaderOrCookieOrQueryName, GraphQLEntityDescriptor<EntityName> | GraphQLEntityValue<EntityName> | GraphQLEntityValue<EntityName>[]>
 
-export type GraphQLEntity<EntityName = GraphQLEntityName> =
+
+export type GraphQLHeadersEntity = Record<GraphQLHeaderOrCookieOrQueryName, GraphQLEntityDescriptor<'headers'>>;
+export type GraphQLHeadersEntityDescriptorOrValue = GraphQLEntityDescriptorOrValue<'headers'>;
+
+export type GraphQLCookiesEntity = Record<GraphQLHeaderOrCookieOrQueryName, GraphQLEntityDescriptor<'cookies'>>;
+export type GraphQLCookiesEntityDescriptorOrValue = GraphQLEntityDescriptorOrValue<'cookies'>;
+
+export type GraphQLQueryEntity = Record<GraphQLHeaderOrCookieOrQueryName, GraphQLEntityDescriptor<'query'>>;
+export type GraphQLQueryEntityDescriptorOrValue = GraphQLEntityDescriptorOrValue<'query'>;
+
+export type GraphQLVariablesEntity = GraphQLEntityDescriptor<'variables'>;
+export type GraphQLVariablesEntityDescriptorOrValue = GraphQLEntityDescriptorOrValue<'variables'>;
+
+export type GraphQLEntityDescriptorOnly<EntityName = GraphQLEntityName> =
   EntityName extends 'headers'
     ? GraphQLHeadersEntity
     : EntityName extends 'cookies'
@@ -69,6 +88,17 @@ export type GraphQLEntity<EntityName = GraphQLEntityName> =
         ? GraphQLQueryEntity
         : EntityName extends 'variables'
           ? GraphQLVariablesEntity
+          : never;
+
+export type GraphQLEntity<EntityName = GraphQLEntityName> =
+  EntityName extends 'headers'
+    ? GraphQLHeadersEntityDescriptorOrValue
+    : EntityName extends 'cookies'
+      ? GraphQLCookiesEntityDescriptorOrValue
+      : EntityName extends 'query'
+        ? GraphQLQueryEntityDescriptorOrValue
+        : EntityName extends 'variables'
+          ? GraphQLVariablesEntityDescriptorOrValue
           : never;
 
 export type GraphQLEntityByName = {

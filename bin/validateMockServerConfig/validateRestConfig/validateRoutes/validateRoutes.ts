@@ -8,7 +8,7 @@ import type {
   RestMethod,
   RestEntityNameByMethod,
   RestEntityName,
-  RestEntity,
+  RestEntityDescriptorOnly,
   CheckOneValueMode,
   CheckTwoValuesMode,
   CheckMode
@@ -50,7 +50,8 @@ const validateHeadersOrCookiesOrQueryOrParams = (headersOrCookiesOrQueryOrParams
   const isHeadersOrCookiesOrQueryOrParamsObject = isPlainObject(headersOrCookiesOrQueryOrParams);
   if (isHeadersOrCookiesOrQueryOrParamsObject) {
     Object.entries(headersOrCookiesOrQueryOrParams).forEach(([headerOrCookieOrQueryOrParamKey, headerOrCookieOrQueryOrParamDescriptor]) => {
-      const { checkMode, value } = headerOrCookieOrQueryOrParamDescriptor as RestEntity<Exclude<RestEntityName, 'body'>>;
+      const entitiesDescriptor = headerOrCookieOrQueryOrParamDescriptor && typeof headerOrCookieOrQueryOrParamDescriptor === 'object' && 'checkMode' in headerOrCookieOrQueryOrParamDescriptor ? headerOrCookieOrQueryOrParamDescriptor : { checkMode: 'equals', value: headerOrCookieOrQueryOrParamDescriptor };
+      const { checkMode, value } = entitiesDescriptor as RestEntityDescriptorOnly<Exclude<RestEntityName, 'body'>>;
       if (!isCheckModeValid(checkMode)) {
         throw new Error(`${entity}.${headerOrCookieOrQueryOrParamKey}.checkMode`);
       }

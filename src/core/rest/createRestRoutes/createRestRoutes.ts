@@ -3,14 +3,15 @@ import type { IRouter } from 'express';
 import {
   isEntityValuesEqual,
   callResponseInterceptors,
-  callRequestInterceptor
+  callRequestInterceptor,
 } from '@/utils/helpers';
 import type {
   Interceptors,
   RestConfig,
-  RestEntityName,
   RestEntity,
-  RestHeaderOrCookieOrQueryOrParamsName
+  RestEntityName,
+  RestHeaderOrCookieOrQueryOrParamsName,
+  RestEntityDescriptorOnly
 } from '@/utils/types';
 
 import { prepareRestRequestConfigs } from './helpers';
@@ -30,13 +31,15 @@ export const createRestRoutes = (
       const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
         if (!entities) return true;
         const entries = Object.entries(entities) as [RestEntityName, RestEntity][];
-        return entries.every(([entityName, entities]) => {
+        return entries.every(([entityName, rawEntities]) => {
           if (entityName === 'body') {
-            const { value: expectedValue, checkMode } = entities as RestEntity<'body'>;
+            const entitiesDescriptor = rawEntities && typeof rawEntities === 'object' && 'checkMode' in rawEntities ? rawEntities : { checkMode: 'equals', value: rawEntities };
+            const { value: expectedValue, checkMode } = entitiesDescriptor as RestEntityDescriptorOnly<'body'>;
             return isEntityValuesEqual(checkMode, request[entityName], expectedValue);
           }
-          const descriptors = Object.entries(entities) as [RestHeaderOrCookieOrQueryOrParamsName, RestEntity<Exclude<RestEntityName, 'body'>>[RestHeaderOrCookieOrQueryOrParamsName]][];
-          return descriptors.every(([entityKey, entityDescriptor]) => {
+          const descriptors = Object.entries(rawEntities) as [RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptorOnly<Exclude<RestEntityName, 'body'>>[RestHeaderOrCookieOrQueryOrParamsName]][];
+          return descriptors.every(([entityKey, rawEntity]) => {
+            const entityDescriptor = (rawEntity && typeof rawEntity === 'object' && 'checkMode' in rawEntity ? rawEntity : { checkMode: 'equals' as const, value: rawEntity });
             const { value: expectedValue, checkMode } = entityDescriptor;
             return isEntityValuesEqual(checkMode, request[entityName][entityKey], expectedValue);
           })
