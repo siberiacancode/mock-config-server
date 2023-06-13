@@ -1,3 +1,4 @@
+export * from './array';
 export * from './isPlainObject/isPlainObject';
 export * from './isPrimitive/isPrimitive';
 export * from './isRegExp/isRegExp';

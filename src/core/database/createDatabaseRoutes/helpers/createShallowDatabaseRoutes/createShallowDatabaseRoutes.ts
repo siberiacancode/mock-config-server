@@ -7,11 +7,13 @@ import type { MemoryStorage } from '../../storages';
 
 export const createShallowDatabaseRoutes = (
   router: IRouter,
-  shallowDatabase: ShallowDatabase,
+  database: ShallowDatabase,
   storage: MemoryStorage<ShallowDatabase>
 ) => {
-  Object.keys(shallowDatabase).forEach((key) => {
-    router.route(`/${key}`).get((_request, response) => {
+  Object.keys(database).forEach((key) => {
+    const path = `/${key}`;
+
+    router.route(path).get((_request, response) => {
       // ✅ important:
       // set 'Cache-Control' header for explicit browsers response revalidate
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
@@ -19,18 +21,18 @@ export const createShallowDatabaseRoutes = (
       response.json(storage.read(key));
     });
 
-    router.route(`/${key}`).post((request, response) => {
+    router.route(path).post((request, response) => {
       storage.write(key, request.body);
       response.set('Location', request.url);
       response.status(201).json(request.body);
     });
 
-    router.route(`/${key}`).put((request, response) => {
+    router.route(path).put((request, response) => {
       storage.write(key, request.body);
       response.json(request.body);
     });
 
-    router.route(`/${key}`).patch((request, response) => {
+    router.route(path).patch((request, response) => {
       const currentResource = storage.read(key);
 
       if (!isPlainObject(currentResource) || !isPlainObject(request.body)) {

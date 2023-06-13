@@ -34,7 +34,7 @@ describe('CreateNestedDatabaseRoutes', () => {
     return server;
   };
 
-  describe('createNestedDatabaseRoutes: get method for collection', () => {
+  describe('createNestedDatabaseRoutes: GET method for collection', () => {
     const nestedDatabase = createNestedDatabase();
     const server = createServer(nestedDatabase);
 
@@ -51,7 +51,7 @@ describe('CreateNestedDatabaseRoutes', () => {
     });
   });
 
-  describe('createNestedDatabaseRoutes: post method for collection', () => {
+  describe('createNestedDatabaseRoutes: POST method for collection', () => {
     let nestedDatabase: ReturnType<typeof createNestedDatabase>;
     let server: Express;
     beforeEach(() => {
@@ -75,6 +75,122 @@ describe('CreateNestedDatabaseRoutes', () => {
       const postResponse = await request(server).post('/users').send(jim);
 
       expect(postResponse.headers.location).toBe('/users/3');
+    });
+  });
+
+  describe('createNestedDatabaseRoutes: GET method for item', () => {
+    const nestedDatabase = createNestedDatabase();
+    const server = createServer(nestedDatabase);
+
+    test('Should return correct data for valid key and id', async () => {
+      const response = await request(server).get('/users/1');
+
+      expect(response.body).toStrictEqual(nestedDatabase.users.find((item) => item.id === 1));
+    });
+
+    test('Should correct Cache-Control header for valid key and id', async () => {
+      const response = await request(server).get('/users/1');
+
+      expect(response.headers['cache-control']).toBe('max-age=0, must-revalidate');
+    });
+
+    test('Should return 404 for non-existent id', async () => {
+      const response = await request(server).get('/users/3');
+
+      expect(response.status).toBe(404);
+    });
+  });
+
+  describe('createNestedDatabaseRoutes: PUT method for item', () => {
+    let nestedDatabase: ReturnType<typeof createNestedDatabase>;
+    let server: Express;
+    beforeEach(() => {
+      nestedDatabase = createNestedDatabase();
+      server = createServer(nestedDatabase);
+    });
+
+    test('Should correctly replace resource (ignoring id) for valid key and id', async () => {
+      const response = await request(server).put('/users/1').send({ id: 3, name: 'John Smith' });
+
+      expect(response.body).toStrictEqual({ id: 1, name: 'John Smith' });
+    });
+
+    test('Should return error when send non-object body', async () => {
+      const response = await request(server)
+        .put('/users/1')
+        .set('Content-Type', 'text/plain')
+        .send('Non-object');
+
+      expect(response.status).toBe(400);
+      expect(response.body).toStrictEqual({
+        message: 'Cannot handle PUT for non-object resource or body',
+        resource: { id: 1, name: 'John Doe', age: 25 },
+        body: 'Non-object'
+      });
+    });
+
+    test('Should return 404 for non-existent id', async () => {
+      const response = await request(server).put('/users/3');
+
+      expect(response.status).toBe(404);
+    });
+  });
+
+  describe('createNestedDatabaseRoutes: PATCH method for item', () => {
+    let nestedDatabase: ReturnType<typeof createNestedDatabase>;
+    let server: Express;
+    beforeEach(() => {
+      nestedDatabase = createNestedDatabase();
+      server = createServer(nestedDatabase);
+    });
+
+    test('Should correctly update resource (ignoring id) for valid key and id', async () => {
+      const response = await request(server).patch('/users/1').send({ id: 3, name: 'John Smith' });
+
+      expect(response.body).toStrictEqual({ id: 1, name: 'John Smith', age: 25 });
+    });
+
+    test('Should return error when send non-object body', async () => {
+      const response = await request(server)
+        .patch('/users/1')
+        .set('Content-Type', 'text/plain')
+        .send('Non-object');
+
+      expect(response.status).toBe(400);
+      expect(response.body).toStrictEqual({
+        message: 'Cannot handle PATCH for non-object resource or body',
+        resource: { id: 1, name: 'John Doe', age: 25 },
+        body: 'Non-object'
+      });
+    });
+
+    test('Should return 404 for non-existent id', async () => {
+      const response = await request(server).patch('/users/3');
+
+      expect(response.status).toBe(404);
+    });
+  });
+
+  describe('createNestedDatabase: DELETE method for item', () => {
+    let nestedDatabase: ReturnType<typeof createNestedDatabase>;
+    let server: Express;
+    beforeEach(() => {
+      nestedDatabase = createNestedDatabase();
+      server = createServer(nestedDatabase);
+    });
+
+    test('Should correctly delete item from collection for valid key and id', async () => {
+      const deleteResponse = await request(server).delete('/users/1');
+      expect(deleteResponse.status).toBe(204);
+
+      const getResponse = await request(server).get('/users/1');
+      expect(getResponse.status).toBe(404);
+    });
+
+    test('Should return 404 for non-existent id', async () => {
+      const response = await request(server).delete('/users/3');
+
+      expect(response.status).toBe(404);
     });
   });
 });

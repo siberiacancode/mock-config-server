@@ -3,7 +3,8 @@ import { MemoryStorage } from './MemoryStorage';
 describe('MemoryStorage', () => {
   const createInitialData = () => ({
     john: { name: 'John Doe', age: 25 },
-    jane: { name: 'Jane Smith', age: 30 }
+    jane: { name: 'Jane Smith', age: 30 },
+    users: [{ id: 1 }, { id: 2 }]
   });
 
   describe('MemoryStorage: read', () => {
@@ -94,6 +95,15 @@ describe('MemoryStorage', () => {
     test('Should not do anything if some of key does not exists', () => {
       memoryStorage.delete(['john', 'stand', 'name']);
       expect(memoryStorage.read('john')).toStrictEqual(initialData.john);
+    });
+
+    test('Should splice array if delete element from array', () => {
+      memoryStorage.delete(['users', 0]);
+
+      const updatedUsers = memoryStorage.read('users');
+
+      expect(updatedUsers).toStrictEqual([{ id: 2 }]);
+      expect(updatedUsers.length).toBe(1);
     });
   });
 });

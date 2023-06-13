@@ -32,7 +32,7 @@ describe('createShallowDatabaseRoutes', () => {
     return server;
   };
 
-  describe('createShallowDatabaseRoutes: get method', () => {
+  describe('createShallowDatabaseRoutes: GET method', () => {
     const shallowDatabase = createShallowDatabase();
     const server = createServer(shallowDatabase);
 
@@ -50,7 +50,7 @@ describe('createShallowDatabaseRoutes', () => {
     });
   });
 
-  describe('createShallowDatabaseRoutes: post method', () => {
+  describe('createShallowDatabaseRoutes: POST method', () => {
     let shallowDatabase: ReturnType<typeof createShallowDatabase>;
     let server: Express;
     beforeEach(() => {
@@ -76,7 +76,7 @@ describe('createShallowDatabaseRoutes', () => {
     });
   });
 
-  describe('createShallowDatabaseRoutes: put', () => {
+  describe('createShallowDatabaseRoutes: PUT method', () => {
     let shallowDatabase: ReturnType<typeof createShallowDatabase>;
     let server: Express;
     beforeEach(() => {
@@ -96,7 +96,7 @@ describe('createShallowDatabaseRoutes', () => {
     });
   });
 
-  describe('createShallowDatabaseRoutes: patch', () => {
+  describe('createShallowDatabaseRoutes: PATCH method', () => {
     let shallowDatabase: ReturnType<typeof createShallowDatabase>;
     let server: Express;
     beforeEach(() => {

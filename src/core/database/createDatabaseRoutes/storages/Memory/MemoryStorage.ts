@@ -1,3 +1,5 @@
+import { isIndex } from '@/utils/helpers';
+
 type Index = string | number;
 type MemoryObject = Record<Index, any>;
 
@@ -31,7 +33,7 @@ export class MemoryStorage<T extends MemoryObject = MemoryObject> {
       const isCurrentKeyPartObject =
         typeof writable[key[index]] === 'object' && writable[key[index]] !== null;
       if (!isCurrentKeyPartObject) {
-        const isNextKeyPartArrayIndex = Number.isInteger(key[index + 1]) && key[index + 1] >= 0;
+        const isNextKeyPartArrayIndex = isIndex(key[index + 1]);
         writable[key[index]] = isNextKeyPartArrayIndex ? [] : {};
       }
       writable = writable[key[index]];
@@ -43,14 +45,23 @@ export class MemoryStorage<T extends MemoryObject = MemoryObject> {
     const key = Array.isArray(baseKey) ? baseKey : [baseKey];
     let deletable: any = this.data;
     let index = 0;
-    while ((typeof deletable === 'object' && deletable !== null) && index < key.length - 1) {
+    while (typeof deletable === 'object' && deletable !== null && index < key.length - 1) {
       deletable = deletable[key[index]];
       index += 1;
     }
 
     // ✅ important:
     // stop iterate for one element before end of key for get access to deletable object property
-    if ((index === key.length - 1) && (typeof deletable === 'object' && deletable !== null) && key[index] in deletable) {
+    if (
+      index === key.length - 1 &&
+      typeof deletable === 'object' &&
+      deletable !== null &&
+      key[index] in deletable
+    ) {
+      if (Array.isArray(deletable) && isIndex(key[index])) {
+        deletable.splice(key[index] as number, 1);
+        return;
+      }
       delete deletable[key[index]];
     }
   }
