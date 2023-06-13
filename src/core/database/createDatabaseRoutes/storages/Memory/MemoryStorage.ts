@@ -38,4 +38,20 @@ export class MemoryStorage<T extends MemoryObject = MemoryObject> {
       index += 1;
     }
   }
+
+  public delete(baseKey: Index | Index[]): void {
+    const key = Array.isArray(baseKey) ? baseKey : [baseKey];
+    let deletable: any = this.data;
+    let index = 0;
+    while ((typeof deletable === 'object' && deletable !== null) && index < key.length - 1) {
+      deletable = deletable[key[index]];
+      index += 1;
+    }
+
+    // ✅ important:
+    // stop iterate for one element before end of key for get access to deletable object property
+    if ((index === key.length - 1) && (typeof deletable === 'object' && deletable !== null) && key[index] in deletable) {
+      delete deletable[key[index]];
+    }
+  }
 }

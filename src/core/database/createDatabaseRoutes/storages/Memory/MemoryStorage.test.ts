@@ -72,4 +72,28 @@ describe('MemoryStorage', () => {
       expect(memoryStorage.read('users')).toStrictEqual([{ id: 1 }]);
     });
   });
+
+  describe('MemoryStorage: delete', () => {
+    let initialData: ReturnType<typeof createInitialData>;
+    let memoryStorage: MemoryStorage<typeof initialData>;
+    beforeEach(() => {
+      initialData = createInitialData();
+      memoryStorage = new MemoryStorage(initialData);
+    });
+
+    test('Should correctly delete object property with valid single key', () => {
+      memoryStorage.delete('john');
+      expect(memoryStorage.read('john')).toBe(undefined);
+    });
+
+    test('Should correctly delete object property with valid array key', () => {
+      memoryStorage.delete(['john', 'age']);
+      expect(memoryStorage.read('john')).toStrictEqual({ name: initialData.john.name });
+    });
+
+    test('Should not do anything if some of key does not exists', () => {
+      memoryStorage.delete(['john', 'stand', 'name']);
+      expect(memoryStorage.read('john')).toStrictEqual(initialData.john);
+    });
+  });
 });
