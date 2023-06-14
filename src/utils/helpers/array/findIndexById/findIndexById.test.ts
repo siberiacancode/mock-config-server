@@ -15,4 +15,4 @@ describe('findIndexById', () => {
     const array = [{ id: 1 }, { id: 2 }];
     expect(findIndexById(array, '2')).toBe(1);
   });
-})
+});

@@ -68,9 +68,9 @@ describe('MemoryStorage', () => {
     });
 
     test('Should create array if some part of array key is non-negative number and does not exists', () => {
-      memoryStorage.write(['users', 0, 'id'], 1);
+      memoryStorage.write(['users', 2, 'id'], 3);
 
-      expect(memoryStorage.read('users')).toStrictEqual([{ id: 1 }]);
+      expect(memoryStorage.read('users')).toStrictEqual([{ id: 1 }, { id: 2 }, { id: 3 }]);
     });
   });
 
