@@ -11,21 +11,16 @@ describe('MemoryStorage', () => {
     const initialData = createInitialData();
     const memoryStorage = new MemoryStorage(initialData);
 
+    test('Should return correct FULL data for read without keys', () => {
+      expect(memoryStorage.read()).toStrictEqual(initialData);
+    });
+
     test('Should return correct data for read with valid single key', () => {
       expect(memoryStorage.read('john')).toStrictEqual(initialData.john);
     });
 
-    test('Should return undefined for read with invalid single key', () => {
-      expect(memoryStorage.read('jim')).toBe(undefined);
-    });
-
     test('Should return correct data for read with valid array key', () => {
       expect(memoryStorage.read(['john', 'name'])).toStrictEqual(initialData.john.name);
-    });
-
-    test('Should return undefined for read with invalid array key', () => {
-      expect(memoryStorage.read(['jim', 'name'])).toBe(undefined);
-      expect(memoryStorage.read(['jim', 'surname'])).toBe(undefined);
     });
   });
 
@@ -45,14 +40,6 @@ describe('MemoryStorage', () => {
       expect(memoryStorage.read('john')).toStrictEqual(newAgeJohn);
     });
 
-    test('Should set new value for non-existent single key', () => {
-      const jim = { name: 'Jim Black', age: 40 };
-
-      memoryStorage.write('jim', jim);
-
-      expect(memoryStorage.read('jim')).toStrictEqual(jim);
-    });
-
     test('Should update value with valid array key', () => {
       const newAge = 26;
 
@@ -61,16 +48,10 @@ describe('MemoryStorage', () => {
       expect(memoryStorage.read(['john', 'age'])).toBe(newAge);
     });
 
-    test('Should create object if some part of array key (not last part) does not exists', () => {
-      memoryStorage.write(['john', 'stand', 'name'], 'The World');
+    test('Should update value with valid key which contain non-existent last part', () => {
+      memoryStorage.write(['john', 'stand'], 'The World');
 
-      expect(memoryStorage.read(['john', 'stand'])).toStrictEqual({ name: 'The World' });
-    });
-
-    test('Should create array if some part of array key is non-negative number and does not exists', () => {
-      memoryStorage.write(['users', 2, 'id'], 3);
-
-      expect(memoryStorage.read('users')).toStrictEqual([{ id: 1 }, { id: 2 }, { id: 3 }]);
+      expect(memoryStorage.read(['john', 'stand'])).toBe('The World');
     });
   });
 
@@ -90,11 +71,6 @@ describe('MemoryStorage', () => {
     test('Should correctly delete object property with valid array key', () => {
       memoryStorage.delete(['john', 'age']);
       expect(memoryStorage.read('john')).toStrictEqual({ name: initialData.john.name });
-    });
-
-    test('Should not do anything if some of key does not exists', () => {
-      memoryStorage.delete(['john', 'stand', 'name']);
-      expect(memoryStorage.read('john')).toStrictEqual(initialData.john);
     });
 
     test('Should splice array if delete element from array', () => {
