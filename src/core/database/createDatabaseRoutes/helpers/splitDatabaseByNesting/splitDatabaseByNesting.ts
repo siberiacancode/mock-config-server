@@ -7,11 +7,11 @@ const isAllArrayElementsHaveValidId = (array: unknown[]) =>
       isPlainObject(element) && (typeof element.id === 'number' || typeof element.id === 'string')
   );
 
-export const splitDatabaseByNesting = (databaseConfig: DatabaseConfig) => {
+export const splitDatabaseByNesting = (data: DatabaseConfig['data']) => {
   const shallowDatabase: ShallowDatabase = {};
   const nestedDatabase: NestedDatabase = {};
 
-  Object.entries(databaseConfig).forEach(([databaseEntityKey, databaseEntityValue]) => {
+  Object.entries(data).forEach(([databaseEntityKey, databaseEntityValue]) => {
     if (Array.isArray(databaseEntityValue) && isAllArrayElementsHaveValidId(databaseEntityValue)) {
       nestedDatabase[databaseEntityKey] = databaseEntityValue;
       return;

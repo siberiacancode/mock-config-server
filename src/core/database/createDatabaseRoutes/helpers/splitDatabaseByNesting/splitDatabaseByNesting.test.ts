@@ -5,22 +5,24 @@ import { splitDatabaseByNesting } from './splitDatabaseByNesting';
 describe('splitDatabaseByNesting', () => {
   test('Should put in nested database only arrays of objects with id (string | number)', () => {
     const databaseConfig: DatabaseConfig = {
-      key: 'value',
-      validArray: [
-        { id: 1, key: 'value' },
-        { id: 'string', key: 'value' }
-      ],
-      invalidArray: [{ id: 1, key: 'value' }, null]
+      data: {
+        key: 'value',
+        validArray: [
+          { id: 1, key: 'value' },
+          { id: 'string', key: 'value' }
+        ],
+        invalidArray: [{ id: 1, key: 'value' }, null]
+      }
     };
 
-    const { shallowDatabase, nestedDatabase } = splitDatabaseByNesting(databaseConfig);
+    const { shallowDatabase, nestedDatabase } = splitDatabaseByNesting(databaseConfig.data);
 
     expect(shallowDatabase).toStrictEqual({
-      key: databaseConfig.key,
-      invalidArray: databaseConfig.invalidArray
+      key: databaseConfig.data.key,
+      invalidArray: databaseConfig.data.invalidArray
     });
     expect(nestedDatabase).toStrictEqual({
-      validArray: databaseConfig.validArray
+      validArray: databaseConfig.data.validArray
     });
   });
 });

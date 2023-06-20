@@ -10,9 +10,9 @@ import {
 import { MemoryStorage } from './storages';
 
 export const createDatabaseRoutes = (router: IRouter, databaseConfig: DatabaseConfig) => {
-  const { shallowDatabase, nestedDatabase } = splitDatabaseByNesting(databaseConfig);
+  const { shallowDatabase, nestedDatabase } = splitDatabaseByNesting(databaseConfig.data);
 
-  const storage = new MemoryStorage(databaseConfig);
+  const storage = new MemoryStorage(databaseConfig.data);
   createShallowDatabaseRoutes(router, shallowDatabase, storage as MemoryStorage<ShallowDatabase>);
   createNestedDatabaseRoutes(router, nestedDatabase, storage as MemoryStorage<NestedDatabase>);
 
