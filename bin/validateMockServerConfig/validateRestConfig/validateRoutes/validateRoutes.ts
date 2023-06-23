@@ -1,16 +1,16 @@
 import {
   ALLOWED_CHECK_MODES,
-  ONE_VALUE_CHECK_MODES,
-  TWO_VALUES_CHECK_MODES
+  CHECK_ACTUAL_VALUE_CHECK_MODES,
+  COMPARE_WITH_EXPECTED_VALUE_CHECK_MODES
 } from '@/utils/constants';
 import { isPlainObject } from '@/utils/helpers';
 import type {
   RestMethod,
   RestEntityNameByMethod,
   RestEntityName,
-  RestEntityDescriptorOnly,
-  CheckOneValueMode,
-  CheckTwoValuesMode,
+  RestEntityDescriptor,
+  CheckActualValueCheckMode,
+  CompareWithExpectedValueCheckMode,
   CheckMode
 } from '@/utils/types';
 
@@ -28,17 +28,30 @@ const ALLOWED_ENTITIES_BY_METHOD: AllowedEntitiesByMethod = {
   options: ['headers', 'cookies', 'query', 'params']
 };
 
-export const isCheckModeValid = (checkMode: unknown) => ALLOWED_CHECK_MODES.includes(checkMode as CheckMode);
+const isCheckModeValid = (checkMode: unknown) => ALLOWED_CHECK_MODES.includes(checkMode as CheckMode);
 
-const isHeadersOrCookiesOrQueryOrParamsDescriptorValid = (checkMode: unknown, value: unknown) => {
-  if (ONE_VALUE_CHECK_MODES.includes(checkMode as CheckOneValueMode) && typeof value === 'undefined') return true;
-  if (
-    TWO_VALUES_CHECK_MODES.includes(checkMode as CheckTwoValuesMode) && (
-      typeof value === 'string' ||
+const isDescriptorValueValid = (entityName: unknown, checkMode: unknown, value: unknown) => {
+  if (CHECK_ACTUAL_VALUE_CHECK_MODES.includes(checkMode as CheckActualValueCheckMode) && typeof value === 'undefined') return true;
+
+  if (COMPARE_WITH_EXPECTED_VALUE_CHECK_MODES.includes(checkMode as CompareWithExpectedValueCheckMode)) {
+    if (entityName === 'body') {
+      if ((
+          typeof value === 'boolean' ||
+          typeof value === 'number' ||
+          typeof value === 'string' ||
+          typeof value === 'object'
+        ) &&
+        value !== null &&
+        typeof value !== 'function' &&
+        !(value instanceof RegExp)
+      ) return true;
+    }
+    if (
+      typeof value === 'boolean' ||
       typeof value === 'number' ||
-      typeof value === 'boolean'
-    )
-  ) return true;
+      typeof value === 'string'
+    ) return true;
+  }
 
   if (checkMode === 'function' && typeof value === 'function') return true;
   if (checkMode === 'regExp' && (value instanceof RegExp)) return true;
@@ -46,56 +59,65 @@ const isHeadersOrCookiesOrQueryOrParamsDescriptorValid = (checkMode: unknown, va
   return false;
 }
 
-const validateHeadersOrCookiesOrQueryOrParams = (headersOrCookiesOrQueryOrParams: unknown, entity: string) => {
-  const isHeadersOrCookiesOrQueryOrParamsObject = isPlainObject(headersOrCookiesOrQueryOrParams);
-  if (isHeadersOrCookiesOrQueryOrParamsObject) {
-    Object.entries(headersOrCookiesOrQueryOrParams).forEach(([headerOrCookieOrQueryOrParamKey, headerOrCookieOrQueryOrParamDescriptor]) => {
-      const entitiesDescriptor = headerOrCookieOrQueryOrParamDescriptor && typeof headerOrCookieOrQueryOrParamDescriptor === 'object' && 'checkMode' in headerOrCookieOrQueryOrParamDescriptor ? headerOrCookieOrQueryOrParamDescriptor : { checkMode: 'equals', value: headerOrCookieOrQueryOrParamDescriptor };
-      const { checkMode, value } = entitiesDescriptor as RestEntityDescriptorOnly<Exclude<RestEntityName, 'body'>>;
+const validateObjectEntity = (objectEntity: unknown, entityName: string) => {
+  const isEntityObject = isPlainObject(objectEntity);
+  if (isEntityObject) {
+    Object.entries(objectEntity).forEach(([key, descriptor]) => {
+      const entitiesDescriptor = descriptor && typeof descriptor === 'object' && 'checkMode' in descriptor ? descriptor : { checkMode: 'equals', value: descriptor };
+      const { checkMode, value } = entitiesDescriptor as RestEntityDescriptor<Exclude<RestEntityName, 'body'>>;
       if (!isCheckModeValid(checkMode)) {
-        throw new Error(`${entity}.${headerOrCookieOrQueryOrParamKey}.checkMode`);
+        throw new Error(`${entityName}.${key}.checkMode`);
       }
       const isValueArray = Array.isArray(value);
       if (isValueArray) {
         value.forEach((element, index) => {
-          if (!isHeadersOrCookiesOrQueryOrParamsDescriptorValid(checkMode, element)) {
-            throw new Error(`${entity}.${headerOrCookieOrQueryOrParamKey}.value[${index}]`);
+          if (!isDescriptorValueValid(entityName, checkMode, element)) {
+            throw new Error(`${entityName}.${key}.value[${index}]`);
           }
         })
         return;
       }
-      if (!isHeadersOrCookiesOrQueryOrParamsDescriptorValid(checkMode, value)) {
-        throw new Error(`${entity}.${headerOrCookieOrQueryOrParamKey}.value`);
+      if (!isDescriptorValueValid(entityName, checkMode, value)) {
+        throw new Error(`${entityName}.${key}.value`);
       }
     });
     return;
   }
 
-  throw new Error(entity);
+  throw new Error(entityName);
+};
+
+const validateBodyEntity = (body: unknown) => {
+  const bodyDescriptor = body && typeof body === 'object' && 'checkMode' in body ? body : { checkMode: 'equals', value: body };
+  const { checkMode, value } = bodyDescriptor as RestEntityDescriptor<'body'>;
+  if (!isCheckModeValid(checkMode)) {
+    throw new Error('body.checkMode');
+  }
+
+  if (!isDescriptorValueValid('variables', checkMode, value)) {
+    throw new Error('body.value');
+  }
 };
 
 const validateEntities = (entities: unknown, method: RestMethod) => {
   const isEntitiesObject = isPlainObject(entities);
   if (isEntitiesObject) {
-    Object.keys(entities).forEach((entityName) => {
-      const isEntityAllowed = ALLOWED_ENTITIES_BY_METHOD[method].includes(entityName as any);
+    Object.keys(entities).forEach((entity) => {
+      const isEntityAllowed = ALLOWED_ENTITIES_BY_METHOD[method].includes(entity as any);
       if (!isEntityAllowed) {
-        throw new Error(`entities.${entityName}`);
+        throw new Error(`entities.${entity}`);
       }
 
-      if (
-        entityName === 'headers' ||
-        entityName === 'cookies' ||
-        entityName === 'query' ||
-        entityName === 'params'
-      ) {
-        try {
-          const headersOrCookiesOrQueryOrParams = entities[entityName];
-          validateHeadersOrCookiesOrQueryOrParams(headersOrCookiesOrQueryOrParams, entityName);
-        } catch (error: any) {
-          throw new Error(`entities.${error.message}`);
+      try {
+        if (entity === 'body') {
+          validateBodyEntity(entities[entity]);
+        } else {
+          validateObjectEntity(entities[entity], entity);
         }
+      } catch (error: any) {
+        throw new Error(`entities.${error.message}`);
       }
+
     });
     return;
   }

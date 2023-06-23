@@ -1,17 +1,17 @@
 import {
   ALLOWED_CHECK_MODES,
-  ONE_VALUE_CHECK_MODES,
-  TWO_VALUES_CHECK_MODES
+  CHECK_ACTUAL_VALUE_CHECK_MODES,
+  COMPARE_WITH_EXPECTED_VALUE_CHECK_MODES
 } from '@/utils/constants';
 import { isPlainObject } from '@/utils/helpers';
 import type {
   GraphQLEntityNameByOperationType,
   GraphQLOperationType,
-  GraphQLEntity,
   GraphQLEntityName,
-  CheckOneValueMode,
-  CheckTwoValuesMode,
-  CheckMode
+  CheckActualValueCheckMode,
+  CompareWithExpectedValueCheckMode,
+  CheckMode,
+  GraphQLEntityDescriptor
 } from '@/utils/types';
 
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
@@ -24,19 +24,30 @@ const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntitiesByOperationType = {
   mutation: ['headers', 'cookies', 'query', 'variables']
 };
 
+const isCheckModeValid = (checkMode: unknown) => ALLOWED_CHECK_MODES.includes(checkMode as CheckMode);
 
+const isDescriptorValueValid = (entityName: unknown, checkMode: unknown, value: unknown) => {
+  if (CHECK_ACTUAL_VALUE_CHECK_MODES.includes(checkMode as CheckActualValueCheckMode) && typeof value === 'undefined') return true;
 
-export const isCheckModeValid = (checkMode: unknown) => ALLOWED_CHECK_MODES.includes(checkMode as CheckMode);
-
-const isHeadersOrCookiesOrQueryDescriptorValid = (checkMode: unknown, value: unknown) => {
-  if (ONE_VALUE_CHECK_MODES.includes(checkMode as CheckOneValueMode) && typeof value === 'undefined') return true;
-  if (
-    TWO_VALUES_CHECK_MODES.includes(checkMode as CheckTwoValuesMode) && (
-      typeof value === 'string' ||
+  if (COMPARE_WITH_EXPECTED_VALUE_CHECK_MODES.includes(checkMode as CompareWithExpectedValueCheckMode)) {
+    if (entityName === 'variables') {
+      if ((
+        typeof value === 'boolean' ||
+        typeof value === 'number' ||
+        typeof value === 'string' ||
+        typeof value === 'object'
+        ) &&
+        value !== null &&
+        typeof value !== 'function' &&
+        !(value instanceof RegExp)
+      ) return true;
+    }
+    if (
+      typeof value === 'boolean' ||
       typeof value === 'number' ||
-      typeof value === 'boolean'
-    )
-  ) return true;
+      typeof value === 'string'
+    ) return true;
+  }
 
   if (checkMode === 'function' && typeof value === 'function') return true;
   if (checkMode === 'regExp' && (value instanceof RegExp)) return true;
@@ -44,32 +55,44 @@ const isHeadersOrCookiesOrQueryDescriptorValid = (checkMode: unknown, value: unk
   return false;
 }
 
-const validateHeadersOrCookiesOrQuery = (headersOrCookiesOrQuery: unknown, entity: string) => {
-  const isHeadersOrCookiesOrQueryObject = isPlainObject(headersOrCookiesOrQuery);
+const validateObjectEntity = (objectEntity: unknown, entityName: string) => {
+  const isHeadersOrCookiesOrQueryObject = isPlainObject(objectEntity);
   if (isHeadersOrCookiesOrQueryObject) {
-    Object.entries(headersOrCookiesOrQuery).forEach(([headerOrCookieOrQueryKey, headerOrCookieOrQueryDescriptor]) => {
-      const entitiesDescriptor = headerOrCookieOrQueryDescriptor && typeof headerOrCookieOrQueryDescriptor === 'object' && 'checkMode' in headerOrCookieOrQueryDescriptor ? headerOrCookieOrQueryDescriptor : { checkMode: 'equals', value: headerOrCookieOrQueryDescriptor };
-      const { checkMode, value } = entitiesDescriptor as GraphQLEntity<Exclude<GraphQLEntityName, 'variables'>>;
+    Object.entries(objectEntity).forEach(([key, descriptor]) => {
+      const entitiesDescriptor = descriptor && typeof descriptor === 'object' && 'checkMode' in descriptor ? descriptor : { checkMode: 'equals', value: descriptor };
+      const { checkMode, value } = entitiesDescriptor as GraphQLEntityDescriptor<Exclude<GraphQLEntityName, 'variables'>>;
       if (!isCheckModeValid(checkMode)) {
-        throw new Error(`${entity}.${headerOrCookieOrQueryKey}.checkMode`);
+        throw new Error(`${entityName}.${key}.checkMode`);
       }
       const isValueArray = Array.isArray(value);
       if (isValueArray) {
         value.forEach((element, index) => {
-          if (!isHeadersOrCookiesOrQueryDescriptorValid(checkMode, element)) {
-            throw new Error(`${entity}.${headerOrCookieOrQueryKey}.value[${index}]`);
+          if (!isDescriptorValueValid(entityName, checkMode, element)) {
+            throw new Error(`${entityName}.${key}.value[${index}]`);
           }
         })
         return;
       }
-      if (!isHeadersOrCookiesOrQueryDescriptorValid(checkMode, value)) {
-        throw new Error(`${entity}.${headerOrCookieOrQueryKey}.value`);
+      if (!isDescriptorValueValid(entityName, checkMode, value)) {
+        throw new Error(`${entityName}.${key}.value`);
       }
     });
     return;
   }
 
-  throw new Error(entity);
+  throw new Error(entityName);
+};
+
+const validateVariablesEntity = (variables: unknown) => {
+  const variablesDescriptor = variables && typeof variables === 'object' && 'checkMode' in variables ? variables : { checkMode: 'equals', value: variables };
+  const { checkMode, value } = variablesDescriptor as GraphQLEntityDescriptor<'variables'>;
+  if (!isCheckModeValid(checkMode)) {
+    throw new Error('variables.checkMode');
+  }
+
+  if (!isDescriptorValueValid('variables', checkMode, value)) {
+    throw new Error('variables.value');
+  }
 };
 
 const validateEntities = (entities: unknown, operationType: GraphQLOperationType) => {
@@ -83,13 +106,14 @@ const validateEntities = (entities: unknown, operationType: GraphQLOperationType
         throw new Error(`entities.${entity}`);
       }
 
-      if (entity === 'headers' || entity === 'query' || entity === 'cookies') {
-        try {
-          const headersOrCookiesOrQuery = entities[entity];
-          validateHeadersOrCookiesOrQuery(headersOrCookiesOrQuery, entity);
-        } catch (error: any) {
-          throw new Error(`entities.${error.message}`);
+      try {
+        if (entity === 'variables') {
+          validateVariablesEntity(entities[entity]);
+        } else {
+          validateObjectEntity(entities[entity], entity);
         }
+      } catch (error: any) {
+        throw new Error(`entities.${error.message}`);
       }
     });
     return;

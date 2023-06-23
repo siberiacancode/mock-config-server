@@ -1,7 +1,7 @@
 import type { IRouter, NextFunction, Request, Response } from 'express';
 
 import {
-  isEntityValuesEqual,
+  resolveEntityValues,
   callResponseInterceptors,
   getGraphQLInput,
   parseQuery,
@@ -10,7 +10,7 @@ import {
 import type {
   GraphqlConfig,
   Interceptors,
-  GraphQLEntity,
+  GraphQLEntityDescriptorOrValue,
   GraphQLEntityName,
   GraphQLHeaderOrCookieOrQueryName,
   GraphQLEntityDescriptorOnly
@@ -70,18 +70,18 @@ export const createGraphQLRoutes = (
 
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
       if (!entities) return true;
-      const entries = Object.entries(entities) as [GraphQLEntityName, GraphQLEntity][];
+      const entries = Object.entries(entities) as [GraphQLEntityName, GraphQLEntityDescriptorOrValue][];
       return entries.every(([entityName, rawEntities]) => {
         if (entityName === 'variables') {
           const entitiesDescriptor = rawEntities && typeof rawEntities === 'object' && 'checkMode' in rawEntities ? rawEntities : { checkMode: 'equals', value: rawEntities };
-          const { value: expectedValue, checkMode } = entitiesDescriptor as GraphQLEntityDescriptorOnly<'variables'>;
-          return isEntityValuesEqual(checkMode, graphQLInput.variables, expectedValue);
+          const { value: descriptorValue, checkMode } = entitiesDescriptor as GraphQLEntityDescriptorOnly<'variables'>;
+          return resolveEntityValues(checkMode, graphQLInput.variables, descriptorValue);
         }
         const descriptors = Object.entries(rawEntities) as [GraphQLHeaderOrCookieOrQueryName, GraphQLEntityDescriptorOnly<Exclude<GraphQLEntityName, 'variables'>>[GraphQLHeaderOrCookieOrQueryName]][];
         return descriptors.every(([entityKey, rawEntity]) => {
           const entityDescriptor = (rawEntity && typeof rawEntity === 'object' && 'checkMode' in rawEntity ? rawEntity : { checkMode: 'equals' as const, value: rawEntity });
-          const { value: expectedValue, checkMode } = entityDescriptor;
-          return isEntityValuesEqual(checkMode, request[entityName][entityKey], expectedValue);
+          const { value: descriptorValue, checkMode } = entityDescriptor;
+          return resolveEntityValues(checkMode, request[entityName][entityKey], descriptorValue);
         })
         }
       );

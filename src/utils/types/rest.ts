@@ -1,21 +1,20 @@
 import type { Request } from 'express';
 
 import type { Interceptors } from './interceptors';
-import type { CheckFunction, CheckMode, CheckOneValueMode, CheckTwoValuesMode, Data } from './values';
+import type { CheckFunction, CheckMode, CheckActualValueCheckMode, CompareWithExpectedValueCheckMode, Data } from './values';
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options';
 export type RestEntityName = 'headers' | 'cookies' | 'query' | 'params' | 'body';
-export type RestHeaderOrCookieOrQueryOrParamEntityValue = string | number | boolean;
+type RestHeaderOrCookieOrQueryOrParamEntityValue = string | number | boolean;
 
 export type RestEntityValue<EntityName = RestEntityName> =
   EntityName extends 'headers' | 'cookies' | 'query' | 'params'
     ? RestHeaderOrCookieOrQueryOrParamEntityValue
     : EntityName extends 'body'
       ?
-      | boolean
-      | number
       | string
-      | { checkMode?: undefined; [key: string]: any }
+      // ✅ important: Omit `checkMode` key for fix types. Omit `call` key for exclude functions
+      | { checkMode?: undefined; call?: undefined; [key: string]: any }
       | any[]
       : never;
 
@@ -33,12 +32,12 @@ export type RestEntityDescriptor<
         checkMode: Check,
         value: RegExp | RegExp[];
       } :
-      Check extends CheckTwoValuesMode ?
+      Check extends CompareWithExpectedValueCheckMode ?
         {
           checkMode: Check;
           value: RestEntityValue<EntityName> | RestEntityValue<EntityName>[];
         } :
-        Check extends CheckOneValueMode ?
+        Check extends CheckActualValueCheckMode ?
           {
             checkMode: Check;
             value?: undefined;

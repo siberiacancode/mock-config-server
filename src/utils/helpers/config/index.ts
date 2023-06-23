@@ -1,1 +1,1 @@
-export * from './isEntitiesEqual/isEntityValuesEqual';
+export * from './resolveEntityValues/resolveEntityValues';

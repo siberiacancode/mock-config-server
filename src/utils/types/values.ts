@@ -1,14 +1,11 @@
 export type PlainObject = Record<string, any>;
 export type PlainFunction = (...args: any[]) => any;
 
-export type CheckOneValueMode =
+export type CheckActualValueCheckMode =
   | 'exists'
   | 'notExists'
-  | 'isBoolean'
-  | 'isNumber'
-  | 'isString';
 
-export type CheckTwoValuesMode =
+export type CompareWithExpectedValueCheckMode =
   | 'equals'
   | 'notEquals'
   | 'includes'
@@ -16,14 +13,18 @@ export type CheckTwoValuesMode =
   | 'startsWith'
   | 'notStartsWith'
   | 'endsWith'
-  | 'notEndsWith'
+  | 'notEndsWith';
+
+export type CalculateByExpectedValueCheckMode =
   | 'regExp'
   | 'function';
 
 export type CheckMode =
-  | CheckOneValueMode
-  | CheckTwoValuesMode
+  | CheckActualValueCheckMode
+  | CompareWithExpectedValueCheckMode
+  | CalculateByExpectedValueCheckMode
 
-export type CheckFunction = (checkMode: Exclude<CheckMode, 'function'>, firstValue: any, secondValue?: any) => boolean;
+export type CheckFunction = (checkMode: CheckMode, actualValue: any, descriptorValue?: any) => boolean;
 
-export type Data = boolean | number | string | any[] | Record<any, any> | null | undefined;
+// todo: string or object
+export type Data = boolean | number | string | any[] | Record<any, any>;

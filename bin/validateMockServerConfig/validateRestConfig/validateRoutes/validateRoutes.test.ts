@@ -127,7 +127,7 @@ describe('validateRoutes (rest)', () => {
   });
 
   test('Should correctly handle post|put|patch method entities only with correct type', () => {
-    const correctEntities = ['headers', 'cookies', 'params', 'query', 'body'];
+    const correctEntities = ['headers', 'cookies', 'params', 'query'];
     correctEntities.forEach((correctEntity) => {
       expect(() =>
         validateRoutes(
