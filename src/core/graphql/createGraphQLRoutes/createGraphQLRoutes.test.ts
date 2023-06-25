@@ -41,10 +41,7 @@ describe('createGraphQLRoutes', () => {
               {
                 entities: {
                   headers: {
-                    key1: {
-                      checkMode: 'equals',
-                      value: 'value1'
-                    },
+                    key1: 'value1',
                     key2: {
                       checkMode: 'equals',
                       value: 'value2'

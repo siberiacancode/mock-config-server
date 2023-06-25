@@ -5,7 +5,7 @@ import {
 } from '@/utils/constants';
 import { isPlainObject } from '@/utils/helpers';
 import type {
-  GraphQLEntityNameByOperationType,
+  GraphQLEntityNamesByOperationType,
   GraphQLOperationType,
   GraphQLEntityName,
   CheckActualValueCheckMode,
@@ -16,10 +16,10 @@ import type {
 
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
-type AllowedEntitiesByOperationType = {
-  [OperationType in keyof GraphQLEntityNameByOperationType]: GraphQLEntityNameByOperationType[OperationType][];
+type AllowedEntityNamesByOperationType = {
+  [OperationType in keyof GraphQLEntityNamesByOperationType]: GraphQLEntityNamesByOperationType[OperationType][];
 };
-const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntitiesByOperationType = {
+const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntityNamesByOperationType = {
   query: ['headers', 'cookies', 'query', 'variables'],
   mutation: ['headers', 'cookies', 'query', 'variables']
 };
@@ -56,8 +56,8 @@ const isDescriptorValueValid = (entityName: unknown, checkMode: unknown, value: 
 }
 
 const validateObjectEntity = (objectEntity: unknown, entityName: string) => {
-  const isHeadersOrCookiesOrQueryObject = isPlainObject(objectEntity);
-  if (isHeadersOrCookiesOrQueryObject) {
+  const isEntityObject = isPlainObject(objectEntity);
+  if (isEntityObject) {
     Object.entries(objectEntity).forEach(([key, descriptor]) => {
       const entitiesDescriptor = descriptor && typeof descriptor === 'object' && 'checkMode' in descriptor ? descriptor : { checkMode: 'equals', value: descriptor };
       const { checkMode, value } = entitiesDescriptor as GraphQLEntityDescriptor<Exclude<GraphQLEntityName, 'variables'>>;

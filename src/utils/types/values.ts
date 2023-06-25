@@ -24,7 +24,8 @@ export type CheckMode =
   | CompareWithExpectedValueCheckMode
   | CalculateByExpectedValueCheckMode
 
-export type CheckFunction = (checkMode: CheckMode, actualValue: any, descriptorValue?: any) => boolean;
+export type CheckFunction = <ActualValue extends any = any, DescriptorValue extends any = any>
+  (checkMode: CheckMode, actualValue: ActualValue, descriptorValue?: DescriptorValue) => boolean;
 
 // todo: string or object
 export type Data = boolean | number | string | any[] | Record<any, any>;

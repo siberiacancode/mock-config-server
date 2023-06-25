@@ -13,9 +13,9 @@ const NEGATIVE_CHECK_MODES: CheckMode[] = [
   'notEndsWith'
 ];
 
-export const checkFunction: CheckFunction = (checkMode, actualValue: any, descriptorValue?: any): boolean => {
-  if (checkMode === 'function') return descriptorValue(actualValue, checkFunction);
-  if (checkMode === 'regExp') return descriptorValue.test(actualValue);
+export const checkFunction: CheckFunction = (checkMode, actualValue, descriptorValue?): boolean => {
+  if (checkMode === 'function' && typeof descriptorValue === 'function') return descriptorValue(actualValue, checkFunction);
+  if (checkMode === 'regExp' && (descriptorValue instanceof RegExp)) return descriptorValue.test(actualValue as string);
 
   const isActualValueUndefined = typeof actualValue === 'undefined';
 
@@ -42,7 +42,7 @@ export const checkFunction: CheckFunction = (checkMode, actualValue: any, descri
   throw new Error('Wrong checkMode');
 };
 
-export const resolveEntityValues = (checkMode: CheckMode, actualValue: any, descriptorValue?: any): boolean => {
+export const resolveEntityValues = (checkMode: CheckMode, actualValue: any, descriptorValue?: any) => {
   if (checkMode === 'function') return descriptorValue(actualValue, checkFunction);
   if (checkMode === 'exists' || checkMode === 'notExists') return checkFunction(checkMode, actualValue, descriptorValue);
 
@@ -140,6 +140,4 @@ export const resolveEntityValues = (checkMode: CheckMode, actualValue: any, desc
     }
     return Object.keys(flattenDescriptorValue).every((flattenDescriptorValueKey) => checkFunction(checkMode, flattenActualValue[flattenDescriptorValueKey], flattenDescriptorValue[flattenDescriptorValueKey]));
   }
-
-  throw new Error('Passed unexpected values into resolveEntityValues');
 };

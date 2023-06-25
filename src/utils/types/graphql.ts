@@ -4,11 +4,13 @@ import type { Interceptors } from './interceptors';
 import type { CheckFunction, CheckMode, CheckActualValueCheckMode, CompareWithExpectedValueCheckMode, Data } from './values';
 
 export type GraphQLEntityName = 'headers' | 'cookies' | 'query' | 'variables';
-type GraphQLHeaderOrCookieOrQueryEntityValue = string | number | boolean;
-// todo: make object only
-type GraphQLVariablesEntityValue =
+
+export type GraphQLObjectEntityName = string;
+export type GraphQLObjectEntityValue = string | number | boolean;
+
+type GraphQLPlainEntityValue =
   // ✅ important: Omit `checkMode` key for fix types. Omit `call` key for exclude functions
-  { checkMode?: undefined; call?: undefined; [key: string]: any }
+  { checkMode?: undefined; call?: undefined; [key: string]: any };
 
 export type GraphQLOperationType = 'query' | 'mutation';
 export type GraphQLOperationName = string | RegExp;
@@ -26,8 +28,8 @@ export interface GraphQLInput {
 
 export type GraphQLEntityValue<EntityName = GraphQLEntityName> =
   EntityName extends 'variables'
-    ? GraphQLVariablesEntityValue
-    : GraphQLHeaderOrCookieOrQueryEntityValue;
+    ? GraphQLPlainEntityValue
+    : GraphQLObjectEntityValue;
 
 export type GraphQLEntityDescriptor<
   EntityName extends GraphQLEntityName = GraphQLEntityName,
@@ -55,33 +57,28 @@ export type GraphQLEntityDescriptor<
           } :
           never;
 
-export type GraphQLHeaderOrCookieOrQueryName = string;
-
 export type GraphQLEntityDescriptorOrValue<EntityName extends GraphQLEntityName = GraphQLEntityName> =
   EntityName extends 'variables'
     ? GraphQLEntityDescriptor<EntityName> | GraphQLEntityValue<EntityName>
-    : Record<GraphQLHeaderOrCookieOrQueryName, GraphQLEntityDescriptor<EntityName> | GraphQLEntityValue<EntityName> | GraphQLEntityValue<EntityName>[]>
+    : Record<GraphQLObjectEntityName, GraphQLEntityDescriptor<EntityName> | GraphQLEntityValue<EntityName> | GraphQLEntityValue<EntityName>[]>
 
 export type GraphQLEntityDescriptorOnly<EntityName extends GraphQLEntityName = GraphQLEntityName> =
   EntityName extends 'variables'
     ? GraphQLEntityDescriptor<EntityName>
-    : Record<GraphQLHeaderOrCookieOrQueryName, GraphQLEntityDescriptor<EntityName>>;
+    : Record<GraphQLObjectEntityName, GraphQLEntityDescriptor<EntityName>>;
 
-export type GraphQLEntityByName = {
-  [EntityName in GraphQLEntityName]: GraphQLEntityDescriptorOrValue<EntityName>;
-};
-
-export type GraphQLEntityNameByOperationType<OperationTypes extends GraphQLOperationType = GraphQLOperationType> = {
-  [OperationType in OperationTypes]: GraphQLEntityName;
+export interface GraphQLEntityNamesByOperationType {
+  query: GraphQLEntityName;
+  mutation: GraphQLEntityName;
 }
 
-
-export type GraphQLRouteConfigEntities = {
-  [EntityName in GraphQLEntityNameByOperationType[GraphQLOperationType]]?: GraphQLEntityByName[EntityName];
+export type GraphQLEntityByEntityName<OperationType extends GraphQLOperationType> = {
+  [EntityName in GraphQLEntityNamesByOperationType[OperationType]]?: GraphQLEntityDescriptorOrValue<EntityName>;
 };
 
 export interface GraphQLRouteConfig<
-  Entities extends GraphQLRouteConfigEntities = GraphQLRouteConfigEntities
+  OperationType extends GraphQLOperationType = GraphQLOperationType,
+  Entities extends GraphQLEntityByEntityName<OperationType> = GraphQLEntityByEntityName<OperationType>
 > {
   entities?: Entities;
   data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;

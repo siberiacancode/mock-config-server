@@ -6,7 +6,7 @@ import {
 import { isPlainObject } from '@/utils/helpers';
 import type {
   RestMethod,
-  RestEntityNameByMethod,
+  RestEntityNamesByMethod,
   RestEntityName,
   RestEntityDescriptor,
   CheckActualValueCheckMode,
@@ -16,10 +16,10 @@ import type {
 
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
-type AllowedEntitiesByMethod = {
-  [Method in keyof RestEntityNameByMethod]: RestEntityNameByMethod[Method][];
+type AllowedEntityNamesByMethod = {
+  [Method in keyof RestEntityNamesByMethod]: RestEntityNamesByMethod[Method][];
 };
-const ALLOWED_ENTITIES_BY_METHOD: AllowedEntitiesByMethod = {
+const ALLOWED_ENTITIES_BY_METHOD: AllowedEntityNamesByMethod = {
   get: ['headers', 'cookies', 'query', 'params'],
   delete: ['headers', 'cookies', 'query', 'params'],
   post: ['headers', 'cookies', 'query', 'params', 'body'],
@@ -94,7 +94,7 @@ const validateBodyEntity = (body: unknown) => {
     throw new Error('body.checkMode');
   }
 
-  if (!isDescriptorValueValid('variables', checkMode, value)) {
+  if (!isDescriptorValueValid('body', checkMode, value)) {
     throw new Error('body.value');
   }
 };

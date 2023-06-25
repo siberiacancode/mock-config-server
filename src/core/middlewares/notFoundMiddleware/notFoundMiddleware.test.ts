@@ -24,10 +24,7 @@ describe('notFoundMiddleware', () => {
             data: {},
             entities: {
               params: {
-                postId: {
-                  checkMode: 'equals',
-                  value: 1
-                }
+                postId: 1
               }
             }
           }
@@ -51,10 +48,7 @@ describe('notFoundMiddleware', () => {
             data: {},
             entities: {
               params: {
-                developerId: {
-                  checkMode: 'equals',
-                  value: 1
-                }
+                developerId: 1
               }
             }
           }

@@ -12,7 +12,7 @@ import type {
   Interceptors,
   GraphQLEntityDescriptorOrValue,
   GraphQLEntityName,
-  GraphQLHeaderOrCookieOrQueryName,
+  GraphQLObjectEntityName,
   GraphQLEntityDescriptorOnly
 } from '@/utils/types';
 
@@ -71,16 +71,16 @@ export const createGraphQLRoutes = (
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
       if (!entities) return true;
       const entries = Object.entries(entities) as [GraphQLEntityName, GraphQLEntityDescriptorOrValue][];
-      return entries.every(([entityName, rawEntities]) => {
+      return entries.every(([entityName, entityDescriptorOrValue]) => {
         if (entityName === 'variables') {
-          const entitiesDescriptor = rawEntities && typeof rawEntities === 'object' && 'checkMode' in rawEntities ? rawEntities : { checkMode: 'equals', value: rawEntities };
-          const { value: descriptorValue, checkMode } = entitiesDescriptor as GraphQLEntityDescriptorOnly<'variables'>;
+          const descriptor = entityDescriptorOrValue && typeof entityDescriptorOrValue === 'object' && 'checkMode' in entityDescriptorOrValue ? entityDescriptorOrValue : { checkMode: 'equals', value: entityDescriptorOrValue };
+          const { checkMode, value: descriptorValue } = descriptor as GraphQLEntityDescriptorOnly<'variables'>;
           return resolveEntityValues(checkMode, graphQLInput.variables, descriptorValue);
         }
-        const descriptors = Object.entries(rawEntities) as [GraphQLHeaderOrCookieOrQueryName, GraphQLEntityDescriptorOnly<Exclude<GraphQLEntityName, 'variables'>>[GraphQLHeaderOrCookieOrQueryName]][];
-        return descriptors.every(([entityKey, rawEntity]) => {
-          const entityDescriptor = (rawEntity && typeof rawEntity === 'object' && 'checkMode' in rawEntity ? rawEntity : { checkMode: 'equals' as const, value: rawEntity });
-          const { value: descriptorValue, checkMode } = entityDescriptor;
+        const objectEntityDescriptors = Object.entries(entityDescriptorOrValue) as [GraphQLObjectEntityName, GraphQLEntityDescriptorOnly<Exclude<GraphQLEntityName, 'variables'>>[GraphQLObjectEntityName]][];
+        return objectEntityDescriptors.every(([entityKey, objectEntityDescriptor]) => {
+          const descriptor = (objectEntityDescriptor && typeof objectEntityDescriptor === 'object' && 'checkMode' in objectEntityDescriptor ? objectEntityDescriptor : { checkMode: 'equals' as const, value: objectEntityDescriptor });
+          const { checkMode, value: descriptorValue } = descriptor;
           return resolveEntityValues(checkMode, request[entityName][entityKey], descriptorValue);
         })
         }

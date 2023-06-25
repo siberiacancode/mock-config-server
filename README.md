@@ -102,34 +102,6 @@ Configs are the fundamental part of the mock server. These configs are easy to f
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 
-##### Entities
-
-`entities` can be considered as parameters to each `route` describing what `entities` client should send to receive corresponding data.
-
-`entities` is an object in which you can describe `headers`, `cookies`, `query`, `params` and `body` for `Rest api` and `headers`, `cookies`, `query` and `variables` for `GraphQL api`.
-
-`headers`, `cookies`, `query` and `params` are represented as an object with the names of the corresponding `entity` and its `descriptor`, `body` and `variables` are represented by `descriptor` only.
-
-`descriptor` is an object with `checkMode` and `value` fields. `value` contains the value against which the `entity` sent by the client will be checked. `checkMode` describes the logic for checking this `entity`.
-
-`checkMode` is divided into two groups: "checking only `actual entity`" and "checking `actual entity` with `value`". The `value` field is not required for the first group.
-
-First group checkModes can be: 'exists' | 'notExists' | 'isBoolean' | 'isNumber' | 'isString'.
-Second group checkModes can be: 'equals' | 'notEquals' | 'includes' | 'notIncludes' | 'startsWith' | 'notStartsWith' | 'endsWith' | 'notEndsWith' | 'regExp' | 'function';
-
-`checkModes` from the second group, except `function` can be arrays, so you can write more complex logic. For example "does not contain these values" or "must be equal to one of these values". You can also use `regExp` to describe any other logic.
-
-`function checkMode` is the most powerful way to describe your `entities` logic, but in most cases you will be fine using other `checkModes`.
-
-`Function value` has the following signature `(actualValue, checkFunction) => boolean`.
-Return `true` if `actualValue` matches your logic or `false` otherwise.
-
-You can use the `checkFunction` function if you want to describe your logic in a more declarative way.
-`checkFunction` has the following signature `(checkMode, firstValue, secondValue?) => boolean`.
-
-If `entities` is omitted, `route` will be taken as default and its data will be returned if no other `routes` match.
-
-
 ##### Rest example
 
 ```javascript
@@ -144,56 +116,15 @@ const mockServerConfig = {
         routes: [
           {
             entities: {
-              headers: {
-                'name-header': {
-                  checkMode: 'equals',
-                  value: 'Nursultan'
-                },
-                authToken: {
-                  checkMode: 'exists'
-                }
-              }
+              headers: { 'name-header': 'Nursultan' }
             },
             data: { emoji: '🦁', name: 'Nursultan' }
           },
           {
             entities: {
-              headers: {
-                'name-header': {
-                  checkMode: 'equals',
-                  value: 'Dmitriy'
-                },
-                authToken: {
-                  checkMode: 'startsWith',
-                  value: ['123', 'abc']
-                }
-              }
+              headers: { 'name-header': 'Dmitriy' }
             },
             data: { emoji: '☄', name: 'Dmitriy' }
-          },
-          {
-            entities: {
-              headers: {
-                'name-header': {
-                  checkMode: 'equals',
-                  value: 'Sergey'
-                },
-                authToken: {
-                  checkMode: 'function',
-                  value: (actualValue, checkFunction) => {
-                    if (!actualValue || !actualValue.includes('_')) return false;
-
-                    const [firstPart, secondPart, thirdPart] = actualValue.split('_');
-                    const condition1 = checkFunction('includes', firstPart, 'abc');
-                    const condition2 = checkFunction('isNumber', secondPart);
-                    const condition3 = checkFunction('regExp', thirdPart, /^def\d{4}$/);
-                    
-                    return condition1 && condition2 && condition3;
-                  } 
-                }
-              }
-            },
-            data: { emoji: '🐘', name: 'Sergey' }
           }
         ]
       }
@@ -209,13 +140,12 @@ Now you can make a request with an additional header and get the desired result
 ```javascript
 fetch('http://localhost:31299/api/user', {
   headers: {
-    'name-header': 'Sergey',
-    'authToken': 'abcd_12345_def6789',
+    'name-header': 'Nursultan',
     'Content-Type': 'application/json'
   }
 })
   .then((response) => response.json())
-  .then((data) => console.log(data)); // { emoji: '🐘', name: 'Sergey' }
+  .then((data) => console.log(data)); // {  emoji: '🦁', name: 'Nursultan' }
 ```
 
 ##### GraphQL example
@@ -232,23 +162,13 @@ const mockServerConfig = {
         routes: [
           {
             entities: {
-              headers: {
-                'name-header': {
-                  checkMode: 'equals',
-                  value: 'Nursultan'
-                }
-              }
+              headers: { 'name-header': 'Nursultan' }
             },
             data: { emoji: '🦁', name: 'Nursultan' }
           },
           {
             entities: {
-              headers: {
-                'name-header': {
-                  checkMode: 'equals',
-                  value: 'Dmitriy'
-                }
-              }
+              headers: { 'name-header': 'Dmitriy' }
             },
             data: { emoji: '☄', name: 'Dmitriy' }
           }
@@ -279,6 +199,79 @@ fetch('http://localhost:31299/graphql', {
   .then((response) => response.json())
   .then((data) => console.log(data)); // {  emoji: '🦁', name: 'Nursultan' }
 ```
+
+#### Entity descriptors
+
+If you need more complex logic for matching entities, you can use entity descriptors.
+Descriptor is an object with `checkMode` and `value` fields that describe how the correctness of the actual entity is calculated.
+
+Allowed `checkModes`
+- exists - checks actual value for existence i.e. any value.
+- notExists - checks actual value for non-existence i.e. undefined value.
+- equals - checks actual value for equality with descriptor value.
+- notEquals - checks actual value for non-equality with descriptor value.
+- includes - checks actual value for including with descriptor value.
+- notIncludes - checks actual value for non-including with descriptor value.
+- startsWith - checks actual value for starting with descriptor value.
+- notStartsWith - checks actual value for non-starting with descriptor value.
+- endsWith - checks actual value for ending with descriptor value.
+- notEndsWith - checks actual value for non-ending with descriptor value.
+- regExp - checks actual value with descriptor regExp.
+- function - checks actual value with descriptor function.
+
+All `checkModes` except `function` can be arrays, so you can write even more complex logic. For example "does not contain these values" or "must be match to one of these regExp".
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/user',
+        method: 'get',
+        routes: [
+          {
+            entities: {
+              headers: {
+                // 'name-header' is 'Dmitriy' or 'Nursultan'
+                'name-header': {
+                  checkMode: 'equals',
+                  value: ['Dmitriy', 'Nursultan']
+                },
+                // check for 'equals' if descriptor not provided
+                role: 'developer'
+              },
+              cookies: {
+                // any 'token' cookie
+                token: {
+                  checkMode: 'exists'
+                },
+                // 'someSecretToken' cookie can be '123-abc' or 'abc-999' for example
+                someSecretToken: {
+                  checkMode: 'regExp',
+                  value: [/^\d\d\d-abc$/, /^abc-\d\d\d$/]
+                }
+              }
+            },
+            data: 'Some user data for Dmitriy and Nursultan'
+          }
+        ]
+      }
+    ]
+  }
+}
+
+module.exports = mockServerConfig;
+```
+
+`function checkMode` is the most powerful way to describe your `entities` logic, but in most cases you will be fine using other `checkModes`.
+
+`Function value` has the following signature `(actualValue, checkFunction) => boolean`.
+Return `true` if `actualValue` matches your logic or `false` otherwise.
+
+You can use the `checkFunction` from second argument if you want to describe your logic in a more declarative way.
+`checkFunction` has the following signature `(checkMode, actualValue, descriptorValue?) => boolean`.
 
 #### Static Path
 

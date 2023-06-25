@@ -5,18 +5,20 @@ import type { CheckFunction, CheckMode, CheckActualValueCheckMode, CompareWithEx
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options';
 export type RestEntityName = 'headers' | 'cookies' | 'query' | 'params' | 'body';
-type RestHeaderOrCookieOrQueryOrParamEntityValue = string | number | boolean;
+
+export type RestObjectEntityKey = string;
+export type RestObjectEntityValue = string | number | boolean;
+
+export type RestPlainEntityValue =
+  | string
+  // ✅ important: Omit `checkMode` key for fix types. Omit `call` key for exclude functions
+  | { checkMode?: undefined; call?: undefined; [key: string]: any }
+  | any[];
 
 export type RestEntityValue<EntityName = RestEntityName> =
-  EntityName extends 'headers' | 'cookies' | 'query' | 'params'
-    ? RestHeaderOrCookieOrQueryOrParamEntityValue
-    : EntityName extends 'body'
-      ?
-      | string
-      // ✅ important: Omit `checkMode` key for fix types. Omit `call` key for exclude functions
-      | { checkMode?: undefined; call?: undefined; [key: string]: any }
-      | any[]
-      : never;
+  EntityName extends 'body'
+    ? RestPlainEntityValue
+    : RestObjectEntityValue;
 
 export type RestEntityDescriptor<
   EntityName extends RestEntityName = RestEntityName,
@@ -25,7 +27,7 @@ export type RestEntityDescriptor<
   Check extends 'function' ?
     {
       checkMode: Check;
-      value: (actualValue: any, checkValues: CheckFunction) => boolean;
+      value: (actualValue: any, checkFunction: CheckFunction) => boolean;
     } :
     Check extends 'regExp' ?
       {
@@ -44,71 +46,32 @@ export type RestEntityDescriptor<
           } :
           never;
 
-export type RestHeaderOrCookieOrQueryOrParamsName = string;
-
 export type RestEntityDescriptorOrValue<EntityName extends RestEntityName = RestEntityName> =
   EntityName extends 'body'
     ? RestEntityDescriptor<EntityName> | RestEntityValue<EntityName>
-    : Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<EntityName> | RestEntityValue<EntityName> | RestEntityValue<EntityName>[]>
+    : Record<RestObjectEntityKey, RestEntityDescriptor<EntityName> | RestEntityValue<EntityName> | RestEntityValue<EntityName>[]>;
 
-export type RestHeadersEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'headers'>>;
-export type RestHeadersEntityDescriptorOrValue = RestEntityDescriptorOrValue<'headers'>;
+export type RestEntityDescriptorOnly<EntityName extends RestEntityName = RestEntityName> =
+  EntityName extends 'body'
+    ? RestEntityDescriptor<EntityName>
+    : Record<RestObjectEntityKey, RestEntityDescriptor<EntityName>>;
 
-export type RestCookiesEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'cookies'>>;
-export type RestCookiesEntityDescriptorOrValue = RestEntityDescriptorOrValue<'cookies'>;
+export interface RestEntityNamesByMethod {
+  get: Exclude<RestEntityName, 'body'>;
+  delete: Exclude<RestEntityName, 'body'>;
+  post: RestEntityName;
+  put: RestEntityName;
+  patch: RestEntityName;
+  options: Exclude<RestEntityName, 'body'>;
+}
 
-export type RestQueryEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'query'>>;
-export type RestQueryEntityDescriptorOrValue = RestEntityDescriptorOrValue<'query'>;
-
-export type RestParamsEntity = Record<RestHeaderOrCookieOrQueryOrParamsName, RestEntityDescriptor<'params'>>;
-export type RestParamsEntityDescriptorOrValue = RestEntityDescriptorOrValue<'params'>;
-
-export type RestBodyEntity = RestEntityDescriptor<'body'>;
-export type RestBodyEntityDescriptorOrValue = RestEntityDescriptorOrValue<'body'>;
-
-export type RestEntityDescriptorOnly<EntityName = RestEntityName> =
-  EntityName extends 'headers'
-    ? RestHeadersEntity
-    : EntityName extends 'cookies'
-      ? RestCookiesEntity
-      : EntityName extends 'query'
-        ? RestQueryEntity
-        : EntityName extends 'params'
-          ? RestParamsEntity
-          : EntityName extends 'body'
-            ? RestBodyEntity
-            : never;
-
-export type RestEntity<EntityName = RestEntityName> =
-  EntityName extends 'headers'
-    ? RestHeadersEntityDescriptorOrValue
-    : EntityName extends 'cookies'
-      ? RestCookiesEntityDescriptorOrValue
-      : EntityName extends 'query'
-        ? RestQueryEntityDescriptorOrValue
-        : EntityName extends 'params'
-          ? RestParamsEntityDescriptorOrValue
-          : EntityName extends 'body'
-            ? RestBodyEntityDescriptorOrValue
-            : never;
-
-export type RestEntityByName = {
-  [EntityName in RestEntityName]: RestEntity<EntityName>
-};
-
-export type RestEntityNameByMethod<Methods extends RestMethod = RestMethod> = {
-  [Method in Methods]: Method extends Extract<RestMethod, 'get' | 'delete' | 'options'>
-    ? Exclude<RestEntityName, 'body'>
-    : RestEntityName;
-};
-
-export type RestRouteConfigEntities<Method extends RestMethod> = {
-  [EntityName in RestEntityNameByMethod[Method]]?: RestEntityByName[EntityName];
+export type RestEntityByEntityName<Method extends RestMethod> = {
+  [EntityName in RestEntityNamesByMethod[Method]]?: RestEntityDescriptorOrValue<EntityName>
 };
 
 export interface RestRouteConfig<
   Method extends RestMethod,
-  Entities extends RestRouteConfigEntities<Method> = RestRouteConfigEntities<Method>
+  Entities extends RestEntityByEntityName<Method> = RestEntityByEntityName<Method>
 > {
   entities?: Entities;
   data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
