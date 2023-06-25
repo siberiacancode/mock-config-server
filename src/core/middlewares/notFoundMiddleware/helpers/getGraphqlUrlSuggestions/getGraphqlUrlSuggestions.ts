@@ -1,10 +1,11 @@
-import type { GraphQLRequestConfig } from '@/utils/types';
+import type { GraphQLOperationType } from '@/utils/types';
 
 import { getLevenshteinDistance } from '../getLevenshteinDistance/getLevenshteinDistance';
 
-export type GraphqlRequestSuggestionConfigs = Array<
-  Pick<GraphQLRequestConfig, 'operationType'> & { operationName: string }
->;
+export type GraphqlRequestSuggestionConfigs = {
+  operationType: GraphQLOperationType;
+  operationName: string;
+}[];
 
 interface GetGraphqlUrlSuggestionsParams {
   url: URL;
@@ -16,18 +17,15 @@ export const getGraphqlUrlSuggestions = ({
   requestConfigs
 }: GetGraphqlUrlSuggestionsParams) => {
   // ✅ important: operationName is always second word in 'query' query param
-  const operationName = url.searchParams.get('query')?.split(' ')[1];
-  const actualUrlMeaningful = `${url.pathname}/${operationName}`;
+  const actualOperationName = url.searchParams.get('query')?.split(' ')[1];
+  const actualUrlMeaningful = `${url.pathname}/${actualOperationName}`;
 
   const graphqlUrlSuggestions = requestConfigs.reduce((acc, requestConfig) => {
-    const distance = getLevenshteinDistance(actualUrlMeaningful, requestConfig.operationName);
+    const { operationName } = requestConfig;
+    const distance = getLevenshteinDistance(actualUrlMeaningful, operationName);
 
-    const tolerance = Math.floor(requestConfig.operationName.length / 2);
-    if (distance <= tolerance)
-      acc.push({
-        ...requestConfig,
-        operationName: requestConfig.operationName
-      });
+    const tolerance = Math.floor(operationName.length / 2);
+    if (distance <= tolerance) acc.push(requestConfig);
 
     return acc;
   }, [] as GraphqlRequestSuggestionConfigs);

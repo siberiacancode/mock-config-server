@@ -4,61 +4,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>404 - mocs</title>
 
-  <link rel="stylesheet" href="/styles/light.css" media="(prefers-color-scheme: light)" />
-  <link rel="stylesheet" href="/styles/dark.css" media="(prefers-color-scheme: dark)" />
+  <title>404 - 🎉 Mock Config Server</title>
 
-  <script src="/theme/index.js"></script>
-  <link rel="stylesheet" href="/styles/index.css" />
-
-  <link rel="stylesheet" href="/components/header/index.css" />
-
+  <link rel="stylesheet" href="/assets/styles/index.css" />
+  <link rel="stylesheet" href="/pages/404/index.css" />
   <link rel="stylesheet" href="/components/tab/index.css" />
   <script defer src="/components/tab/index.js"></script>
-  <style>
-    .REST #tab-item-REST,
-    .GraphQL #tab-item-GraphQL {
-      background: var(--accent);
-    }
 
-    .REST #tab-content-REST,
-    .GraphQL #tab-content-GraphQL {
-      display: unset;
-    }
-  </style>
+  <%- include(('../../assets/scheme/index')) -%>
 
   <% const api = {rest: "REST", graphql: "GraphQL"} %>
   <% const rootPath = (path) => `../../${path}` %>
 </head>
 
-<body class="<%= !graphqlRequestSuggestions.length ? api.rest : api.graphql %>">
+<body class="tab-item-<%= graphqlRequestSuggestions.length ? api.graphql : api.rest %>">
   <%- include(rootPath('components/header/index')); -%>
   <div class="margin-container">
     <div class="hero">
       <div class="title">
-        <img src="/images/404.png" />
-        <span>404</span>
+        <img src="/assets/images/404.png" />
+        404
       </div>
       <div class="description">
-        <span>Such request or page not found ☹️</span>
+        Such request or page not found ☹️
         <a class="link" href="/">
-          <span>Return on main page</span>
+          Return on main page
         </a>
       </div>
     </div>
   </div>
   <div class="margin-container">
-    <div class="body">
-      <div class="body-head">
-        <%- include(rootPath('components/tab/tabItemContainer'), {itemVariants: api}) -%>
+    <div class="content">
+      <div class="content-head">
+        <%- include(rootPath('components/tab/tabItems'), {variants: api}) -%>
       </div>
-      <%- include(rootPath('components/tab/tabContentContainer'), 
-                    {itemVariant: api.rest, children: { path: 'pages/404/components/tabContent/index', 
-                    params: {api: api.rest, requestSuggestions: restRequestSuggestions}}})  %>
-      <%- include(rootPath('components/tab/tabContentContainer'), 
-                    {itemVariant: api.graphql, children: { path: 'pages/404/components/tabContent/index', 
-                    params: {api: api.graphql, requestSuggestions: graphqlRequestSuggestions.map(item => ({method: item.operationType, path: item.operationName}))}}})  %>
+      <%- include(rootPath('components/tab/tabContent'),
+      {variant: api.rest, children: { path: 'pages/404/components/tabContent/index', params: {api: api.rest, requestSuggestions: restRequestSuggestions}}}) %>
+      <%- include(rootPath('components/tab/tabContent'),  {variant: api.graphql, children: { path: 'pages/404/components/tabContent/index', params: {api: api.graphql, requestSuggestions: graphqlRequestSuggestions.map(item => ({method: item.operationType, path: item.operationName}))}}})  %>
     </div>
   </div>
   </div>

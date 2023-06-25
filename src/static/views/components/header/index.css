@@ -2,26 +2,22 @@
   display: flex;
   justify-content: center;
   width: 100%;
-
   background-color: var(--background-container);
   backdrop-filter: blur(20px);
 }
 
-.header-body {
+.header-content {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-
   padding-inline: 75px;
-
   gap: 25px;
-
   height: 60px;
   width: 800px;
 }
 
-.header-menu-container {
+.header-menu {
   display: flex;
   flex-direction: row;
   gap: 25px;
@@ -32,24 +28,19 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-
   gap: 10px;
-
   height: 25px;
-
   font-weight: 400;
   font-size: 14px;
   line-height: 17px;
-
   cursor: pointer;
 }
 
-.theme-switcher {
-  height: 22px;
-  width: 22px;
-  background-image: var(--theme-image);
-  background-position: center;
-  background-repeat: no-repeat;
+.logo img {
+  height: 30px;
+  margin-right: 5px
+}
 
-  cursor: pointer;
+li {
+  list-style-type: none;
 }

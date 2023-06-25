@@ -1,23 +1,16 @@
 :root {
   color-scheme: light dark;
-}
-
-html {
-  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  margin: 0px;
-
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
+  margin: 0;
   background-color: var(--background-body);
   color: var(--primary);
 }
@@ -28,7 +21,6 @@ svg {
 
 a {
   color: var(--primary);
-
   text-decoration-line: none;
 }
 
@@ -36,9 +28,7 @@ a {
   font-weight: 500;
   font-size: 14px;
   line-height: 17px;
-
   color: var(--primary);
-
   text-decoration-line: underline;
 }
 
@@ -47,9 +37,7 @@ a {
   flex-direction: row;
   align-items: center;
   gap: 10px;
-
   height: 50px;
-
   font-weight: 500;
   font-size: 20px;
   line-height: 24px;
@@ -64,7 +52,6 @@ a {
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
-
   font-weight: 200;
   font-size: 14px;
   line-height: 17px;
@@ -73,38 +60,30 @@ a {
 .margin-container {
   display: flex;
   justify-content: center;
-
   width: 100%;
 }
 
 .hero {
   display: flex;
   flex-direction: column;
-
   gap: 10px;
-
   margin-top: 100px;
   margin-bottom: 100px;
   padding-inline: 75px;
-
   width: 800px;
 }
 
-.body {
+.content {
   display: flex;
   flex-direction: column;
-
   gap: 20px;
-
   padding-inline: 75px;
-
   width: 800px;
 }
 
-.body-head {
+.content-head {
   display: flex;
   flex-direction: column;
   align-items: center;
-
   gap: 10px;
 }

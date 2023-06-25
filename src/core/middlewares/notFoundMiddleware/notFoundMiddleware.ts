@@ -42,28 +42,29 @@ export const notFoundMiddleware = (
     }
 
     let graphqlRequestSuggestions: GraphqlRequestSuggestionConfigs = [];
-    if (graphql) {
-      const graphqlQuery = parseGraphQLRequest(request);
-      if (graphqlQuery) {
-        graphqlRequestSuggestions = getGraphqlUrlSuggestions({
-          url,
-          requestConfigs: graphqlRequestConfigs
-        });
-      }
+    if (graphql && parseGraphQLRequest(request)) {
+      graphqlRequestSuggestions = getGraphqlUrlSuggestions({
+        url,
+        requestConfigs: graphqlRequestConfigs
+      });
     }
-    if (request.headers.accept?.includes('text/html')) {
-      response.status(404).render('pages/404/index', {
+
+    const isHtmlRequest =
+      request.headers.accept?.includes('text/html') || request.headers.accept?.includes('*/*');
+    if (isHtmlRequest) {
+      response.status(404).render('pages/404', {
         restRequestSuggestions,
         graphqlRequestSuggestions
       });
-    } else {
-      response.status(404).json({
-        message: 'Request or page not found. Similar requests in body',
-        body: {
-          restRequestSuggestions,
-          graphqlRequestSuggestions
-        }
-      });
+      return;
     }
+
+    response.status(404).json({
+      message: 'Request or page not found. Similar requests in data',
+      data: {
+        restRequestSuggestions,
+        graphqlRequestSuggestions
+      }
+    });
   });
 };

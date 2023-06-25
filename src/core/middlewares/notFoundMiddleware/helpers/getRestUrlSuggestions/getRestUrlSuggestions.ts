@@ -1,13 +1,11 @@
 import { getUrlParts } from '@/utils/helpers';
-import type { RestRequestConfig, RestPathString } from '@/utils/types';
+import type { RestMethod, RestPathString } from '@/utils/types';
 
 import { getLevenshteinDistance } from '../getLevenshteinDistance/getLevenshteinDistance';
 
 import { getActualRestUrlMeaningfulString, getPatternRestUrlMeaningfulString } from './helpers';
 
-export type RestRequestSuggestionConfigs = Array<
-  Pick<RestRequestConfig, 'method'> & { path: RestPathString }
->;
+export type RestRequestSuggestionConfigs = { method: RestMethod; path: RestPathString }[];
 
 interface GetRestUrlSuggestionsParams {
   url: URL;

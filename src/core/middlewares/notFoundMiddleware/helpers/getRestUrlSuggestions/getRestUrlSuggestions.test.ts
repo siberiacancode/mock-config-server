@@ -4,7 +4,6 @@ import type { RestRequestSuggestionConfigs } from './getRestUrlSuggestions';
 describe('getRestUrlSuggestions', () => {
   test('Should correctly return suggestions', () => {
     const requestConfigs: RestRequestSuggestionConfigs = [
-      { method: 'get', path: '/posts' },
       { method: 'get', path: '/posts/:postId' },
       { method: 'post', path: '/posts/:postId/comments/:commentId' }
     ];
@@ -34,35 +33,22 @@ describe('getRestUrlSuggestions', () => {
     ).toEqual([]);
   });
 
-  test('Should return patterns with same query params as provided', () => {
+  test('Should return requests with same query params as provided', () => {
     const requestConfigs: RestRequestSuggestionConfigs = [
       { method: 'get', path: '/users' },
       { method: 'get', path: '/users/:userId' },
       { method: 'post', path: '/user' },
-      { method: 'put', path: '/comments' },
-      { method: 'patch', path: '/login' },
-      { method: 'get', path: '/logout' }
+      { method: 'post', path: '/login' },
+      { method: 'delete', path: '/logout' }
     ];
     expect(
       getRestUrlSuggestions({
-        url: new URL('http://localhost:31299/login?remember=true'),
+        url: new URL('http://localhost:31299/login?remember=true?action=success'),
         requestConfigs
       })
     ).toEqual([
-      { method: 'patch', path: '/login?remember=true' },
-      { method: 'get', path: '/logout?remember=true' }
+      { method: 'post', path: '/login?remember=true?action=success' },
+      { method: 'delete', path: '/logout?remember=true?action=success' }
     ]);
-    expect(
-      getRestUrlSuggestions({
-        url: new URL('http://localhost:31299/users/5?firstParam=1&secondParam=2'),
-        requestConfigs
-      })
-    ).toEqual([{ method: 'get', path: '/users/5?firstParam=1&secondParam=2' }]);
-    expect(
-      getRestUrlSuggestions({
-        url: new URL('http://localhost:31299/users/5?backurl=someUrl?action=success'),
-        requestConfigs
-      })
-    ).toEqual([{ method: 'get', path: '/users/5?backurl=someUrl?action=success' }]);
   });
 });

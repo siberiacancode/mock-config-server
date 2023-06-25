@@ -35,9 +35,9 @@ const createServer = (
   );
   server.use(graphqlBaseUrl, routerWithGraphqlRoutes);
 
+  server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../../static/views'));
   server.use(express.static(urlJoin(__dirname, '../../../static/views')));
-  server.set('view engine', 'ejs');
   server.use(express.json());
 
   notFoundMiddleware(server, mockServerConfig);
@@ -45,7 +45,7 @@ const createServer = (
   return server;
 };
 
-describe('notFoundMiddleware: html response', () => {
+describe('notFoundMiddleware: HTML response', () => {
   const server = createServer({
     rest: {
       configs: [
@@ -67,19 +67,21 @@ describe('notFoundMiddleware: html response', () => {
     }
   });
 
-  test('Should send correct html REST response', async () => {
+  test('Should send correct HTML REST response', async () => {
     const response = await request(server).get('/pstss').set('accept', 'text/html');
 
     expect(response.statusCode).toBe(404);
+    expect(response.get('Content-Type')).toContain('text/html');
     expect(response.text).toContain('GET /posts');
   });
 
-  test('Should send correct html GraphQL response', async () => {
+  test('Should send correct HTML GraphQL response', async () => {
     const response = await request(server)
       .get('/?query=query getPost { posts }')
       .set('accept', 'text/html');
 
     expect(response.statusCode).toBe(404);
+    expect(response.get('Content-Type')).toContain('text/html');
     expect(response.text).toContain('QUERY  GetPosts');
   });
 });
@@ -93,15 +95,15 @@ const responseBody = ({
   restRequestSuggestions = [],
   graphqlRequestSuggestions = []
 }: ResponseBody) => ({
-  message: 'Request or page not found. Similar requests in body',
-  body: {
+  message: 'Request or page not found. Similar requests in data',
+  data: {
     restRequestSuggestions,
     graphqlRequestSuggestions
   }
 });
 
 describe('notFoundMiddleware: REST', () => {
-  const serverBaseUrl: MockServerConfig['baseUrl'] = '/base';
+  const serverBaseUrl: BaseUrl = '/base';
   const restBaseUrl: BaseUrl = '/rest';
   const rest: MockServerConfig['rest'] = {
     configs: [
