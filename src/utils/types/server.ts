@@ -34,8 +34,8 @@ export interface GraphqlConfig {
 }
 
 export type DatabaseConfig = {
-  data: Record<string, unknown> | string;
-  routes?: Record<string, string> | string;
+  data: Record<string, unknown> | `${string}.json`;
+  routes?: Record<`/${string}`, `/${string}`> | `${string}.json`;
 };
 
 export interface MockServerConfig {

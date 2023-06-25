@@ -42,7 +42,7 @@ export class FileStorage<T extends Object = Object> {
     // stop iterate for one element before end of key for get access to writable object property
     writable[key[index]] = value;
 
-    fs.writeFileSync(this.filePath, JSON.stringify(this.data));
+    fs.writeFileSync(this.filePath, JSON.stringify(this.data, null, 2));
   }
 
   public delete(baseKey: Index | Index[]): void {

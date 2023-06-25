@@ -12,7 +12,8 @@ import { FileStorage, MemoryStorage } from './storages';
 
 export const createDatabaseRoutes = (router: IRouter, { data, routes }: DatabaseConfig) => {
   if (routes) {
-    const storage = typeof routes === 'string' ? new FileStorage(routes) : new MemoryStorage(routes);
+    const storage =
+      typeof routes === 'string' ? new FileStorage(routes) : new MemoryStorage(routes);
     createRewrittenDatabaseRoutes(router, storage.read());
 
     // ✅ important:

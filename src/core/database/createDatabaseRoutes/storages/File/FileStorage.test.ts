@@ -80,7 +80,7 @@ describe('FileStorage', () => {
       fileStorage.write(['john', 'stand'], 'The World');
 
       expect(mockWriteFileSync.mock.calls.length).toBe(1);
-      expect(mockWriteFileSync.mock.calls[0][1]).toBe(JSON.stringify(fileStorage.read()));
+      expect(mockWriteFileSync.mock.calls[0][1]).toBe(JSON.stringify(fileStorage.read(), null, 2));
     });
   });
 

@@ -23,7 +23,7 @@ describe('createDatabaseRoutes', () => {
 
   describe('createDatabaseRoutes: routes and data successfully works when passing them by object', () => {
     const data = { profile: { name: 'John' }, users: [{ id: 1 }, { id: 2 }] };
-    const routes = { '/api/profile': '/profile' };
+    const routes = { '/api/profile': '/profile' } as const;
     const server = createServer({ database: { data, routes } });
 
     test('Should overwrite routes according to routes object (but default url should work too)', async () => {
@@ -50,7 +50,7 @@ describe('createDatabaseRoutes', () => {
 
   describe('createDatabaseRoutes: routes and data successfully works when passing them by file', () => {
     const data = { profile: { name: 'John' }, users: [{ id: 1 }, { id: 2 }] };
-    const routes = { '/api/profile': '/profile' };
+    const routes = { '/api/profile': '/profile' } as const;
     (fs as jest.Mocked<typeof fs>).readFileSync.mockImplementation((filename) => {
       if ((filename as string).endsWith('data.json')) return JSON.stringify(data);
       if ((filename as string).endsWith('routes.json')) return JSON.stringify(routes);
@@ -86,7 +86,7 @@ describe('createDatabaseRoutes', () => {
 
   describe('createDatabaseRoutes: routes /__routes and /__db', () => {
     const data = { profile: { name: 'John' }, users: [{ id: 1 }, { id: 2 }] };
-    const routes = { '/api/profile': '/profile' };
+    const routes = { '/api/profile': '/profile' } as const;
     const server = createServer({ database: { data, routes } });
 
     test('Should create /__db route that return data from databaseConfig', async () => {

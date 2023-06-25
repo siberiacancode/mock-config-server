@@ -2,21 +2,25 @@ import { isPlainObject } from '@/utils/helpers';
 
 const validateData = (data: unknown) => {
   const isDataObject = isPlainObject(data);
-  if (!isDataObject) throw new Error('data');
+  const isDataJsonFilePath = typeof data === 'string' && data.endsWith('.json');
+  if (!isDataObject && !isDataJsonFilePath) throw new Error('data');
 };
 
 const validateRoutes = (routes: unknown) => {
   const isRoutesObject = isPlainObject(routes);
   if (isRoutesObject) {
     Object.entries(routes).forEach(([routeKey, routeValue]) => {
-      if (typeof routeValue !== 'string') {
+      const isKeyRoutePath = routeKey.startsWith('/');
+      const isValueRoutePath = typeof routeValue === 'string' && routeValue.startsWith('/');
+      if (!isKeyRoutePath || !isValueRoutePath) {
         throw new Error(`routes.${routeKey}`);
       }
     });
     return;
   }
 
-  if (typeof routes !== 'undefined') {
+  const isRoutesJsonFilePath = typeof routes === 'string' && routes.endsWith('.json');
+  if (!isRoutesJsonFilePath && typeof routes !== 'undefined') {
     throw new Error('routes');
   }
 };

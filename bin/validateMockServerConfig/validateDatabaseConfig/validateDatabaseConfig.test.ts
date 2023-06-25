@@ -14,7 +14,7 @@ describe('validateDatabaseConfig', () => {
   });
 
   test('Should correctly handle database config data only with valid type', () => {
-    const validData = [{}];
+    const validData = [{}, 'string.json'];
     validData.forEach((validDataElement) => {
       expect(() => validateDatabaseConfig({ data: validDataElement })).not.toThrow(Error);
     });
@@ -26,7 +26,7 @@ describe('validateDatabaseConfig', () => {
   });
 
   test('Should correctly handle database config routes only with valid type', () => {
-    const validRoutes = [{}, undefined];
+    const validRoutes = [{}, 'string.json', undefined];
     validRoutes.forEach((validRoutesElement) => {
       expect(() => validateDatabaseConfig({ data: {}, routes: validRoutesElement })).not.toThrow(
         Error
@@ -41,15 +41,23 @@ describe('validateDatabaseConfig', () => {
     });
   });
 
-  test('Should correctly handle database config routes values only with valid type', () => {
-    const validRoutesValues = ['string'];
-    validRoutesValues.forEach((validRoutesValue) => {
-      expect(() =>
-        validateDatabaseConfig({ data: {}, routes: { key: validRoutesValue } })
-      ).not.toThrow(Error);
-    });
+  test('Should correctly handle database config routes keys and values only with valid type', () => {
+    const validRoutesKey = '/stringWithForwardSlash';
+    const validRoutesValue = '/stringWithForwardSlash';
+    expect(() =>
+      validateDatabaseConfig({ data: {}, routes: { [validRoutesKey]: validRoutesValue } })
+    ).not.toThrow(Error);
 
-    const invalidRoutesValues = [true, 3000, null, undefined, {}, [], () => {}];
+    const invalidRoutesValues = [
+      'stringWithoutForwardSlash',
+      true,
+      3000,
+      null,
+      undefined,
+      {},
+      [],
+      () => {}
+    ];
     invalidRoutesValues.forEach((invalidRoutesValue) => {
       expect(() =>
         validateDatabaseConfig({ data: {}, routes: { key: invalidRoutesValue } })
