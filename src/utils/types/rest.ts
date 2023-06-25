@@ -1,7 +1,14 @@
 import type { Request } from 'express';
 
 import type { Interceptors } from './interceptors';
-import type { BodyValue, CookiesValue, Data, HeadersValue, ParamsValue, QueryValue } from './values';
+import type {
+  BodyValue,
+  CookiesValue,
+  Data,
+  HeadersValue,
+  ParamsValue,
+  QueryValue
+} from './values';
 
 export type RestEntities = 'headers' | 'cookies' | 'query' | 'params' | 'body';
 export type RestEntitiesValue = BodyValue | QueryValue | HeadersValue | CookiesValue | ParamsValue;

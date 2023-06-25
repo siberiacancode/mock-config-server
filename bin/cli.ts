@@ -43,4 +43,4 @@ export const cli = () => {
     .parse() as MockServerConfigArgv;
 
   build(argv);
-}
+};
