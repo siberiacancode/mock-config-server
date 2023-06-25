@@ -21,6 +21,10 @@ describe('FileStorage', () => {
       fileStorage = new FileStorage('./mock-database.json');
     });
 
+    afterEach(() => {
+      (fs as jest.Mocked<typeof fs>).readFileSync.mockClear();
+    });
+
     test('Should return correct FULL data for read without keys', () => {
       expect(fileStorage.read()).toStrictEqual(initialData);
     });
@@ -42,6 +46,10 @@ describe('FileStorage', () => {
       initialData = createInitialData();
       (fs as jest.Mocked<typeof fs>).readFileSync.mockReturnValueOnce(JSON.stringify(initialData));
       fileStorage = new FileStorage('./mock-database.json');
+    });
+
+    afterEach(() => {
+      (fs as jest.Mocked<typeof fs>).readFileSync.mockClear();
     });
 
     test('Should update value with valid single key', () => {
@@ -84,6 +92,10 @@ describe('FileStorage', () => {
       initialData = createInitialData();
       (fs as jest.Mocked<typeof fs>).readFileSync.mockReturnValueOnce(JSON.stringify(initialData));
       fileStorage = new FileStorage('./mock-database.json');
+    });
+
+    afterEach(() => {
+      (fs as jest.Mocked<typeof fs>).readFileSync.mockClear();
     });
 
     test('Should correctly delete object property with valid single key', () => {

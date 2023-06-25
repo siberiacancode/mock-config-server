@@ -8,13 +8,22 @@ import {
   createNestedDatabaseRoutes,
   createShallowDatabaseRoutes
 } from './helpers';
-import { MemoryStorage } from './storages';
+import { FileStorage, MemoryStorage } from './storages';
 
-export const createDatabaseRoutes = (router: IRouter, databaseConfig: DatabaseConfig) => {
-  if (databaseConfig.routes) createRewrittenDatabaseRoutes(router, databaseConfig.routes);
+export const createDatabaseRoutes = (router: IRouter, { data, routes }: DatabaseConfig) => {
+  if (routes) {
+    const storage = typeof routes === 'string' ? new FileStorage(routes) : new MemoryStorage(routes);
+    createRewrittenDatabaseRoutes(router, storage.read());
 
-  const { shallowDatabase, nestedDatabase } = splitDatabaseByNesting(databaseConfig.data);
-  const storage = new MemoryStorage(databaseConfig.data);
+    // ✅ important:
+    // add endpoint for all routes
+    router.route('/__routes').get((_request, response) => {
+      response.json(storage.read());
+    });
+  }
+
+  const storage = typeof data === 'string' ? new FileStorage(data) : new MemoryStorage(data);
+  const { shallowDatabase, nestedDatabase } = splitDatabaseByNesting(storage.read());
   createShallowDatabaseRoutes(router, shallowDatabase, storage as MemoryStorage<ShallowDatabase>);
   createNestedDatabaseRoutes(router, nestedDatabase, storage as MemoryStorage<NestedDatabase>);
 

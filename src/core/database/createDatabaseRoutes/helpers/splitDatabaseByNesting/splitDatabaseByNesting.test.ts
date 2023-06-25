@@ -1,10 +1,8 @@
-import type { DatabaseConfig } from '@/utils/types';
-
 import { splitDatabaseByNesting } from './splitDatabaseByNesting';
 
 describe('splitDatabaseByNesting', () => {
   test('Should put in nested database only arrays of objects with id (string | number)', () => {
-    const databaseConfig: DatabaseConfig = {
+    const databaseConfig = {
       data: {
         key: 'value',
         validArray: [

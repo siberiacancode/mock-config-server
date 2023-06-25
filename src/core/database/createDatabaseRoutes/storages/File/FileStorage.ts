@@ -12,7 +12,7 @@ export class FileStorage<T extends Object = Object> {
   private readonly data: T;
 
   public constructor(fileName: string) {
-    this.filePath = `${path.resolve(process.cwd(), fileName)}`;
+    this.filePath = path.resolve(process.cwd(), fileName);
     this.data = JSON.parse(fs.readFileSync(this.filePath, 'utf-8'));
   }
 
