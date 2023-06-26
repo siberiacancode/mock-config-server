@@ -49,9 +49,9 @@ export const notFoundMiddleware = (
       });
     }
 
-    const isHtmlRequest =
+    const isRequestSupportHtml =
       request.headers.accept?.includes('text/html') || request.headers.accept?.includes('*/*');
-    if (isHtmlRequest) {
+    if (isRequestSupportHtml) {
       response.status(404).render('pages/404', {
         restRequestSuggestions,
         graphqlRequestSuggestions

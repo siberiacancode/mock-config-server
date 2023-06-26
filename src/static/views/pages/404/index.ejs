@@ -7,19 +7,18 @@
 
   <title>404 - 🎉 Mock Config Server</title>
 
-  <link rel="stylesheet" href="/assets/styles/index.css" />
+  <link rel="stylesheet" href="/assets/styles/global.css" />
   <link rel="stylesheet" href="/pages/404/index.css" />
-  <link rel="stylesheet" href="/components/tab/index.css" />
-  <script defer src="/components/tab/index.js"></script>
 
-  <%- include(('../../assets/scheme/index')) -%>
+  <% const api = { rest: "REST", graphql: "GraphQL" } %>
 
-  <% const api = {rest: "REST", graphql: "GraphQL"} %>
   <% const rootPath = (path) => `../../${path}` %>
+  <%- include(rootPath('features/scheme/index')) -%>
+  <%- include(rootPath('features/tab/index')) -%>
 </head>
 
 <body class="tab-item-<%= graphqlRequestSuggestions.length ? api.graphql : api.rest %>">
-  <%- include(rootPath('components/header/index')); -%>
+  <%- include(rootPath('components/header/index')) -%>
   <div class="margin-container">
     <div class="hero">
       <div class="title">
@@ -37,11 +36,47 @@
   <div class="margin-container">
     <div class="content">
       <div class="content-head">
-        <%- include(rootPath('components/tab/tabItems'), {variants: api}) -%>
+        <div class="tab-items">
+          <% Object.values(api).forEach((variant)=> { %>
+          <div id="tab-item-<%=variant%>" class="tab-item">
+            <%=variant%>
+          </div>
+          <% }) %>
+        </div>
       </div>
-      <%- include(rootPath('components/tab/tabContent'),
-      {variant: api.rest, children: { path: 'pages/404/components/tabContent/index', params: {api: api.rest, requestSuggestions: restRequestSuggestions}}}) %>
-      <%- include(rootPath('components/tab/tabContent'),  {variant: api.graphql, children: { path: 'pages/404/components/tabContent/index', params: {api: api.graphql, requestSuggestions: graphqlRequestSuggestions.map(item => ({method: item.operationType, path: item.operationName}))}}})  %>
+      <div id="tab-content-<%=api.rest%>" class="tab-content">
+        <div class="description">
+          <% if (restRequestSuggestions.length) { %>
+          <span>We searched a bit, maybe this will help you:</span>
+          <% restRequestSuggestions.forEach((requestSuggestion) => { %>
+          <span><%= requestSuggestion.method.toUpperCase() %> <%=
+              requestSuggestion.path %></span>
+          <% })} else { %>
+          <span>We searched, but found nothing.</span>
+          <span>Maybe you don't have <%=api.rest%> configs? 👀</span>
+          <a class="link" href="https://github.com/siberiacancode/mock-config-server#configs" rel="noopener noreferrer" target="_blank">
+            Read documentation 📘 for more information
+          </a>
+          <% } %>
+        </div>
+      </div>
+
+      <div id="tab-content-<%=api.graphql%>" class="tab-content">
+        <div class="description">
+          <% if (graphqlRequestSuggestions.length) { %>
+          <span>We searched a bit, maybe this will help you:</span>
+          <% graphqlRequestSuggestions.forEach((requestSuggestion) => { %>
+          <span><%= requestSuggestion.operationType %> <%=
+              requestSuggestion.operationName %></span>
+          <% })} else { %>
+          <span>We searched, but found nothing.</span>
+          <span>Maybe you don't have <%=api.graphql%> configs? 👀</span>
+          <a class="link" href="https://github.com/siberiacancode/mock-config-server#configs" rel="noopener noreferrer" target="_blank">
+            Read documentation 📘 for more information
+          </a>
+          <% } %>
+        </div>
+      </div>
     </div>
   </div>
   </div>

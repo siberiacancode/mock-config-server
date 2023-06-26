@@ -41,10 +41,12 @@
     "test": "jest",
     "type": "tsc --noEmit",
     "lint": "eslint . --ext ts --no-error-on-unmatched-pattern",
+    "stylelint": "stylelint \"src/static/**/*.css\"",
     "format": "prettier --write {src,bin}/**/*.ts",
     "pretty": "yarn type && yarn format && yarn lint --fix"
   },
   "lint-staged": {
+    "*.css": "yarn stylelint",
     "*.js": "yarn format",
     "*.ts": "yarn pretty"
   },
@@ -76,7 +78,11 @@
     "eslint-import-resolver-typescript": "^3.4.1",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^4.2.1",
+    "style-loader": "^3.3.2",
     "stylelint": "^15.6.1",
+    "stylelint-config-prettier": "^9.0.5",
+    "stylelint-config-standard": "^32.0.0",
+    "stylelint-order": "^6.0.3",
     "husky": "^8.0.1",
     "jest": "^29.4.2",
     "lint-staged": "^13.1.1",

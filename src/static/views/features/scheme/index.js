@@ -5,9 +5,11 @@ const darkStyles = document.querySelector(
   'link[rel=stylesheet][media*=prefers-color-scheme][media*=dark]'
 );
 
-const getSavedScheme = () => localStorage.getItem('color-scheme');
+function getSavedScheme() {
+  return localStorage.getItem('color-scheme');
+}
 
-const setScheme = (scheme) => {
+function setScheme(scheme) {
   const lightMedia = scheme === 'light' ? 'all' : 'not all';
   const darkMedia = scheme === 'dark' ? 'all' : 'not all';
 
@@ -15,10 +17,15 @@ const setScheme = (scheme) => {
   darkStyles.media = darkMedia;
 
   localStorage.setItem('color-scheme', scheme);
-};
+}
 
-const switchScheme = () => setScheme(getSavedScheme() === 'light' ? 'light' : 'dark');
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function switchScheme() {
+  setScheme(getSavedScheme() === 'light' ? 'dark' : 'light');
+}
 
-const initScheme = () => setScheme(getSavedScheme() ?? 'dark');
+function initScheme() {
+  setScheme(getSavedScheme() ?? 'dark');
+}
 
 initScheme();

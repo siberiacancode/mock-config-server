@@ -82,7 +82,7 @@ describe('notFoundMiddleware: HTML response', () => {
 
     expect(response.statusCode).toBe(404);
     expect(response.get('Content-Type')).toContain('text/html');
-    expect(response.text).toContain('QUERY  GetPosts');
+    expect(response.text).toContain('query  GetPosts');
   });
 });
 

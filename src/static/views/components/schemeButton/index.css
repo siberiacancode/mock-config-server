@@ -1,8 +1,0 @@
-.scheme-switcher {
-    height: 22px;
-    width: 22px;
-    background-image: var(--image-scheme);
-    background-position: center;
-    background-repeat: no-repeat;
-    cursor: pointer;
-}
