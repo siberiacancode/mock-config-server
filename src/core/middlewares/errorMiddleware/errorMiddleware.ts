@@ -7,6 +7,9 @@ export const errorMiddleware = (server: Express) => {
 
     const message = `Message: ${error.message ?? 'Internal server error'}\n\n${error.stack}`;
     response.status(error.status || 500).send(message);
+
+    // ✅ important:
+    // call next function for trigger default express error handling behavior
     next(error);
   }) as ErrorRequestHandler);
 };
