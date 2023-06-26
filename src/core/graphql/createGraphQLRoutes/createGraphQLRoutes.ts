@@ -5,7 +5,8 @@ import {
   callResponseInterceptors,
   getGraphQLInput,
   parseQuery,
-  callRequestInterceptor
+  callRequestInterceptor,
+  asyncHandler
 } from '@/utils/helpers';
 import type {
   GraphQLEntities,
@@ -108,8 +109,8 @@ export const createGraphQLRoutes = (
     return response.status(response.statusCode).json(data);
   };
 
-  router.route('/').get(graphqlMiddleware);
-  router.route('/').post(graphqlMiddleware);
+  router.route('/').get(asyncHandler(graphqlMiddleware));
+  router.route('/').post(asyncHandler(graphqlMiddleware));
 
   return router;
 };

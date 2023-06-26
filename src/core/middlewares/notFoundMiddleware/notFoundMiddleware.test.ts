@@ -79,10 +79,7 @@ describe('notFoundMiddleware', () => {
     server.set('view engine', 'ejs');
     server.use(express.json());
 
-    notFoundMiddleware({
-      server,
-      mockServerConfig
-    });
+    notFoundMiddleware(server, mockServerConfig);
 
     return server;
   };

@@ -9,7 +9,8 @@ import {
   noCorsMiddleware,
   notFoundMiddleware,
   requestInterceptorMiddleware,
-  staticMiddleware
+  staticMiddleware,
+  errorMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
@@ -73,10 +74,9 @@ export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'
     server.use(graphqlBaseUrl, routerWithGraphQLRoutes);
   }
 
-  notFoundMiddleware({
-    server,
-    mockServerConfig
-  });
+  notFoundMiddleware(server, mockServerConfig);
+
+  errorMiddleware(server);
 
   return server;
 };
