@@ -1,20 +1,20 @@
 .header {
+  display: flex;
+  width: 100%;
+  justify-content: center;
   backdrop-filter: blur(20px);
   background-color: var(--background-container);
-  display: flex;
-  justify-content: center;
-  width: 100%;
 }
 
 .header-content {
-  align-items: center;
   display: flex;
-  flex-direction: row;
-  gap: 25px;
-  height: 60px;
-  justify-content: space-between;
-  padding-inline: 75px;
   width: 800px;
+  height: 60px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+  padding-inline: 75px;
 }
 
 .header-menu {
@@ -24,15 +24,15 @@
 }
 
 .header-menu-item {
-  align-items: center;
-  cursor: pointer;
   display: flex;
+  height: 25px;
   flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
   font-size: 14px;
   font-weight: 400;
   gap: 10px;
-  height: 25px;
-  justify-content: center;
   line-height: 17px;
 }
 
@@ -46,10 +46,10 @@ li {
 }
 
 .scheme-switcher {
+  width: 22px;
+  height: 22px;
   background-image: var(--image-scheme);
   background-position: center;
   background-repeat: no-repeat;
   cursor: pointer;
-  height: 22px;
-  width: 22px;
 }

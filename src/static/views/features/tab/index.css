@@ -1,24 +1,24 @@
 .tab-items {
-  align-items: center;
-  background: var(--background-container);
-  border-radius: 20px;
   display: flex;
   flex-direction: row;
+  align-items: center;
+  padding: 3px;
+  border-radius: 20px;
+  background: var(--background-container);
   font-size: 14px;
   font-weight: 300;
   gap: 4px;
   line-height: 17px;
-  padding: 3px;
 }
 
 .tab-item {
+  display: flex;
+  width: 120px;
+  height: 30px;
   align-items: center;
+  justify-content: center;
   border-radius: 20px;
   cursor: pointer;
-  display: flex;
-  height: 30px;
-  justify-content: center;
-  width: 120px;
 }
 
 .tab-item:not(.tab-item-active):hover {
