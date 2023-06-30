@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --accent: rgb(149 155 255);
   --accent-glass: rgb(149 155 255 / 50%);
   --primary: #343434;
