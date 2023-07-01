@@ -27,7 +27,7 @@ export interface ResponseInterceptorParams {
   attachment: (filename: string) => void;
 }
 
-export type ResponseInterceptor<Data extends any = any> = (
+export type ResponseInterceptor<Data = any> = (
   data: Data,
   params: ResponseInterceptorParams
 ) => any;

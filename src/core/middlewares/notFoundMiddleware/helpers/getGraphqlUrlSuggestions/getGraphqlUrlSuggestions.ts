@@ -1,32 +1,34 @@
+import type { GraphQLOperationType } from '@/utils/types';
+
 import { getLevenshteinDistance } from '../getLevenshteinDistance/getLevenshteinDistance';
+
+export type GraphqlRequestSuggestionConfigs = {
+  operationType: GraphQLOperationType;
+  operationName: string;
+}[];
 
 interface GetGraphqlUrlSuggestionsParams {
   url: URL;
-  graphqlPatternUrlMeaningfulStrings: string[];
+  requestConfigs: GraphqlRequestSuggestionConfigs;
 }
 
 export const getGraphqlUrlSuggestions = ({
   url,
-  graphqlPatternUrlMeaningfulStrings
+  requestConfigs
 }: GetGraphqlUrlSuggestionsParams) => {
   // ✅ important: operationName is always second word in 'query' query param
-  const operationName = url.searchParams.get('query')?.split(' ')[1];
-  const actualUrlMeaningfulString = `${url.pathname}/${operationName}`;
+  const actualOperationName = url.searchParams.get('query')?.split(' ')[1];
+  const actualUrlMeaningful = `${url.pathname}/${actualOperationName}`;
 
-  const graphqlUrlSuggestions = graphqlPatternUrlMeaningfulStrings.reduce(
-    (acc, patternUrlMeaningfulString) => {
-      const distance = getLevenshteinDistance(
-        actualUrlMeaningfulString,
-        patternUrlMeaningfulString
-      );
+  const graphqlUrlSuggestions = requestConfigs.reduce((acc, requestConfig) => {
+    const { operationName } = requestConfig;
+    const distance = getLevenshteinDistance(actualUrlMeaningful, operationName);
 
-      const tolerance = Math.floor(patternUrlMeaningfulString.length / 2);
-      if (distance <= tolerance) acc.push(patternUrlMeaningfulString);
+    const tolerance = Math.floor(operationName.length / 2);
+    if (distance <= tolerance) acc.push(requestConfig);
 
-      return acc;
-    },
-    [] as string[]
-  );
+    return acc;
+  }, [] as GraphqlRequestSuggestionConfigs);
 
   return graphqlUrlSuggestions;
 };

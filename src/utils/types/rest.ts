@@ -50,9 +50,10 @@ export interface RestRouteConfig<
 }
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options';
+export type RestPathString = `/${string}`;
 
 export interface BaseRestRequestConfig<Method extends RestMethod> {
-  path: `/${string}` | RegExp;
+  path: RestPathString | RegExp;
   method: Method;
   routes: RestRouteConfig<Method>[];
   interceptors?: Interceptors;
