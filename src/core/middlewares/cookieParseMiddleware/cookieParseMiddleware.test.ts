@@ -13,7 +13,7 @@ describe('cookieParseMiddleware', () => {
     server.use((request, _response, next) => {
       parsedCookies = request.cookies;
       next();
-    })
+    });
 
     await request(server).get('/').set({ cookie: 'key=value' });
 

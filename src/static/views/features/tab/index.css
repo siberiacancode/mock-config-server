@@ -1,0 +1,30 @@
+.tab-items {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 3px;
+  border-radius: 20px;
+  background: var(--background-container);
+  font-size: 14px;
+  font-weight: 300;
+  gap: 4px;
+  line-height: 17px;
+}
+
+.tab-item {
+  display: flex;
+  width: 120px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.tab-item:not(.tab-item-active):hover {
+  background-color: var(--accent-glass);
+}
+
+.tab-content {
+  display: none;
+}

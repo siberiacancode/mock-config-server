@@ -14,11 +14,13 @@ const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntitiesByOperationType = {
 const validateHeadersOrCookiesOrQuery = (headersOrCookiesOrQuery: unknown, entity: string) => {
   const isHeadersOrCookiesOrQueryObject = isPlainObject(headersOrCookiesOrQuery);
   if (isHeadersOrCookiesOrQueryObject) {
-    Object.entries(headersOrCookiesOrQuery).forEach(([headerOrCookieOrQueryKey, headerOrCookieOrQueryValue]) => {
-      if (typeof headerOrCookieOrQueryValue !== 'string') {
-        throw new Error(`${entity}.${headerOrCookieOrQueryKey}`);
+    Object.entries(headersOrCookiesOrQuery).forEach(
+      ([headerOrCookieOrQueryKey, headerOrCookieOrQueryValue]) => {
+        if (typeof headerOrCookieOrQueryValue !== 'string') {
+          throw new Error(`${entity}.${headerOrCookieOrQueryKey}`);
+        }
       }
-    });
+    );
     return;
   }
 

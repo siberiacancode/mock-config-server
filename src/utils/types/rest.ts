@@ -1,7 +1,14 @@
 import type { Request } from 'express';
 
 import type { Interceptors } from './interceptors';
-import type { BodyValue, CookiesValue, Data, HeadersValue, ParamsValue, QueryValue } from './values';
+import type {
+  BodyValue,
+  CookiesValue,
+  Data,
+  HeadersValue,
+  ParamsValue,
+  QueryValue
+} from './values';
 
 export type RestEntities = 'headers' | 'cookies' | 'query' | 'params' | 'body';
 export type RestEntitiesValue = BodyValue | QueryValue | HeadersValue | CookiesValue | ParamsValue;
@@ -43,9 +50,10 @@ export interface RestRouteConfig<
 }
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options';
+export type RestPathString = `/${string}`;
 
 export interface BaseRestRequestConfig<Method extends RestMethod> {
-  path: `/${string}` | RegExp;
+  path: RestPathString | RegExp;
   method: Method;
   routes: RestRouteConfig<Method>[];
   interceptors?: Interceptors;
