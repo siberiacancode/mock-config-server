@@ -512,15 +512,23 @@ const mockServerConfig = {
     },
     routes: {
       '/api/users/:id': '/users/:id',
-      '/my-settings': '/settings'
+      '/*/my-settings': '/settings'
     }
   }
 };
 ```
 
+Now following routes will work correctly
+
+```
+/api/users/1 -> return data for /users/1
+/some/custom/url/my-settings -> return data for /settings
+```
+
+Note some things:
 - String routes should start with forward slash
 - If you want to use id param in route then use only `:id` template
-- You can use `RegExp` and `wildcard`
+- You can use `wildcard` only for custom route, **not for real route**
 
 ### File example
 
@@ -533,7 +541,7 @@ const mockServerConfig = {
 };
 ```
 
-Instead of JS objects you can use paths to JSON files which contain needed info.
+Instead of objects you can use paths to **JSON** files which contain needed data or routes
 
 ## CLI usage
 
