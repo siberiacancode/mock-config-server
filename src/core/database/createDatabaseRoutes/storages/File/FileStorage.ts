@@ -3,17 +3,20 @@ import path from 'path';
 
 import { isIndex } from '@/utils/helpers';
 
+import { Writer } from './Writer';
+
 type Index = string | number;
 type Object = Record<Index, any>;
 
 export class FileStorage<T extends Object = Object> {
-  private readonly filePath: string;
+  private readonly writer: Writer;
 
   private readonly data: T;
 
   public constructor(fileName: string) {
-    this.filePath = path.resolve(process.cwd(), fileName);
-    this.data = JSON.parse(fs.readFileSync(this.filePath, 'utf-8'));
+    const filePath = path.resolve(process.cwd(), fileName);
+    this.writer = new Writer(filePath);
+    this.data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
   }
 
   public read(baseKey?: Index | Index[]): any {
@@ -42,7 +45,7 @@ export class FileStorage<T extends Object = Object> {
     // stop iterate for one element before end of key for get access to writable object property
     writable[key[index]] = value;
 
-    fs.writeFileSync(this.filePath, JSON.stringify(this.data, null, 2));
+    this.writer.write(JSON.stringify(this.data, null, 2));
   }
 
   public delete(baseKey: Index | Index[]): void {
@@ -62,6 +65,6 @@ export class FileStorage<T extends Object = Object> {
       delete deletable[key[index]];
     }
 
-    fs.writeFileSync(this.filePath, JSON.stringify(this.data));
+    this.writer.write(JSON.stringify(this.data, null, 2));
   }
 }

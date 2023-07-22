@@ -1,8 +1,10 @@
 import * as fs from 'fs';
 
 import { FileStorage } from './FileStorage';
+import { Writer } from './Writer';
 
 jest.mock('fs');
+jest.mock('./Writer');
 
 describe('FileStorage', () => {
   const createInitialData = () => ({
@@ -18,11 +20,11 @@ describe('FileStorage', () => {
     beforeEach(() => {
       initialData = createInitialData();
       (fs as jest.Mocked<typeof fs>).readFileSync.mockReturnValueOnce(JSON.stringify(initialData));
-      fileStorage = new FileStorage('./mock-database.json');
+      fileStorage = new FileStorage('./database.json');
     });
 
     afterEach(() => {
-      (fs as jest.Mocked<typeof fs>).readFileSync.mockClear();
+      jest.clearAllMocks();
     });
 
     test('Should return correct FULL data for read without keys', () => {
@@ -45,11 +47,11 @@ describe('FileStorage', () => {
     beforeEach(() => {
       initialData = createInitialData();
       (fs as jest.Mocked<typeof fs>).readFileSync.mockReturnValueOnce(JSON.stringify(initialData));
-      fileStorage = new FileStorage('./mock-database.json');
+      fileStorage = new FileStorage('./database.json');
     });
 
     afterEach(() => {
-      (fs as jest.Mocked<typeof fs>).readFileSync.mockClear();
+      jest.clearAllMocks();
     });
 
     test('Should update value with valid single key', () => {
@@ -75,12 +77,12 @@ describe('FileStorage', () => {
     });
 
     test('Should write in file updated data', () => {
-      const mockWriteFileSync = jest.fn();
-      (fs as jest.Mocked<typeof fs>).writeFileSync.mockImplementation(mockWriteFileSync);
+      const writerWriteMock = jest.spyOn(Writer.prototype, 'write');
+
       fileStorage.write(['john', 'stand'], 'The World');
 
-      expect(mockWriteFileSync.mock.calls.length).toBe(1);
-      expect(mockWriteFileSync.mock.calls[0][1]).toBe(JSON.stringify(fileStorage.read(), null, 2));
+      expect(writerWriteMock).toHaveBeenCalledTimes(1);
+      expect(writerWriteMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read(), null, 2));
     });
   });
 
@@ -91,11 +93,11 @@ describe('FileStorage', () => {
     beforeEach(() => {
       initialData = createInitialData();
       (fs as jest.Mocked<typeof fs>).readFileSync.mockReturnValueOnce(JSON.stringify(initialData));
-      fileStorage = new FileStorage('./mock-database.json');
+      fileStorage = new FileStorage('./database.json');
     });
 
     afterEach(() => {
-      (fs as jest.Mocked<typeof fs>).readFileSync.mockClear();
+      jest.clearAllMocks();
     });
 
     test('Should correctly delete object property with valid single key', () => {
@@ -118,12 +120,11 @@ describe('FileStorage', () => {
     });
 
     test('Should write in file updated data', () => {
-      const mockWriteFileSync = jest.fn();
-      (fs as jest.Mocked<typeof fs>).writeFileSync.mockImplementation(mockWriteFileSync);
+      const writerWriteMock = jest.spyOn(Writer.prototype, 'write');
       fileStorage.delete(['users', 0]);
 
-      expect(mockWriteFileSync.mock.calls.length).toBe(1);
-      expect(mockWriteFileSync.mock.calls[0][1]).toBe(JSON.stringify(fileStorage.read()));
+      expect(writerWriteMock).toHaveBeenCalledTimes(1);
+      expect(writerWriteMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read(), null, 2));
     });
   });
 });
