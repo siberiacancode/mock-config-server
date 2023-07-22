@@ -2,9 +2,9 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { Writer } from './Writer';
+import { FileWriter } from './FileWriter';
 
-describe('Writer', () => {
+describe('FileWriter', () => {
   let tmpDirPath: string;
 
   beforeEach(() => {
@@ -13,35 +13,36 @@ describe('Writer', () => {
 
   afterEach(() => {
     fs.rmSync(tmpDirPath, { recursive: true, force: true });
+    jest.clearAllMocks();
   });
 
   test('Write asynchronously in file only last data (before Promise become fulfilled)', async () => {
     const fileName = './database.json';
-    const writer = new Writer(path.join(tmpDirPath, fileName));
+    const filePath = path.join(tmpDirPath, fileName);
+    const fileWriter = new FileWriter(filePath);
 
     const writePromises: Promise<void>[] = [];
     const writeOperationCount = 100;
     for (let i = 0; i <= writeOperationCount; i += 1) {
-      writePromises.push(writer.write(JSON.stringify({ index: i })));
+      writePromises.push(fileWriter.write(JSON.stringify({ index: i })));
     }
     await Promise.all(writePromises);
 
-    expect(JSON.parse(fs.readFileSync(path.join(tmpDirPath, fileName), 'utf-8'))).toStrictEqual({
-      index: writeOperationCount
-    });
+    const fileData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    expect(fileData).toStrictEqual({ index: writeOperationCount });
   });
 
   test('Write in file only if writing is unlocked (first write and last write)', async () => {
-    const writer = new Writer(path.join(tmpDirPath, './database.json'));
-    const writeFileMock = jest.spyOn(fs.promises, 'writeFile');
+    const fileWriter = new FileWriter(path.join(tmpDirPath, './database.json'));
+    const fsPromisesWriteFileMock = jest.spyOn(fs.promises, 'writeFile');
 
     const writePromises: Promise<void>[] = [];
     const writeOperationCount = 100;
     for (let i = 0; i <= writeOperationCount; i += 1) {
-      writePromises.push(writer.write(JSON.stringify({ index: i })));
+      writePromises.push(fileWriter.write(JSON.stringify({ index: i })));
     }
     await Promise.all(writePromises);
 
-    expect(writeFileMock).toHaveBeenCalledTimes(2);
+    expect(fsPromisesWriteFileMock).toHaveBeenCalledTimes(2);
   });
 });

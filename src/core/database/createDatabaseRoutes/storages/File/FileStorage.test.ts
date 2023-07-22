@@ -1,10 +1,10 @@
 import * as fs from 'fs';
 
 import { FileStorage } from './FileStorage';
-import { Writer } from './Writer';
+import { FileWriter } from './FileWriter';
 
 jest.mock('fs');
-jest.mock('./Writer');
+jest.mock('./FileWriter');
 
 describe('FileStorage', () => {
   const createInitialData = () => ({
@@ -77,12 +77,12 @@ describe('FileStorage', () => {
     });
 
     test('Should write in file updated data', () => {
-      const writerWriteMock = jest.spyOn(Writer.prototype, 'write');
+      const fileWriterWriteMock = jest.spyOn(FileWriter.prototype, 'write');
 
       fileStorage.write(['john', 'stand'], 'The World');
 
-      expect(writerWriteMock).toHaveBeenCalledTimes(1);
-      expect(writerWriteMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read(), null, 2));
+      expect(fileWriterWriteMock).toHaveBeenCalledTimes(1);
+      expect(fileWriterWriteMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read(), null, 2));
     });
   });
 
@@ -120,11 +120,11 @@ describe('FileStorage', () => {
     });
 
     test('Should write in file updated data', () => {
-      const writerWriteMock = jest.spyOn(Writer.prototype, 'write');
+      const fileWriterWriteMock = jest.spyOn(FileWriter.prototype, 'write');
       fileStorage.delete(['users', 0]);
 
-      expect(writerWriteMock).toHaveBeenCalledTimes(1);
-      expect(writerWriteMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read(), null, 2));
+      expect(fileWriterWriteMock).toHaveBeenCalledTimes(1);
+      expect(fileWriterWriteMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read(), null, 2));
     });
   });
 });

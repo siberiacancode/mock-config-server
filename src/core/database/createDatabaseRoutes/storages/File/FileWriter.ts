@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import path from 'path';
 
-export class Writer {
+export class FileWriter {
   private readonly filePath: string;
 
   private nextData: string | null = null;
