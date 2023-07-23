@@ -1,9 +1,10 @@
 import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 import { FileStorage } from './FileStorage';
 import { FileWriter } from './FileWriter';
 
-jest.mock('fs');
 jest.mock('./FileWriter');
 
 describe('FileStorage', () => {
@@ -14,16 +15,21 @@ describe('FileStorage', () => {
   });
 
   describe('FileStorage: read', () => {
+    let tmpDirPath: string;
     let initialData: ReturnType<typeof createInitialData>;
     let fileStorage: FileStorage;
 
-    beforeEach(() => {
+    beforeAll(() => {
+      tmpDirPath = fs.mkdtempSync(os.tmpdir());
       initialData = createInitialData();
-      (fs as jest.Mocked<typeof fs>).readFileSync.mockReturnValueOnce(JSON.stringify(initialData));
-      fileStorage = new FileStorage('./database.json');
+
+      const pathToFileStorage = path.join(tmpDirPath, './database.json');
+      fs.writeFileSync(pathToFileStorage, JSON.stringify(initialData));
+      fileStorage = new FileStorage(pathToFileStorage);
     });
 
-    afterEach(() => {
+    afterAll(() => {
+      fs.rmSync(tmpDirPath, { recursive: true, force: true });
       jest.clearAllMocks();
     });
 
@@ -41,16 +47,21 @@ describe('FileStorage', () => {
   });
 
   describe('FileStorage: write', () => {
+    let tmpDirPath: string;
     let initialData: ReturnType<typeof createInitialData>;
     let fileStorage: FileStorage;
 
     beforeEach(() => {
+      tmpDirPath = fs.mkdtempSync(os.tmpdir());
       initialData = createInitialData();
-      (fs as jest.Mocked<typeof fs>).readFileSync.mockReturnValueOnce(JSON.stringify(initialData));
-      fileStorage = new FileStorage('./database.json');
+
+      const pathToFileStorage = path.join(tmpDirPath, './database.json');
+      fs.writeFileSync(pathToFileStorage, JSON.stringify(initialData));
+      fileStorage = new FileStorage(pathToFileStorage);
     });
 
     afterEach(() => {
+      fs.rmSync(tmpDirPath, { recursive: true, force: true });
       jest.clearAllMocks();
     });
 
@@ -87,16 +98,21 @@ describe('FileStorage', () => {
   });
 
   describe('FileStorage: delete', () => {
+    let tmpDirPath: string;
     let initialData: ReturnType<typeof createInitialData>;
     let fileStorage: FileStorage;
 
     beforeEach(() => {
+      tmpDirPath = fs.mkdtempSync(os.tmpdir());
       initialData = createInitialData();
-      (fs as jest.Mocked<typeof fs>).readFileSync.mockReturnValueOnce(JSON.stringify(initialData));
-      fileStorage = new FileStorage('./database.json');
+
+      const pathToFileStorage = path.join(tmpDirPath, './database.json');
+      fs.writeFileSync(pathToFileStorage, JSON.stringify(initialData));
+      fileStorage = new FileStorage(pathToFileStorage);
     });
 
     afterEach(() => {
+      fs.rmSync(tmpDirPath, { recursive: true, force: true });
       jest.clearAllMocks();
     });
 
