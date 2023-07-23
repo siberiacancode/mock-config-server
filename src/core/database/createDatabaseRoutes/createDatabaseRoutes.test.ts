@@ -1,13 +1,14 @@
 import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
+import type { Express } from 'express';
 import express from 'express';
 import request from 'supertest';
 
 import { createDatabaseRoutes } from '@/core/database';
 import { findIndexById } from '@/utils/helpers';
 import type { MockServerConfig, DatabaseConfig } from '@/utils/types';
-
-jest.mock('fs');
 
 describe('createDatabaseRoutes', () => {
   const createServer = (
@@ -51,15 +52,24 @@ describe('createDatabaseRoutes', () => {
   describe('createDatabaseRoutes: routes and data successfully works when passing them by file', () => {
     const data = { profile: { name: 'John' }, users: [{ id: 1 }, { id: 2 }] };
     const routes = { '/api/profile': '/profile' } as const;
-    (fs as jest.Mocked<typeof fs>).readFileSync.mockImplementation((filename) => {
-      if ((filename as string).endsWith('data.json')) return JSON.stringify(data);
-      if ((filename as string).endsWith('routes.json')) return JSON.stringify(routes);
-      throw new Error('Error with mocking fs.readFileSync');
+
+    let tmpDirPath: string;
+    let server: Express;
+
+    beforeAll(() => {
+      tmpDirPath = fs.mkdtempSync(os.tmpdir());
+
+      const pathToData = path.join(tmpDirPath, './data.json') as `${string}.json`;
+      fs.writeFileSync(pathToData, JSON.stringify(data));
+
+      const pathToRoutes = path.join(tmpDirPath, './routes.json') as `${string}.json`;
+      fs.writeFileSync(pathToRoutes, JSON.stringify(routes));
+
+      server = createServer({ database: { data: pathToData, routes: pathToRoutes } });
     });
-    const server = createServer({ database: { data: 'data.json', routes: 'routes.json' } });
 
     afterAll(() => {
-      (fs as jest.Mocked<typeof fs>).readFileSync.mockClear();
+      fs.rmSync(tmpDirPath, { recursive: true, force: true });
     });
 
     test('Should overwrite routes according to routes object (but default url should work too)', async () => {

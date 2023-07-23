@@ -24,8 +24,12 @@ export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../static/views'));
   server.use(express.static(urlJoin(__dirname, '../../static/views')));
+
   server.use(bodyParser.urlencoded({ extended: false }));
+
   server.use(bodyParser.json({ limit: '10mb' }));
+  server.set('json spaces', 2);
+
   server.use(bodyParser.text());
 
   cookieParseMiddleware(server);
