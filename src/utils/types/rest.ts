@@ -12,6 +12,7 @@ import type { Interceptors } from './interceptors';
 import type { Data, Primitive } from './values';
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options';
+
 export type RestEntityName = 'headers' | 'cookies' | 'query' | 'params' | 'body';
 
 export type RestMappedEntityKey = string;
@@ -122,8 +123,9 @@ export interface RestRouteConfig<
   interceptors?: Pick<Interceptors, 'response'>;
 }
 
+export type RestPathString = `/${string}`;
 interface BaseRestRequestConfig<Method extends RestMethod> {
-  path: `/${string}` | RegExp;
+  path: RestPathString | RegExp;
   method: Method;
   routes: RestRouteConfig<Method>[];
   interceptors?: Interceptors;

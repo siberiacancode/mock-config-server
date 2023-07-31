@@ -10,7 +10,7 @@ describe('noCorsMiddleware', () => {
     noCorsMiddleware(server);
 
     const preflightHeaders = {
-      'access-control-request-method': '*',
+      'access-control-request-method': 'GET,OPTIONS,PUT,PATCH,POST,DELETE',
       'access-control-request-headers': '*',
       origin: '/'
     };
@@ -21,7 +21,7 @@ describe('noCorsMiddleware', () => {
       'access-control-allow-credentials': 'true',
       'access-control-expose-headers': '*',
       'access-control-allow-headers': '*',
-      'access-control-allow-methods': '*',
+      'access-control-allow-methods': 'GET,OPTIONS,PUT,PATCH,POST,DELETE',
       'access-control-max-age': '3600'
     });
     expect(response.statusCode).toBe(204);

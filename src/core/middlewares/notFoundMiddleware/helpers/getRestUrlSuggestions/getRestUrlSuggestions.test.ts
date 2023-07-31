@@ -1,64 +1,54 @@
 import { getRestUrlSuggestions } from './getRestUrlSuggestions';
+import type { RestRequestSuggestionConfigs } from './getRestUrlSuggestions';
 
 describe('getRestUrlSuggestions', () => {
   test('Should correctly return suggestions', () => {
-    const patternUrls: string[] = [
-      '/posts',
-      '/posts/:postId',
-      '/posts/:postId/comments/:commentId'
+    const requestConfigs: RestRequestSuggestionConfigs = [
+      { method: 'get', path: '/posts/:postId' },
+      { method: 'post', path: '/posts/:postId/comments/:commentId' }
     ];
     expect(
       getRestUrlSuggestions({
         url: new URL('http://localhost:31299/posts/5/comments/2'),
-        patternUrls
+        requestConfigs
       })
-    ).toEqual(['/posts/5/comments/2']);
+    ).toEqual([{ method: 'post', path: '/posts/5/comments/2' }]);
     expect(
       getRestUrlSuggestions({
         url: new URL('http://localhost:31299/psts/5/commennts/2'),
-        patternUrls
+        requestConfigs
       })
-    ).toEqual(['/posts/5/comments/2']);
+    ).toEqual([{ method: 'post', path: '/posts/5/comments/2' }]);
     expect(
       getRestUrlSuggestions({
         url: new URL('http://localhost:31299/post/5/omments/2'),
-        patternUrls
+        requestConfigs
       })
-    ).toEqual(['/posts/5/comments/2']);
+    ).toEqual([{ method: 'post', path: '/posts/5/comments/2' }]);
     expect(
       getRestUrlSuggestions({
         url: new URL('http://localhost:31299/ps/5/cots/2'),
-        patternUrls
+        requestConfigs
       })
     ).toEqual([]);
   });
 
-  test('Should return patterns with same query params as provided', () => {
-    const patternUrls: string[] = [
-      '/users',
-      '/users/:userId',
-      '/user',
-      '/comments',
-      '/login',
-      '/logout'
+  test('Should return requests with same query params as provided', () => {
+    const requestConfigs: RestRequestSuggestionConfigs = [
+      { method: 'get', path: '/users' },
+      { method: 'get', path: '/users/:userId' },
+      { method: 'post', path: '/user' },
+      { method: 'post', path: '/login' },
+      { method: 'delete', path: '/logout' }
     ];
     expect(
       getRestUrlSuggestions({
-        url: new URL('http://localhost:31299/login?remember=true'),
-        patternUrls
+        url: new URL('http://localhost:31299/login?remember=true?action=success'),
+        requestConfigs
       })
-    ).toEqual(['/login?remember=true', '/logout?remember=true']);
-    expect(
-      getRestUrlSuggestions({
-        url: new URL('http://localhost:31299/users/5?firstParam=1&secondParam=2'),
-        patternUrls
-      })
-    ).toEqual(['/users/5?firstParam=1&secondParam=2']);
-    expect(
-      getRestUrlSuggestions({
-        url: new URL('http://localhost:31299/users/5?backurl=someUrl?action=success'),
-        patternUrls
-      })
-    ).toEqual(['/users/5?backurl=someUrl?action=success']);
+    ).toEqual([
+      { method: 'post', path: '/login?remember=true?action=success' },
+      { method: 'delete', path: '/logout?remember=true?action=success' }
+    ]);
   });
 });

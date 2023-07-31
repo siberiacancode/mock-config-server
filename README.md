@@ -391,7 +391,7 @@ Entity for connecting statics to the server, like HTML, JSON, PNG, etc.
 Object with settings for [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). You can flexibly configure the required origin, methods, headers, credentials, maxAge for the entire server. If you do not specify `CORS` settings, then it will be disabled.
 
 - `origin` {string | RegExp | Array<string | RegExp> | Function | Promise } available origins from which requests can be made
-- `methods?` {Array<GET | POST | DELETE | PUT | PATCH>} available methods (default: `*`)
+- `methods?` {Array<GET | POST | DELETE | PUT | PATCH>} available methods (default: `GET,OPTIONS,PUT,PATCH,POST,DELETE`)
 - `allowedHeaders?` {Array<string>} allowed headers (default: `*`)
 - `exposedHeaders?` {Array<string>} exposed headers (default: `*`)
 - `credentials?` {boolean} param tells browsers whether to expose the response to the frontend JavaScript code (default: `true`)
