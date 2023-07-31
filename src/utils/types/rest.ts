@@ -1,60 +1,104 @@
 import type { Request } from 'express';
 
+import type {
+  CalculateByDescriptorValueCheckMode,
+  CheckActualValueCheckMode,
+  CheckFunction,
+  CheckMode,
+  CompareWithDescriptorAnyValueCheckMode,
+  CompareWithDescriptorValueCheckMode
+} from './checkModes';
 import type { Interceptors } from './interceptors';
-import type { CheckFunction, CheckMode, CheckActualValueCheckMode, CompareWithExpectedValueCheckMode, Data } from './values';
+import type { Data, Primitive } from './values';
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options';
 export type RestEntityName = 'headers' | 'cookies' | 'query' | 'params' | 'body';
 
-export type RestObjectEntityKey = string;
-export type RestObjectEntityValue = string | number | boolean;
+export type RestMappedEntityKey = string;
+type RestMappedEntityValue = string | number | boolean;
 
-export type RestPlainEntityValue =
-  | string
-  // ✅ important: Omit `checkMode` key for fix types. Omit `call` key for exclude functions
-  | { checkMode?: undefined; call?: undefined; [key: string]: any }
-  | any[];
+type RestPlainEntityInnerValue = {
+  checkMode?: undefined;
+  call?: undefined;
+  dotAll?: undefined;
+  [key: string]: Primitive | RestPlainEntityInnerValue;
+};
 
-export type RestEntityValue<EntityName = RestEntityName> =
-  EntityName extends 'body'
-    ? RestPlainEntityValue
-    : RestObjectEntityValue;
+type RestPlainEntityValue =
+  // ✅ important:
+  // Omit `checkMode` key for fix types,
+  // Omit `call` key for exclude functions,
+  // Omit `dotAll` for exclude RegExp.
+  | {
+      checkMode?: undefined;
+      call?: undefined;
+      dotAll?: undefined;
+      [key: string]: RestPlainEntityInnerValue | Primitive | RestEntityDescriptor;
+    }
+  | (RestPlainEntityInnerValue | Primitive | RestEntityDescriptor)[];
 
-export type RestEntityDescriptor<
+type RestEntityValue<EntityName = RestEntityName> = EntityName extends 'body'
+  ? RestPlainEntityValue
+  : RestMappedEntityValue;
+
+type RestEntityValueOrValues<EntityName = RestEntityName> =
+  | RestEntityValue<EntityName>
+  | RestEntityValue<EntityName>[];
+
+type RestEntityDescriptor<
   EntityName extends RestEntityName = RestEntityName,
   Check extends CheckMode = CheckMode
-> =
-  Check extends 'function' ?
-    {
+> = EntityName extends 'body'
+  ? Check extends Extract<CalculateByDescriptorValueCheckMode, 'function'>
+    ? {
+        checkMode: Check;
+        value: (actualValue: any, checkFunction: CheckFunction) => boolean;
+      }
+    : Check extends CompareWithDescriptorAnyValueCheckMode
+    ? {
+        checkMode: Check;
+        value: RestEntityValueOrValues<EntityName>;
+      }
+    : Check extends CheckActualValueCheckMode
+    ? {
+        checkMode: Check;
+        value?: undefined;
+      }
+    : never
+  : Check extends Extract<CalculateByDescriptorValueCheckMode, 'function'>
+  ? {
       checkMode: Check;
       value: (actualValue: any, checkFunction: CheckFunction) => boolean;
-    } :
-    Check extends 'regExp' ?
-      {
-        checkMode: Check,
-        value: RegExp | RegExp[];
-      } :
-      Check extends CompareWithExpectedValueCheckMode ?
-        {
-          checkMode: Check;
-          value: RestEntityValue<EntityName> | RestEntityValue<EntityName>[];
-        } :
-        Check extends CheckActualValueCheckMode ?
-          {
-            checkMode: Check;
-            value?: undefined;
-          } :
-          never;
+    }
+  : Check extends Extract<CalculateByDescriptorValueCheckMode, 'regExp'>
+  ? {
+      checkMode: Check;
+      value: RegExp | RegExp[];
+    }
+  : Check extends CompareWithDescriptorValueCheckMode
+  ? {
+      checkMode: Check;
+      value: RestEntityValueOrValues<EntityName>;
+    }
+  : Check extends CheckActualValueCheckMode
+  ? {
+      checkMode: Check;
+      value?: undefined;
+    }
+  : never;
 
 export type RestEntityDescriptorOrValue<EntityName extends RestEntityName = RestEntityName> =
   EntityName extends 'body'
     ? RestEntityDescriptor<EntityName> | RestEntityValue<EntityName>
-    : Record<RestObjectEntityKey, RestEntityDescriptor<EntityName> | RestEntityValue<EntityName> | RestEntityValue<EntityName>[]>;
+    : Record<
+        RestMappedEntityKey,
+        RestEntityDescriptor<EntityName> | RestEntityValueOrValues<EntityName>
+      >;
 
 export type RestEntityDescriptorOnly<EntityName extends RestEntityName = RestEntityName> =
   EntityName extends 'body'
     ? RestEntityDescriptor<EntityName>
-    : Record<RestObjectEntityKey, RestEntityDescriptor<EntityName>>;
+    : Record<RestMappedEntityKey, RestEntityDescriptor<EntityName>>;
 
 export interface RestEntityNamesByMethod {
   get: Exclude<RestEntityName, 'body'>;
@@ -66,7 +110,7 @@ export interface RestEntityNamesByMethod {
 }
 
 export type RestEntityByEntityName<Method extends RestMethod> = {
-  [EntityName in RestEntityNamesByMethod[Method]]?: RestEntityDescriptorOrValue<EntityName>
+  [EntityName in RestEntityNamesByMethod[Method]]?: RestEntityDescriptorOrValue<EntityName>;
 };
 
 export interface RestRouteConfig<
@@ -78,19 +122,19 @@ export interface RestRouteConfig<
   interceptors?: Pick<Interceptors, 'response'>;
 }
 
-export interface BaseRestRequestConfig<Method extends RestMethod> {
+interface BaseRestRequestConfig<Method extends RestMethod> {
   path: `/${string}` | RegExp;
   method: Method;
   routes: RestRouteConfig<Method>[];
   interceptors?: Interceptors;
 }
 
-export type RestGetRequestConfig = BaseRestRequestConfig<'get'>;
-export type RestPostRequestConfig = BaseRestRequestConfig<'post'>;
-export type RestPutRequestConfig = BaseRestRequestConfig<'put'>;
-export type RestDeleteRequestConfig = BaseRestRequestConfig<'delete'>;
-export type RestPatchRequestConfig = BaseRestRequestConfig<'patch'>;
-export type RestOptionsRequestConfig = BaseRestRequestConfig<'options'>;
+type RestGetRequestConfig = BaseRestRequestConfig<'get'>;
+type RestPostRequestConfig = BaseRestRequestConfig<'post'>;
+type RestPutRequestConfig = BaseRestRequestConfig<'put'>;
+type RestDeleteRequestConfig = BaseRestRequestConfig<'delete'>;
+type RestPatchRequestConfig = BaseRestRequestConfig<'patch'>;
+type RestOptionsRequestConfig = BaseRestRequestConfig<'options'>;
 export type RestRequestConfig =
   | RestGetRequestConfig
   | RestPostRequestConfig

@@ -19,9 +19,9 @@ export const destroyerMiddleware = (server: Server): ServerWithDestroyer => {
     serverWithDestroyer.close(callback);
     Object.values(connections).forEach((connection) => {
       connection.destroy();
-    })
+    });
     return serverWithDestroyer;
   };
 
   return serverWithDestroyer;
-}
+};

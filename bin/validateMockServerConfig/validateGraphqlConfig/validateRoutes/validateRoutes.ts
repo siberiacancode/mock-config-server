@@ -1,19 +1,7 @@
-import {
-  ALLOWED_CHECK_MODES,
-  CHECK_ACTUAL_VALUE_CHECK_MODES,
-  COMPARE_WITH_EXPECTED_VALUE_CHECK_MODES
-} from '@/utils/constants';
-import { isPlainObject } from '@/utils/helpers';
-import type {
-  GraphQLEntityNamesByOperationType,
-  GraphQLOperationType,
-  GraphQLEntityName,
-  CheckActualValueCheckMode,
-  CompareWithExpectedValueCheckMode,
-  CheckMode,
-  GraphQLEntityDescriptor
-} from '@/utils/types';
+import { convertToEntityDescriptor, isEntityDescriptor, isPlainObject } from '@/utils/helpers';
+import type { GraphQLEntityNamesByOperationType, GraphQLOperationType } from '@/utils/types';
 
+import { isCheckModeValid, isDescriptorValueValid } from '../../helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
 type AllowedEntityNamesByOperationType = {
@@ -24,57 +12,45 @@ const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntityNamesByOperationType = {
   mutation: ['headers', 'cookies', 'query', 'variables']
 };
 
-const isCheckModeValid = (checkMode: unknown) => ALLOWED_CHECK_MODES.includes(checkMode as CheckMode);
+const validateEntity = (entity: unknown, entityName: string) => {
+  const { checkMode: topLevelCheckMode, value: topLevelValue } = convertToEntityDescriptor(entity);
+  const isVariables = entityName === 'variables';
 
-const isDescriptorValueValid = (entityName: unknown, checkMode: unknown, value: unknown) => {
-  if (CHECK_ACTUAL_VALUE_CHECK_MODES.includes(checkMode as CheckActualValueCheckMode) && typeof value === 'undefined') return true;
-
-  if (COMPARE_WITH_EXPECTED_VALUE_CHECK_MODES.includes(checkMode as CompareWithExpectedValueCheckMode)) {
-    if (entityName === 'variables') {
-      if ((
-        typeof value === 'boolean' ||
-        typeof value === 'number' ||
-        typeof value === 'string' ||
-        typeof value === 'object'
-        ) &&
-        value !== null &&
-        typeof value !== 'function' &&
-        !(value instanceof RegExp)
-      ) return true;
+  const isTopLevelDescriptor = isEntityDescriptor(entity);
+  if (isTopLevelDescriptor && isVariables) {
+    if (!isCheckModeValid(topLevelCheckMode, 'variables')) {
+      throw new Error('variables.checkMode');
     }
-    if (
-      typeof value === 'boolean' ||
-      typeof value === 'number' ||
-      typeof value === 'string'
-    ) return true;
+
+    if (!isDescriptorValueValid(topLevelCheckMode, topLevelValue, 'variables')) {
+      const errorMessage = 'variables.value';
+      throw new Error(errorMessage);
+    }
   }
 
-  if (checkMode === 'function' && typeof value === 'function') return true;
-  if (checkMode === 'regExp' && (value instanceof RegExp)) return true;
-
-  return false;
-}
-
-const validateObjectEntity = (objectEntity: unknown, entityName: string) => {
-  const isEntityObject = isPlainObject(objectEntity);
-  if (isEntityObject) {
-    Object.entries(objectEntity).forEach(([key, descriptor]) => {
-      const entitiesDescriptor = descriptor && typeof descriptor === 'object' && 'checkMode' in descriptor ? descriptor : { checkMode: 'equals', value: descriptor };
-      const { checkMode, value } = entitiesDescriptor as GraphQLEntityDescriptor<Exclude<GraphQLEntityName, 'variables'>>;
+  const isEntityObject = isPlainObject(entity) && !(entity instanceof RegExp);
+  const isEntityArray = Array.isArray(entity) && isVariables;
+  if (isEntityObject || isEntityArray) {
+    Object.entries(topLevelValue).forEach(([key, valueOrDescriptor]) => {
+      const { checkMode, value } = convertToEntityDescriptor(valueOrDescriptor);
       if (!isCheckModeValid(checkMode)) {
         throw new Error(`${entityName}.${key}.checkMode`);
       }
+
+      const isDescriptor = isEntityDescriptor(valueOrDescriptor);
+      const errorMessage = `${entityName}.${key}${isDescriptor ? '.value' : ''}`;
+
       const isValueArray = Array.isArray(value);
-      if (isValueArray) {
+      if (isValueArray && !isVariables) {
         value.forEach((element, index) => {
-          if (!isDescriptorValueValid(entityName, checkMode, element)) {
-            throw new Error(`${entityName}.${key}.value[${index}]`);
+          if (!isDescriptorValueValid(checkMode, element)) {
+            throw new Error(`${errorMessage}[${index}]`);
           }
-        })
+        });
         return;
       }
-      if (!isDescriptorValueValid(entityName, checkMode, value)) {
-        throw new Error(`${entityName}.${key}.value`);
+      if (!isDescriptorValueValid(checkMode, value)) {
+        throw new Error(errorMessage);
       }
     });
     return;
@@ -83,35 +59,19 @@ const validateObjectEntity = (objectEntity: unknown, entityName: string) => {
   throw new Error(entityName);
 };
 
-const validateVariablesEntity = (variables: unknown) => {
-  const variablesDescriptor = variables && typeof variables === 'object' && 'checkMode' in variables ? variables : { checkMode: 'equals', value: variables };
-  const { checkMode, value } = variablesDescriptor as GraphQLEntityDescriptor<'variables'>;
-  if (!isCheckModeValid(checkMode)) {
-    throw new Error('variables.checkMode');
-  }
-
-  if (!isDescriptorValueValid('variables', checkMode, value)) {
-    throw new Error('variables.value');
-  }
-};
-
 const validateEntities = (entities: unknown, operationType: GraphQLOperationType) => {
   const isEntitiesObject = isPlainObject(entities);
   if (isEntitiesObject) {
-    Object.keys(entities).forEach((entity) => {
+    Object.keys(entities).forEach((entityName) => {
       const isEntityAllowed = ALLOWED_ENTITIES_BY_OPERATION_TYPE[operationType].includes(
-        entity as any
+        entityName as any
       );
       if (!isEntityAllowed) {
-        throw new Error(`entities.${entity}`);
+        throw new Error(`entities.${entityName}`);
       }
 
       try {
-        if (entity === 'variables') {
-          validateVariablesEntity(entities[entity]);
-        } else {
-          validateObjectEntity(entities[entity], entity);
-        }
+        validateEntity(entities[entityName], entityName);
       } catch (error: any) {
         throw new Error(`entities.${error.message}`);
       }

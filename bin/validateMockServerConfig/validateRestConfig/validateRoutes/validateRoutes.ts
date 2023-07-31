@@ -1,19 +1,7 @@
-import {
-  ALLOWED_CHECK_MODES,
-  CHECK_ACTUAL_VALUE_CHECK_MODES,
-  COMPARE_WITH_EXPECTED_VALUE_CHECK_MODES
-} from '@/utils/constants';
-import { isPlainObject } from '@/utils/helpers';
-import type {
-  RestMethod,
-  RestEntityNamesByMethod,
-  RestEntityName,
-  RestEntityDescriptor,
-  CheckActualValueCheckMode,
-  CompareWithExpectedValueCheckMode,
-  CheckMode
-} from '@/utils/types';
+import { convertToEntityDescriptor, isEntityDescriptor, isPlainObject } from '@/utils/helpers';
+import type { RestMethod, RestEntityNamesByMethod } from '@/utils/types';
 
+import { isCheckModeValid, isDescriptorValueValid } from '../../helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
 type AllowedEntityNamesByMethod = {
@@ -28,57 +16,45 @@ const ALLOWED_ENTITIES_BY_METHOD: AllowedEntityNamesByMethod = {
   options: ['headers', 'cookies', 'query', 'params']
 };
 
-const isCheckModeValid = (checkMode: unknown) => ALLOWED_CHECK_MODES.includes(checkMode as CheckMode);
+const validateEntity = (entity: unknown, entityName: string) => {
+  const { checkMode: topLevelCheckMode, value: topLevelValue } = convertToEntityDescriptor(entity);
+  const isBody = entityName === 'body';
 
-const isDescriptorValueValid = (entityName: unknown, checkMode: unknown, value: unknown) => {
-  if (CHECK_ACTUAL_VALUE_CHECK_MODES.includes(checkMode as CheckActualValueCheckMode) && typeof value === 'undefined') return true;
-
-  if (COMPARE_WITH_EXPECTED_VALUE_CHECK_MODES.includes(checkMode as CompareWithExpectedValueCheckMode)) {
-    if (entityName === 'body') {
-      if ((
-          typeof value === 'boolean' ||
-          typeof value === 'number' ||
-          typeof value === 'string' ||
-          typeof value === 'object'
-        ) &&
-        value !== null &&
-        typeof value !== 'function' &&
-        !(value instanceof RegExp)
-      ) return true;
+  const isTopLevelDescriptor = isEntityDescriptor(entity);
+  if (isTopLevelDescriptor && isBody) {
+    if (!isCheckModeValid(topLevelCheckMode, 'body')) {
+      throw new Error('body.checkMode');
     }
-    if (
-      typeof value === 'boolean' ||
-      typeof value === 'number' ||
-      typeof value === 'string'
-    ) return true;
+
+    if (!isDescriptorValueValid(topLevelCheckMode, topLevelValue, 'body')) {
+      const errorMessage = 'body.value';
+      throw new Error(errorMessage);
+    }
   }
 
-  if (checkMode === 'function' && typeof value === 'function') return true;
-  if (checkMode === 'regExp' && (value instanceof RegExp)) return true;
-
-  return false;
-}
-
-const validateObjectEntity = (objectEntity: unknown, entityName: string) => {
-  const isEntityObject = isPlainObject(objectEntity);
-  if (isEntityObject) {
-    Object.entries(objectEntity).forEach(([key, descriptor]) => {
-      const entitiesDescriptor = descriptor && typeof descriptor === 'object' && 'checkMode' in descriptor ? descriptor : { checkMode: 'equals', value: descriptor };
-      const { checkMode, value } = entitiesDescriptor as RestEntityDescriptor<Exclude<RestEntityName, 'body'>>;
+  const isEntityObject = isPlainObject(entity) && !(entity instanceof RegExp);
+  const isEntityArray = Array.isArray(entity) && isBody;
+  if (isEntityObject || isEntityArray) {
+    Object.entries(topLevelValue).forEach(([key, valueOrDescriptor]) => {
+      const { checkMode, value } = convertToEntityDescriptor(valueOrDescriptor);
       if (!isCheckModeValid(checkMode)) {
         throw new Error(`${entityName}.${key}.checkMode`);
       }
+
+      const isDescriptor = isEntityDescriptor(valueOrDescriptor);
+      const errorMessage = `${entityName}.${key}${isDescriptor ? '.value' : ''}`;
+
       const isValueArray = Array.isArray(value);
-      if (isValueArray) {
+      if (isValueArray && !isBody) {
         value.forEach((element, index) => {
-          if (!isDescriptorValueValid(entityName, checkMode, element)) {
-            throw new Error(`${entityName}.${key}.value[${index}]`);
+          if (!isDescriptorValueValid(checkMode, element)) {
+            throw new Error(`${errorMessage}[${index}]`);
           }
-        })
+        });
         return;
       }
-      if (!isDescriptorValueValid(entityName, checkMode, value)) {
-        throw new Error(`${entityName}.${key}.value`);
+      if (!isDescriptorValueValid(checkMode, value)) {
+        throw new Error(errorMessage);
       }
     });
     return;
@@ -87,37 +63,20 @@ const validateObjectEntity = (objectEntity: unknown, entityName: string) => {
   throw new Error(entityName);
 };
 
-const validateBodyEntity = (body: unknown) => {
-  const bodyDescriptor = body && typeof body === 'object' && 'checkMode' in body ? body : { checkMode: 'equals', value: body };
-  const { checkMode, value } = bodyDescriptor as RestEntityDescriptor<'body'>;
-  if (!isCheckModeValid(checkMode)) {
-    throw new Error('body.checkMode');
-  }
-
-  if (!isDescriptorValueValid('body', checkMode, value)) {
-    throw new Error('body.value');
-  }
-};
-
 const validateEntities = (entities: unknown, method: RestMethod) => {
   const isEntitiesObject = isPlainObject(entities);
   if (isEntitiesObject) {
-    Object.keys(entities).forEach((entity) => {
-      const isEntityAllowed = ALLOWED_ENTITIES_BY_METHOD[method].includes(entity as any);
+    Object.keys(entities).forEach((entityName) => {
+      const isEntityAllowed = ALLOWED_ENTITIES_BY_METHOD[method].includes(entityName as any);
       if (!isEntityAllowed) {
-        throw new Error(`entities.${entity}`);
+        throw new Error(`entities.${entityName}`);
       }
 
       try {
-        if (entity === 'body') {
-          validateBodyEntity(entities[entity]);
-        } else {
-          validateObjectEntity(entities[entity], entity);
-        }
+        validateEntity(entities[entityName], entityName);
       } catch (error: any) {
         throw new Error(`entities.${error.message}`);
       }
-
     });
     return;
   }

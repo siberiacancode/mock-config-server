@@ -35,10 +35,7 @@ describe('prepareGraphQLRequestConfigs', () => {
           {
             entities: {
               headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                header1: 'value'
               }
             },
             data: { name: 'John', surname: 'Doe' }
@@ -46,14 +43,8 @@ describe('prepareGraphQLRequestConfigs', () => {
           {
             entities: {
               headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                },
-                header2: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                header1: 'value',
+                header2: 'value'
               }
             },
             data: { name: 'John', surname: 'Doe' }
@@ -61,20 +52,15 @@ describe('prepareGraphQLRequestConfigs', () => {
           {
             entities: {
               headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                header1: 'value'
               },
               query: {
-                query1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                },
-                query2: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                query1: 'value',
+                query2: 'value'
+              },
+              variables: {
+                variable1: 'value1',
+                variable2: 'value2'
               }
             },
             data: { name: 'John', surname: 'Doe' }
@@ -90,69 +76,15 @@ describe('prepareGraphQLRequestConfigs', () => {
           {
             entities: {
               headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                header1: 'value'
               },
               query: {
-                query1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                },
-                query2: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
-              }
-            },
-            data: { name: 'John', surname: 'Doe' }
-          },
-          {
-            entities: {
-              headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                },
-                header2: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
-              }
-            },
-            data: { name: 'John', surname: 'Doe' }
-          },
-          {
-            entities: {
-              headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
-              }
-            },
-            data: { name: 'John', surname: 'Doe' }
-          }
-        ]
-      }
-    ];
-    expect(prepareGraphQLRequestConfigs(GraphQLRequestConfigs)).toStrictEqual(
-      expectedGraphQLRequestConfigs
-    );
-  });
-
-  test('Should set not object variables weight equals to one', () => {
-    const GraphQLRequestConfigs: GraphQLRequestConfig[] = [
-      {
-        operationName: 'GetUser',
-        operationType: 'query',
-        routes: [
-          {
-            entities: {
+                query1: 'value',
+                query2: 'value'
+              },
               variables: {
-                checkMode: 'equals',
-                value: ['value', 'value', 'value']
+                variable1: 'value1',
+                variable2: 'value2'
               }
             },
             data: { name: 'John', surname: 'Doe' }
@@ -160,46 +92,16 @@ describe('prepareGraphQLRequestConfigs', () => {
           {
             entities: {
               headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                },
-                header2: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
-              }
-            },
-            data: { name: 'John', surname: 'Doe' }
-          }
-        ]
-      }
-    ];
-    const expectedGraphQLRequestConfigs: GraphQLRequestConfig[] = [
-      {
-        operationName: 'GetUser',
-        operationType: 'query',
-        routes: [
-          {
-            entities: {
-              headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                },
-                header2: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                header1: 'value',
+                header2: 'value'
               }
             },
             data: { name: 'John', surname: 'Doe' }
           },
           {
             entities: {
-              variables: {
-                checkMode: 'equals',
-                value: ['value', 'value', 'value']
+              headers: {
+                header1: 'value'
               }
             },
             data: { name: 'John', surname: 'Doe' }

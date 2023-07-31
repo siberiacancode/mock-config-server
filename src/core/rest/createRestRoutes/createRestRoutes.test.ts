@@ -42,16 +42,10 @@ describe('createRestRoutes', () => {
                 entities: {
                   headers: {
                     key1: 'value1',
-                    key2: {
-                      checkMode: 'equals',
-                      value: 'value2'
-                    }
+                    key2: 'value2'
                   },
                   query: {
-                    key1: {
-                      checkMode: 'equals',
-                      value: 'value1'
-                    }
+                    key1: 'value1'
                   }
                 },
                 data: { name: 'John', surname: 'Doe' }
@@ -82,20 +76,11 @@ describe('createRestRoutes', () => {
               {
                 entities: {
                   headers: {
-                    key1: {
-                      checkMode: 'equals',
-                      value: 'value1'
-                    },
-                    key2: {
-                      checkMode: 'equals',
-                      value: 'value2'
-                    }
+                    key1: 'value1',
+                    key2: 'value2'
                   },
                   query: {
-                    key1: {
-                      checkMode: 'equals',
-                      value: 'value1'
-                    }
+                    key1: 'value1'
                   }
                 },
                 data: { name: 'John', surname: 'Doe' }
@@ -126,10 +111,7 @@ describe('createRestRoutes', () => {
               {
                 entities: {
                   query: {
-                    key1: {
-                      checkMode: 'equals',
-                      value: 'value1'
-                    }
+                    key1: 'value1'
                   }
                 },
                 data: ({ url }, { query }) => ({
@@ -149,10 +131,7 @@ describe('createRestRoutes', () => {
     expect(response.body).toEqual({
       url: '/users?key1=value1',
       query: {
-        key1: {
-          checkMode: 'equals',
-          value: 'value1'
-        }
+        key1: 'value1'
       }
     });
   });
@@ -168,20 +147,11 @@ describe('createRestRoutes', () => {
               {
                 entities: {
                   headers: {
-                    key1: {
-                      checkMode: 'equals',
-                      value: 'value1'
-                    },
-                    key2: {
-                      checkMode: 'equals',
-                      value: 'value2'
-                    }
+                    key1: 'value1',
+                    key2: 'value2'
                   },
                   query: {
-                    key1: {
-                      checkMode: 'equals',
-                      value: 'value1'
-                    }
+                    key1: 'value1'
                   }
                 },
                 data: { name: 'John', surname: 'Doe' }
@@ -189,24 +159,12 @@ describe('createRestRoutes', () => {
               {
                 entities: {
                   headers: {
-                    key1: {
-                      checkMode: 'equals',
-                      value: 'value1'
-                    },
-                    key2: {
-                      checkMode: 'equals',
-                      value: 'value2'
-                    }
+                    key1: 'value1',
+                    key2: 'value2'
                   },
                   query: {
-                    key1: {
-                      checkMode: 'equals',
-                      value: 'value1'
-                    },
-                    key2: {
-                      checkMode: 'equals',
-                      value: 'value2'
-                    }
+                    key1: 'value1',
+                    key2: 'value2'
                   }
                 },
                 data: { name: 'John', surname: 'Smith' }
@@ -237,10 +195,7 @@ describe('createRestRoutes', () => {
               {
                 entities: {
                   headers: {
-                    key1: {
-                      checkMode: 'equals',
-                      value: 'value1'
-                    }
+                    key1: 'value1'
                   }
                 },
                 data: { name: 'John', surname: 'Doe' }
@@ -256,7 +211,7 @@ describe('createRestRoutes', () => {
     expect(response.statusCode).toBe(404);
   });
 
-  test('Should compare non plain object body by full equal behavior', async () => {
+  test('Should strictly compare plain array body if top level descriptor used', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -298,7 +253,7 @@ describe('createRestRoutes', () => {
     expect(failedResponse.statusCode).toBe(404);
   });
 
-  test('Should compare plain object body by "includes" behavior', async () => {
+  test('Should strictly compare plain object body if top level descriptor used', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -313,6 +268,41 @@ describe('createRestRoutes', () => {
                     value: {
                       key1: 'value1',
                       key2: { nestedKey1: 'nestedValue1' }
+                    }
+                  }
+                },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .post('/users')
+      .set('Content-Type', 'application/json')
+      .send({ key1: 'value1', key2: { nestedKey1: 'nestedValue1' } });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+  });
+
+  test('Should correctly resolve flat object body with descriptors', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'post',
+            routes: [
+              {
+                entities: {
+                  body: {
+                    key1: 'value1',
+                    'key2.nestedKey1': {
+                      checkMode: 'equals',
+                      value: 'nestedValue1'
                     }
                   }
                 },
@@ -345,11 +335,8 @@ describe('createRestRoutes', () => {
               {
                 entities: {
                   body: {
-                    checkMode: 'equals',
-                    value: {
-                      key1: 'value1',
-                      key2: 'value2'
-                    }
+                    key1: 'value1',
+                    key2: 'value2'
                   }
                 },
                 data: { name: 'John', surname: 'Doe' }
@@ -364,11 +351,8 @@ describe('createRestRoutes', () => {
               {
                 entities: {
                   body: {
-                    checkMode: 'equals',
-                    value: {
-                      key1: 'value1',
-                      key2: 'value2'
-                    }
+                    key1: 'value1',
+                    key2: 'value2'
                   }
                 },
                 data: { name: 'John', surname: 'Smith' }
@@ -406,11 +390,8 @@ describe('createRestRoutes', () => {
               {
                 entities: {
                   body: {
-                    checkMode: 'equals',
-                    value: {
-                      key1: 'value1',
-                      key2: 'value2'
-                    }
+                    key1: 'value1',
+                    key2: 'value2'
                   }
                 },
                 data: { name: 'John', surname: 'Doe' },
@@ -426,11 +407,8 @@ describe('createRestRoutes', () => {
               {
                 entities: {
                   body: {
-                    checkMode: 'equals',
-                    value: {
-                      key1: 'value1',
-                      key2: 'value2'
-                    }
+                    key1: 'value1',
+                    key2: 'value2'
                   }
                 },
                 data: { name: 'John', surname: 'Smith' }

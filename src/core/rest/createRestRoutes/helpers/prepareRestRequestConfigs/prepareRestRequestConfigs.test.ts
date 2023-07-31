@@ -33,10 +33,7 @@ describe('prepareRestRequestConfigs', () => {
           {
             entities: {
               headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                header1: 'value'
               }
             },
             data: { name: 'John', surname: 'Doe' }
@@ -44,14 +41,8 @@ describe('prepareRestRequestConfigs', () => {
           {
             entities: {
               headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                },
-                header2: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                header1: 'value',
+                header2: 'value'
               }
             },
             data: { name: 'John', surname: 'Doe' }
@@ -59,20 +50,11 @@ describe('prepareRestRequestConfigs', () => {
           {
             entities: {
               headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                header1: 'value'
               },
               query: {
-                query1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                },
-                query2: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                query1: 'value',
+                query2: 'value'
               }
             },
             data: { name: 'John', surname: 'Doe' }
@@ -88,20 +70,11 @@ describe('prepareRestRequestConfigs', () => {
           {
             entities: {
               headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                header1: 'value'
               },
               query: {
-                query1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                },
-                query2: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                query1: 'value',
+                query2: 'value'
               }
             },
             data: { name: 'John', surname: 'Doe' }
@@ -109,14 +82,8 @@ describe('prepareRestRequestConfigs', () => {
           {
             entities: {
               headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                },
-                header2: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                header1: 'value',
+                header2: 'value'
               }
             },
             data: { name: 'John', surname: 'Doe' }
@@ -124,10 +91,7 @@ describe('prepareRestRequestConfigs', () => {
           {
             entities: {
               headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                header1: 'value'
               }
             },
             data: { name: 'John', surname: 'Doe' }
@@ -146,24 +110,15 @@ describe('prepareRestRequestConfigs', () => {
         routes: [
           {
             entities: {
-              body: {
-                checkMode: 'equals',
-                value: ['value', 'value', 'value']
-              }
+              body: ['value', 'value', 'value']
             },
             data: { name: 'John', surname: 'Doe' }
           },
           {
             entities: {
               headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                },
-                header2: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                header1: 'value',
+                header2: 'value'
               }
             },
             data: { name: 'John', surname: 'Doe' }
@@ -179,24 +134,15 @@ describe('prepareRestRequestConfigs', () => {
           {
             entities: {
               headers: {
-                header1: {
-                  checkMode: 'equals',
-                  value: 'value'
-                },
-                header2: {
-                  checkMode: 'equals',
-                  value: 'value'
-                }
+                header1: 'value',
+                header2: 'value'
               }
             },
             data: { name: 'John', surname: 'Doe' }
           },
           {
             entities: {
-              body: {
-                checkMode: 'equals',
-                value: ['value', 'value', 'value']
-              }
+              body: ['value', 'value', 'value']
             },
             data: { name: 'John', surname: 'Doe' }
           }

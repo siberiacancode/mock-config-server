@@ -1,18 +1,21 @@
 import type { IRouter, NextFunction, Request, Response } from 'express';
+import { flatten } from 'flat';
 
 import {
   resolveEntityValues,
   callResponseInterceptors,
   getGraphQLInput,
   parseQuery,
-  callRequestInterceptor
+  callRequestInterceptor,
+  convertToEntityDescriptor,
+  isEntityDescriptor
 } from '@/utils/helpers';
 import type {
   GraphqlConfig,
   Interceptors,
   GraphQLEntityDescriptorOrValue,
   GraphQLEntityName,
-  GraphQLObjectEntityName,
+  GraphQLMappedEntityName,
   GraphQLEntityDescriptorOnly
 } from '@/utils/types';
 
@@ -70,21 +73,40 @@ export const createGraphQLRoutes = (
 
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
       if (!entities) return true;
-      const entries = Object.entries(entities) as [GraphQLEntityName, GraphQLEntityDescriptorOrValue][];
-      return entries.every(([entityName, entityDescriptorOrValue]) => {
-        if (entityName === 'variables') {
-          const descriptor = entityDescriptorOrValue && typeof entityDescriptorOrValue === 'object' && 'checkMode' in entityDescriptorOrValue ? entityDescriptorOrValue : { checkMode: 'equals', value: entityDescriptorOrValue };
-          const { checkMode, value: descriptorValue } = descriptor as GraphQLEntityDescriptorOnly<'variables'>;
-          return resolveEntityValues(checkMode, graphQLInput.variables, descriptorValue);
+      const entries = Object.entries(entities) as [
+        GraphQLEntityName,
+        GraphQLEntityDescriptorOrValue
+      ][];
+      return entries.every(([entityName, valueOrDescriptor]) => {
+        const { checkMode, value: descriptorValue } = convertToEntityDescriptor(valueOrDescriptor);
+
+        // ✅ important: check whole variables as plain value strictly if descriptor used for variables
+        const isVariablesPlain =
+          entityName === 'variables' && isEntityDescriptor(valueOrDescriptor);
+        if (isVariablesPlain) {
+          // ✅ important: getGraphQLInput returns empty object if variables not sent or invalid, so count {} as undefined
+          return resolveEntityValues(
+            checkMode,
+            Object.keys(graphQLInput.variables).length ? graphQLInput.variables : undefined,
+            descriptorValue
+          );
         }
-        const objectEntityDescriptors = Object.entries(entityDescriptorOrValue) as [GraphQLObjectEntityName, GraphQLEntityDescriptorOnly<Exclude<GraphQLEntityName, 'variables'>>[GraphQLObjectEntityName]][];
-        return objectEntityDescriptors.every(([entityKey, objectEntityDescriptor]) => {
-          const descriptor = (objectEntityDescriptor && typeof objectEntityDescriptor === 'object' && 'checkMode' in objectEntityDescriptor ? objectEntityDescriptor : { checkMode: 'equals' as const, value: objectEntityDescriptor });
-          const { checkMode, value: descriptorValue } = descriptor;
-          return resolveEntityValues(checkMode, request[entityName][entityKey], descriptorValue);
-        })
-        }
-      );
+
+        const mappedEntityDescriptors = Object.entries(valueOrDescriptor) as [
+          GraphQLMappedEntityName,
+          GraphQLEntityDescriptorOnly<
+            Exclude<GraphQLEntityName, 'variables'>
+          >[GraphQLMappedEntityName]
+        ][];
+        return mappedEntityDescriptors.every(([entityKey, mappedEntityDescriptor]) => {
+          const { checkMode, value: descriptorValue } =
+            convertToEntityDescriptor(mappedEntityDescriptor);
+          const flattenEntity = flatten<any, any>(
+            entityName === 'variables' ? graphQLInput.variables : request[entityName]
+          );
+          return resolveEntityValues(checkMode, flattenEntity[entityKey], descriptorValue);
+        });
+      });
     });
 
     if (!matchedRouteConfig) {

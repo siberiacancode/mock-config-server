@@ -1,21 +1,20 @@
 import { flatten } from 'flat';
 
+import { NEGATION_CHECK_MODES } from '@/utils/constants';
 import type { CheckFunction, CheckMode } from '@/utils/types';
 
 import { isPlainObject } from '../../isPlainObject/isPlainObject';
 import { isPrimitive } from '../../isPrimitive/isPrimitive';
+import { isRegExp } from '../../isRegExp/isRegExp';
 
-const NEGATIVE_CHECK_MODES: CheckMode[] = [
-  'notExists',
-  'notEquals',
-  'notIncludes',
-  'notStartsWith',
-  'notEndsWith'
-];
+const checkFunction: CheckFunction = (checkMode, actualValue, descriptorValue?): boolean => {
+  if (checkMode === 'function' && typeof descriptorValue === 'function')
+    return descriptorValue(actualValue, checkFunction);
 
-export const checkFunction: CheckFunction = (checkMode, actualValue, descriptorValue?): boolean => {
-  if (checkMode === 'function' && typeof descriptorValue === 'function') return descriptorValue(actualValue, checkFunction);
-  if (checkMode === 'regExp' && (descriptorValue instanceof RegExp)) return descriptorValue.test(actualValue as string);
+  const actualValueString = String(actualValue);
+
+  if (checkMode === 'regExp' && isRegExp(descriptorValue))
+    return descriptorValue.test(actualValueString);
 
   const isActualValueUndefined = typeof actualValue === 'undefined';
 
@@ -24,7 +23,6 @@ export const checkFunction: CheckFunction = (checkMode, actualValue, descriptorV
 
   // ✅ important:
   // cast values to string for ignore types of values
-  const actualValueString = String(actualValue);
   const descriptorValueString = String(descriptorValue);
 
   if (checkMode === 'equals') return actualValueString === descriptorValueString;
@@ -42,102 +40,139 @@ export const checkFunction: CheckFunction = (checkMode, actualValue, descriptorV
   throw new Error('Wrong checkMode');
 };
 
-export const resolveEntityValues = (checkMode: CheckMode, actualValue: any, descriptorValue?: any) => {
+export const resolveEntityValues = (
+  checkMode: CheckMode,
+  actualValue: any,
+  descriptorValue?: any
+) => {
   if (checkMode === 'function') return descriptorValue(actualValue, checkFunction);
-  if (checkMode === 'exists' || checkMode === 'notExists') return checkFunction(checkMode, actualValue, descriptorValue);
+  if (checkMode === 'exists' || checkMode === 'notExists')
+    return checkFunction(checkMode, actualValue, descriptorValue);
 
+  // ✅ actual: primitive, descriptor: primitive
   const isActualValuePrimitive = isPrimitive(actualValue);
-  const isActualValueArray =  Array.isArray(actualValue);
-  const isActualValueObject = isPlainObject(actualValue);
+  const isDescriptorValuePrimitive = isPrimitive(descriptorValue);
+  if (isActualValuePrimitive && isDescriptorValuePrimitive)
+    return checkFunction(checkMode, actualValue, descriptorValue);
 
-  const isDescriptorValuePrimitive =  isPrimitive(descriptorValue);
+  // ✅ actual: primitive, descriptor: array
   const isDescriptorValueArray = Array.isArray(descriptorValue);
-  const isDescriptorValueObject = isPlainObject(descriptorValue);
-
-  const isNegativeCheckMode = NEGATIVE_CHECK_MODES.includes(checkMode);
-
-  // ✅ primitive-primitive
-  if (isActualValuePrimitive && isDescriptorValuePrimitive) return checkFunction(checkMode, actualValue, descriptorValue);
-
-  // ✅ primitive-array
+  const isNegativeCheckMode = NEGATION_CHECK_MODES.includes(checkMode);
   if (isActualValuePrimitive && isDescriptorValueArray) {
     if (isNegativeCheckMode) {
-      return descriptorValue.every((descriptorValueElement) => checkFunction(checkMode, actualValue, descriptorValueElement))
+      return descriptorValue.every((descriptorValueElement) =>
+        checkFunction(checkMode, actualValue, descriptorValueElement)
+      );
     }
-    return descriptorValue.some((descriptorValueElement) => checkFunction(checkMode, actualValue, descriptorValueElement))
+    return descriptorValue.some((descriptorValueElement) =>
+      checkFunction(checkMode, actualValue, descriptorValueElement)
+    );
   }
 
-  // ✅ primitive-object
+  // ✅ actual: primitive, descriptor: object => skip
+  const isDescriptorValueObject = isPlainObject(descriptorValue) || isRegExp(descriptorValue);
   if (isActualValuePrimitive && isDescriptorValueObject) {
     if (checkMode === 'regExp') return checkFunction(checkMode, actualValue, descriptorValue);
+    // ✅ important: resolving primitive with object make no sense
     return isNegativeCheckMode;
   }
 
-  // ✅ array-primitive
-  if (isActualValueArray && isDescriptorValuePrimitive) {
-    if (isNegativeCheckMode) {
-      return actualValue.every((actualValueElement) => checkFunction(checkMode, actualValueElement, descriptorValue))
-    }
-    return actualValue.some((actualValueElement) => checkFunction(checkMode, actualValueElement, descriptorValue))
-  }
+  // ✅ actual: array, descriptor: primitive => skip
+  const isActualValueArray = Array.isArray(actualValue);
+  // ✅ important: resolving array with primitive make no sense
+  if (isActualValueArray && isDescriptorValuePrimitive) return isNegativeCheckMode;
 
-  // ✅ array-array
+  // ✅ actual: array, descriptor: array
   if (isActualValueArray && isDescriptorValueArray) {
-    if (checkMode === 'regExp') return descriptorValue.every((descriptorValueElement, index) => checkFunction(checkMode, actualValue[index], descriptorValueElement));
+    if (actualValue.length !== descriptorValue.length) return isNegativeCheckMode;
     const flattenActualValue = flatten<any, any>(actualValue);
     const flattenDescriptorValue = flatten<any, any>(descriptorValue);
 
-    if (Object.keys(flattenActualValue).length === Object.keys(flattenDescriptorValue).length) return Object.keys(flattenDescriptorValue).every((flattenDescriptorValueKey) => checkFunction(checkMode, flattenActualValue[flattenDescriptorValueKey], flattenDescriptorValue[flattenDescriptorValueKey]));
+    if (Object.keys(flattenActualValue).length === Object.keys(flattenDescriptorValue).length)
+      return Object.keys(flattenDescriptorValue).every((flattenDescriptorValueKey) =>
+        checkFunction(
+          checkMode,
+          flattenActualValue[flattenDescriptorValueKey],
+          flattenDescriptorValue[flattenDescriptorValueKey]
+        )
+      );
     return isNegativeCheckMode;
   }
 
-  // ✅ array-object
+  // ✅ actual: array, descriptor: object => skip
   if (isActualValueArray && isDescriptorValueObject) {
-    if (checkMode === 'regExp') return actualValue.some((actualValueElement) => checkFunction(checkMode, actualValueElement, descriptorValue));
-
-    const flattenDescriptorValue = flatten<any, any>(descriptorValue);
-
-    if (isNegativeCheckMode) {
-      return actualValue.every((actualValueElement) => {
-        const flattenActualValue = flatten<any, any>(actualValueElement);
-        return Object.keys(flattenDescriptorValue).every((flattenDescriptorValueKey) => checkFunction(checkMode, flattenActualValue[flattenDescriptorValueKey], flattenDescriptorValue[flattenDescriptorValueKey]))
-      });
-    }
-    return actualValue.some((actualValueElement) => {
-      const flattenActualValue = flatten<any, any>(actualValueElement);
-      return Object.keys(flattenDescriptorValue).every((flattenDescriptorValueKey) => checkFunction(checkMode, flattenActualValue[flattenDescriptorValueKey], flattenDescriptorValue[flattenDescriptorValueKey]))
-    })
+    if (checkMode === 'regExp')
+      return actualValue.some((actualValueElement) =>
+        checkFunction(checkMode, actualValueElement, descriptorValue)
+      );
+    // ✅ important: resolving array with object make no sense
+    return isNegativeCheckMode;
   }
 
-  // ✅ object-primitive
+  // ✅ actual: object, descriptor: primitive => skip
+  const isActualValueObject = isPlainObject(actualValue);
+  // ✅ important: resolving object with primitive make no sense
   if (isActualValueObject && isDescriptorValuePrimitive) return isNegativeCheckMode;
 
-  // ✅ object-array
+  // ✅ actual: object, descriptor: array
   if (isActualValueObject && isDescriptorValueArray) {
-    if (checkMode === 'regExp') return descriptorValue.some((descriptorValueElement) => checkFunction(checkMode, actualValue, descriptorValueElement));
+    // ✅ important: any object can not pass RegExp check
+    if (checkMode === 'regExp') return false;
     const flattenActualValue = flatten<any, any>(actualValue);
 
     if (isNegativeCheckMode) {
       return descriptorValue.every((descriptorValueElement) => {
         const flattenDescriptorValue = flatten<any, any>(descriptorValueElement);
-        return Object.keys(flattenActualValue).every((flattenActualValueKey) => checkFunction(checkMode, flattenActualValue[flattenActualValueKey], flattenDescriptorValue[flattenActualValueKey]));
-      })
+        if (Object.keys(flattenActualValue).length !== Object.keys(flattenDescriptorValue).length)
+          return isNegativeCheckMode;
+        return Object.keys(flattenActualValue).every((flattenActualValueKey) =>
+          checkFunction(
+            checkMode,
+            flattenActualValue[flattenActualValueKey],
+            flattenDescriptorValue[flattenActualValueKey]
+          )
+        );
+      });
     }
     return descriptorValue.some((descriptorValueElement) => {
       const flattenDescriptorValue = flatten<any, any>(descriptorValueElement);
-      return Object.keys(flattenActualValue).every((flattenActualValueKey) => checkFunction(checkMode, flattenActualValue[flattenActualValueKey], flattenDescriptorValue[flattenActualValueKey]));
-    })
+      if (Object.keys(flattenActualValue).length !== Object.keys(flattenDescriptorValue).length)
+        return isNegativeCheckMode;
+      return Object.keys(flattenActualValue).every((flattenActualValueKey) =>
+        checkFunction(
+          checkMode,
+          flattenActualValue[flattenActualValueKey],
+          flattenDescriptorValue[flattenActualValueKey]
+        )
+      );
+    });
   }
 
-  // ✅ object-object
+  // ✅ actual: object, descriptor: object
   if (isActualValueObject && isDescriptorValueObject) {
-    if (checkMode === 'regExp') return checkFunction(checkMode, actualValue, descriptorValue);
+    // ✅ important: any object can not pass RegExp check
+    if (checkMode === 'regExp') return false;
     const flattenActualValue = flatten<any, any>(actualValue);
     const flattenDescriptorValue = flatten<any, any>(descriptorValue);
 
+    if (Object.keys(flattenActualValue).length !== Object.keys(flattenDescriptorValue).length)
+      return isNegativeCheckMode;
+
     if (isNegativeCheckMode) {
-      return Object.keys(flattenDescriptorValue).some((flattenDescriptorValueKey) => checkFunction(checkMode, flattenActualValue[flattenDescriptorValueKey], flattenDescriptorValue[flattenDescriptorValueKey]));
+      return Object.keys(flattenDescriptorValue).some((flattenDescriptorValueKey) =>
+        checkFunction(
+          checkMode,
+          flattenActualValue[flattenDescriptorValueKey],
+          flattenDescriptorValue[flattenDescriptorValueKey]
+        )
+      );
     }
-    return Object.keys(flattenDescriptorValue).every((flattenDescriptorValueKey) => checkFunction(checkMode, flattenActualValue[flattenDescriptorValueKey], flattenDescriptorValue[flattenDescriptorValueKey]));
+    return Object.keys(flattenDescriptorValue).every((flattenDescriptorValueKey) =>
+      checkFunction(
+        checkMode,
+        flattenActualValue[flattenDescriptorValueKey],
+        flattenDescriptorValue[flattenDescriptorValueKey]
+      )
+    );
   }
 };

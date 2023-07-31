@@ -1,2 +1,3 @@
-export const isPrimitive = (value: any): value is boolean | number | bigint | string | null | undefined | symbol =>
-  value !== Object(value);
+import type { Primitive } from '@/utils/types';
+
+export const isPrimitive = (value: any): value is Primitive => value !== Object(value);

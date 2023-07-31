@@ -4,10 +4,10 @@ import type { GraphQLRequestConfig } from './graphql';
 import type { Interceptors } from './interceptors';
 import type { RestMethod, RestRequestConfig } from './rest';
 
-export type StaticPathObject = { prefix: `/${string}`; path: `/${string}` };
+type StaticPathObject = { prefix: `/${string}`; path: `/${string}` };
 export type StaticPath = `/${string}` | StaticPathObject | (StaticPathObject | `/${string}`)[];
 
-export type CorsHeader = string;
+type CorsHeader = string;
 export type CorsOrigin = string | RegExp | (RegExp | string)[];
 export type Cors = {
   origin: CorsOrigin | ((request: Request) => Promise<CorsOrigin> | CorsOrigin);
@@ -18,7 +18,7 @@ export type Cors = {
   maxAge?: number;
 };
 
-export type Port = number;
+type Port = number;
 export type BaseUrl = `/${string}`;
 
 export interface RestConfig {

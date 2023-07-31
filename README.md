@@ -206,10 +206,10 @@ If you need more complex logic for matching entities, you can use entity descrip
 Descriptor is an object with `checkMode` and `value` fields that describe how the correctness of the actual entity is calculated.
 
 Allowed `checkModes`
+- equals - checks actual value for equality with descriptor value (default).
+- notEquals - checks actual value for non-equality with descriptor value.
 - exists - checks actual value for existence i.e. any value.
 - notExists - checks actual value for non-existence i.e. undefined value.
-- equals - checks actual value for equality with descriptor value.
-- notEquals - checks actual value for non-equality with descriptor value.
 - includes - checks actual value for including with descriptor value.
 - notIncludes - checks actual value for non-including with descriptor value.
 - startsWith - checks actual value for starting with descriptor value.
@@ -219,7 +219,7 @@ Allowed `checkModes`
 - regExp - checks actual value with descriptor regExp.
 - function - checks actual value with descriptor function.
 
-All `checkModes` except `function` can be arrays, so you can write even more complex logic. For example "does not contain these values" or "must be match to one of these regExp".
+Value for `checkMode` except `function` | `exists` | `notExists` can be array, so you can write even more complex logic. For example "does not contain these values" or "must be match to one of these regExp".
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
@@ -272,6 +272,109 @@ Return `true` if `actualValue` matches your logic or `false` otherwise.
 
 You can use the `checkFunction` from second argument if you want to describe your logic in a more declarative way.
 `checkFunction` has the following signature `(checkMode, actualValue, descriptorValue?) => boolean`.
+
+##### Using descriptors for part of REST body or GraphQL variables
+
+If you want to check a certain field of your body or variables, you can use descriptors in flatten object style. In this case server will check every field in entity with corresponding actual field.
+You can use descriptors for array body elements as well.
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/users',
+        method: 'post',
+        routes: [
+          {
+            entities: {
+              body: {
+                'user.name': 'Sergey'
+              }
+            },
+            data: 'user.name in body is "Sergey"'
+          }
+        ]
+      },
+      {
+        path: '/posts',
+        method: 'post',
+        routes: [
+          {
+            entities: {
+              body: {
+                'title': {
+                  checkMode: 'startsWith',
+                  value: 'A'
+                }
+              }
+            },
+            data: 'title in body starts with "A"'
+          }
+        ]
+      },
+      {
+        path: '/posts',
+        method: 'post',
+        routes: [
+          {
+            entities: {
+              body: [
+                {
+                  checkMode: 'startsWith',
+                  value: 1
+                }, 
+                2
+              ]
+            },
+            data: 'array[0] starts with "1" and array[1] equals "2"'
+          }
+        ]
+      }
+    ]
+  }
+}
+
+module.exports = mockServerConfig;
+```
+
+> To enable whole body/variables checking as plain object you should use descriptor for entire body/variables.
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/users',
+        method: 'post',
+        routes: [
+          {
+            entities: {
+              body: {
+                checkMode: 'equals',
+                value: {
+                  user: {
+                    name: 'Sergey',
+                    emoji: '🐘',
+                    roles: ['developer', 'moderator']
+                  }
+                }
+              }
+            },
+            data: 'your body is strictly equals object from body entity value'
+          }
+        ]
+      }
+    ]
+  }
+}
+
+module.exports = mockServerConfig;
+```
 
 #### Static Path
 
