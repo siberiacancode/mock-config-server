@@ -1,12 +1,22 @@
 import type { IRouter } from 'express';
+import { flatten } from 'flat';
 
 import {
-  isEntityValuesEqual,
+  asyncHandler,
+  resolveEntityValues,
   callResponseInterceptors,
   callRequestInterceptor,
-  asyncHandler
+  convertToEntityDescriptor,
+  isEntityDescriptor
 } from '@/utils/helpers';
-import type { Interceptors, RestConfig, RestEntities, RestEntitiesValue } from '@/utils/types';
+import type {
+  Interceptors,
+  RestConfig,
+  RestEntityDescriptorOrValue,
+  RestEntityName,
+  RestMappedEntityKey,
+  RestEntityDescriptorOnly
+} from '@/utils/types';
 
 import { prepareRestRequestConfigs } from './helpers';
 
@@ -25,9 +35,36 @@ export const createRestRoutes = (
 
         const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
           if (!entities) return true;
-          return (Object.entries(entities) as [RestEntities, RestEntitiesValue][]).every(
-            ([entity, entityValue]) => isEntityValuesEqual(entityValue, request[entity])
-          );
+          const entries = Object.entries(entities) as [
+            RestEntityName,
+            RestEntityDescriptorOrValue
+          ][];
+          return entries.every(([entityName, valueOrDescriptor]) => {
+            const { checkMode, value: descriptorValue } =
+              convertToEntityDescriptor(valueOrDescriptor);
+
+            // ✅ important: check whole body as plain value strictly if descriptor used for body
+            const isBodyPlain = entityName === 'body' && isEntityDescriptor(valueOrDescriptor);
+            if (isBodyPlain) {
+              // ✅ important: bodyParser sets body to empty object if body not sent or invalid, so count {} as undefined
+              return resolveEntityValues(
+                checkMode,
+                Object.keys(request.body).length ? request.body : undefined,
+                descriptorValue
+              );
+            }
+
+            const mappedEntityDescriptors = Object.entries(valueOrDescriptor) as [
+              RestMappedEntityKey,
+              RestEntityDescriptorOnly<Exclude<RestEntityName, 'body'>>[RestMappedEntityKey]
+            ][];
+            return mappedEntityDescriptors.every(([entityKey, mappedEntityDescriptor]) => {
+              const { checkMode, value: descriptorValue } =
+                convertToEntityDescriptor(mappedEntityDescriptor);
+              const flattenEntity = flatten<any, any>(request[entityName]);
+              return resolveEntityValues(checkMode, flattenEntity[entityKey], descriptorValue);
+            });
+          });
         });
 
         if (!matchedRouteConfig) {

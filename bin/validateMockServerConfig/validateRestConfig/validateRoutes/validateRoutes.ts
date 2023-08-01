@@ -1,12 +1,13 @@
-import { isPlainObject } from '@/utils/helpers';
-import type { RestMethod, RestMethodsEntities } from '@/utils/types';
+import { convertToEntityDescriptor, isEntityDescriptor, isPlainObject } from '@/utils/helpers';
+import type { RestMethod, RestEntityNamesByMethod } from '@/utils/types';
 
+import { isCheckModeValid, isDescriptorValueValid } from '../../helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
-type AllowedEntitiesByMethod = {
-  [Key in keyof RestMethodsEntities]: RestMethodsEntities[Key][];
+type AllowedEntityNamesByMethod = {
+  [Method in keyof RestEntityNamesByMethod]: RestEntityNamesByMethod[Method][];
 };
-const ALLOWED_ENTITIES_BY_METHOD: AllowedEntitiesByMethod = {
+const ALLOWED_ENTITIES_BY_METHOD: AllowedEntityNamesByMethod = {
   get: ['headers', 'cookies', 'query', 'params'],
   delete: ['headers', 'cookies', 'query', 'params'],
   post: ['headers', 'cookies', 'query', 'params', 'body'],
@@ -15,71 +16,66 @@ const ALLOWED_ENTITIES_BY_METHOD: AllowedEntitiesByMethod = {
   options: ['headers', 'cookies', 'query', 'params']
 };
 
-const validateHeadersOrCookiesOrParams = (headersOrCookiesOrParams: unknown, entity: string) => {
-  const isHeadersOrCookiesOrParamsObject = isPlainObject(headersOrCookiesOrParams);
-  if (isHeadersOrCookiesOrParamsObject) {
-    Object.entries(headersOrCookiesOrParams).forEach(
-      ([headerOrCookieOrParamKey, headerOrCookieOrParamValue]) => {
-        if (typeof headerOrCookieOrParamValue !== 'string') {
-          throw new Error(`${entity}.${headerOrCookieOrParamKey}`);
-        }
-      }
-    );
-    return;
+const validateEntity = (entity: unknown, entityName: string) => {
+  const { checkMode: topLevelCheckMode, value: topLevelValue } = convertToEntityDescriptor(entity);
+  const isBody = entityName === 'body';
+
+  const isTopLevelDescriptor = isEntityDescriptor(entity);
+  if (isTopLevelDescriptor && isBody) {
+    if (!isCheckModeValid(topLevelCheckMode, 'body')) {
+      throw new Error('body.checkMode');
+    }
+
+    if (!isDescriptorValueValid(topLevelCheckMode, topLevelValue, 'body')) {
+      const errorMessage = 'body.value';
+      throw new Error(errorMessage);
+    }
   }
 
-  throw new Error(entity);
-};
+  const isEntityObject = isPlainObject(entity) && !(entity instanceof RegExp);
+  const isEntityArray = Array.isArray(entity) && isBody;
+  if (isEntityObject || isEntityArray) {
+    Object.entries(topLevelValue).forEach(([key, valueOrDescriptor]) => {
+      const { checkMode, value } = convertToEntityDescriptor(valueOrDescriptor);
+      if (!isCheckModeValid(checkMode)) {
+        throw new Error(`${entityName}.${key}.checkMode`);
+      }
 
-const validateQuery = (query: unknown, entity: string) => {
-  const isQueryObject = isPlainObject(query);
-  if (isQueryObject) {
-    Object.entries(query).forEach(([queryKey, queryValue]) => {
-      const isQueryValueArray = Array.isArray(queryValue);
-      if (isQueryValueArray) {
-        queryValue.forEach((queryValueElement, index) => {
-          if (typeof queryValueElement !== 'string') {
-            throw new Error(`${entity}.${queryKey}[${index}]`);
+      const isDescriptor = isEntityDescriptor(valueOrDescriptor);
+      const errorMessage = `${entityName}.${key}${isDescriptor ? '.value' : ''}`;
+
+      const isValueArray = Array.isArray(value);
+      if (isValueArray && !isBody) {
+        value.forEach((element, index) => {
+          if (!isDescriptorValueValid(checkMode, element)) {
+            throw new Error(`${errorMessage}[${index}]`);
           }
         });
         return;
       }
-
-      if (typeof queryValue !== 'string') {
-        throw new Error(`${entity}.${queryKey}`);
+      if (!isDescriptorValueValid(checkMode, value)) {
+        throw new Error(errorMessage);
       }
     });
     return;
   }
 
-  throw new Error(entity);
+  throw new Error(entityName);
 };
 
 const validateEntities = (entities: unknown, method: RestMethod) => {
   const isEntitiesObject = isPlainObject(entities);
   if (isEntitiesObject) {
-    Object.keys(entities).forEach((entity) => {
-      const isEntityAllowed = ALLOWED_ENTITIES_BY_METHOD[method].includes(entity as any);
+    Object.keys(entities).forEach((entityName) => {
+      const isEntityAllowed = ALLOWED_ENTITIES_BY_METHOD[method].includes(entityName as any);
       if (!isEntityAllowed) {
-        throw new Error(`entities.${entity}`);
+        throw new Error(`entities.${entityName}`);
       }
 
-      if (entity === 'headers' || entity === 'params' || entity === 'cookies') {
-        try {
-          const headersOrCookiesOrParams = entities[entity];
-          validateHeadersOrCookiesOrParams(headersOrCookiesOrParams, entity);
-        } catch (error: any) {
-          throw new Error(`entities.${error.message}`);
-        }
-      }
-
-      if (entity === 'query') {
-        try {
-          const query = entities[entity];
-          validateQuery(query, entity);
-        } catch (error: any) {
-          throw new Error(`entities.${error.message}`);
-        }
+      try {
+        validateEntity(entities[entityName], entityName);
+      } catch (error: any) {
+        throw new Error(`entities.${error.message}`);
       }
     });
     return;

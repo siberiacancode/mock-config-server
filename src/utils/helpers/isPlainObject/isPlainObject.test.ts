@@ -15,5 +15,6 @@ describe('isPlainObject', () => {
     expect(isPlainObject(() => {})).toBe(false);
     expect(isPlainObject(undefined)).toBe(false);
     expect(isPlainObject(null)).toBe(false);
+    expect(isPlainObject(/\d/)).toBe(false);
   });
 });

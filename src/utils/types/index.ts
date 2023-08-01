@@ -1,3 +1,4 @@
+export * from './checkModes';
 export * from './graphql';
 export * from './interceptors';
 export * from './rest';

@@ -42,8 +42,8 @@
     "type": "tsc --noEmit",
     "lint": "eslint . --ext ts --no-error-on-unmatched-pattern",
     "stylelint": "stylelint \"src/static/**/*.css\"",
-    "format": "prettier --write {src,bin}/**/*.ts",
-    "pretty": "yarn type && yarn format && yarn lint --fix"
+    "format": "prettier --write \"{src,bin}/**/*.ts\"",
+    "pretty": "yarn format && yarn lint --fix && yarn type"
   },
   "lint-staged": {
     "*.css": "yarn stylelint",
