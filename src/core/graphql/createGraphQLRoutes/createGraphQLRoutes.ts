@@ -1,19 +1,23 @@
 import type { IRouter, NextFunction, Request, Response } from 'express';
+import { flatten } from 'flat';
 
 import {
-  isEntityValuesEqual,
+  asyncHandler,
+  resolveEntityValues,
   callResponseInterceptors,
   getGraphQLInput,
   parseQuery,
   callRequestInterceptor,
-  asyncHandler
+  convertToEntityDescriptor,
+  isEntityDescriptor
 } from '@/utils/helpers';
 import type {
-  GraphQLEntities,
   GraphqlConfig,
   Interceptors,
-  PlainObject,
-  VariablesValue
+  GraphQLEntityDescriptorOrValue,
+  GraphQLEntityName,
+  GraphQLMappedEntityName,
+  GraphQLEntityDescriptorOnly
 } from '@/utils/types';
 
 import { prepareGraphQLRequestConfigs } from './helpers';
@@ -72,15 +76,40 @@ export const createGraphQLRoutes = (
 
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
       if (!entities) return true;
-      return (Object.entries(entities) as [GraphQLEntities, PlainObject | VariablesValue][]).every(
-        ([entity, entityValue]) => {
-          if (entity === 'variables') {
-            return isEntityValuesEqual(entityValue, graphQLInput.variables);
-          }
+      const entries = Object.entries(entities) as [
+        GraphQLEntityName,
+        GraphQLEntityDescriptorOrValue
+      ][];
+      return entries.every(([entityName, valueOrDescriptor]) => {
+        const { checkMode, value: descriptorValue } = convertToEntityDescriptor(valueOrDescriptor);
 
-          return isEntityValuesEqual(entityValue, request[entity]);
+        // ✅ important: check whole variables as plain value strictly if descriptor used for variables
+        const isVariablesPlain =
+          entityName === 'variables' && isEntityDescriptor(valueOrDescriptor);
+        if (isVariablesPlain) {
+          // ✅ important: getGraphQLInput returns empty object if variables not sent or invalid, so count {} as undefined
+          return resolveEntityValues(
+            checkMode,
+            Object.keys(graphQLInput.variables).length ? graphQLInput.variables : undefined,
+            descriptorValue
+          );
         }
-      );
+
+        const mappedEntityDescriptors = Object.entries(valueOrDescriptor) as [
+          GraphQLMappedEntityName,
+          GraphQLEntityDescriptorOnly<
+            Exclude<GraphQLEntityName, 'variables'>
+          >[GraphQLMappedEntityName]
+        ][];
+        return mappedEntityDescriptors.every(([entityKey, mappedEntityDescriptor]) => {
+          const { checkMode, value: descriptorValue } =
+            convertToEntityDescriptor(mappedEntityDescriptor);
+          const flattenEntity = flatten<any, any>(
+            entityName === 'variables' ? graphQLInput.variables : request[entityName]
+          );
+          return resolveEntityValues(checkMode, flattenEntity[entityKey], descriptorValue);
+        });
+      });
     });
 
     if (!matchedRouteConfig) {

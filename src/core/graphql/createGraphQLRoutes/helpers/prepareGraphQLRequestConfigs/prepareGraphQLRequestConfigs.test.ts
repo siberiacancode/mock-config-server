@@ -57,6 +57,10 @@ describe('prepareGraphQLRequestConfigs', () => {
               query: {
                 query1: 'value',
                 query2: 'value'
+              },
+              variables: {
+                variable1: 'value1',
+                variable2: 'value2'
               }
             },
             data: { name: 'John', surname: 'Doe' }
@@ -77,6 +81,10 @@ describe('prepareGraphQLRequestConfigs', () => {
               query: {
                 query1: 'value',
                 query2: 'value'
+              },
+              variables: {
+                variable1: 'value1',
+                variable2: 'value2'
               }
             },
             data: { name: 'John', surname: 'Doe' }
@@ -95,58 +103,6 @@ describe('prepareGraphQLRequestConfigs', () => {
               headers: {
                 header1: 'value'
               }
-            },
-            data: { name: 'John', surname: 'Doe' }
-          }
-        ]
-      }
-    ];
-    expect(prepareGraphQLRequestConfigs(GraphQLRequestConfigs)).toStrictEqual(
-      expectedGraphQLRequestConfigs
-    );
-  });
-
-  test('Should set not object variables weight equals to one', () => {
-    const GraphQLRequestConfigs: GraphQLRequestConfig[] = [
-      {
-        operationName: 'GetUser',
-        operationType: 'query',
-        routes: [
-          {
-            entities: {
-              variables: ['value', 'value', 'value']
-            },
-            data: { name: 'John', surname: 'Doe' }
-          },
-          {
-            entities: {
-              headers: {
-                header1: 'value',
-                header2: 'value'
-              }
-            },
-            data: { name: 'John', surname: 'Doe' }
-          }
-        ]
-      }
-    ];
-    const expectedGraphQLRequestConfigs: GraphQLRequestConfig[] = [
-      {
-        operationName: 'GetUser',
-        operationType: 'query',
-        routes: [
-          {
-            entities: {
-              headers: {
-                header1: 'value',
-                header2: 'value'
-              }
-            },
-            data: { name: 'John', surname: 'Doe' }
-          },
-          {
-            entities: {
-              variables: ['value', 'value', 'value']
             },
             data: { name: 'John', surname: 'Doe' }
           }

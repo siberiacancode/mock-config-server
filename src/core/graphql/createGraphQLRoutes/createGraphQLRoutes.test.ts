@@ -40,8 +40,13 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  headers: { key1: 'value1', key2: 'value2' },
-                  query: { key1: 'value1' }
+                  headers: {
+                    key1: 'value1',
+                    key2: 'value2'
+                  },
+                  query: {
+                    key1: 'value1'
+                  }
                 },
                 data: { name: 'John', surname: 'Doe' }
               }
@@ -83,7 +88,9 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  query: { key1: 'value1' }
+                  query: {
+                    key1: 'value1'
+                  }
                 },
                 data: ({ url }, { query }) => ({
                   url,
@@ -104,7 +111,9 @@ describe('createGraphQLRoutes', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body).toEqual({
       url: `/?query=${encodeURIComponent('query GetUsers { users { name } }')}&key1=value1`,
-      query: { key1: 'value1' }
+      query: {
+        key1: 'value1'
+      }
     });
   });
 
@@ -118,8 +127,13 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  headers: { key1: 'value1', key2: 'value2' },
-                  query: { key1: 'value1' }
+                  headers: {
+                    key1: 'value1',
+                    key2: 'value2'
+                  },
+                  query: {
+                    key1: 'value1'
+                  }
                 },
                 data: { name: 'John', surname: 'Doe' }
               }
@@ -156,8 +170,13 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  headers: { key1: 'value1', key2: 'value2' },
-                  query: { key1: 'value1' }
+                  headers: {
+                    key1: 'value1',
+                    key2: 'value2'
+                  },
+                  query: {
+                    key1: 'value1'
+                  }
                 },
                 data: { name: 'John', surname: 'Doe' }
               }
@@ -199,15 +218,26 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  headers: { key1: 'value1', key2: 'value2' },
-                  query: { key1: 'value1' }
+                  headers: {
+                    key1: 'value1',
+                    key2: 'value2'
+                  },
+                  query: {
+                    key1: 'value1'
+                  }
                 },
                 data: { name: 'John', surname: 'Doe' }
               },
               {
                 entities: {
-                  headers: { key1: 'value1', key2: 'value2' },
-                  query: { key1: 'value1', key2: 'value2' }
+                  headers: {
+                    key1: 'value1',
+                    key2: 'value2'
+                  },
+                  query: {
+                    key1: 'value1',
+                    key2: 'value2'
+                  }
                 },
                 data: { name: 'John', surname: 'Smith' }
               }
@@ -249,7 +279,9 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  headers: { key1: 'value1' }
+                  headers: {
+                    key1: 'value1'
+                  }
                 },
                 data: { name: 'John', surname: 'Doe' }
               }
@@ -273,7 +305,7 @@ describe('createGraphQLRoutes', () => {
     expect(getResponse.statusCode).toBe(404);
   });
 
-  test('Should compare non plain object variables by full equal behavior', async () => {
+  test('Should strictly compare plain object variables if top level descriptor used', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -283,12 +315,13 @@ describe('createGraphQLRoutes', () => {
             routes: [
               {
                 entities: {
-                  variables: [
-                    {
+                  variables: {
+                    checkMode: 'equals',
+                    value: {
                       key1: 'value1',
                       key2: { nestedKey1: 'nestedValue1' }
                     }
-                  ]
+                  }
                 },
                 data: { name: 'John', surname: 'Doe' }
               }
@@ -298,53 +331,33 @@ describe('createGraphQLRoutes', () => {
       }
     });
 
-    const successPostResponse = await request(server)
+    const postResponse = await request(server)
       .post('/')
       .set('Content-Type', 'application/json')
       .send({
         query: 'query GetUsers { users { name } }',
-        variables: [{ key1: 'value1', key2: { nestedKey1: 'nestedValue1' } }]
+        variables: {
+          key1: 'value1',
+          key2: { nestedKey1: 'nestedValue1' }
+        }
       });
 
-    expect(successPostResponse.statusCode).toBe(200);
-    expect(successPostResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+    expect(postResponse.statusCode).toBe(200);
+    expect(postResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
 
-    const successGetResponse = await request(server)
+    const getResponse = await request(server)
       .get('/')
       .set('Content-Type', 'application/json')
       .query({
         query: 'query GetUsers { users { name } }',
-        variables: '[{ "key1": "value1", "key2": { "nestedKey1": "nestedValue1" } }]'
+        variables: '{ "key1": "value1", "key2": { "nestedKey1": "nestedValue1" } }'
       });
 
-    expect(successGetResponse.statusCode).toBe(200);
-    expect(successGetResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
-
-    const failedPostResponse = await request(server)
-      .post('/')
-      .set('Content-Type', 'application/json')
-      .send({
-        query: 'query GetUsers { users { name } }',
-        variables: [
-          { key1: 'value1', key2: { nestedKey1: 'nestedValue1', nestedKey2: 'nestedValue2' } }
-        ]
-      });
-
-    expect(failedPostResponse.statusCode).toBe(404);
-
-    const failedGetResponse = await request(server)
-      .get('/')
-      .set('Content-Type', 'application/json')
-      .query({
-        query: 'query GetUsers { users { name } }',
-        variables:
-          '[{ "key1": "value1", "key2": { "nestedKey1": "nestedValue1", "nestedKey2": "nestedValue2" } }]'
-      });
-
-    expect(failedGetResponse.statusCode).toBe(404);
+    expect(getResponse.statusCode).toBe(200);
+    expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should compare plain object variables by "includes" behavior', async () => {
+  test('Should correctly resolve flat object variables with descriptors', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -356,7 +369,10 @@ describe('createGraphQLRoutes', () => {
                 entities: {
                   variables: {
                     key1: 'value1',
-                    key2: { nestedKey1: 'nestedValue1' }
+                    'key2.nestedKey1': {
+                      checkMode: 'equals',
+                      value: 'nestedValue1'
+                    }
                   }
                 },
                 data: { name: 'John', surname: 'Doe' }

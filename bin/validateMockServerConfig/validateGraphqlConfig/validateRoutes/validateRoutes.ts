@@ -1,50 +1,79 @@
-import { isPlainObject } from '@/utils/helpers';
-import type { GraphQLOperationsEntities, GraphQLOperationType } from '@/utils/types';
+import { convertToEntityDescriptor, isEntityDescriptor, isPlainObject } from '@/utils/helpers';
+import type { GraphQLEntityNamesByOperationType, GraphQLOperationType } from '@/utils/types';
 
+import { isCheckModeValid, isDescriptorValueValid } from '../../helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
 
-type AllowedEntitiesByOperationType = {
-  [Key in keyof GraphQLOperationsEntities]: GraphQLOperationsEntities[Key][];
+type AllowedEntityNamesByOperationType = {
+  [OperationType in keyof GraphQLEntityNamesByOperationType]: GraphQLEntityNamesByOperationType[OperationType][];
 };
-const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntitiesByOperationType = {
+const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntityNamesByOperationType = {
   query: ['headers', 'cookies', 'query', 'variables'],
   mutation: ['headers', 'cookies', 'query', 'variables']
 };
 
-const validateHeadersOrCookiesOrQuery = (headersOrCookiesOrQuery: unknown, entity: string) => {
-  const isHeadersOrCookiesOrQueryObject = isPlainObject(headersOrCookiesOrQuery);
-  if (isHeadersOrCookiesOrQueryObject) {
-    Object.entries(headersOrCookiesOrQuery).forEach(
-      ([headerOrCookieOrQueryKey, headerOrCookieOrQueryValue]) => {
-        if (typeof headerOrCookieOrQueryValue !== 'string') {
-          throw new Error(`${entity}.${headerOrCookieOrQueryKey}`);
-        }
+const validateEntity = (entity: unknown, entityName: string) => {
+  const { checkMode: topLevelCheckMode, value: topLevelValue } = convertToEntityDescriptor(entity);
+  const isVariables = entityName === 'variables';
+
+  const isTopLevelDescriptor = isEntityDescriptor(entity);
+  if (isTopLevelDescriptor && isVariables) {
+    if (!isCheckModeValid(topLevelCheckMode, 'variables')) {
+      throw new Error('variables.checkMode');
+    }
+
+    if (!isDescriptorValueValid(topLevelCheckMode, topLevelValue, 'variables')) {
+      const errorMessage = 'variables.value';
+      throw new Error(errorMessage);
+    }
+  }
+
+  const isEntityObject = isPlainObject(entity) && !(entity instanceof RegExp);
+  const isEntityArray = Array.isArray(entity) && isVariables;
+  if (isEntityObject || isEntityArray) {
+    Object.entries(topLevelValue).forEach(([key, valueOrDescriptor]) => {
+      const { checkMode, value } = convertToEntityDescriptor(valueOrDescriptor);
+      if (!isCheckModeValid(checkMode)) {
+        throw new Error(`${entityName}.${key}.checkMode`);
       }
-    );
+
+      const isDescriptor = isEntityDescriptor(valueOrDescriptor);
+      const errorMessage = `${entityName}.${key}${isDescriptor ? '.value' : ''}`;
+
+      const isValueArray = Array.isArray(value);
+      if (isValueArray && !isVariables) {
+        value.forEach((element, index) => {
+          if (!isDescriptorValueValid(checkMode, element)) {
+            throw new Error(`${errorMessage}[${index}]`);
+          }
+        });
+        return;
+      }
+      if (!isDescriptorValueValid(checkMode, value)) {
+        throw new Error(errorMessage);
+      }
+    });
     return;
   }
 
-  throw new Error(entity);
+  throw new Error(entityName);
 };
 
 const validateEntities = (entities: unknown, operationType: GraphQLOperationType) => {
   const isEntitiesObject = isPlainObject(entities);
   if (isEntitiesObject) {
-    Object.keys(entities).forEach((entity) => {
+    Object.keys(entities).forEach((entityName) => {
       const isEntityAllowed = ALLOWED_ENTITIES_BY_OPERATION_TYPE[operationType].includes(
-        entity as any
+        entityName as any
       );
       if (!isEntityAllowed) {
-        throw new Error(`entities.${entity}`);
+        throw new Error(`entities.${entityName}`);
       }
 
-      if (entity === 'headers' || entity === 'query' || entity === 'cookies') {
-        try {
-          const headersOrCookiesOrQuery = entities[entity];
-          validateHeadersOrCookiesOrQuery(headersOrCookiesOrQuery, entity);
-        } catch (error: any) {
-          throw new Error(`entities.${error.message}`);
-        }
+      try {
+        validateEntity(entities[entityName], entityName);
+      } catch (error: any) {
+        throw new Error(`entities.${error.message}`);
       }
     });
     return;
