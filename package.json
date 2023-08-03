@@ -34,7 +34,7 @@
     "node": ">=14"
   },
   "scripts": {
-    "prepare": "husky install",
+    "prepare": "husky install && yarn build",
     "build": "shx rm -rf dist && tsc -p tsconfig.production.json && tsc-alias -p tsconfig.production.json && shx cp -R src/static dist/src/static",
     "start": "yarn build && node ./dist/bin/bin.js",
     "dev": "nodemon --watch src --watch bin --watch mock-server.config.* -e js,ts,ejs --exec \"yarn start\"",
