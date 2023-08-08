@@ -1,4 +1,4 @@
-import { isIndex } from '@/utils/helpers';
+import { isIndex } from '../../helpers';
 
 type Index = string | number;
 type Object = Record<Index, any>;

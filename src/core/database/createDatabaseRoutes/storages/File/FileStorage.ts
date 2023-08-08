@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { isIndex } from '@/utils/helpers';
+import { isIndex } from '../../helpers';
 
 import { FileWriter } from './FileWriter';
 

@@ -1,4 +1,4 @@
-import { isIndex } from '@/utils/helpers';
+import { isIndex } from './isIndex';
 
 describe('isIndex', () => {
   test('Should return true for positive integer value', () => {

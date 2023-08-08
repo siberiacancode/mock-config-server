@@ -1,4 +1,4 @@
-import { createNewId } from '@/utils/helpers';
+import { createNewId } from './createNewId';
 
 describe('createNewId', () => {
   test('Should increment max numeric id in array on 1', () => {

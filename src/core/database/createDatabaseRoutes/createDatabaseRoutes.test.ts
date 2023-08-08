@@ -7,8 +7,9 @@ import express from 'express';
 import request from 'supertest';
 
 import { createDatabaseRoutes } from '@/core/database';
-import { findIndexById } from '@/utils/helpers';
 import type { MockServerConfig, DatabaseConfig } from '@/utils/types';
+
+import { findIndexById } from './helpers';
 
 describe('createDatabaseRoutes', () => {
   const createServer = (

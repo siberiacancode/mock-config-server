@@ -1,9 +1,10 @@
 import type { IRouter } from 'express';
 
-import { createNewId, findIndexById, isPlainObject } from '@/utils/helpers';
+import { isPlainObject } from '@/utils/helpers';
 import type { NestedDatabase } from '@/utils/types';
 
 import type { MemoryStorage } from '../../storages';
+import { createNewId, findIndexById } from '../array';
 
 export const createNestedDatabaseRoutes = (
   router: IRouter,
