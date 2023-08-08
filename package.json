@@ -43,7 +43,7 @@
     "lint": "eslint . --ext ts --no-error-on-unmatched-pattern",
     "stylelint": "stylelint \"src/static/**/*.css\"",
     "format": "prettier --write \"{src,bin}/**/*.ts\"",
-    "pretty": "yarn format && yarn lint --fix && yarn type"
+    "pretty": "yarn format && yarn lint --fix"
   },
   "lint-staged": {
     "*.css": "yarn stylelint",
