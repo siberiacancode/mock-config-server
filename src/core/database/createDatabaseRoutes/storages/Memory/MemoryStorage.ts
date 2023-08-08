@@ -10,48 +10,45 @@ export class MemoryStorage<T extends Object = Object> {
     this.data = initialData;
   }
 
-  public read(baseKey?: Index | Index[]): any {
-    if (!baseKey) return this.data;
+  public read(key?: Index | Index[]): any {
+    if (!key) return this.data;
+    const keys = Array.isArray(key) ? key : [key];
 
-    const key = Array.isArray(baseKey) ? baseKey : [baseKey];
     let readable: any = this.data;
-    let index = 0;
-    while (index < key.length) {
-      readable = readable[key[index]];
-      index += 1;
+    for (const currentKey of keys) {
+      readable = readable[currentKey];
     }
     return readable;
   }
 
-  public write<V>(baseKey: Index | Index[], value: V): void {
-    const key = Array.isArray(baseKey) ? baseKey : [baseKey];
+  public write(key: Index | Index[], value: unknown): void {
+    const keys = Array.isArray(key) ? key : [key];
     let writable: any = this.data;
     let index = 0;
-    while (index < key.length - 1) {
-      writable = writable[key[index]];
+    // ✅ important:
+    // stop iterate one element before end of keys for get access to writable object property
+    while (index < keys.length - 1) {
+      writable = writable[keys[index]];
       index += 1;
     }
-
-    // ✅ important:
-    // stop iterate for one element before end of key for get access to writable object property
-    writable[key[index]] = value;
+    writable[keys[index]] = value;
   }
 
-  public delete(baseKey: Index | Index[]): void {
-    const key = Array.isArray(baseKey) ? baseKey : [baseKey];
+  public delete(key: Index | Index[]): void {
+    const keys = Array.isArray(key) ? key : [key];
     let deletable: any = this.data;
     let index = 0;
-    while (index < key.length - 1) {
-      deletable = deletable[key[index]];
+    // ✅ important:
+    // stop iterate one element before end of key for get access to deletable object property
+    while (index < keys.length - 1) {
+      deletable = deletable[keys[index]];
       index += 1;
     }
 
-    // ✅ important:
-    // stop iterate for one element before end of key for get access to deletable object property
-    if (Array.isArray(deletable) && isIndex(key[index])) {
-      deletable.splice(key[index] as number, 1);
+    if (Array.isArray(deletable) && isIndex(keys[index])) {
+      deletable.splice(keys[index] as number, 1);
       return;
     }
-    delete deletable[key[index]];
+    delete deletable[keys[index]];
   }
 }

@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 
 export class FileWriter {
   private readonly filePath: string;
@@ -12,8 +11,8 @@ export class FileWriter {
 
   private writeIsLocked: boolean = false;
 
-  public constructor(fileName: string) {
-    this.filePath = path.resolve(process.cwd(), fileName);
+  public constructor(filePath: string) {
+    this.filePath = filePath;
   }
 
   private lockedWrite(data: string): Promise<void> {
