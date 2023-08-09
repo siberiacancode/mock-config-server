@@ -1,6 +1,5 @@
 import type { IRouter } from 'express';
 
-import { isPlainObject } from '@/utils/helpers';
 import type { ShallowDatabase } from '@/utils/types';
 
 import type { MemoryStorage } from '../../storages';
@@ -34,16 +33,6 @@ export const createShallowDatabaseRoutes = (
 
     router.route(path).patch((request, response) => {
       const currentResource = storage.read(key);
-
-      if (!isPlainObject(currentResource) || !isPlainObject(request.body)) {
-        response.status(400).json({
-          message: 'Cannot handle PATCH for non-object data or body',
-          data: currentResource,
-          body: request.body
-        });
-        return;
-      }
-
       const newResource = { ...currentResource, ...request.body };
       storage.write(key, newResource);
       response.json(newResource);

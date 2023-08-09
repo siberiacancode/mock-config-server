@@ -114,19 +114,5 @@ describe('createShallowDatabaseRoutes', () => {
       const getResponse = await request(server).get('/john');
       expect(getResponse.body).toStrictEqual({ ...shallowDatabase.john, ...newJohnInfo });
     });
-
-    test('Should return error when send non-object body', async () => {
-      const response = await request(server)
-        .patch('/john')
-        .set('Content-Type', 'text/plain')
-        .send('string');
-
-      expect(response.statusCode).toBe(400);
-      expect(response.body).toStrictEqual({
-        message: 'Cannot handle PATCH for non-object data or body',
-        data: shallowDatabase.john,
-        body: 'string'
-      });
-    });
   });
 });

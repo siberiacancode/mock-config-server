@@ -115,20 +115,6 @@ describe('CreateNestedDatabaseRoutes', () => {
       expect(response.body).toStrictEqual({ id: 1, name: 'John Smith' });
     });
 
-    test('Should return error when send non-object body', async () => {
-      const response = await request(server)
-        .put('/users/1')
-        .set('Content-Type', 'text/plain')
-        .send('Non-object');
-
-      expect(response.status).toBe(400);
-      expect(response.body).toStrictEqual({
-        message: 'Cannot handle PUT for non-object resource or body',
-        resource: { id: 1, name: 'John Doe', age: 25 },
-        body: 'Non-object'
-      });
-    });
-
     test('Should return 404 for non-existent id', async () => {
       const response = await request(server).put('/users/3');
 
@@ -148,20 +134,6 @@ describe('CreateNestedDatabaseRoutes', () => {
       const response = await request(server).patch('/users/1').send({ id: 3, name: 'John Smith' });
 
       expect(response.body).toStrictEqual({ id: 1, name: 'John Smith', age: 25 });
-    });
-
-    test('Should return error when send non-object body', async () => {
-      const response = await request(server)
-        .patch('/users/1')
-        .set('Content-Type', 'text/plain')
-        .send('Non-object');
-
-      expect(response.status).toBe(400);
-      expect(response.body).toStrictEqual({
-        message: 'Cannot handle PATCH for non-object resource or body',
-        resource: { id: 1, name: 'John Doe', age: 25 },
-        body: 'Non-object'
-      });
     });
 
     test('Should return 404 for non-existent id', async () => {

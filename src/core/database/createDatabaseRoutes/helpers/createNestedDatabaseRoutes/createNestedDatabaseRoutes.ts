@@ -1,6 +1,5 @@
 import type { IRouter } from 'express';
 
-import { isPlainObject } from '@/utils/helpers';
 import type { NestedDatabase } from '@/utils/types';
 
 import type { MemoryStorage } from '../../storages';
@@ -24,14 +23,6 @@ export const createNestedDatabaseRoutes = (
     });
 
     router.route(collectionPath).post((request, response) => {
-      if (!isPlainObject(request.body)) {
-        response.status(400).json({
-          message: 'Cannot handle POST for non-object body',
-          body: request.body
-        });
-        return;
-      }
-
       const collection = storage.read(key);
       const newResourceId = createNewId(collection);
       const newResource = { ...request.body, id: newResourceId };
@@ -64,15 +55,6 @@ export const createNestedDatabaseRoutes = (
       }
 
       const currentResource = storage.read([key, currentResourceIndex]);
-      if (!isPlainObject(currentResource) || !isPlainObject(request.body)) {
-        response.status(400).json({
-          message: 'Cannot handle PUT for non-object resource or body',
-          resource: currentResource,
-          body: request.body
-        });
-        return;
-      }
-
       const newResource = { ...request.body, id: currentResource.id };
       storage.write([key, currentResourceIndex], newResource);
       response.json(newResource);
@@ -87,15 +69,6 @@ export const createNestedDatabaseRoutes = (
       }
 
       const currentResource = storage.read([key, currentResourceIndex]);
-      if (!isPlainObject(currentResource) || !isPlainObject(request.body)) {
-        response.status(400).json({
-          message: 'Cannot handle PATCH for non-object resource or body',
-          resource: currentResource,
-          body: request.body
-        });
-        return;
-      }
-
       const newResource = { ...currentResource, ...request.body, id: currentResource.id };
       storage.write([key, currentResourceIndex], newResource);
       response.json(newResource);

@@ -5,11 +5,8 @@ describe('splitDatabaseByNesting', () => {
     const databaseConfig = {
       data: {
         key: 'value',
-        validArray: [
-          { id: 1, key: 'value' },
-          { id: 'string', key: 'value' }
-        ],
-        invalidArray: [{ id: 1, key: 'value' }, null]
+        invalidArray: [{ id: 1 }, null],
+        validArray: [{ id: 1 }, { id: 'string' }]
       }
     };
 
