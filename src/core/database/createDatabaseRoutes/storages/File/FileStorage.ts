@@ -44,7 +44,7 @@ export class FileStorage<T extends Object = Object> {
     }
     writable[keys[index]] = value;
 
-    this.fileWriter.write(JSON.stringify(this.data, null, 2));
+    this.fileWriter.write(JSON.stringify(this.data));
   }
 
   public delete(key: Index | Index[]): void {
@@ -64,6 +64,6 @@ export class FileStorage<T extends Object = Object> {
       delete deletable[keys[index]];
     }
 
-    this.fileWriter.write(JSON.stringify(this.data, null, 2));
+    this.fileWriter.write(JSON.stringify(this.data));
   }
 }

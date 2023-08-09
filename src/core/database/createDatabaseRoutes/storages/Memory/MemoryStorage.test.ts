@@ -11,7 +11,7 @@ describe('MemoryStorage', () => {
     const initialData = createInitialData();
     const memoryStorage = new MemoryStorage(initialData);
 
-    test('Should return correct FULL data for read without keys', () => {
+    test('Should return correct full data for read without keys', () => {
       expect(memoryStorage.read()).toStrictEqual(initialData);
     });
 
@@ -27,21 +27,22 @@ describe('MemoryStorage', () => {
   describe('MemoryStorage: write', () => {
     let initialData: ReturnType<typeof createInitialData>;
     let memoryStorage: MemoryStorage<typeof initialData>;
+
     beforeEach(() => {
       initialData = createInitialData();
       memoryStorage = new MemoryStorage(initialData);
     });
 
     test('Should update value with valid single key', () => {
-      const newAgeJohn = { ...initialData.john, age: 26 };
+      const johnWithNewAge = { ...initialData.john, age: initialData.john.age + 1 };
 
-      memoryStorage.write('john', newAgeJohn);
+      memoryStorage.write('john', johnWithNewAge);
 
-      expect(memoryStorage.read('john')).toStrictEqual(newAgeJohn);
+      expect(memoryStorage.read('john')).toStrictEqual(johnWithNewAge);
     });
 
     test('Should update value with valid array key', () => {
-      const newAge = 26;
+      const newAge = initialData.john.age + 1;
 
       memoryStorage.write(['john', 'age'], newAge);
 
@@ -49,35 +50,45 @@ describe('MemoryStorage', () => {
     });
 
     test('Should update value with valid key which contain non-existent last part', () => {
-      memoryStorage.write(['john', 'stand'], 'The World');
+      const stand = initialData.john.age + 1;
 
-      expect(memoryStorage.read(['john', 'stand'])).toBe('The World');
+      memoryStorage.write(['john', 'stand'], stand);
+
+      expect(memoryStorage.read(['john', 'stand'])).toBe(stand);
     });
   });
 
   describe('MemoryStorage: delete', () => {
     let initialData: ReturnType<typeof createInitialData>;
     let memoryStorage: MemoryStorage<typeof initialData>;
+
     beforeEach(() => {
       initialData = createInitialData();
       memoryStorage = new MemoryStorage(initialData);
     });
 
     test('Should correctly delete object property with valid single key', () => {
+      expect(memoryStorage.read('john')).toStrictEqual(initialData.john);
+
       memoryStorage.delete('john');
+
       expect(memoryStorage.read('john')).toBe(undefined);
     });
 
     test('Should correctly delete object property with valid array key', () => {
+      expect(memoryStorage.read('john')).toStrictEqual(initialData.john);
+
       memoryStorage.delete(['john', 'age']);
+
       expect(memoryStorage.read('john')).toStrictEqual({ name: initialData.john.name });
     });
 
     test('Should splice array if delete element from array', () => {
+      expect(memoryStorage.read('users')).toStrictEqual(initialData.users);
+
       memoryStorage.delete(['users', 0]);
 
       const updatedUsers = memoryStorage.read('users');
-
       expect(updatedUsers).toStrictEqual([{ id: 2 }]);
       expect(updatedUsers.length).toBe(1);
     });

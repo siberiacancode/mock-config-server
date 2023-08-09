@@ -33,7 +33,7 @@ describe('FileStorage', () => {
       jest.clearAllMocks();
     });
 
-    test('Should return correct FULL data for read without keys', () => {
+    test('Should return correct full data for read without keys', () => {
       expect(fileStorage.read()).toStrictEqual(initialData);
     });
 
@@ -66,15 +66,15 @@ describe('FileStorage', () => {
     });
 
     test('Should update value with valid single key', () => {
-      const newAgeJohn = { ...initialData.john, age: 26 };
+      const johnWithNewAge = { ...initialData.john, age: initialData.john.age + 1 };
 
-      fileStorage.write('john', newAgeJohn);
+      fileStorage.write('john', johnWithNewAge);
 
-      expect(fileStorage.read('john')).toStrictEqual(newAgeJohn);
+      expect(fileStorage.read('john')).toStrictEqual(johnWithNewAge);
     });
 
     test('Should update value with valid array key', () => {
-      const newAge = 26;
+      const newAge = initialData.john.age + 1;
 
       fileStorage.write(['john', 'age'], newAge);
 
@@ -82,18 +82,20 @@ describe('FileStorage', () => {
     });
 
     test('Should update value with valid key which contain non-existent last part', () => {
-      fileStorage.write(['john', 'stand'], 'The World');
+      const stand = 'The World';
 
-      expect(fileStorage.read(['john', 'stand'])).toBe('The World');
+      fileStorage.write(['john', 'stand'], stand);
+
+      expect(fileStorage.read(['john', 'stand'])).toBe(stand);
     });
 
     test('Should write in file updated data', () => {
-      const fileWriterWriteMock = jest.spyOn(FileWriter.prototype, 'write');
+      const fileWriterWriteMethodMock = jest.spyOn(FileWriter.prototype, 'write');
 
       fileStorage.write(['john', 'stand'], 'The World');
 
-      expect(fileWriterWriteMock).toHaveBeenCalledTimes(1);
-      expect(fileWriterWriteMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read(), null, 2));
+      expect(fileWriterWriteMethodMock).toHaveBeenCalledTimes(1);
+      expect(fileWriterWriteMethodMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read()));
     });
   });
 
@@ -117,30 +119,38 @@ describe('FileStorage', () => {
     });
 
     test('Should correctly delete object property with valid single key', () => {
+      expect(fileStorage.read('john')).toStrictEqual(initialData.john);
+
       fileStorage.delete('john');
+
       expect(fileStorage.read('john')).toBe(undefined);
     });
 
     test('Should correctly delete object property with valid array key', () => {
+      expect(fileStorage.read('john')).toStrictEqual(initialData.john);
+
       fileStorage.delete(['john', 'age']);
+
       expect(fileStorage.read('john')).toStrictEqual({ name: initialData.john.name });
     });
 
     test('Should splice array if delete element from array', () => {
+      expect(fileStorage.read('users')).toStrictEqual(initialData.users);
+
       fileStorage.delete(['users', 0]);
 
       const updatedUsers = fileStorage.read('users');
-
       expect(updatedUsers).toStrictEqual([{ id: 2 }]);
       expect(updatedUsers.length).toBe(1);
     });
 
     test('Should write in file updated data', () => {
-      const fileWriterWriteMock = jest.spyOn(FileWriter.prototype, 'write');
+      const fileWriterWriteMethodMock = jest.spyOn(FileWriter.prototype, 'write');
+
       fileStorage.delete(['users', 0]);
 
-      expect(fileWriterWriteMock).toHaveBeenCalledTimes(1);
-      expect(fileWriterWriteMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read(), null, 2));
+      expect(fileWriterWriteMethodMock).toHaveBeenCalledTimes(1);
+      expect(fileWriterWriteMethodMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read()));
     });
   });
 });
