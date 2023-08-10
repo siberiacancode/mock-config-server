@@ -14,7 +14,7 @@ describe('validateDatabaseConfig', () => {
   });
 
   test('Should correctly handle database config data only with valid type', () => {
-    const validData = [{}, 'string.json'];
+    const validData = [{}, 'file.json'];
     validData.forEach((validDataElement) => {
       expect(() => validateDatabaseConfig({ data: validDataElement })).not.toThrow(Error);
     });
@@ -26,7 +26,7 @@ describe('validateDatabaseConfig', () => {
   });
 
   test('Should correctly handle database config routes only with valid type', () => {
-    const validRoutes = [{}, 'string.json', undefined];
+    const validRoutes = [{}, 'file.json', undefined];
     validRoutes.forEach((validRoutesElement) => {
       expect(() => validateDatabaseConfig({ data: {}, routes: validRoutesElement })).not.toThrow(
         Error

@@ -495,7 +495,14 @@ PUT   /settings
 PATCH /settings
 ```
 
-> Collection routes created from arrays which all elements have **unique** id. Other database parts become single routes.
+> Collection routes created from arrays which all elements have **unique**(!) id. Other database parts become single routes.
+
+Also, there are additional routes: `/__db` and `/__routes`
+
+```
+__db -> return data from database config
+__routes -> return routes from database config
+```
 
 ### Routes example
 
