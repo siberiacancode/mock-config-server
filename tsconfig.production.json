@@ -2,6 +2,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "declaration": true,
+    "emitDeclarationOnly": true,
     "target": "esnext",
     "lib": ["dom", "es2021"],
     "skipLibCheck": true,

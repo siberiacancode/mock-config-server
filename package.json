@@ -31,11 +31,13 @@
     "dist"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=10"
   },
   "scripts": {
     "prepare": "husky install && yarn build",
-    "build": "shx rm -rf dist && tsc -p tsconfig.production.json && tsc-alias -p tsconfig.production.json && shx cp -R src/static dist/src/static",
+    "build:ts": "tsc -p tsconfig.production.json && tsc-alias -p tsconfig.production.json",
+    "build:babel": "babel ./ --out-dir dist --extensions \".ts,.tsx\" --source-maps inline",
+    "build": "shx rm -rf dist && yarn build:babel && yarn build:ts && shx cp -R src/static dist/src/static",
     "start": "yarn build && node ./dist/bin/bin.js",
     "dev": "nodemon --watch src --watch bin --watch mock-server.config.* -e js,ts,ejs --exec \"yarn start\"",
     "test": "jest",
@@ -51,6 +53,10 @@
     "*.ts": "yarn pretty"
   },
   "dependencies": {
+    "@babel/cli": "^7.22.10",
+    "@babel/core": "^7.22.10",
+    "@babel/preset-env": "^7.22.10",
+    "@babel/preset-typescript": "^7.22.5",
     "@types/body-parser": "^1.19.2",
     "@types/express": "^4.17.17",
     "@types/flat": "^5.0.2",
