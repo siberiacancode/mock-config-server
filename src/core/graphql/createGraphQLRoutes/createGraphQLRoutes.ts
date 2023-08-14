@@ -107,7 +107,12 @@ export const createGraphQLRoutes = (
           const flattenEntity = flatten<any, any>(
             entityName === 'variables' ? graphQLInput.variables : request[entityName]
           );
-          return resolveEntityValues(checkMode, flattenEntity[entityKey], descriptorValue);
+          // ✅ important: transform header keys to lower case because browsers send headers in lowercase
+          return resolveEntityValues(
+            checkMode,
+            flattenEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey],
+            descriptorValue
+          );
         });
       });
     });
