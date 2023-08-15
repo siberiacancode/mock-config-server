@@ -570,4 +570,44 @@ describe('createGraphQLRoutes', () => {
       .query({ query: 'query GetUsers { users { name } }' });
     expect(getResponse.headers['cache-control']).toBe('max-age=0, must-revalidate');
   });
+
+  test('Header keys should be case-insensitive', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            operationName: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                entities: {
+                  headers: {
+                    lowercase: 'lowercase',
+                    UPPERCASE: 'UPPERCASE'
+                  }
+                },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const postResponse = await request(server)
+      .post('/')
+      .send({ query: 'query GetUsers { users { name } }' })
+      .set({ LowerCase: 'lowercase', upperCase: 'UPPERCASE' });
+
+    expect(postResponse.statusCode).toBe(200);
+    expect(postResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+
+    const getResponse = await request(server)
+      .get('/')
+      .set({ LowerCase: 'lowercase', upperCase: 'UPPERCASE' })
+      .query({ query: 'query GetUsers { users { name } }' });
+
+    expect(getResponse.statusCode).toBe(200);
+    expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+  });
 });

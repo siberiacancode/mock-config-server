@@ -467,4 +467,36 @@ describe('createRestRoutes', () => {
     const response = await request(server).get('/users');
     expect(response.headers['cache-control']).toBe('max-age=0, must-revalidate');
   });
+
+  test('Header keys should be case-insensitive', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                entities: {
+                  headers: {
+                    lowercase: 'lowercase',
+                    UPPERCASE: 'UPPERCASE'
+                  }
+                },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .get('/users')
+      .set('Content-Type', 'application/json')
+      .set({ LowerCase: 'lowercase', upperCase: 'UPPERCASE' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+  });
 });
