@@ -571,7 +571,7 @@ describe('createGraphQLRoutes', () => {
     expect(getResponse.headers['cache-control']).toBe('max-age=0, must-revalidate');
   });
 
-  test('Header keys should be case-insensitive', async () => {
+  test('Should header keys  be case-insensitive', async () => {
     const server = createServer({
       graphql: {
         configs: [
