@@ -468,7 +468,7 @@ describe('createRestRoutes', () => {
     expect(response.headers['cache-control']).toBe('max-age=0, must-revalidate');
   });
 
-  test('Should header keys  be case-insensitive', async () => {
+  test('Should be case-insensitive for header keys', async () => {
     const server = createServer({
       rest: {
         configs: [
