@@ -497,6 +497,15 @@ Examples:
             <br />
             <sub style="font-size:13px"><b>🐘 RiceWithMeat</b></sub>
         </a>
-    </td> 
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 100.0; height: 100.0">
+        <a href="https://github.com/anv296">
+            <img src="https://avatars.githubusercontent.com/u/39154399?s=400&u=7c4fcc6d120f4b13ccbd03a9a384622b6523c376&v=4"
+            width="100;"  
+            alt="anv296" />
+            <br />
+            <sub style="font-size:13px"><b>🎱️ anv296</b></sub>
+        </a>
+    </td>
   </tr>
 </table>
