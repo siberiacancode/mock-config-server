@@ -21,6 +21,7 @@ $ yarn add mock-config-server --dev
 - **TypeScript support out of the box** - full typed package
 - **Full Rest Api support** - using simple configs of a certain format, you can easily simulate rest operation of servers
 - **GraphQL support** - using simple configs of a certain format, you can easily simulate graphlql operation of servers
+- **Database** - use mock database with all CRUD operations
 - **CORS setup** - turn on and off CORS, fully customizable when CORS is turned on
 - **Support for any kind of static** - server can return any type of static file if needed. Images, HTML, CSS, JSON, etc
 
@@ -72,6 +73,9 @@ $ npx mock-config-server
   - `baseUrl?` {string} part of the url that will be substituted at the beginning of graphql request url (default: `'/'`)
   - `configs` {Array<GraphQLRequestConfig>} configs for mock requests, [read](#configs)
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
+- `database?` Database config for mock requests [read](#Database)
+  - `data` {Object | string} initial data for database
+  - `routes?` {Object | string} map of custom routes for database
 - `staticPath?` {StaticPath} entity for working with static files, [read](#static-path)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `cors?` {Cors} CORS settings object (default: `CORS is turn off`), [read](#cors)
@@ -447,6 +451,105 @@ Functions to change request or response parameters
   - `attachment` (filename) => void
     - `filename` {string} name of file in 'Content-Disposition' header
 
+## Database
+
+With `mock-config-server` you can create your own mock database with all CRUD operations
+- `data` {Object | string} initial data for database
+- `routes?` {Object | string} map of custom routes for database
+
+### Basic example
+
+```javascript
+const mockServerConfig = {
+  database: {
+    data: {
+      users: [
+        { id: 1, name: 'John' }
+      ],
+      settings: {
+        blocked: false
+      }
+    }
+  }
+};
+```
+
+Now you have the following routes for requests
+
+#### Collection routes
+```
+GET    /users
+POST   /users
+GET    /users/1
+PUT    /users/1
+PATCH  /users/1
+DELETE /users/1
+```
+
+#### Single routes
+
+```
+GET   /settings
+POST  /settings
+PUT   /settings
+PATCH /settings
+```
+
+> Collection routes created from arrays which all elements have **unique**(!) id. Other database parts become single routes.
+
+Also, there are additional routes: `/__db` and `/__routes`
+
+```
+__db -> return data from database config
+__routes -> return routes from database config
+```
+
+### Routes example
+
+```javascript
+const mockServerConfig = {
+  database: {
+    data: {
+      users: [
+        { id: 1, name: 'John' }
+      ],
+      settings: {
+        blocked: false
+      }
+    },
+    routes: {
+      '/api/users/:id': '/users/:id',
+      '/*/my-settings': '/settings'
+    }
+  }
+};
+```
+
+Now following routes will work correctly
+
+```
+/api/users/1 -> return data for /users/1
+/some/custom/url/my-settings -> return data for /settings
+```
+
+Note some things:
+- String routes should start with forward slash
+- If you want to use id param in route then use only `:id` template
+- You can use `wildcard` only for custom route, **not for real route**
+
+### File example
+
+```javascript
+const mockServerConfig = {
+  database: {
+    data: './data.json',
+    routes: './routes.json'
+  }
+};
+```
+
+Instead of objects you can use paths to **JSON** files which contain needed data or routes
+
 ## CLI usage
 
 ```
@@ -497,6 +600,15 @@ Examples:
             <br />
             <sub style="font-size:13px"><b>🐘 RiceWithMeat</b></sub>
         </a>
-    </td> 
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 100.0; height: 100.0">
+        <a href="https://github.com/anv296">
+            <img src="https://avatars.githubusercontent.com/u/39154399?s=400&u=7c4fcc6d120f4b13ccbd03a9a384622b6523c376&v=4"
+            width="100;"  
+            alt="anv296" />
+            <br />
+            <sub style="font-size:13px"><b>🎱️ anv296</b></sub>
+        </a>
+    </td>
   </tr>
 </table>

@@ -62,7 +62,12 @@ export const createRestRoutes = (
               const { checkMode, value: descriptorValue } =
                 convertToEntityDescriptor(mappedEntityDescriptor);
               const flattenEntity = flatten<any, any>(request[entityName]);
-              return resolveEntityValues(checkMode, flattenEntity[entityKey], descriptorValue);
+              // ✅ important: transform header keys to lower case because browsers send headers in lowercase
+              return resolveEntityValues(
+                checkMode,
+                flattenEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey],
+                descriptorValue
+              );
             });
           });
         });

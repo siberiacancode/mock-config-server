@@ -126,7 +126,8 @@ type GraphQLEntityByEntityName<OperationType extends GraphQLOperationType> = {
 
 export interface GraphQLRouteConfig<
   OperationType extends GraphQLOperationType = GraphQLOperationType,
-  Entities extends GraphQLEntityByEntityName<OperationType> = GraphQLEntityByEntityName<OperationType>
+  Entities extends
+    GraphQLEntityByEntityName<OperationType> = GraphQLEntityByEntityName<OperationType>
 > {
   entities?: Entities;
   data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;

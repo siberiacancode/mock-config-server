@@ -33,10 +33,16 @@ export interface GraphqlConfig {
   interceptors?: Interceptors;
 }
 
+export type DatabaseConfig = {
+  data: Record<string, unknown> | `${string}.json`;
+  routes?: Record<`/${string}`, `/${string}`> | `${string}.json`;
+};
+
 export interface MockServerConfig {
   baseUrl?: BaseUrl;
   rest?: RestConfig;
   graphql?: GraphqlConfig;
+  database?: DatabaseConfig;
   port?: Port;
   staticPath?: StaticPath;
   interceptors?: Interceptors;

@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import fs from 'fs';
 import path from 'path';
 
 export const resolveConfigFilePath = (cliConfigFilePath?: string) => {
