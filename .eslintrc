@@ -22,6 +22,7 @@
   "rules": {
     "consistent-return": "off",
     "no-shadow": "off",
+    "no-restricted-syntax": "off",
     "@typescript-eslint/no-shadow": "off",
     "require-await": "off",
     "@typescript-eslint/require-await": "error",

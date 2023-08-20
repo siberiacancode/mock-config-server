@@ -2,6 +2,7 @@ import type { PlainObject } from '../../src';
 
 import { validateBaseUrl } from './validateBaseUrl/validateBaseUrl';
 import { validateCors } from './validateCors/validateCors';
+import { validateDatabaseConfig } from './validateDatabaseConfig/validateDatabaseConfig';
 import { validateGraphqlConfig } from './validateGraphqlConfig/validateGraphqlConfig';
 import { validateInterceptors } from './validateInterceptors/validateInterceptors';
 import { validatePort } from './validatePort/validatePort';
@@ -9,15 +10,16 @@ import { validateRestConfig } from './validateRestConfig/validateRestConfig';
 import { validateStaticPath } from './validateStaticPath/validateStaticPath';
 
 export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
-  if (!mockServerConfig.rest && !mockServerConfig.graphql) {
+  if (!mockServerConfig.rest && !mockServerConfig.graphql && !mockServerConfig.database) {
     throw new Error(
-      'configuration should contain at least one of these configs: rest | graphql; see our doc (https://www.npmjs.com/package/mock-config-server) for more information'
+      'configuration should contain at least one of these configs: rest | graphql | database; see our doc (https://www.npmjs.com/package/mock-config-server) for more information'
     );
   }
 
   try {
     if (mockServerConfig.rest) validateRestConfig(mockServerConfig.rest);
     if (mockServerConfig.graphql) validateGraphqlConfig(mockServerConfig.graphql);
+    if (mockServerConfig.database) validateDatabaseConfig(mockServerConfig.database);
 
     validateBaseUrl(mockServerConfig.baseUrl);
     validatePort(mockServerConfig.port);

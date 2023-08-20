@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "outDir": "dist",
     "target": "esnext",
     "allowJs": true,
     "skipLibCheck": true,
@@ -18,6 +19,7 @@
     "baseUrl": "./",
     "paths": {
       "@/server": ["./src/server"],
+      "@/core/database": ["./src/core/database"],
       "@/core/rest": ["./src/core/rest"],
       "@/core/graphql": ["./src/core/graphql"],
       "@/core/middlewares": ["./src/core/middlewares"],
