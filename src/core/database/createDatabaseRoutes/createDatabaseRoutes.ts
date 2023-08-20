@@ -10,10 +10,14 @@ import {
 } from './helpers';
 import { FileStorage, MemoryStorage } from './storages';
 
+const isVariableJsonFile = (variable: unknown): variable is `${string}.json` =>
+  typeof variable === 'string' && variable.endsWith('.json');
+
 export const createDatabaseRoutes = (router: IRouter, { data, routes }: DatabaseConfig) => {
   if (routes) {
-    const isRoutesJsonFile = typeof routes === 'string';
-    const storage = isRoutesJsonFile ? new FileStorage(routes) : new MemoryStorage(routes);
+    const storage = isVariableJsonFile(routes)
+      ? new FileStorage(routes)
+      : new MemoryStorage(routes);
     createRewrittenDatabaseRoutes(router, storage.read());
 
     router.route('/__routes').get((_request, response) => {
@@ -21,8 +25,7 @@ export const createDatabaseRoutes = (router: IRouter, { data, routes }: Database
     });
   }
 
-  const isDataJsonFile = typeof data === 'string';
-  const storage = isDataJsonFile ? new FileStorage(data) : new MemoryStorage(data);
+  const storage = isVariableJsonFile(data) ? new FileStorage(data) : new MemoryStorage(data);
   const { shallowDatabase, nestedDatabase } = splitDatabaseByNesting(storage.read());
   createShallowDatabaseRoutes(router, shallowDatabase, storage as MemoryStorage<ShallowDatabase>);
   createNestedDatabaseRoutes(router, nestedDatabase, storage as MemoryStorage<NestedDatabase>);
