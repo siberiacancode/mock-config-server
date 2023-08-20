@@ -40,21 +40,21 @@
     "dev": "nodemon --watch src --watch bin --watch mock-server.config.* -e js,ts,ejs --exec \"yarn start\"",
     "test": "jest",
     "type": "tsc --noEmit",
-    "lint-global": "eslint . --ext .ts --no-error-on-unmatched-pattern",
-    "stylelint-global": "stylelint \"src/static/**/*.css\"",
-    "format-global": "prettier --write \"{src,bin}/**/*.ts\"",
-    "pretty-global": "yarn format && yarn lint --fix"
+    "lint": "eslint . --ext .ts --no-error-on-unmatched-pattern --fix",
+    "stylelint": "stylelint \"src/static/**/*.css\" --fix",
+    "format": "prettier --write \"{src,bin}/**/*.ts\"",
+    "pretty": "yarn format && yarn lint"
   },
   "lint-staged": {
     "*.css": [
-      "stylelint"
+      "stylelint --fix"
     ],
     "*.js": [
       "prettier --write"
     ],
     "*.ts": [
       "prettier --write",
-      "eslint --ext .ts --no-error-on-unmatched-pattern --fix"
+      "eslint --no-error-on-unmatched-pattern --fix"
     ]
   },
   "dependencies": {
