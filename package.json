@@ -18,6 +18,10 @@
     {
       "name": "Sergey Kryavkin",
       "url": "https://github.com/RiceWithMeat"
+    },
+    {
+      "name": "Alexander Vasilchuk",
+      "url": "https://github.com/anv296"
     }
   ],
   "license": "MIT",
@@ -31,11 +35,13 @@
     "dist"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=10"
   },
   "scripts": {
     "prepare": "husky install && yarn build",
-    "build": "shx rm -rf dist && tsc -p tsconfig.production.json && tsc-alias -p tsconfig.production.json && shx cp -R src/static dist/src/static",
+    "build:types": "tsc -p tsconfig.production.json && tsc-alias -p tsconfig.production.json",
+    "build:babel": "babel --delete-dir-on-start bin --out-dir dist/bin --extensions \".ts,.tsx\" && babel src --out-dir dist/src --extensions \".ts,.tsx\" --copy-files --no-copy-ignored && babel ./index.ts --out-dir dist",
+    "build": "yarn build:babel && yarn build:types",
     "start": "yarn build && node ./dist/bin/bin.js",
     "dev": "nodemon --watch src --watch bin --watch mock-server.config.* -e js,ts,ejs --exec \"yarn start\"",
     "test": "jest",
@@ -63,10 +69,13 @@
     "flat": "^5.0.2",
     "graphql": "^16.6.0",
     "please-upgrade-node": "^3.2.0",
-    "shx": "^0.3.4",
     "yargs": "^17.7.1"
   },
   "devDependencies": {
+    "@babel/cli": "^7.22.10",
+    "@babel/core": "^7.22.10",
+    "@babel/preset-env": "^7.22.10",
+    "@babel/preset-typescript": "^7.22.5",
     "@types/jest": "^29.4.0",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^6.2.0",

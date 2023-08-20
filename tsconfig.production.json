@@ -2,6 +2,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "declaration": true,
+    "emitDeclarationOnly": true,
     "target": "esnext",
     "lib": ["dom", "es2021"],
     "skipLibCheck": true,
@@ -29,5 +30,6 @@
       "@/utils/constants": ["./src/utils/constants"]
     }
   },
-  "exclude": ["dist", "node_modules", "./**/*.test.ts", "jest.config.js"]
+  "include": ["bin", "src", "./index.ts"],
+  "exclude": ["./**/*.test.ts"]
 }
