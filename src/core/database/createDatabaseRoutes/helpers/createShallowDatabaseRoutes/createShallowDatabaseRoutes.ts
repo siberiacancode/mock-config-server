@@ -33,9 +33,9 @@ export const createShallowDatabaseRoutes = (
 
     router.route(path).patch((request, response) => {
       const currentResource = storage.read(key);
-      const newResource = { ...currentResource, ...request.body };
-      storage.write(key, newResource);
-      response.json(newResource);
+      const updatedResource = { ...currentResource, ...request.body };
+      storage.write(key, updatedResource);
+      response.json(updatedResource);
     });
   });
 

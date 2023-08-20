@@ -55,9 +55,9 @@ export const createNestedDatabaseRoutes = (
       }
 
       const currentResource = storage.read([key, currentResourceIndex]);
-      const newResource = { ...request.body, id: currentResource.id };
-      storage.write([key, currentResourceIndex], newResource);
-      response.json(newResource);
+      const updatedResource = { ...request.body, id: currentResource.id };
+      storage.write([key, currentResourceIndex], updatedResource);
+      response.json(updatedResource);
     });
 
     router.route(itemPath).patch((request, response) => {
@@ -69,9 +69,9 @@ export const createNestedDatabaseRoutes = (
       }
 
       const currentResource = storage.read([key, currentResourceIndex]);
-      const newResource = { ...currentResource, ...request.body, id: currentResource.id };
-      storage.write([key, currentResourceIndex], newResource);
-      response.json(newResource);
+      const updatedResource = { ...currentResource, ...request.body, id: currentResource.id };
+      storage.write([key, currentResourceIndex], updatedResource);
+      response.json(updatedResource);
     });
 
     router.route(itemPath).delete((request, response) => {
