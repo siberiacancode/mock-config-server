@@ -30,5 +30,6 @@
       "@/utils/constants": ["./src/utils/constants"]
     }
   },
-  "exclude": ["dist", "node_modules", "./**/*.test.ts", "jest.config.js"]
+  "include": ["bin", "src", "./index.ts"],
+  "exclude": ["./**/*.test.ts"]
 }

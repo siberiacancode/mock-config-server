@@ -40,8 +40,8 @@
   "scripts": {
     "prepare": "husky install && yarn build",
     "build:types": "tsc -p tsconfig.production.json && tsc-alias -p tsconfig.production.json",
-    "build:babel": "babel . --out-dir dist --extensions \".ts,.tsx\"",
-    "build": "shx rm -rf dist && yarn build:babel && yarn build:types && shx cp -R src/static dist/src/static",
+    "build:babel": "babel --delete-dir-on-start bin --out-dir dist/bin --extensions \".ts,.tsx\" && babel src --out-dir dist/src --extensions \".ts,.tsx\" --copy-files --no-copy-ignored && babel ./index.ts --out-dir dist --extensions \".ts,.tsx\"",
+    "build": "yarn build:babel && yarn build:types",
     "start": "yarn build && node ./dist/bin/bin.js",
     "dev": "nodemon --watch src --watch bin --watch mock-server.config.* -e js,ts,ejs --exec \"yarn start\"",
     "test": "jest",
@@ -69,7 +69,6 @@
     "flat": "^5.0.2",
     "graphql": "^16.6.0",
     "please-upgrade-node": "^3.2.0",
-    "shx": "^0.3.4",
     "yargs": "^17.7.1"
   },
   "devDependencies": {

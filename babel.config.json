@@ -1,6 +1,5 @@
 {
-  "sourceMaps": "inline",
-  "ignore": ["dist", "node_modules", "jest.config.js", "./**/*.test.ts"],
+  "ignore": ["./**/*.test.ts"],
   "presets": [
     "@babel/preset-typescript",
     [
