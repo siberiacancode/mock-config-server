@@ -40,7 +40,7 @@
   "scripts": {
     "prepare": "husky install && yarn build",
     "build:types": "tsc -p tsconfig.production.json && tsc-alias -p tsconfig.production.json",
-    "build:babel": "babel --delete-dir-on-start bin --out-dir dist/bin --extensions \".ts,.tsx\" && babel src --out-dir dist/src --extensions \".ts,.tsx\" --copy-files --no-copy-ignored && babel ./index.ts --out-dir dist",
+    "build:babel": "babel --delete-dir-on-start bin --out-dir dist/bin --extensions \".ts,.tsx\" && babel src --out-dir dist/src --extensions \".ts,.tsx\" --copy-files --no-copy-ignored && babel ./index.ts --out-dir dist --extensions \".ts\"",
     "build": "yarn build:babel && yarn build:types",
     "start": "yarn build && node ./dist/bin/bin.js",
     "dev": "nodemon --watch src --watch bin --watch mock-server.config.* -e js,ts,ejs --exec \"yarn start\"",
