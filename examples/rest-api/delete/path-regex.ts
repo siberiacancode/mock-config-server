@@ -6,7 +6,7 @@ export const mockServerConfig: MockServerConfig = {
     configs: [
       {
         method: 'delete',
-        path: '/users/:id([\\s\\S]*)',
+        path: '/users?/:id',
         routes: [
           {
             data: { succes: true }

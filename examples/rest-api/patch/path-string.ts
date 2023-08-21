@@ -26,3 +26,6 @@ export const mockServerConfig: MockServerConfig = {
     ]
   }
 };
+
+createMockServer(mockServerConfig);
+startMockServer(mockServerConfig);

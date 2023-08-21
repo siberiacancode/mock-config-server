@@ -23,7 +23,7 @@ export const mockServerConfig: MockServerConfig = {
       },
       {
         method: 'get',
-        path: '/users/:id([\\s\\S]*)',
+        path: '/users?/:id',
         routes: [
           {
             data: [{ id: 1, emoji: '🎉' }]

@@ -1,11 +1,12 @@
 import type { MockServerConfig } from 'mock-config-server';
+import { createMockServer, startMockServer } from 'mock-config-server';
 
 export const mockServerConfig: MockServerConfig = {
   rest: {
     configs: [
       {
         method: 'patch',
-        path: '/users/:id([\\s\\S]*)',
+        path: '/users?/:id',
         routes: [
           {
             data: [{ id: 1, emoji: '🎉' }]
@@ -26,3 +27,6 @@ export const mockServerConfig: MockServerConfig = {
     ]
   }
 };
+
+createMockServer(mockServerConfig);
+startMockServer(mockServerConfig);
