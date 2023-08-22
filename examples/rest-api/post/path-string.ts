@@ -9,10 +9,10 @@ export const mockServerConfig: MockServerConfig = {
         path: '/users',
         routes: [
           {
-            data: [{ id: 1, emoji: '🎉' }]
+            data: { id: 1, emoji: '🎉' }
           },
           {
-            data: [{ id: 2, emoji: '🔥' }],
+            data: { id: 2, emoji: '🔥' },
             entities: {
               body: {
                 emoji: '🔥'
