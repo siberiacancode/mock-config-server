@@ -4,6 +4,7 @@ import type { NestedDatabase } from '@/utils/types';
 
 import type { MemoryStorage } from '../../storages';
 import { createNewId, findIndexById } from '../array';
+import { filter } from '../filter/filter';
 
 export const createNestedDatabaseRoutes = (
   router: IRouter,
@@ -14,12 +15,18 @@ export const createNestedDatabaseRoutes = (
     const collectionPath = `/${key}`;
     const itemPath = `/${key}/:id`;
 
-    router.route(collectionPath).get((_request, response) => {
+    router.route(collectionPath).get((request, response) => {
+      let data = storage.read(key);
+
+      if (request.query && Object.keys(request.query).length) {
+        data = filter(data, request.query as any);
+      }
+
       // ✅ important:
       // set 'Cache-Control' header for explicit browsers response revalidate
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
       response.set('Cache-control', 'max-age=0, must-revalidate');
-      response.json(storage.read(key));
+      response.json(data);
     });
 
     router.route(collectionPath).post((request, response) => {

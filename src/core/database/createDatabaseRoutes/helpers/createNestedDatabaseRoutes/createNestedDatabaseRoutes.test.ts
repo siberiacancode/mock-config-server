@@ -11,8 +11,8 @@ import { createNestedDatabaseRoutes } from './createNestedDatabaseRoutes';
 describe('CreateNestedDatabaseRoutes', () => {
   const createNestedDatabase = () => ({
     users: [
-      { id: 1, name: 'John Doe', age: 25 },
-      { id: 2, name: 'Jane Smith', age: 30 }
+      { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
+      { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
     ]
   });
 
@@ -133,7 +133,12 @@ describe('CreateNestedDatabaseRoutes', () => {
     test('Should correctly update resource (ignoring id) for valid key and id', async () => {
       const response = await request(server).patch('/users/1').send({ id: 3, name: 'John Smith' });
 
-      expect(response.body).toStrictEqual({ id: 1, name: 'John Smith', age: 25 });
+      expect(response.body).toStrictEqual({
+        id: 1,
+        name: 'John Smith',
+        age: 25,
+        address: { city: 'Novosibirsk' }
+      });
     });
 
     test('Should return 404 for non-existent id', async () => {
@@ -163,6 +168,42 @@ describe('CreateNestedDatabaseRoutes', () => {
       const response = await request(server).delete('/users/3');
 
       expect(response.status).toBe(404);
+    });
+  });
+
+  describe('createNestedDatabaseRoutes: filter function', () => {
+    const nestedDatabase = createNestedDatabase();
+    const server = createServer(nestedDatabase);
+    test('Should return filtered array by query', async () => {
+      const response = await request(server).get('/users?name=John Doe');
+
+      expect(response.body).toStrictEqual([
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' }
+        }
+      ]);
+    });
+
+    test('Should return filtered array by same queries', async () => {
+      const response = await request(server).get('/users?id=1&id=2');
+
+      expect(response.body).toStrictEqual(nestedDatabase.users);
+    });
+
+    test('Should return filtered array by nested query', async () => {
+      const response = await request(server).get('/users?address.city=Novosibirsk');
+
+      expect(response.body).toStrictEqual([
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' }
+        }
+      ]);
     });
   });
 });
