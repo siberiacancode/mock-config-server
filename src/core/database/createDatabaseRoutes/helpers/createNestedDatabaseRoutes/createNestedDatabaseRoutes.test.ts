@@ -165,4 +165,27 @@ describe('CreateNestedDatabaseRoutes', () => {
       expect(response.status).toBe(404);
     });
   });
+
+  describe('createNestedDatabaseRoutes: slice function', () => {
+    const nestedDatabase = createNestedDatabase();
+    const server = createServer(nestedDatabase);
+
+    test('Should return sliced array by _begin query', async () => {
+      const response = await request(server).get('/users?_begin=1');
+
+      expect(response.body).toStrictEqual([{ id: 2, name: 'Jane Smith', age: 30 }]);
+    });
+
+    test('Should return sliced array by _end query', async () => {
+      const response = await request(server).get('/users?_end=1');
+
+      expect(response.body).toStrictEqual([{ id: 1, name: 'John Doe', age: 25 }]);
+    });
+
+    test('Should return sliced array by _begin and _end query', async () => {
+      const response = await request(server).get('/users?_begin=0&_end=2');
+
+      expect(response.body).toStrictEqual(nestedDatabase.users);
+    });
+  });
 });

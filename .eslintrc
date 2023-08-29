@@ -20,6 +20,7 @@
     }
   },
   "rules": {
+    "no-underscore-dangle": "off",
     "consistent-return": "off",
     "no-shadow": "off",
     "no-restricted-syntax": "off",
@@ -51,8 +52,5 @@
       }
     ]
   },
-  "ignorePatterns": [
-    "dist",
-    "jest.config.js"
-  ]
+  "ignorePatterns": ["dist", "jest.config.js"]
 }

@@ -14,12 +14,20 @@ export const createNestedDatabaseRoutes = (
     const collectionPath = `/${key}`;
     const itemPath = `/${key}/:id`;
 
-    router.route(collectionPath).get((_request, response) => {
+    router.route(collectionPath).get((request, response) => {
+      let data = storage.read(key);
+
+      if (request.query._begin || request.query._end) {
+        data = data.slice(request.query._begin ?? 0, request.query._end);
+        response.set('X-Total-Count', data.length);
+        response.set('Cache-control', 'max-age=0, must-revalidate');
+      }
       // ✅ important:
       // set 'Cache-Control' header for explicit browsers response revalidate
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
       response.set('Cache-control', 'max-age=0, must-revalidate');
-      response.json(storage.read(key));
+
+      response.json(data);
     });
 
     router.route(collectionPath).post((request, response) => {
