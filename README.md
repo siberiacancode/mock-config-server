@@ -210,6 +210,7 @@ If you need more complex logic for matching entities, you can use entity descrip
 Descriptor is an object with `checkMode` and `value` fields that describe how the correctness of the actual entity is calculated.
 
 Allowed `checkModes`
+
 - equals - checks actual value for equality with descriptor value (default).
 - notEquals - checks actual value for non-equality with descriptor value.
 - exists - checks actual value for existence i.e. any value.
@@ -264,7 +265,7 @@ const mockServerConfig = {
       }
     ]
   }
-}
+};
 
 module.exports = mockServerConfig;
 ```
@@ -309,7 +310,7 @@ const mockServerConfig = {
           {
             entities: {
               body: {
-                'title': {
+                title: {
                   checkMode: 'startsWith',
                   value: 'A'
                 }
@@ -329,7 +330,7 @@ const mockServerConfig = {
                 {
                   checkMode: 'startsWith',
                   value: 1
-                }, 
+                },
                 2
               ]
             },
@@ -339,7 +340,7 @@ const mockServerConfig = {
       }
     ]
   }
-}
+};
 
 module.exports = mockServerConfig;
 ```
@@ -375,7 +376,7 @@ const mockServerConfig = {
       }
     ]
   }
-}
+};
 
 module.exports = mockServerConfig;
 ```
@@ -454,6 +455,7 @@ Functions to change request or response parameters
 ## Database
 
 With `mock-config-server` you can create your own mock database with all CRUD operations
+
 - `data` {Object | string} initial data for database
 - `routes?` {Object | string} map of custom routes for database
 
@@ -463,9 +465,7 @@ With `mock-config-server` you can create your own mock database with all CRUD op
 const mockServerConfig = {
   database: {
     data: {
-      users: [
-        { id: 1, name: 'John' }
-      ],
+      users: [{ id: 1, name: 'John' }],
       settings: {
         blocked: false
       }
@@ -477,6 +477,7 @@ const mockServerConfig = {
 Now you have the following routes for requests
 
 #### Collection routes
+
 ```
 GET    /users
 POST   /users
@@ -510,9 +511,7 @@ __routes -> return routes from database config
 const mockServerConfig = {
   database: {
     data: {
-      users: [
-        { id: 1, name: 'John' }
-      ],
+      users: [{ id: 1, name: 'John' }],
       settings: {
         blocked: false
       }
@@ -533,9 +532,19 @@ Now following routes will work correctly
 ```
 
 Note some things:
+
 - String routes should start with forward slash
 - If you want to use id param in route then use only `:id` template
 - You can use `wildcard` only for custom route, **not for real route**
+
+### Slice
+
+> X-Total-Count header is included in the response
+
+```
+GET /users?_begin=20
+GET /users?_begin=20&_end=30
+```
 
 ### File example
 
