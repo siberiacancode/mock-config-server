@@ -31,7 +31,7 @@ export const createGraphQLRoutes = (
 
   const graphqlMiddleware = async (request: Request, response: Response, next: NextFunction) => {
     const graphQLInput = getGraphQLInput(request);
-    if (!graphQLInput || !graphQLInput.query) {
+    if (!graphQLInput.query) {
       return response
         .status(400)
         .json({ message: 'Query is missing, you must pass a valid GraphQL query' });
@@ -88,11 +88,7 @@ export const createGraphQLRoutes = (
           entityName === 'variables' && isEntityDescriptor(valueOrDescriptor);
         if (isVariablesPlain) {
           // ✅ important: getGraphQLInput returns empty object if variables not sent or invalid, so count {} as undefined
-          return resolveEntityValues(
-            checkMode,
-            Object.keys(graphQLInput.variables).length ? graphQLInput.variables : undefined,
-            descriptorValue
-          );
+          return resolveEntityValues(checkMode, graphQLInput.variables, descriptorValue);
         }
 
         const mappedEntityDescriptors = Object.entries(valueOrDescriptor) as [
