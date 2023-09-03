@@ -9,7 +9,7 @@ describe('getGraphqlUrlSuggestions', () => {
     ];
     expect(
       getGraphqlUrlSuggestions({
-        url: new URL(`http://localhost:31299/?query=query Getdevoper { developers }}`),
+        url: new URL('http://localhost:31299/?query=query Getdevoper { developers }}'),
         requestConfigs
       })
     ).toEqual([
@@ -19,7 +19,7 @@ describe('getGraphqlUrlSuggestions', () => {
 
     expect(
       getGraphqlUrlSuggestions({
-        url: new URL(`http://localhost:31299/?query=query devel { developers }}`),
+        url: new URL('http://localhost:31299/?query=query devel { developers }}'),
         requestConfigs
       })
     ).toEqual([]);

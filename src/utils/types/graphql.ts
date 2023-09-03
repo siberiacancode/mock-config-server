@@ -1,7 +1,6 @@
 import type { Request } from 'express';
 
 import type {
-  CalculateByDescriptorValueCheckMode,
   CheckActualValueCheckMode,
   CheckFunction,
   CheckMode,
@@ -9,82 +8,64 @@ import type {
   CompareWithDescriptorValueCheckMode
 } from './checkModes';
 import type { Interceptors } from './interceptors';
+import type { NestedObject } from './utils';
 import type { Data, Primitive } from './values';
 
 export type GraphQLEntityName = 'headers' | 'cookies' | 'query' | 'variables';
+type GraphQLPlainEntityName = Extract<GraphQLEntityName, 'variables'>;
+type GraphQLMappedEntityName = Exclude<GraphQLEntityName, 'variables'>;
 
-export type GraphQLMappedEntityName = string;
+type GraphQLPlainEntityValue = Primitive;
 type GraphQLMappedEntityValue = string | number | boolean;
 
-type GraphQLPlainEntityInnerValue = {
-  checkMode?: undefined;
-  call?: undefined;
-  dotAll?: undefined;
-  [key: string]: Primitive | GraphQLPlainEntityInnerValue;
-};
-
-type GraphQLPlainEntityValue =
-  // ✅ important:
-  // Omit `checkMode` key for fix types,
-  // Omit `call` key for exclude functions,
-  // Omit `forEach` for exclude arrays,
-  // Omit `dotAll` for exclude RegExp.
-  {
-    checkMode?: undefined;
-    call?: undefined;
-    forEach?: undefined;
-    dotAll?: undefined;
-    [key: string]: GraphQLPlainEntityInnerValue | Primitive | GraphQLEntityDescriptor;
-  };
-
-export type GraphQLOperationType = 'query' | 'mutation';
-type GraphQLOperationName = string | RegExp;
-
-interface GraphQLQuery {
-  operationType: GraphQLOperationType;
-  operationName: GraphQLOperationName;
-}
-
-type GraphQLVariables = Record<string, any>;
-export interface GraphQLInput {
-  query?: string;
-  variables: GraphQLVariables;
-}
-
-type GraphQLEntityValue<EntityName = GraphQLEntityName> = EntityName extends 'variables'
-  ? GraphQLPlainEntityValue
-  : GraphQLMappedEntityValue;
-
-type GraphQLEntityValueOrValues<EntityName = GraphQLEntityName> =
+type GraphQLEntityValue<EntityName extends GraphQLEntityName> =
+  EntityName extends GraphQLPlainEntityName ? GraphQLPlainEntityValue : GraphQLMappedEntityValue;
+export type GraphQLEntityValueOrValues<EntityName extends GraphQLEntityName = GraphQLEntityName> =
   | GraphQLEntityValue<EntityName>
   | GraphQLEntityValue<EntityName>[];
 
-type GraphQLEntityDescriptor<
-  EntityName extends GraphQLEntityName = GraphQLEntityName,
-  Check extends CheckMode = CheckMode
-> = EntityName extends 'variables'
-  ? Check extends Extract<CalculateByDescriptorValueCheckMode, 'function'>
+export type GraphQLTopLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
+  Check extends 'function'
     ? {
         checkMode: Check;
-        value: (actualValue: any, checkFunction: CheckFunction) => boolean;
+        value: (actualValue: NestedObject<Primitive>, checkFunction: CheckFunction) => boolean;
       }
     : Check extends CompareWithDescriptorAnyValueCheckMode
     ? {
         checkMode: Check;
-        value: GraphQLEntityValueOrValues<EntityName>;
+        value: Record<string, GraphQLPlainEntityValue> | Record<string, GraphQLPlainEntityValue>[];
       }
     : Check extends CheckActualValueCheckMode
     ? {
         checkMode: Check;
-        value?: undefined;
+        value: never;
       }
-    : never
-  : Check extends Extract<CalculateByDescriptorValueCheckMode, 'function'>
+    : never;
+
+type GraphQLNestedLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
+  Check extends 'function'
+    ? {
+        checkMode: Check;
+        value: (actualValue: GraphQLPlainEntityValue, checkFunction: CheckFunction) => boolean;
+      }
+    : Check extends CompareWithDescriptorAnyValueCheckMode
+    ? {
+        checkMode: Check;
+        value: GraphQLEntityValueOrValues<GraphQLPlainEntityName>;
+      }
+    : Check extends CheckActualValueCheckMode
+    ? {
+        checkMode: Check;
+        value: never;
+      }
+    : never;
+
+type GraphQLMappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check extends 'function'
   ? {
       checkMode: Check;
-      value: (actualValue: any, checkFunction: CheckFunction) => boolean;
+      value: (actualValue: GraphQLMappedEntityValue, checkFunction: CheckFunction) => boolean;
     }
-  : Check extends Extract<CalculateByDescriptorValueCheckMode, 'regExp'>
+  : Check extends 'regExp'
   ? {
       checkMode: Check;
       value: RegExp | RegExp[];
@@ -92,49 +73,44 @@ type GraphQLEntityDescriptor<
   : Check extends CompareWithDescriptorValueCheckMode
   ? {
       checkMode: Check;
-      value: GraphQLEntityValueOrValues<EntityName>;
+      value: GraphQLEntityValueOrValues<GraphQLMappedEntityName>;
     }
   : Check extends CheckActualValueCheckMode
   ? {
       checkMode: Check;
-      value?: undefined;
+      value: never;
     }
   : never;
 
 export type GraphQLEntityDescriptorOrValue<
   EntityName extends GraphQLEntityName = GraphQLEntityName
-> = EntityName extends 'variables'
-  ? GraphQLEntityDescriptor<EntityName> | GraphQLEntityValue<EntityName>
-  : Record<
-      GraphQLMappedEntityName,
-      GraphQLEntityDescriptor<EntityName> | GraphQLEntityValueOrValues<EntityName>
-    >;
+> = EntityName extends GraphQLPlainEntityName
+  ?
+      | GraphQLTopLevelPlainEntityDescriptor
+      | Record<
+          string,
+          GraphQLNestedLevelPlainEntityDescriptor | GraphQLEntityValueOrValues<EntityName>
+        >
+  : Record<string, GraphQLMappedEntityDescriptor | GraphQLEntityValueOrValues<EntityName>>;
 
-export type GraphQLEntityDescriptorOnly<EntityName extends GraphQLEntityName = GraphQLEntityName> =
-  EntityName extends 'variables'
-    ? GraphQLEntityDescriptor<EntityName>
-    : Record<GraphQLMappedEntityName, GraphQLEntityDescriptor<EntityName>>;
-
-export interface GraphQLEntityNamesByOperationType {
-  query: GraphQLEntityName;
-  mutation: GraphQLEntityName;
-}
-
-type GraphQLEntityByEntityName<OperationType extends GraphQLOperationType> = {
-  [EntityName in GraphQLEntityNamesByOperationType[OperationType]]?: GraphQLEntityDescriptorOrValue<EntityName>;
+export type GraphQLOperationType = 'query' | 'mutation';
+export type GraphQLOperationName = string | RegExp;
+export type GraphQLEntityNamesByOperationType = {
+  [operationType in GraphQLOperationType]: GraphQLEntityName;
 };
 
-export interface GraphQLRouteConfig<
-  OperationType extends GraphQLOperationType = GraphQLOperationType,
-  Entities extends
-    GraphQLEntityByEntityName<OperationType> = GraphQLEntityByEntityName<OperationType>
-> {
-  entities?: Entities;
-  data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
+export type GraphQLEntitiesByEntityName = {
+  [EntityName in GraphQLEntityName]?: GraphQLEntityDescriptorOrValue<EntityName>;
+};
+export interface GraphQLRouteConfig {
+  entities?: GraphQLEntitiesByEntityName;
+  data: ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>) | Data;
   interceptors?: Pick<Interceptors, 'response'>;
 }
 
-export interface GraphQLRequestConfig extends GraphQLQuery {
+export interface GraphQLRequestConfig {
+  operationType: GraphQLOperationType;
+  operationName: GraphQLOperationName;
   routes: GraphQLRouteConfig[];
   interceptors?: Interceptors;
 }

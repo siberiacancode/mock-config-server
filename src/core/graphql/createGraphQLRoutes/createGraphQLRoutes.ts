@@ -12,12 +12,12 @@ import {
   isEntityDescriptor
 } from '@/utils/helpers';
 import type {
+  Entries,
+  GraphQLEntitiesByEntityName,
   GraphqlConfig,
-  Interceptors,
   GraphQLEntityDescriptorOrValue,
-  GraphQLEntityName,
-  GraphQLMappedEntityName,
-  GraphQLEntityDescriptorOnly
+  GraphQLTopLevelPlainEntityDescriptor,
+  Interceptors
 } from '@/utils/types';
 
 import { prepareGraphQLRequestConfigs } from './helpers';
@@ -38,13 +38,11 @@ export const createGraphQLRoutes = (
     }
 
     const query = parseQuery(graphQLInput.query);
-
     if (!query) {
       return response
         .status(400)
         .json({ message: 'Query is invalid, you must use a valid GraphQL query' });
     }
-
     if (!query.operationName || !query.operationType) {
       return response.status(400).json({
         message: `You should to specify operationName and operationType for ${request.method}:${request.baseUrl}${request.path}`
@@ -76,30 +74,24 @@ export const createGraphQLRoutes = (
 
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
       if (!entities) return true;
-      const entries = Object.entries(entities) as [
-        GraphQLEntityName,
-        GraphQLEntityDescriptorOrValue
-      ][];
-      return entries.every(([entityName, valueOrDescriptor]) => {
-        const { checkMode, value: descriptorValue } = convertToEntityDescriptor(valueOrDescriptor);
+
+      const entries = Object.entries(entities) as Entries<Required<GraphQLEntitiesByEntityName>>;
+      return entries.every(([entityName, entityDescriptorOrValue]) => {
+        const { checkMode, value: entityDescriptorValue } =
+          convertToEntityDescriptor(entityDescriptorOrValue);
 
         // ✅ important: check whole variables as plain value strictly if descriptor used for variables
-        const isVariablesPlain =
-          entityName === 'variables' && isEntityDescriptor(valueOrDescriptor);
-        if (isVariablesPlain) {
-          // ✅ important: getGraphQLInput returns empty object if variables not sent or invalid, so count {} as undefined
-          return resolveEntityValues(checkMode, graphQLInput.variables, descriptorValue);
+        const isEntityVariablesByDescriptor =
+          entityName === 'variables' && isEntityDescriptor(entityDescriptorOrValue);
+        if (isEntityVariablesByDescriptor) {
+          return resolveEntityValues(checkMode, graphQLInput.variables, entityDescriptorValue);
         }
 
-        const mappedEntityDescriptors = Object.entries(valueOrDescriptor) as [
-          GraphQLMappedEntityName,
-          GraphQLEntityDescriptorOnly<
-            Exclude<GraphQLEntityName, 'variables'>
-          >[GraphQLMappedEntityName]
-        ][];
-        return mappedEntityDescriptors.every(([entityKey, mappedEntityDescriptor]) => {
-          const { checkMode, value: descriptorValue } =
-            convertToEntityDescriptor(mappedEntityDescriptor);
+        const recordEntries = Object.entries(entityDescriptorOrValue) as Entries<
+          Exclude<GraphQLEntityDescriptorOrValue, GraphQLTopLevelPlainEntityDescriptor>
+        >;
+        return recordEntries.every(([entityKey, entityValue]) => {
+          const { checkMode, value: descriptorValue } = convertToEntityDescriptor(entityValue);
           const flattenEntity = flatten<any, any>(
             entityName === 'variables' ? graphQLInput.variables : request[entityName]
           );

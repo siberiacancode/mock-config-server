@@ -319,7 +319,7 @@ describe('createGraphQLRoutes', () => {
                     checkMode: 'equals',
                     value: {
                       key1: 'value1',
-                      key2: { nestedKey1: 'nestedValue1' }
+                      'key2.nestedKey1': 'nestedValue1'
                     }
                   }
                 },
