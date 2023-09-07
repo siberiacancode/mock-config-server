@@ -26,6 +26,8 @@ const validateEntity = (entity: unknown, entityName: string) => {
       const errorMessage = 'variables.value';
       throw new Error(errorMessage);
     }
+
+    return;
   }
 
   const isEntityObject = isPlainObject(entity) && !(entity instanceof RegExp);

@@ -42,7 +42,7 @@ export type GraphQLTopLevelPlainEntityDescriptor<Check extends CheckMode = Check
       }
     : never;
 
-type GraphQLNestedLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
+type GraphQLPropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
   Check extends 'function'
     ? {
         checkMode: Check;
@@ -89,7 +89,7 @@ export type GraphQLEntityDescriptorOrValue<
       | GraphQLTopLevelPlainEntityDescriptor
       | Record<
           string,
-          GraphQLNestedLevelPlainEntityDescriptor | GraphQLEntityValueOrValues<EntityName>
+          GraphQLPropertyLevelPlainEntityDescriptor | GraphQLEntityValueOrValues<EntityName>
         >
   : Record<string, GraphQLMappedEntityDescriptor | GraphQLEntityValueOrValues<EntityName>>;
 
