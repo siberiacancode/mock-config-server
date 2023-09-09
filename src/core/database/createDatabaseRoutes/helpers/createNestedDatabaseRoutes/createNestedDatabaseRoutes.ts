@@ -20,7 +20,6 @@ export const createNestedDatabaseRoutes = (
       if (request.query._begin || request.query._end) {
         data = data.slice(request.query._begin ?? 0, request.query._end);
         response.set('X-Total-Count', data.length);
-        response.set('Cache-control', 'max-age=0, must-revalidate');
       }
       // ✅ important:
       // set 'Cache-Control' header for explicit browsers response revalidate
