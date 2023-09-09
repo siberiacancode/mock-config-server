@@ -174,6 +174,7 @@ describe('CreateNestedDatabaseRoutes', () => {
   describe('createNestedDatabaseRoutes: filter function', () => {
     const nestedDatabase = createNestedDatabase();
     const server = createServer(nestedDatabase);
+
     test('Should return filtered array by query', async () => {
       const response = await request(server).get('/users?name=John Doe');
 
