@@ -17,9 +17,9 @@
   <%- include(rootPath('features/tab/index')) -%>
 </head>
 
-<body class="tab-item-<%= graphqlRequestSuggestions.length ? api.graphql : api.rest %>">
+<body class="tab_item-<%= graphqlRequestSuggestions.length ? api.graphql : api.rest %>">
   <%- include(rootPath('components/header/index')) -%>
-  <div class="margin-container">
+  <div class="margin_container">
     <div class="hero">
       <div class="title">
         <img src="/assets/images/404.png" />
@@ -33,18 +33,18 @@
       </div>
     </div>
   </div>
-  <div class="margin-container">
+  <div class="margin_container">
     <div class="content">
-      <div class="content-head">
-        <div class="tab-items">
+      <div class="content_head">
+        <div class="tab_items">
           <% Object.values(api).forEach((variant)=> { %>
-          <div id="tab-item-<%=variant%>" class="tab-item">
+          <div id="tab_item-<%=variant%>" class="tab_item">
             <%=variant%>
           </div>
           <% }) %>
         </div>
       </div>
-      <div id="tab-content-<%=api.rest%>" class="tab-content">
+      <div id="tab_content-<%=api.rest%>" class="tab_content">
         <div class="description">
           <% if (restRequestSuggestions.length) { %>
           <span>We searched a bit, maybe this will help you:</span>
@@ -61,7 +61,7 @@
         </div>
       </div>
 
-      <div id="tab-content-<%=api.graphql%>" class="tab-content">
+      <div id="tab_content-<%=api.graphql%>" class="tab_content">
         <div class="description">
           <% if (graphqlRequestSuggestions.length) { %>
           <span>We searched a bit, maybe this will help you:</span>

@@ -1,5 +1,5 @@
 import { convertToEntityDescriptor, isEntityDescriptor, isPlainObject } from '@/utils/helpers';
-import type { RestMethod, RestEntityNamesByMethod } from '@/utils/types';
+import type { RestEntityNamesByMethod, RestMethod } from '@/utils/types';
 
 import { isCheckModeValid, isDescriptorValueValid } from '../../helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';

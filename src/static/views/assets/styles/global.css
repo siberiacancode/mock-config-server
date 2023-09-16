@@ -56,7 +56,7 @@ a {
   line-height: 17px;
 }
 
-.margin-container {
+.margin_container {
   display: flex;
   width: 100%;
   justify-content: center;
@@ -80,7 +80,7 @@ a {
   padding-inline: 75px;
 }
 
-.content-head {
+.content_head {
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -3,7 +3,7 @@ function switchTab(activeTabId) {
 }
 
 function initTab() {
-  const tabItems = document.getElementsByClassName('tab-item');
+  const tabItems = document.getElementsByClassName('tab_item');
   for (let i = 0; i < tabItems.length; i += 1) {
     tabItems[i].addEventListener('click', () => switchTab(tabItems[i].id));
   }

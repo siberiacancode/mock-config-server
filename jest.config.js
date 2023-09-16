@@ -1,13 +1,11 @@
+const { jest } = require('@siberiacancode/jest');
 const { pathsToModuleNameMapper } = require('ts-jest');
 const { compilerOptions } = require('./tsconfig.dev.json');
 
-/** @type {import('ts-jest').JestConfigWithTsJest} */
-const jestConfig = {
-  rootDir: './',
+/** @type {import('prettier').Config} */
+module.exports = {
+  ...jest,
   preset: 'ts-jest',
   testEnvironment: 'node',
-  collectCoverage: true,
-  coverageDirectory: 'coverage',
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' })
 };
-module.exports = jestConfig;

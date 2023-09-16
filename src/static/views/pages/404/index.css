@@ -1,10 +1,10 @@
 /* stylelint-disable */
-.tab-item-REST #tab-item-REST,
-.tab-item-GraphQL #tab-item-GraphQL {
+.tab_item-REST #tab_item-REST,
+.tab_item-GraphQL #tab_item-GraphQL {
   background: var(--accent);
 }
 
-.tab-item-REST #tab-content-REST,
-.tab-item-GraphQL #tab-content-GraphQL {
+.tab_item-REST #tab_content-REST,
+.tab_item-GraphQL #tab_content-GraphQL {
   display: unset;
 }

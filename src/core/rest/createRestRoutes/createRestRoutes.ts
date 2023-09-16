@@ -3,19 +3,19 @@ import { flatten } from 'flat';
 
 import {
   asyncHandler,
-  resolveEntityValues,
-  callResponseInterceptors,
   callRequestInterceptor,
+  callResponseInterceptors,
   convertToEntityDescriptor,
-  isEntityDescriptor
+  isEntityDescriptor,
+  resolveEntityValues
 } from '@/utils/helpers';
 import type {
   Interceptors,
   RestConfig,
+  RestEntityDescriptorOnly,
   RestEntityDescriptorOrValue,
   RestEntityName,
-  RestMappedEntityKey,
-  RestEntityDescriptorOnly
+  RestMappedEntityKey
 } from '@/utils/types';
 
 import { prepareRestRequestConfigs } from './helpers';

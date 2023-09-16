@@ -8,9 +8,8 @@ import { isIndex } from '../../helpers';
 import { FileWriter } from './FileWriter';
 
 type Index = string | number;
-type Object = Record<Index, any>;
 
-export class FileStorage<T extends Object = Object> {
+export class FileStorage<T extends Record<Index, any> = Record<Index, any>> {
   private readonly fileWriter: FileWriter;
 
   private readonly data: T;

@@ -5,13 +5,13 @@ import express from 'express';
 import { createDatabaseRoutes } from '@/core/database';
 import { createGraphQLRoutes } from '@/core/graphql';
 import {
-  corsMiddleware,
   cookieParseMiddleware,
+  corsMiddleware,
+  errorMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
   requestInterceptorMiddleware,
-  staticMiddleware,
-  errorMiddleware
+  staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';

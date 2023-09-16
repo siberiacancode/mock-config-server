@@ -3,8 +3,8 @@ import type { Express } from 'express';
 import { parseGraphQLRequest } from '@/utils/helpers';
 import type { MockServerConfig, RestPathString } from '@/utils/types';
 
+import type { GraphqlRequestSuggestionConfigs, RestRequestSuggestionConfigs } from './helpers';
 import { getGraphqlUrlSuggestions, getRestUrlSuggestions } from './helpers';
-import type { RestRequestSuggestionConfigs, GraphqlRequestSuggestionConfigs } from './helpers';
 
 export const notFoundMiddleware = (
   server: Express,
@@ -25,9 +25,7 @@ export const notFoundMiddleware = (
       .filter(({ operationName }) => !(operationName instanceof RegExp))
       .map((request) => ({
         operationType: request.operationType,
-        operationName: `${serverBaseUrl ?? ''}${graphql?.baseUrl ?? ''} ${
-          request.operationName
-        }` as string
+        operationName: `${serverBaseUrl ?? ''}${graphql?.baseUrl ?? ''} ${request.operationName}`
       })) ?? [];
 
   server.use((request, response) => {
