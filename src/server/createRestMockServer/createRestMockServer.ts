@@ -3,7 +3,6 @@ import type { Express } from 'express';
 import express from 'express';
 
 import { createDatabaseRoutes } from '@/core/database';
-import { createGraphQLRoutes } from '@/core/graphql';
 import {
   corsMiddleware,
   cookieParseMiddleware,
@@ -15,13 +14,13 @@ import {
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
-import type { MockServerConfig } from '@/utils/types';
+import type { RestMockServerConfig } from '@/utils/types';
 
-export const createMockServer = (
-  mockServerConfig: Omit<MockServerConfig, 'port'>,
+export const createRestMockServer = (
+  restMockServerConfig: Omit<RestMockServerConfig, 'port'>,
   server: Express = express()
 ) => {
-  const { cors, staticPath, rest, graphql, database, interceptors } = mockServerConfig;
+  const { cors, staticPath, configs, database, interceptors } = restMockServerConfig;
 
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../static/views'));
@@ -36,12 +35,12 @@ export const createMockServer = (
 
   cookieParseMiddleware(server);
 
-  const serverRequestInterceptor = mockServerConfig.interceptors?.request;
+  const serverRequestInterceptor = restMockServerConfig.interceptors?.request;
   if (serverRequestInterceptor) {
     requestInterceptorMiddleware(server, serverRequestInterceptor);
   }
 
-  const baseUrl = mockServerConfig.baseUrl ?? '/';
+  const baseUrl = restMockServerConfig.baseUrl ?? '/';
 
   if (cors) {
     corsMiddleware(server, cors);
@@ -53,42 +52,20 @@ export const createMockServer = (
     staticMiddleware(server, baseUrl, staticPath);
   }
 
-  if (rest) {
-    const routerWithRestRoutes = createRestRoutes(express.Router(), rest, interceptors?.response);
+  const routerWithRestRoutes = createRestRoutes(
+    express.Router(),
+    { configs },
+    interceptors?.response
+  );
 
-    const apiRequestInterceptor = rest.interceptors?.request;
-    if (apiRequestInterceptor) {
-      requestInterceptorMiddleware(server, apiRequestInterceptor);
-    }
-
-    const restBaseUrl = urlJoin(baseUrl, rest.baseUrl ?? '/');
-
-    server.use(restBaseUrl, routerWithRestRoutes);
-  }
-
-  if (graphql) {
-    const routerWithGraphQLRoutes = createGraphQLRoutes(
-      express.Router(),
-      graphql,
-      interceptors?.response
-    );
-
-    const apiRequestInterceptor = graphql.interceptors?.request;
-    if (apiRequestInterceptor) {
-      requestInterceptorMiddleware(server, apiRequestInterceptor);
-    }
-
-    const graphqlBaseUrl = urlJoin(baseUrl, graphql.baseUrl ?? '/');
-
-    server.use(graphqlBaseUrl, routerWithGraphQLRoutes);
-  }
+  server.use(baseUrl, routerWithRestRoutes);
 
   if (database) {
     const routerWithDatabaseRoutes = createDatabaseRoutes(express.Router(), database);
     server.use(baseUrl, routerWithDatabaseRoutes);
   }
 
-  notFoundMiddleware(server, mockServerConfig);
+  notFoundMiddleware(server, restMockServerConfig);
 
   errorMiddleware(server);
 

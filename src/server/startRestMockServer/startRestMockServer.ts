@@ -1,0 +1,19 @@
+import color from 'ansi-colors';
+
+import { destroyerMiddleware } from '@/core/middlewares';
+import { DEFAULT } from '@/utils/constants';
+import type { RestMockServerConfig } from '@/utils/types';
+
+import { createRestMockServer } from '../createRestMockServer/createRestMockServer';
+
+export const startRestMockServer = (restMockServerConfig: RestMockServerConfig) => {
+  const mockServer = createRestMockServer(restMockServerConfig);
+  const port = restMockServerConfig.port ?? DEFAULT.PORT;
+
+  const server = mockServer.listen(port, () => {
+    console.log(color.green(`🎉 Rest Mock Server is running at http://localhost:${port}`));
+  });
+
+  // ✅ important: add destroy method for closing keep-alive connections after server shutdown
+  return destroyerMiddleware(server);
+};

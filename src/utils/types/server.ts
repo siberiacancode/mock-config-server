@@ -49,6 +49,36 @@ export interface MockServerConfig {
   cors?: Cors;
 }
 
+export interface RestMockServerConfig {
+  baseUrl?: BaseUrl;
+  configs: RestRequestConfig[];
+  database?: DatabaseConfig;
+  port?: Port;
+  staticPath?: StaticPath;
+  interceptors?: Interceptors;
+  cors?: Cors;
+}
+
+export interface GraphQLMockServerConfig {
+  baseUrl?: BaseUrl;
+  configs: GraphQLRequestConfig[];
+  database?: DatabaseConfig;
+  port?: Port;
+  staticPath?: StaticPath;
+  interceptors?: Interceptors;
+  cors?: Cors;
+}
+
+export interface DatabaseMockServerConfig {
+  baseUrl?: BaseUrl;
+  data: Record<string, unknown> | `${string}.json`;
+  routes?: Record<`/${string}`, `/${string}`> | `${string}.json`;
+  port?: Port;
+  staticPath?: StaticPath;
+  interceptors?: Interceptors;
+  cors?: Cors;
+}
+
 export interface MockServerConfigArgv {
   baseUrl?: string;
   port?: number;
