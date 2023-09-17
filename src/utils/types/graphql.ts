@@ -8,7 +8,7 @@ import type {
   CompareWithDescriptorValueCheckMode
 } from './checkModes';
 import type { Interceptors } from './interceptors';
-import type { NestedObject } from './utils';
+import type { NestedObjectOrArray } from './utils';
 import type { Data, Primitive } from './values';
 
 export type GraphQLEntityName = 'headers' | 'cookies' | 'query' | 'variables';
@@ -20,7 +20,7 @@ type GraphQLMappedEntityValue = string | number | boolean;
 
 type GraphQLEntityValue<EntityName extends GraphQLEntityName> =
   EntityName extends GraphQLPlainEntityName ? GraphQLPlainEntityValue : GraphQLMappedEntityValue;
-export type GraphQLEntityValueOrValues<EntityName extends GraphQLEntityName = GraphQLEntityName> =
+type GraphQLEntityValueOrValues<EntityName extends GraphQLEntityName> =
   | GraphQLEntityValue<EntityName>
   | GraphQLEntityValue<EntityName>[];
 
@@ -28,12 +28,15 @@ export type GraphQLTopLevelPlainEntityDescriptor<Check extends CheckMode = Check
   Check extends 'function'
     ? {
         checkMode: Check;
-        value: (actualValue: NestedObject<Primitive>, checkFunction: CheckFunction) => boolean;
+        value: (
+          actualValue: NestedObjectOrArray<GraphQLPlainEntityValue>,
+          checkFunction: CheckFunction
+        ) => boolean;
       }
     : Check extends CompareWithDescriptorAnyValueCheckMode
     ? {
         checkMode: Check;
-        value: Record<string, GraphQLPlainEntityValue> | Record<string, GraphQLPlainEntityValue>[];
+        value: NestedObjectOrArray<GraphQLPlainEntityValue>;
       }
     : Check extends CheckActualValueCheckMode
     ? {
@@ -46,12 +49,15 @@ type GraphQLPropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMo
   Check extends 'function'
     ? {
         checkMode: Check;
-        value: (actualValue: GraphQLPlainEntityValue, checkFunction: CheckFunction) => boolean;
+        value: (
+          actualValue: GraphQLPlainEntityValue | NestedObjectOrArray<GraphQLPlainEntityValue>,
+          checkFunction: CheckFunction
+        ) => boolean;
       }
     : Check extends CompareWithDescriptorAnyValueCheckMode
     ? {
         checkMode: Check;
-        value: GraphQLEntityValueOrValues<GraphQLPlainEntityName>;
+        value: GraphQLPlainEntityValue | NestedObjectOrArray<GraphQLPlainEntityValue>;
       }
     : Check extends CheckActualValueCheckMode
     ? {
@@ -89,7 +95,9 @@ export type GraphQLEntityDescriptorOrValue<
       | GraphQLTopLevelPlainEntityDescriptor
       | Record<
           string,
-          GraphQLPropertyLevelPlainEntityDescriptor | GraphQLEntityValueOrValues<EntityName>
+          | GraphQLPropertyLevelPlainEntityDescriptor
+          | GraphQLEntityValue<EntityName>
+          | NestedObjectOrArray<GraphQLEntityValue<EntityName>>
         >
   : Record<string, GraphQLMappedEntityDescriptor | GraphQLEntityValueOrValues<EntityName>>;
 
