@@ -43,16 +43,16 @@ export const createGraphQLRoutes = (
         .status(400)
         .json({ message: 'Query is invalid, you must use a valid GraphQL query' });
     }
-    if (!query.operationName || !query.operationType) {
+    if (!query.operationName) {
       return response.status(400).json({
-        message: `You should to specify operationName and operationType for ${request.method}:${request.baseUrl}${request.path}`
+        message: `You should to specify operationName for ${request.method}:${request.baseUrl}${request.path}`
       });
     }
 
     const matchedRequestConfig = preparedGraphQLRequestConfig.find((requestConfig) => {
       if (requestConfig.operationName instanceof RegExp) {
         return (
-          new RegExp(requestConfig.operationName).test(query.operationName) &&
+          new RegExp(requestConfig.operationName).test(query.operationName!) &&
           requestConfig.operationType === query.operationType
         );
       }
@@ -93,8 +93,9 @@ export const createGraphQLRoutes = (
         return recordEntries.every(([entityKey, entityValue]) => {
           const { checkMode, value: descriptorValue } = convertToEntityDescriptor(entityValue);
           const flattenEntity = flatten<any, any>(
-            entityName === 'variables' ? graphQLInput.variables : request[entityName]
+            entityName === 'variables' ? graphQLInput.variables ?? {} : request[entityName]
           );
+
           // ✅ important: transform header keys to lower case because browsers send headers in lowercase
           return resolveEntityValues(
             checkMode,

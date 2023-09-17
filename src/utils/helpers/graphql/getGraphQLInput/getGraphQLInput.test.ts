@@ -3,12 +3,29 @@ import type { Request } from 'express';
 import { getGraphQLInput } from './getGraphQLInput';
 
 describe('getGraphQLInput', () => {
-  test('Should get correct graphQL input from GET request', () => {
+  test('Should get correct graphQL input from GET request (with object variables)', () => {
     const mockRequest = {
       method: 'GET',
       query: {
         query: 'query GetCharacters { characters { name } }',
-        variables: '{"limit": 10}'
+        variables: { limit: 10 }
+      }
+    } as unknown as Request;
+
+    const graphQLInput = getGraphQLInput(mockRequest);
+
+    expect(graphQLInput).toStrictEqual({
+      query: 'query GetCharacters { characters { name } }',
+      variables: { limit: 10 }
+    });
+  });
+
+  test('Should get correct graphQL input from GET request (with string variables)', () => {
+    const mockRequest = {
+      method: 'GET',
+      query: {
+        query: 'query GetCharacters { characters { name } }',
+        variables: '{ "limit": 10 }'
       }
     } as unknown as Request;
 

@@ -11,9 +11,11 @@ export const getGraphQLInput = (request: Request): GetGraphQLInputResult => {
   if (request.method === 'GET') {
     const { query, variables } = request.query;
 
+    // ✅ important:
+    // if 'variables' was sent as encoded uri component then it already decoded into object and we do not need to use JSON.parse
     return {
       query: query?.toString(),
-      variables: variables && JSON.parse(variables as string)
+      variables: typeof variables === 'string' ? JSON.parse(variables as string) : variables
     };
   }
 
