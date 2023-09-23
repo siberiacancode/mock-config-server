@@ -3,21 +3,21 @@ import { flatten } from 'flat';
 
 import {
   asyncHandler,
-  resolveEntityValues,
-  callResponseInterceptors,
-  getGraphQLInput,
-  parseQuery,
   callRequestInterceptor,
+  callResponseInterceptors,
   convertToEntityDescriptor,
-  isEntityDescriptor
+  getGraphQLInput,
+  isEntityDescriptor,
+  parseQuery,
+  resolveEntityValues
 } from '@/utils/helpers';
 import type {
   GraphqlConfig,
-  Interceptors,
+  GraphQLEntityDescriptorOnly,
   GraphQLEntityDescriptorOrValue,
   GraphQLEntityName,
   GraphQLMappedEntityName,
-  GraphQLEntityDescriptorOnly
+  Interceptors
 } from '@/utils/types';
 
 import { prepareGraphQLRequestConfigs } from './helpers';

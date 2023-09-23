@@ -1,5 +1,5 @@
-import { getRestUrlSuggestions } from './getRestUrlSuggestions';
 import type { RestRequestSuggestionConfigs } from './getRestUrlSuggestions';
+import { getRestUrlSuggestions } from './getRestUrlSuggestions';
 
 describe('getRestUrlSuggestions', () => {
   test('Should correctly return suggestions', () => {

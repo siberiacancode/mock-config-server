@@ -1,3 +1,4 @@
+/* eslint-disable eslint-comments/disable-enable-pair, eslint-comments/no-unlimited-disable */
 /* eslint-disable */
 
 const min = (d0: number, d1: number, d2: number, bx: number, ay: number) =>

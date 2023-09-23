@@ -1,9 +1,8 @@
 import { isIndex } from '../../helpers';
 
 type Index = string | number;
-type Object = Record<Index, any>;
 
-export class MemoryStorage<T extends Object = Object> {
+export class MemoryStorage<T extends Record<Index, any> = Record<Index, any>> {
   private readonly data: T;
 
   public constructor(initialData: T) {

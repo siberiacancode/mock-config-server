@@ -6,7 +6,7 @@
   background-color: var(--background-container);
 }
 
-.header-content {
+.header_content {
   display: flex;
   width: 800px;
   height: 60px;
@@ -17,13 +17,13 @@
   padding-inline: 75px;
 }
 
-.header-menu {
+.header_menu {
   display: flex;
   flex-direction: row;
   gap: 25px;
 }
 
-.header-menu-item {
+.header_menu_item {
   display: flex;
   height: 25px;
   flex-direction: row;
@@ -45,7 +45,7 @@ li {
   list-style-type: none;
 }
 
-.scheme-switcher {
+.scheme_switcher {
   width: 22px;
   height: 22px;
   background-image: var(--image-scheme);
