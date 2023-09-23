@@ -1,3 +1,2 @@
-export * from './server/createMockServer/createMockServer';
-export * from './server/startMockServer/startMockServer';
+export * from './server';
 export * from './utils/types';
