@@ -1,35 +1,77 @@
 import {
   CHECK_ACTUAL_VALUE_CHECK_MODES,
-  COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES
+  COMPARE_WITH_DESCRIPTOR_ANY_VALUE_CHECK_MODES,
+  COMPARE_WITH_DESCRIPTOR_STRING_VALUE_CHECK_MODES
 } from '@/utils/constants';
-import type { CheckActualValueCheckMode, CompareWithDescriptorValueCheckMode } from '@/utils/types';
+import { isPlainObject } from '@/utils/helpers';
+import type {
+  CheckActualValueCheckMode,
+  CheckMode,
+  CompareWithDescriptorAnyValueCheckMode,
+  CompareWithDescriptorStringValueCheckMode
+} from '@/utils/types';
+
+// ✅ important:
+// should validate all properties over nesting
+const isObjectOrArrayValid = (objectOrPrimitive: unknown): boolean => {
+  if (
+    typeof objectOrPrimitive === 'boolean' ||
+    typeof objectOrPrimitive === 'number' ||
+    typeof objectOrPrimitive === 'string' ||
+    objectOrPrimitive === null
+  ) {
+    return true;
+  }
+
+  if (Array.isArray(objectOrPrimitive)) {
+    return objectOrPrimitive.every(isObjectOrArrayValid);
+  }
+
+  if (isPlainObject(objectOrPrimitive)) {
+    for (const key in objectOrPrimitive) {
+      if (!isObjectOrArrayValid(objectOrPrimitive[key])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return false;
+};
 
 export const isDescriptorValueValid = (
-  checkMode: unknown,
+  checkMode: CheckMode,
   value: unknown,
-  entityName?: unknown
+  isCheckAsObject: boolean
 ) => {
   if (CHECK_ACTUAL_VALUE_CHECK_MODES.includes(checkMode as CheckActualValueCheckMode))
     return typeof value === 'undefined';
 
   if (
-    COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES.includes(
-      checkMode as CompareWithDescriptorValueCheckMode
+    COMPARE_WITH_DESCRIPTOR_ANY_VALUE_CHECK_MODES.includes(
+      checkMode as CompareWithDescriptorAnyValueCheckMode
     )
   ) {
-    if (entityName === 'body' || entityName === 'variables') {
-      return (
-        typeof value === 'object' &&
-        value !== null &&
-        typeof value !== 'function' &&
-        !(value instanceof RegExp)
-      );
+    if (isCheckAsObject) {
+      const isValueValidOnTopLevel = isPlainObject(value) || Array.isArray(value);
+      return isValueValidOnTopLevel && isObjectOrArrayValid(value);
     }
+    return (
+      typeof value === 'boolean' ||
+      typeof value === 'number' ||
+      typeof value === 'string' ||
+      value === null
+    );
+  }
+
+  if (
+    COMPARE_WITH_DESCRIPTOR_STRING_VALUE_CHECK_MODES.includes(
+      checkMode as CompareWithDescriptorStringValueCheckMode
+    )
+  ) {
     return typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string';
   }
 
   if (checkMode === 'function') return typeof value === 'function';
   if (checkMode === 'regExp') return value instanceof RegExp;
-
-  throw new Error('Invalid checkMode');
 };

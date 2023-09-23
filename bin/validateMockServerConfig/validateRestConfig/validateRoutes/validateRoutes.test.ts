@@ -217,7 +217,7 @@ describe('validateRoutes (rest)', () => {
         ).toThrow(new Error('routes[0].entities.headers.key.value'));
       });
 
-      const incorrectMappedEntityValues = [null, {}, () => {}, /\d/];
+      const incorrectMappedEntityValues = [undefined, {}, () => {}, /\d/];
       incorrectMappedEntityValues.forEach((incorrectMappedEntityValue) => {
         expect(() =>
           validateRoutes(
@@ -547,7 +547,7 @@ describe('validateRoutes (rest)', () => {
       ).toThrow(new Error('routes[0].entities.headers'));
     });
 
-    const incorrectHeadersMappedValues = [null, undefined, {}, () => {}, /\d/];
+    const incorrectHeadersMappedValues = [undefined, {}, () => {}, /\d/];
     incorrectHeadersMappedValues.forEach((incorrectHeadersMappedValue) => {
       expect(() =>
         validateRoutes(
@@ -594,7 +594,7 @@ describe('validateRoutes (rest)', () => {
       ).toThrow(new Error('routes[0].entities.cookies'));
     });
 
-    const incorrectCookiesMappedValues = [null, undefined, {}, () => {}, /\d/];
+    const incorrectCookiesMappedValues = [undefined, {}, () => {}, /\d/];
     incorrectCookiesMappedValues.forEach((incorrectCookiesMappedValue) => {
       expect(() =>
         validateRoutes(
@@ -641,7 +641,7 @@ describe('validateRoutes (rest)', () => {
       ).toThrow(new Error('routes[0].entities.params'));
     });
 
-    const incorrectParamsMappedValues = [null, undefined, {}, () => {}, /\d/];
+    const incorrectParamsMappedValues = [undefined, {}, () => {}, /\d/];
     incorrectParamsMappedValues.forEach((incorrectParamsMappedValue) => {
       expect(() =>
         validateRoutes(
@@ -695,7 +695,7 @@ describe('validateRoutes (rest)', () => {
       ).toThrow(new Error('routes[0].entities.query'));
     });
 
-    const incorrectQueryMappedValues = [null, undefined, () => {}, /\d/];
+    const incorrectQueryMappedValues = [undefined, () => {}, /\d/];
     incorrectQueryMappedValues.forEach((incorrectQueryMappedValue) => {
       expect(() =>
         validateRoutes(

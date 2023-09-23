@@ -26,7 +26,7 @@ const validateEntity = (entity: unknown, entityName: string) => {
       throw new Error('body.checkMode');
     }
 
-    if (!isDescriptorValueValid(topLevelCheckMode, topLevelValue, 'body')) {
+    if (!isDescriptorValueValid(topLevelCheckMode, topLevelValue, true)) {
       const errorMessage = 'body.value';
       throw new Error(errorMessage);
     }
@@ -47,13 +47,13 @@ const validateEntity = (entity: unknown, entityName: string) => {
       const isValueArray = Array.isArray(value);
       if (isValueArray && !isBody) {
         value.forEach((element, index) => {
-          if (!isDescriptorValueValid(checkMode, element)) {
+          if (!isDescriptorValueValid(checkMode, element, false)) {
             throw new Error(`${errorMessage}[${index}]`);
           }
         });
         return;
       }
-      if (!isDescriptorValueValid(checkMode, value)) {
+      if (!isDescriptorValueValid(checkMode, value, false)) {
         throw new Error(errorMessage);
       }
     });
