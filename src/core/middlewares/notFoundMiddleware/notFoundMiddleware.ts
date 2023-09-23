@@ -22,12 +22,12 @@ export const notFoundMiddleware = (
 
   const graphqlRequestConfigs =
     graphql?.configs
-      .filter(({ operationName }) => !(operationName instanceof RegExp))
+      .filter((request) => 'operationName' in request && !(request.operationName instanceof RegExp))
       .map((request) => ({
         operationType: request.operationType,
         operationName: `${serverBaseUrl ?? ''}${graphql?.baseUrl ?? ''} ${
-          request.operationName
-        }` as string
+          (request as any).operationName
+        }`
       })) ?? [];
 
   server.use((request, response) => {

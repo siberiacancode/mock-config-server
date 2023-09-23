@@ -43,24 +43,29 @@ export const createGraphQLRoutes = (
         .status(400)
         .json({ message: 'Query is invalid, you must use a valid GraphQL query' });
     }
-    if (!query.operationName) {
-      return response.status(400).json({
-        message: `You should to specify operationName for ${request.method}:${request.baseUrl}${request.path}`
-      });
-    }
 
     const matchedRequestConfig = preparedGraphQLRequestConfig.find((requestConfig) => {
-      if (requestConfig.operationName instanceof RegExp) {
-        return (
-          new RegExp(requestConfig.operationName).test(query.operationName!) &&
-          requestConfig.operationType === query.operationType
-        );
+      if (requestConfig.operationType !== query.operationType) {
+        return false;
       }
 
-      return (
-        requestConfig.operationName === query.operationName &&
-        requestConfig.operationType === query.operationType
-      );
+      if ('query' in requestConfig && requestConfig.query !== graphQLInput.query) {
+        return false;
+      }
+
+      if ('operationName' in requestConfig) {
+        if (!query.operationName) {
+          return false;
+        }
+
+        if (requestConfig.operationName instanceof RegExp) {
+          return new RegExp(requestConfig.operationName).test(query.operationName);
+        }
+
+        return requestConfig.operationName === query.operationName;
+      }
+
+      return true;
     });
 
     if (!matchedRequestConfig) {

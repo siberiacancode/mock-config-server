@@ -94,40 +94,7 @@ describe('createGraphQLRoutes', () => {
       });
     });
 
-    test('Should return 400 and description text if operationName does not presented in graphql query', async () => {
-      const server = createServer({
-        graphql: {
-          configs: [
-            {
-              operationName: 'GetUsers',
-              operationType: 'query',
-              routes: [
-                {
-                  data: { name: 'John', surname: 'Doe' }
-                }
-              ]
-            }
-          ]
-        }
-      });
-
-      const postResponse = await request(server)
-        .post('/')
-        .send({ query: 'query { users { name } }' });
-      expect(postResponse.statusCode).toBe(400);
-      expect(postResponse.body).toStrictEqual({
-        message: 'You should to specify operationName for POST:/'
-      });
-
-      const getResponse = await request(server)
-        .get('/')
-        .query({ query: 'query { users { name } }' });
-      expect(getResponse.statusCode).toBe(400);
-      expect(getResponse.body).toStrictEqual({
-        message: 'You should to specify operationName for GET:/'
-      });
-    });
-
+    // TODO delete
     test('Should return 404 for no matched request configs', async () => {
       const server = createServer({
         graphql: {
@@ -159,6 +126,149 @@ describe('createGraphQLRoutes', () => {
       const getResponse = await request(server)
         .get('/')
         .set({ key2: 'value2' })
+        .query({ query: 'query GetUsers { users { name } }' });
+      expect(getResponse.statusCode).toBe(404);
+    });
+  });
+
+  describe('createGraphQLRoutes: not found config', () => {
+    test('Should return 404 for not matched operationType', async () => {
+      const server = createServer({
+        graphql: {
+          configs: [
+            {
+              operationName: 'GetUsers',
+              operationType: 'query',
+              routes: [
+                {
+                  data: { name: 'John', surname: 'Doe' }
+                }
+              ]
+            }
+          ]
+        }
+      });
+
+      const postResponse = await request(server)
+        .post('/')
+        .send({ query: 'mutation GetUsers { users { name } }' });
+      expect(postResponse.statusCode).toBe(404);
+
+      const getResponse = await request(server)
+        .get('/')
+        .query({ query: 'mutation GetUsers { users { name } }' });
+      expect(getResponse.statusCode).toBe(404);
+    });
+
+    test('Should return 404 for not matched query', async () => {
+      const server = createServer({
+        graphql: {
+          configs: [
+            {
+              operationName: 'GetUsers',
+              operationType: 'query',
+              query: 'mutation GetUsers { users { name } }',
+              routes: [
+                {
+                  data: { name: 'John', surname: 'Doe' }
+                }
+              ]
+            }
+          ]
+        }
+      });
+
+      const postResponse = await request(server)
+        .post('/')
+        .send({ query: 'query GetUsers { users { name } }' });
+      expect(postResponse.statusCode).toBe(404);
+
+      const getResponse = await request(server)
+        .get('/')
+        .query({ query: 'query GetUsers { users { name } }' });
+      expect(getResponse.statusCode).toBe(404);
+    });
+
+    test('Should return 404 if operationName presented in config but not presented in actual query', async () => {
+      const server = createServer({
+        graphql: {
+          configs: [
+            {
+              operationName: 'GetUsers',
+              operationType: 'query',
+              routes: [
+                {
+                  data: { name: 'John', surname: 'Doe' }
+                }
+              ]
+            }
+          ]
+        }
+      });
+
+      const postResponse = await request(server)
+        .post('/')
+        .send({ query: 'query { users { name } }' });
+      expect(postResponse.statusCode).toBe(404);
+
+      const getResponse = await request(server)
+        .get('/')
+        .query({ query: 'query { users { name } }' });
+      expect(getResponse.statusCode).toBe(404);
+    });
+
+    test('Should return 404 if actual query operationName does not match to config RegExp operationName', async () => {
+      const server = createServer({
+        graphql: {
+          configs: [
+            {
+              operationName: /GetUsers\d+/,
+              operationType: 'query',
+              routes: [
+                {
+                  data: { name: 'John', surname: 'Doe' }
+                }
+              ]
+            }
+          ]
+        }
+      });
+
+      const postResponse = await request(server)
+        .post('/')
+        .send({ query: 'query GetUsers { users { name } }' });
+      expect(postResponse.statusCode).toBe(404);
+
+      const getResponse = await request(server)
+        .get('/')
+        .query({ query: 'query GetUsers { users { name } }' });
+      expect(getResponse.statusCode).toBe(404);
+    });
+
+    test('Should return 404 if actual query operationName does not mathc to config string operationName', async () => {
+      const server = createServer({
+        graphql: {
+          configs: [
+            {
+              operationName: 'GetSettings',
+              operationType: 'query',
+              routes: [
+                {
+                  data: { name: 'John', surname: 'Doe' }
+                }
+              ]
+            }
+          ]
+        }
+      });
+
+      const postResponse = await request(server)
+        .post('/')
+        .send({ query: 'query GetUsers { users { name } }' });
+      expect(postResponse.statusCode).toBe(404);
+
+      const getResponse = await request(server)
+        .get('/')
         .query({ query: 'query GetUsers { users { name } }' });
       expect(getResponse.statusCode).toBe(404);
     });

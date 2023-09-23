@@ -116,9 +116,18 @@ export interface GraphQLRouteConfig {
   interceptors?: Pick<Interceptors, 'response'>;
 }
 
-export interface GraphQLRequestConfig {
+interface GraphQLRequestConfigBase {
   operationType: GraphQLOperationType;
-  operationName: GraphQLOperationName;
   routes: GraphQLRouteConfig[];
   interceptors?: Interceptors;
 }
+
+interface OperationNameGraphQLRequestConfig extends GraphQLRequestConfigBase {
+  operationName: GraphQLOperationName;
+}
+
+interface QueryGraphQLRequestConfig extends GraphQLRequestConfigBase {
+  query: string;
+}
+
+export type GraphQLRequestConfig = OperationNameGraphQLRequestConfig | QueryGraphQLRequestConfig;
