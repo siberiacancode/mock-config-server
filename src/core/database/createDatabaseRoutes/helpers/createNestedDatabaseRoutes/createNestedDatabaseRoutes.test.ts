@@ -188,7 +188,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by same queries', async () => {
+    test('Should return filtered array by identical queries names', async () => {
       const response = await request(server).get('/users?id=1&id=2');
 
       expect(response.body).toStrictEqual(nestedDatabase.users);
