@@ -428,7 +428,7 @@ describe('createGraphQLRoutes', () => {
   });
 
   describe('createGraphQLRoutes: interceptors', () => {
-    test('Should call request interceptor for specific route', async () => {
+    test('Should call request interceptor for specific config', async () => {
       const requestInterceptor = jest.fn();
       const server = createServer({
         graphql: {
@@ -578,7 +578,7 @@ describe('createGraphQLRoutes', () => {
   });
 
   describe('createGraphQLRoutes: browsers specific', () => {
-    test('Should have response Cache-Control header equals to max-age=0, must-revalidate', async () => {
+    test('Should have response Cache-Control header with max-age=0, must-revalidate value', async () => {
       const server = createServer({
         graphql: {
           configs: [

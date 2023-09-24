@@ -9,13 +9,13 @@ import type {
 } from './checkModes';
 import type { Interceptors } from './interceptors';
 import type { NestedObjectOrArray } from './utils';
-import type { Data, Primitive } from './values';
+import type { Data } from './values';
 
 export type GraphQLEntityName = 'headers' | 'cookies' | 'query' | 'variables';
 type GraphQLPlainEntityName = Extract<GraphQLEntityName, 'variables'>;
 type GraphQLMappedEntityName = Exclude<GraphQLEntityName, 'variables'>;
 
-type GraphQLPlainEntityValue = Primitive;
+type GraphQLPlainEntityValue = string | number | boolean | null;
 type GraphQLMappedEntityValue = string | number | boolean;
 
 type GraphQLEntityValue<EntityName extends GraphQLEntityName> =
@@ -93,12 +93,8 @@ export type GraphQLEntityDescriptorOrValue<
 > = EntityName extends GraphQLPlainEntityName
   ?
       | GraphQLTopLevelPlainEntityDescriptor
-      | Record<
-          string,
-          | GraphQLPropertyLevelPlainEntityDescriptor
-          | GraphQLEntityValue<EntityName>
-          | NestedObjectOrArray<GraphQLEntityValue<EntityName>>
-        >
+      | Record<string, GraphQLPropertyLevelPlainEntityDescriptor>
+      | NestedObjectOrArray<GraphQLPlainEntityValue>
   : Record<string, GraphQLMappedEntityDescriptor | GraphQLEntityValueOrValues<EntityName>>;
 
 export type GraphQLOperationType = 'query' | 'mutation';
@@ -111,22 +107,22 @@ export type GraphQLEntitiesByEntityName = {
   [EntityName in GraphQLEntityName]?: GraphQLEntityDescriptorOrValue<EntityName>;
 };
 export interface GraphQLRouteConfig {
-  entities?: GraphQLEntitiesByEntityName;
   data: ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>) | Data;
+  entities?: GraphQLEntitiesByEntityName;
   interceptors?: Pick<Interceptors, 'response'>;
 }
 
-interface GraphQLRequestConfigBase {
+interface BaseGraphQLRequestConfig {
   operationType: GraphQLOperationType;
   routes: GraphQLRouteConfig[];
   interceptors?: Interceptors;
 }
 
-interface OperationNameGraphQLRequestConfig extends GraphQLRequestConfigBase {
+interface OperationNameGraphQLRequestConfig extends BaseGraphQLRequestConfig {
   operationName: GraphQLOperationName;
 }
 
-interface QueryGraphQLRequestConfig extends GraphQLRequestConfigBase {
+interface QueryGraphQLRequestConfig extends BaseGraphQLRequestConfig {
   query: string;
 }
 

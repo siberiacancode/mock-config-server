@@ -32,7 +32,8 @@ const validateEntity = (entity: unknown, entityName: GraphQLEntityName) => {
   }
 
   const isEntityObject = isPlainObject(entity);
-  if (isEntityObject) {
+  const isEntityVariablesArray = Array.isArray(entity) && isVariables;
+  if (isEntityObject || isEntityVariablesArray) {
     Object.entries(entity).forEach(([key, valueOrDescriptor]) => {
       const { checkMode, value } = convertToEntityDescriptor(valueOrDescriptor);
       if (!isCheckModeValid(checkMode)) {

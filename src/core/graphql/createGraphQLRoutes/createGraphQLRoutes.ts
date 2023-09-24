@@ -86,16 +86,16 @@ export const createGraphQLRoutes = (
           convertToEntityDescriptor(entityDescriptorOrValue);
 
         // ✅ important: check whole variables as plain value strictly if descriptor used for variables
-        const isEntityVariablesByDescriptor =
+        const isEntityVariablesByTopLevelDescriptor =
           entityName === 'variables' && isEntityDescriptor(entityDescriptorOrValue);
-        if (isEntityVariablesByDescriptor) {
+        if (isEntityVariablesByTopLevelDescriptor) {
           return resolveEntityValues(checkMode, graphQLInput.variables, entityDescriptorValue);
         }
 
-        const recordEntries = Object.entries(entityDescriptorOrValue) as Entries<
+        const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
           Exclude<GraphQLEntityDescriptorOrValue, GraphQLTopLevelPlainEntityDescriptor>
         >;
-        return recordEntries.every(([entityKey, entityValue]) => {
+        return recordOrArrayEntries.every(([entityKey, entityValue]) => {
           const { checkMode, value: descriptorValue } = convertToEntityDescriptor(entityValue);
           const flattenEntity = flatten<any, any>(
             entityName === 'variables' ? graphQLInput.variables ?? {} : request[entityName]
@@ -104,7 +104,9 @@ export const createGraphQLRoutes = (
           // ✅ important: transform header keys to lower case because browsers send headers in lowercase
           return resolveEntityValues(
             checkMode,
-            flattenEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey],
+            flattenEntity[
+              entityName === 'headers' ? (entityKey as string).toLowerCase() : entityKey
+            ],
             descriptorValue
           );
         });
