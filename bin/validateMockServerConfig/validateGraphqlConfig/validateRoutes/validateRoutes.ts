@@ -20,13 +20,11 @@ const validateEntity = (entity: unknown, entityName: GraphQLEntityName) => {
   const isVariables = entityName === 'variables';
   const isTopLevelDescriptor = isEntityDescriptor(entity);
   if (isTopLevelDescriptor && isVariables) {
-    const { checkMode: topLevelCheckMode, value: topLevelValue } = entity;
-
-    if (!isCheckModeValid(topLevelCheckMode, 'variables')) {
+    if (!isCheckModeValid(entity.checkMode, 'variables')) {
       throw new Error('variables.checkMode');
     }
 
-    if (!isDescriptorValueValid(topLevelCheckMode, topLevelValue, true)) {
+    if (!isDescriptorValueValid(entity.checkMode, entity.value, true)) {
       throw new Error('variables.value');
     }
 

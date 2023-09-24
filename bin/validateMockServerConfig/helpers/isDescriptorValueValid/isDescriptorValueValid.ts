@@ -13,7 +13,7 @@ import type {
 
 // ✅ important:
 // should validate all properties over nesting
-const isObjectOrArrayValid = (objectOrPrimitive: unknown): boolean => {
+const isObjectValid = (objectOrPrimitive: unknown): boolean => {
   if (
     typeof objectOrPrimitive === 'boolean' ||
     typeof objectOrPrimitive === 'number' ||
@@ -24,12 +24,12 @@ const isObjectOrArrayValid = (objectOrPrimitive: unknown): boolean => {
   }
 
   if (Array.isArray(objectOrPrimitive)) {
-    return objectOrPrimitive.every(isObjectOrArrayValid);
+    return objectOrPrimitive.every(isObjectValid);
   }
 
   if (isPlainObject(objectOrPrimitive)) {
     for (const key in objectOrPrimitive) {
-      if (!isObjectOrArrayValid(objectOrPrimitive[key])) {
+      if (!isObjectValid(objectOrPrimitive[key])) {
         return false;
       }
     }
@@ -44,8 +44,9 @@ export const isDescriptorValueValid = (
   value: unknown,
   isCheckAsObject: boolean
 ) => {
-  if (CHECK_ACTUAL_VALUE_CHECK_MODES.includes(checkMode as CheckActualValueCheckMode))
+  if (CHECK_ACTUAL_VALUE_CHECK_MODES.includes(checkMode as CheckActualValueCheckMode)) {
     return typeof value === 'undefined';
+  }
 
   if (
     COMPARE_WITH_DESCRIPTOR_ANY_VALUE_CHECK_MODES.includes(
@@ -53,8 +54,8 @@ export const isDescriptorValueValid = (
     )
   ) {
     if (isCheckAsObject) {
-      const isValueValidOnTopLevel = isPlainObject(value) || Array.isArray(value);
-      return isValueValidOnTopLevel && isObjectOrArrayValid(value);
+      const isValueObject = isPlainObject(value) || Array.isArray(value);
+      return isValueObject && isObjectValid(value);
     }
     return (
       typeof value === 'boolean' ||

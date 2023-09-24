@@ -58,7 +58,7 @@ export default mockServerConfig;
 Start **🎉 Mock Config Server**
 
 ```bash
-$ npx mock-config-server
+npx mock-config-server
 ```
 
 > If the package is already installed you can use short command `mcs`
@@ -73,7 +73,7 @@ $ npx mock-config-server
   - `baseUrl?` {string} part of the url that will be substituted at the beginning of graphql request url (default: `'/'`)
   - `configs` {Array<GraphQLRequestConfig>} configs for mock requests, [read](#configs)
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
-- `database?` Database config for mock requests [read](#Database)
+- `database?` Database config for mock requests [read](#database)
   - `data` {Object | string} initial data for database
   - `routes?` {Object | string} map of custom routes for database
 - `staticPath?` {StaticPath} entity for working with static files, [read](#static-path)
@@ -99,12 +99,15 @@ Configs are the fundamental part of the mock server. These configs are easy to f
 ##### GraphQL request config
 
 - `operationType` {query | mutation} graphql operation type
-- `operationName` {string} graphql operation name
+- `operationName?` {string | RegExp} graphql operation name
+- `query?`: {string} graphql query as string
 - `routes` {GraphQLRouteConfig[]} request routes
   - `data` {any} mock data of request
   - `entities?` Object<headers | cookies | query | variables> object that helps in data retrieval
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
+
+> Every graphql config should contain `operationName` or `query` or both of them
 
 ##### Rest example
 
@@ -210,6 +213,7 @@ If you need more complex logic for matching entities, you can use entity descrip
 Descriptor is an object with `checkMode` and `value` fields that describe how the correctness of the actual entity is calculated.
 
 Allowed `checkModes`
+
 - equals - checks actual value for equality with descriptor value (default).
 - notEquals - checks actual value for non-equality with descriptor value.
 - exists - checks actual value for existence i.e. any value.
@@ -264,7 +268,7 @@ const mockServerConfig = {
       }
     ]
   }
-}
+};
 
 module.exports = mockServerConfig;
 ```
@@ -309,7 +313,7 @@ const mockServerConfig = {
           {
             entities: {
               body: {
-                'title': {
+                title: {
                   checkMode: 'startsWith',
                   value: 'A'
                 }
@@ -329,7 +333,7 @@ const mockServerConfig = {
                 {
                   checkMode: 'startsWith',
                   value: 1
-                }, 
+                },
                 2
               ]
             },
@@ -339,7 +343,7 @@ const mockServerConfig = {
       }
     ]
   }
-}
+};
 
 module.exports = mockServerConfig;
 ```
@@ -375,7 +379,7 @@ const mockServerConfig = {
       }
     ]
   }
-}
+};
 
 module.exports = mockServerConfig;
 ```
@@ -454,6 +458,7 @@ Functions to change request or response parameters
 ## Database
 
 With `mock-config-server` you can create your own mock database with all CRUD operations
+
 - `data` {Object | string} initial data for database
 - `routes?` {Object | string} map of custom routes for database
 
@@ -463,9 +468,7 @@ With `mock-config-server` you can create your own mock database with all CRUD op
 const mockServerConfig = {
   database: {
     data: {
-      users: [
-        { id: 1, name: 'John' }
-      ],
+      users: [{ id: 1, name: 'John' }],
       settings: {
         blocked: false
       }
@@ -477,6 +480,7 @@ const mockServerConfig = {
 Now you have the following routes for requests
 
 #### Collection routes
+
 ```
 GET    /users
 POST   /users
@@ -510,9 +514,7 @@ __routes -> return routes from database config
 const mockServerConfig = {
   database: {
     data: {
-      users: [
-        { id: 1, name: 'John' }
-      ],
+      users: [{ id: 1, name: 'John' }],
       settings: {
         blocked: false
       }
@@ -533,6 +535,7 @@ Now following routes will work correctly
 ```
 
 Note some things:
+
 - String routes should start with forward slash
 - If you want to use id param in route then use only `:id` template
 - You can use `wildcard` only for custom route, **not for real route**
@@ -591,7 +594,7 @@ Examples:
             <br />
             <sub style="font-size:13px"><b>👹 MiaInturi</b></sub>
         </a>
-    </td> 
+    </td>
       <td align="center" style="word-wrap: break-word; width: 100.0; height: 100.0">
         <a href="https://github.com/RiceWithMeat">
             <img src="https://avatars.githubusercontent.com/u/47690223?v=4"

@@ -93,42 +93,6 @@ describe('createGraphQLRoutes', () => {
         message: 'Query is invalid, you must use a valid GraphQL query'
       });
     });
-
-    // TODO delete
-    test('Should return 404 for no matched request configs', async () => {
-      const server = createServer({
-        graphql: {
-          configs: [
-            {
-              operationName: 'GetUsers',
-              operationType: 'query',
-              routes: [
-                {
-                  entities: {
-                    headers: {
-                      key1: 'value1'
-                    }
-                  },
-                  data: { name: 'John', surname: 'Doe' }
-                }
-              ]
-            }
-          ]
-        }
-      });
-
-      const postResponse = await request(server)
-        .post('/')
-        .send({ query: 'query GetUsers { users { name } }' })
-        .set({ key2: 'value2' });
-      expect(postResponse.statusCode).toBe(404);
-
-      const getResponse = await request(server)
-        .get('/')
-        .set({ key2: 'value2' })
-        .query({ query: 'query GetUsers { users { name } }' });
-      expect(getResponse.statusCode).toBe(404);
-    });
   });
 
   describe('createGraphQLRoutes: not found config', () => {
@@ -269,6 +233,41 @@ describe('createGraphQLRoutes', () => {
 
       const getResponse = await request(server)
         .get('/')
+        .query({ query: 'query GetUsers { users { name } }' });
+      expect(getResponse.statusCode).toBe(404);
+    });
+
+    test('Should return 404 for no matched by entities request configs', async () => {
+      const server = createServer({
+        graphql: {
+          configs: [
+            {
+              operationName: 'GetUsers',
+              operationType: 'query',
+              routes: [
+                {
+                  entities: {
+                    headers: {
+                      key1: 'value1'
+                    }
+                  },
+                  data: { name: 'John', surname: 'Doe' }
+                }
+              ]
+            }
+          ]
+        }
+      });
+
+      const postResponse = await request(server)
+        .post('/')
+        .send({ query: 'query GetUsers { users { name } }' })
+        .set({ key2: 'value2' });
+      expect(postResponse.statusCode).toBe(404);
+
+      const getResponse = await request(server)
+        .get('/')
+        .set({ key2: 'value2' })
         .query({ query: 'query GetUsers { users { name } }' });
       expect(getResponse.statusCode).toBe(404);
     });
