@@ -422,8 +422,70 @@ describe('validateRoutes (graphql)', () => {
     });
   });
 
+  test('Should correctly handle variables entity only with correct type', () => {
+    const correctVariablesValues = [[], {}];
+    correctVariablesValues.forEach((correctVariablesValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { variables: correctVariablesValue },
+              data: null
+            }
+          ],
+          'query'
+        )
+      ).not.toThrow(Error);
+    });
+
+    const incorrectVariablesValues = ['string', 3000, true, null, undefined, () => {}, /\d/];
+    incorrectVariablesValues.forEach((incorrectVariablesValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { variables: incorrectVariablesValue },
+              data: null
+            }
+          ],
+          'query'
+        )
+      ).toThrow(new Error('routes[0].entities.variables'));
+    });
+
+    const correctVariablesMappedValues = [{}, [], 'string', 3000, true, null];
+    correctVariablesMappedValues.forEach((correctVariablesMappedValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { variables: { key: correctVariablesMappedValue } },
+              data: null
+            }
+          ],
+          'query'
+        )
+      ).not.toThrow(Error);
+    });
+
+    const incorrectVariablesMappedValues = [undefined, () => {}, /\d/];
+    incorrectVariablesMappedValues.forEach((incorrectVariablesMappedValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { variables: { key: incorrectVariablesMappedValue } },
+              data: null
+            }
+          ],
+          'query'
+        )
+      ).toThrow(new Error('routes[0].entities.variables.key'));
+    });
+  });
+
   test('Should correctly handle headers entity only with correct type', () => {
-    const correctHeadersMappedValues = ['string'];
+    const correctHeadersMappedValues = ['string', 3000, true, null];
     correctHeadersMappedValues.forEach((correctHeadersMappedValue) => {
       expect(() =>
         validateRoutes(
@@ -470,7 +532,7 @@ describe('validateRoutes (graphql)', () => {
   });
 
   test('Should correctly handle cookies entity only with correct type', () => {
-    const correctCookiesMappedValues = ['string', 3000, true];
+    const correctCookiesMappedValues = ['string', 3000, true, null];
     correctCookiesMappedValues.forEach((correctCookiesMappedValue) => {
       expect(() =>
         validateRoutes(
@@ -517,7 +579,7 @@ describe('validateRoutes (graphql)', () => {
   });
 
   test('Should correctly handle query entity only with correct type', () => {
-    const correctQueryMappedValues = ['string', 3000, true];
+    const correctQueryMappedValues = ['string', 3000, true, null];
     correctQueryMappedValues.forEach((correctQueryMappedValue) => {
       expect(() =>
         validateRoutes(

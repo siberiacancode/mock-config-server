@@ -52,7 +52,8 @@ const validateEntity = (entity: unknown, entityName: GraphQLEntityName) => {
             !isDescriptorValueValid(checkMode, element, false)
           ) {
             throw new Error(`${errorMessage}[${index}]`);
-          } else if (!isDescriptorValueValid(checkMode, element, false)) {
+          }
+          if (!isVariables && !isDescriptorValueValid(checkMode, element, false)) {
             throw new Error(`${errorMessage}[${index}]`);
           }
         });
@@ -65,7 +66,8 @@ const validateEntity = (entity: unknown, entityName: GraphQLEntityName) => {
         !isDescriptorValueValid(checkMode, value, false)
       ) {
         throw new Error(errorMessage);
-      } else if (!isDescriptorValueValid(checkMode, value, false)) {
+      }
+      if (!isVariables && !isDescriptorValueValid(checkMode, value, false)) {
         throw new Error(errorMessage);
       }
     });
