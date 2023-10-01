@@ -516,6 +516,90 @@ describe('validateRoutes (rest)', () => {
     });
   });
 
+  test('Should correctly hanlde body entity only with correct type', () => {
+    const correctBodyValues = [[], {}];
+    correctBodyValues.forEach((correctBodyValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { body: correctBodyValue },
+              data: null
+            }
+          ],
+          'post'
+        )
+      ).not.toThrow(Error);
+    });
+
+    const incorrectBodyValues = ['string', 3000, true, null, undefined, () => {}, /\d/];
+    incorrectBodyValues.forEach((incorrectBodyValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { body: incorrectBodyValue },
+              data: null
+            }
+          ],
+          'post'
+        )
+      ).toThrow(new Error('routes[0].entities.body'));
+    });
+
+    const correctBodyMappedValues = [{}, [], 'string', 3000, true, null];
+    correctBodyMappedValues.forEach((correctBodyMappedValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { body: { key: correctBodyMappedValue } },
+              data: null
+            }
+          ],
+          'post'
+        )
+      ).not.toThrow(Error);
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { body: { key: [correctBodyMappedValue] } },
+              data: null
+            }
+          ],
+          'post'
+        )
+      ).not.toThrow(Error);
+    });
+
+    const incorrectBodyMappedValues = [undefined, () => {}, /\d/];
+    incorrectBodyMappedValues.forEach((incorrectBodyMappedValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { body: { key: incorrectBodyMappedValue } },
+              data: null
+            }
+          ],
+          'post'
+        )
+      ).toThrow(new Error('routes[0].entities.body.key'));
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { body: { key: [incorrectBodyMappedValue] } },
+              data: null
+            }
+          ],
+          'post'
+        )
+      ).toThrow(new Error('routes[0].entities.body.key[0]'));
+    });
+  });
+
   test('Should correctly handle headers entity only with correct type', () => {
     const correctHeadersMappedValues = ['string', 3000, true];
     correctHeadersMappedValues.forEach((correctHeadersMappedValue) => {

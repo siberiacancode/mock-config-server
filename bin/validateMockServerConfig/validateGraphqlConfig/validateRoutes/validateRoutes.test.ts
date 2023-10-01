@@ -466,6 +466,17 @@ describe('validateRoutes (graphql)', () => {
           'query'
         )
       ).not.toThrow(Error);
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { variables: { key: [correctVariablesMappedValue] } },
+              data: null
+            }
+          ],
+          'query'
+        )
+      ).not.toThrow(Error);
     });
 
     const incorrectVariablesMappedValues = [undefined, () => {}, /\d/];
@@ -481,6 +492,17 @@ describe('validateRoutes (graphql)', () => {
           'query'
         )
       ).toThrow(new Error('routes[0].entities.variables.key'));
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { variables: { key: [incorrectVariablesMappedValue] } },
+              data: null
+            }
+          ],
+          'query'
+        )
+      ).toThrow(new Error('routes[0].entities.variables.key[0]'));
     });
   });
 

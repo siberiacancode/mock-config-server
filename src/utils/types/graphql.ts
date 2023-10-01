@@ -118,7 +118,7 @@ interface BaseGraphQLRequestConfig {
   interceptors?: Interceptors;
 }
 
-interface OperationNameGraphQLRequestConfig extends BaseGraphQLRequestConfig {
+export interface OperationNameGraphQLRequestConfig extends BaseGraphQLRequestConfig {
   operationName: GraphQLOperationName;
 }
 

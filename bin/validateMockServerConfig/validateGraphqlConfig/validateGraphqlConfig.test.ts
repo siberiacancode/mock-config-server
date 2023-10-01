@@ -125,7 +125,7 @@ describe('validateGraphqlConfig', () => {
     });
   });
 
-  test('Shouldcorrectly handle operation query only with correct type', () => {
+  test('Should correctly handle operation query only with correct type', () => {
     const correctQueryValues = ['query GetUsers { users { name } }', undefined];
     correctQueryValues.forEach((correctQueryValue) => {
       expect(() =>

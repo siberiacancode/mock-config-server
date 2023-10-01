@@ -54,9 +54,9 @@ export const isDescriptorValueValid = (
     )
   ) {
     if (isCheckAsObject) {
-      const isValueObject = isPlainObject(value) || Array.isArray(value);
-      return isValueObject && isObjectValid(value);
+      return (isPlainObject(value) || Array.isArray(value)) && isObjectValid(value);
     }
+
     return (
       typeof value === 'boolean' ||
       typeof value === 'number' ||

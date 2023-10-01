@@ -42,7 +42,7 @@ const validateEntity = (entity: unknown, entityName: RestEntityName) => {
       const errorMessage = `${entityName}.${key}${isDescriptor ? '.value' : ''}`;
 
       const isValueArray = Array.isArray(value);
-      if (isValueArray && !isBody) {
+      if (isValueArray) {
         value.forEach((element, index) => {
           if (
             isBody &&
