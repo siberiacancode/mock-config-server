@@ -45,22 +45,15 @@ export const createGraphQLRoutes = (
     }
 
     const matchedRequestConfig = preparedGraphQLRequestConfig.find((requestConfig) => {
-      if (requestConfig.operationType !== query.operationType) {
-        return false;
-      }
+      if (requestConfig.operationType !== query.operationType) return false;
 
-      if ('query' in requestConfig && requestConfig.query !== graphQLInput.query) {
-        return false;
-      }
+      if ('query' in requestConfig && requestConfig.query !== graphQLInput.query) return false;
 
       if ('operationName' in requestConfig) {
-        if (!query.operationName) {
-          return false;
-        }
+        if (!query.operationName) return false;
 
-        if (requestConfig.operationName instanceof RegExp) {
+        if (requestConfig.operationName instanceof RegExp)
           return new RegExp(requestConfig.operationName).test(query.operationName);
-        }
 
         return requestConfig.operationName === query.operationName;
       }
@@ -98,7 +91,7 @@ export const createGraphQLRoutes = (
         return recordOrArrayEntries.every(([entityKey, entityValue]) => {
           const { checkMode, value: descriptorValue } = convertToEntityDescriptor(entityValue);
           const flattenEntity = flatten<any, any>(
-            entityName === 'variables' ? graphQLInput.variables ?? {} : request[entityName]
+            entityName === 'variables' ? graphQLInput.variables : request[entityName]
           );
 
           // ✅ important: transform header keys to lower case because browsers send headers in lowercase
