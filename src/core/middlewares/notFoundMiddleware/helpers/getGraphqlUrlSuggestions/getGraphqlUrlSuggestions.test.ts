@@ -1,5 +1,5 @@
-import { getGraphqlUrlSuggestions } from './getGraphqlUrlSuggestions';
 import type { GraphqlRequestSuggestionConfigs } from './getGraphqlUrlSuggestions';
+import { getGraphqlUrlSuggestions } from './getGraphqlUrlSuggestions';
 
 describe('getGraphqlUrlSuggestions', () => {
   test('Should correctly return suggestions', () => {

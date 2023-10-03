@@ -1,13 +1,12 @@
+import type { Express } from 'express';
+import express from 'express';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-
-import type { Express } from 'express';
-import express from 'express';
 import request from 'supertest';
 
 import { createDatabaseRoutes } from '@/core/database';
-import type { MockServerConfig, DatabaseConfig } from '@/utils/types';
+import type { DatabaseConfig, MockServerConfig } from '@/utils/types';
 
 import { findIndexById } from './helpers';
 

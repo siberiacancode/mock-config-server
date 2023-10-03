@@ -38,15 +38,32 @@ export type DatabaseConfig = {
   routes?: Record<`/${string}`, `/${string}`> | `${string}.json`;
 };
 
-export interface MockServerConfig {
+export interface BaseMockServerConfig {
   baseUrl?: BaseUrl;
-  rest?: RestConfig;
-  graphql?: GraphqlConfig;
-  database?: DatabaseConfig;
   port?: Port;
   staticPath?: StaticPath;
   interceptors?: Interceptors;
   cors?: Cors;
+}
+export interface MockServerConfig extends BaseMockServerConfig {
+  rest?: RestConfig;
+  graphql?: GraphqlConfig;
+  database?: DatabaseConfig;
+}
+
+export interface RestMockServerConfig extends BaseMockServerConfig {
+  configs: RestRequestConfig[];
+  database?: DatabaseConfig;
+}
+
+export interface GraphQLMockServerConfig extends BaseMockServerConfig {
+  configs: GraphQLRequestConfig[];
+  database?: DatabaseConfig;
+}
+
+export interface DatabaseMockServerConfig extends BaseMockServerConfig {
+  data: Record<string, unknown> | `${string}.json`;
+  routes?: Record<`/${string}`, `/${string}`> | `${string}.json`;
 }
 
 export interface MockServerConfigArgv {

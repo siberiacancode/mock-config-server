@@ -5,21 +5,23 @@ import express from 'express';
 import { createDatabaseRoutes } from '@/core/database';
 import { createGraphQLRoutes } from '@/core/graphql';
 import {
-  corsMiddleware,
   cookieParseMiddleware,
+  corsMiddleware,
+  errorMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
   requestInterceptorMiddleware,
-  staticMiddleware,
-  errorMiddleware
+  staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
 import type { MockServerConfig } from '@/utils/types';
 
-export const createMockServer = (mockServerConfig: Omit<MockServerConfig, 'port'>) => {
+export const createMockServer = (
+  mockServerConfig: Omit<MockServerConfig, 'port'>,
+  server: Express = express()
+) => {
   const { cors, staticPath, rest, graphql, database, interceptors } = mockServerConfig;
-  const server: Express = express();
 
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../static/views'));

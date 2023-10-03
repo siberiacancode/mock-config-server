@@ -1,4 +1,4 @@
-.tab-items {
+.tab_items {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -11,7 +11,7 @@
   line-height: 17px;
 }
 
-.tab-item {
+.tab_item {
   display: flex;
   width: 120px;
   height: 30px;
@@ -21,10 +21,10 @@
   cursor: pointer;
 }
 
-.tab-item:not(.tab-item-active):hover {
+.tab_item:not(.tab_item_active):hover {
   background-color: var(--accent-glass);
 }
 
-.tab-content {
+.tab_content {
   display: none;
 }

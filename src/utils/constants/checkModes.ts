@@ -1,10 +1,10 @@
 import type {
   CalculateByDescriptorValueCheckMode,
-  CheckMode,
-  CompareWithDescriptorValueCheckMode,
   CheckActualValueCheckMode,
+  CheckMode,
   CompareWithDescriptorAnyValueCheckMode,
-  CompareWithDescriptorStringValueCheckMode
+  CompareWithDescriptorStringValueCheckMode,
+  CompareWithDescriptorValueCheckMode
 } from '@/utils/types';
 
 export const CHECK_ACTUAL_VALUE_CHECK_MODES: CheckActualValueCheckMode[] = ['exists', 'notExists'];

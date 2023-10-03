@@ -10,9 +10,14 @@ import { validateRestConfig } from './validateRestConfig/validateRestConfig';
 import { validateStaticPath } from './validateStaticPath/validateStaticPath';
 
 export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
-  if (!mockServerConfig.rest && !mockServerConfig.graphql && !mockServerConfig.database) {
+  if (
+    !mockServerConfig.rest &&
+    !mockServerConfig.graphql &&
+    !mockServerConfig.database &&
+    !mockServerConfig.staticPath
+  ) {
     throw new Error(
-      'configuration should contain at least one of these configs: rest | graphql | database; see our doc (https://www.npmjs.com/package/mock-config-server) for more information'
+      'configuration should contain at least one of these configs: rest | graphql | database | staticPath; see our doc (https://www.npmjs.com/package/mock-config-server) for more information'
     );
   }
 
