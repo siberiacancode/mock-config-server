@@ -24,7 +24,12 @@ const validateEntity = (entity: unknown, entityName: GraphQLEntityName) => {
       throw new Error('variables.checkMode');
     }
 
-    if (!isDescriptorValueValid(entity.checkMode, entity.value, true)) {
+    const isDescriptorValueObjectOrArray =
+      isPlainObject(entity.value) || Array.isArray(entity.value);
+    if (
+      !isDescriptorValueObjectOrArray ||
+      !isDescriptorValueValid(entity.checkMode, entity.value)
+    ) {
       throw new Error('variables.value');
     }
 
@@ -46,28 +51,26 @@ const validateEntity = (entity: unknown, entityName: GraphQLEntityName) => {
       const isValueArray = Array.isArray(value);
       if (isValueArray) {
         value.forEach((element, index) => {
-          if (
-            isVariables &&
-            !isDescriptorValueValid(checkMode, element, true) &&
-            !isDescriptorValueValid(checkMode, element, false)
-          ) {
+          if (isVariables) {
+            if (isDescriptorValueValid(checkMode, element)) return;
             throw new Error(`${errorMessage}[${index}]`);
           }
-          if (!isVariables && !isDescriptorValueValid(checkMode, element, false)) {
+
+          const isElementObjectOrArray = isPlainObject(element) || Array.isArray(element);
+          if (isElementObjectOrArray || !isDescriptorValueValid(checkMode, element)) {
             throw new Error(`${errorMessage}[${index}]`);
           }
         });
         return;
       }
 
-      if (
-        isVariables &&
-        !isDescriptorValueValid(checkMode, value, true) &&
-        !isDescriptorValueValid(checkMode, value, false)
-      ) {
+      if (isVariables) {
+        if (isDescriptorValueValid(checkMode, value)) return;
         throw new Error(errorMessage);
       }
-      if (!isVariables && !isDescriptorValueValid(checkMode, value, false)) {
+
+      const isValueObjectOrArray = isPlainObject(value) || Array.isArray(value);
+      if (isValueObjectOrArray || !isDescriptorValueValid(checkMode, value)) {
         throw new Error(errorMessage);
       }
     });

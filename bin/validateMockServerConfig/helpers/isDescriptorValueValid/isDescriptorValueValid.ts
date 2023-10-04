@@ -13,23 +13,23 @@ import type {
 
 // ✅ important:
 // should validate all properties over nesting
-const isObjectValid = (objectOrPrimitive: unknown): boolean => {
+const isObjectOrArrayValid = (value: unknown): boolean => {
   if (
-    typeof objectOrPrimitive === 'boolean' ||
-    typeof objectOrPrimitive === 'number' ||
-    typeof objectOrPrimitive === 'string' ||
-    objectOrPrimitive === null
+    typeof value === 'boolean' ||
+    typeof value === 'number' ||
+    typeof value === 'string' ||
+    value === null
   ) {
     return true;
   }
 
-  if (Array.isArray(objectOrPrimitive)) {
-    return objectOrPrimitive.every(isObjectValid);
+  if (Array.isArray(value)) {
+    return value.every(isObjectOrArrayValid);
   }
 
-  if (isPlainObject(objectOrPrimitive)) {
-    for (const key in objectOrPrimitive) {
-      if (!isObjectValid(objectOrPrimitive[key])) {
+  if (isPlainObject(value)) {
+    for (const key in value) {
+      if (!isObjectOrArrayValid(value[key])) {
         return false;
       }
     }
@@ -39,11 +39,7 @@ const isObjectValid = (objectOrPrimitive: unknown): boolean => {
   return false;
 };
 
-export const isDescriptorValueValid = (
-  checkMode: CheckMode,
-  value: unknown,
-  isCheckAsObject: boolean
-) => {
+export const isDescriptorValueValid = (checkMode: CheckMode, value: unknown) => {
   if (CHECK_ACTUAL_VALUE_CHECK_MODES.includes(checkMode as CheckActualValueCheckMode)) {
     return typeof value === 'undefined';
   }
@@ -53,9 +49,8 @@ export const isDescriptorValueValid = (
       checkMode as CompareWithDescriptorAnyValueCheckMode
     )
   ) {
-    if (isCheckAsObject) {
-      return (isPlainObject(value) || Array.isArray(value)) && isObjectValid(value);
-    }
+    const isValueObjectOrArray = isPlainObject(value) || Array.isArray(value);
+    if (isValueObjectOrArray) return isObjectOrArrayValid(value);
 
     return (
       typeof value === 'boolean' ||

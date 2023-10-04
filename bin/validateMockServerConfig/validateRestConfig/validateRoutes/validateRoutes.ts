@@ -24,7 +24,12 @@ const validateEntity = (entity: unknown, entityName: RestEntityName) => {
       throw new Error('body.checkMode');
     }
 
-    if (!isDescriptorValueValid(entity.checkMode, entity.value, true)) {
+    const isDescriptorValueObjectOrArray =
+      isPlainObject(entity.value) || Array.isArray(entity.value);
+    if (
+      !isDescriptorValueObjectOrArray ||
+      !isDescriptorValueValid(entity.checkMode, entity.value)
+    ) {
       throw new Error('body.value');
     }
   }
@@ -44,28 +49,26 @@ const validateEntity = (entity: unknown, entityName: RestEntityName) => {
       const isValueArray = Array.isArray(value);
       if (isValueArray) {
         value.forEach((element, index) => {
-          if (
-            isBody &&
-            !isDescriptorValueValid(checkMode, element, true) &&
-            !isDescriptorValueValid(checkMode, element, false)
-          ) {
+          if (isBody) {
+            if (isDescriptorValueValid(checkMode, element)) return;
             throw new Error(`${errorMessage}[${index}]`);
           }
-          if (!isBody && !isDescriptorValueValid(checkMode, element, false)) {
+
+          const isElementObjectOrArray = isPlainObject(element) || Array.isArray(element);
+          if (isElementObjectOrArray || !isDescriptorValueValid(checkMode, element)) {
             throw new Error(`${errorMessage}[${index}]`);
           }
         });
         return;
       }
 
-      if (
-        isBody &&
-        !isDescriptorValueValid(checkMode, value, true) &&
-        !isDescriptorValueValid(checkMode, value, false)
-      ) {
+      if (isBody) {
+        if (isDescriptorValueValid(checkMode, value)) return;
         throw new Error(errorMessage);
       }
-      if (!isBody && !isDescriptorValueValid(checkMode, value, false)) {
+
+      const isValueObjectOrArray = isPlainObject(value) || Array.isArray(value);
+      if (isValueObjectOrArray || !isDescriptorValueValid(checkMode, value)) {
         throw new Error(errorMessage);
       }
     });
