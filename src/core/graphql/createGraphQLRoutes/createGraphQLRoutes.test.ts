@@ -374,6 +374,46 @@ describe('createGraphQLRoutes', () => {
     });
   });
 
+  describe('createGraphQLRoutes: top level array variables', () => {
+    test('Should iterate over top level array variables and compare with each element', async () => {
+      const server = createServer({
+        graphql: {
+          configs: [
+            {
+              operationName: 'GetUsers',
+              operationType: 'query',
+              routes: [
+                {
+                  entities: {
+                    variables: [{ key1: 'value1' }, { key1: 'value1', key2: 'value2' }]
+                  },
+                  data: { name: 'John', surname: 'Doe' }
+                }
+              ]
+            }
+          ]
+        }
+      });
+
+      const successResponse = await request(server)
+        .get('/')
+        .query({
+          query: 'query GetUsers { users { name } }',
+          variables: { key1: 'value1', key2: 'value2' }
+        });
+      expect(successResponse.statusCode).toBe(200);
+      expect(successResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+
+      const notFoundResponse = await request(server)
+        .get('/')
+        .query({
+          query: 'query GetUsers { users { name } }',
+          variables: { key1: 'value1', key2: 'value2', key3: 'value3' }
+        });
+      expect(notFoundResponse.statusCode).toBe(404);
+    });
+  });
+
   describe('createGraphQLRoutes: descriptors', () => {
     test('Should correctly resolve flat object variables with descriptors', async () => {
       const server = createServer({

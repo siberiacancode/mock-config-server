@@ -85,8 +85,16 @@ export const createGraphQLRoutes = (
           return resolveEntityValues(checkMode, graphQLInput.variables, entityDescriptorValue);
         }
 
+        const isEntityVariablesByTopLevelArray =
+          entityName === 'variables' && Array.isArray(entityDescriptorOrValue);
+        if (isEntityVariablesByTopLevelArray) {
+          return entityDescriptorOrValue.some((entityDescriptorOrValueElement) =>
+            resolveEntityValues(checkMode, graphQLInput.variables, entityDescriptorOrValueElement)
+          );
+        }
+
         const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
-          Exclude<GraphQLEntityDescriptorOrValue, GraphQLTopLevelPlainEntityDescriptor>
+          Exclude<GraphQLEntityDescriptorOrValue, GraphQLTopLevelPlainEntityDescriptor | Array<any>>
         >;
         return recordOrArrayEntries.every(([entityKey, entityValue]) => {
           const { checkMode, value: descriptorValue } = convertToEntityDescriptor(entityValue);
