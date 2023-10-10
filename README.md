@@ -229,6 +229,8 @@ Allowed `checkModes`
 
 Value for `checkMode` except `function` | `exists` | `notExists` can be array, so you can write even more complex logic. For example "does not contain these values" or "must be match to one of these regExp".
 
+> If `checkMode` doesn't defined then `checkMode=equals` is used
+
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
 const mockServerConfig = {
@@ -263,6 +265,35 @@ const mockServerConfig = {
               }
             },
             data: 'Some user data for Dmitriy and Nursultan'
+          }
+        ]
+      }
+    ]
+  }
+};
+
+module.exports = mockServerConfig;
+```
+
+Also you can use array as value for REST body and GraphQL variables entities: in this case mock-config-server will iterate
+over array until `checkMode=equals` finds a match or return 404
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/user',
+        method: 'post',
+        routes: [
+          {
+            entities: {
+              // if body equals to { key1: 'value1' } or ['value1'] then mock-config-server return data
+              body: [{ key1: 'value1' }, ['value1']]
+            },
+            data: 'Some user data'
           }
         ]
       }
