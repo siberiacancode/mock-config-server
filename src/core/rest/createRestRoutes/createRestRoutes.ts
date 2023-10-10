@@ -37,13 +37,13 @@ export const createRestRoutes = (
           if (!entities) return true;
 
           const entries = Object.entries(entities) as Entries<Required<RestEntitiesByEntityName>>;
-          return entries.every(([entityName, valueOrDescriptor]) => {
+          return entries.every(([entityName, entityDescriptorOrValue]) => {
             const { checkMode, value: descriptorValue } =
-              convertToEntityDescriptor(valueOrDescriptor);
+              convertToEntityDescriptor(entityDescriptorOrValue);
 
             // ✅ important: check whole body as plain value strictly if descriptor used for body
             const isEntityBodyByTopLevelDescriptor =
-              entityName === 'body' && isEntityDescriptor(valueOrDescriptor);
+              entityName === 'body' && isEntityDescriptor(entityDescriptorOrValue);
             if (isEntityBodyByTopLevelDescriptor) {
               // ✅ important: bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
               return resolveEntityValues(
@@ -53,8 +53,21 @@ export const createRestRoutes = (
               );
             }
 
-            const recordOrArrayEntries = Object.entries(valueOrDescriptor) as Entries<
-              Exclude<RestEntityDescriptorOrValue, RestTopLevelPlainEntityDescriptor>
+            const isEntityBodyByTopLevelArray =
+              entityName === 'body' && Array.isArray(entityDescriptorOrValue);
+            if (isEntityBodyByTopLevelArray) {
+              return entityDescriptorOrValue.some((entityDescriptorOrValueElement) =>
+                // ✅ important: bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
+                resolveEntityValues(
+                  checkMode,
+                  Object.keys(request.body).length ? request.body : undefined,
+                  entityDescriptorOrValueElement
+                )
+              );
+            }
+
+            const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
+              Exclude<RestEntityDescriptorOrValue, RestTopLevelPlainEntityDescriptor | Array<any>>
             >;
             return recordOrArrayEntries.every(([entityKey, mappedEntityDescriptor]) => {
               const { checkMode, value: descriptorValue } =

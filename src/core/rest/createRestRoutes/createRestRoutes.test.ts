@@ -144,6 +144,36 @@ describe('createRestRoutes', () => {
     });
   });
 
+  describe('createRestRoutes: top level array body', () => {
+    test('Should iterate over top level array body and compare with each element', async () => {
+      const server = createServer({
+        rest: {
+          configs: [
+            {
+              path: '/users',
+              method: 'post',
+              routes: [
+                {
+                  entities: {
+                    body: [{ key1: 'value1' }, ['value1', 'value2']]
+                  },
+                  data: { name: 'John', surname: 'Doe' }
+                }
+              ]
+            }
+          ]
+        }
+      });
+
+      const successResponse = await request(server).post('/users').send(['value1', 'value2']);
+      expect(successResponse.statusCode).toBe(200);
+      expect(successResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+
+      const notFoundResponse = await request(server).post('/users');
+      expect(notFoundResponse.statusCode).toBe(404);
+    });
+  });
+
   describe('createRestRoutes: descriptors', () => {
     test('Should strictly compare plain array body if top level descriptor used', async () => {
       const server = createServer({
