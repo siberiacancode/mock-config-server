@@ -121,13 +121,53 @@ export const createGraphQLRoutes = (
       return next();
     }
 
-    const matchedRouteConfigData =
-      typeof matchedRouteConfig.data === 'function'
-        ? await matchedRouteConfig.data(request, matchedRouteConfig.entities ?? {})
-        : matchedRouteConfig.data;
+    let matchedRouteConfigData = null;
+    if (matchedRouteConfig.settings?.polling && 'queue' in matchedRouteConfig) {
+      if (!matchedRouteConfig.queue.length) return next();
+
+      const shallowMatchedRouteConfig = {
+        ...matchedRouteConfig
+      } as typeof matchedRouteConfig & { __pollingIndex: number; __timeout: boolean };
+
+      let index = shallowMatchedRouteConfig.__pollingIndex ?? 0;
+      if (matchedRouteConfig.queue.length === index) index = 0;
+
+      const { time, data } = matchedRouteConfig.queue[index];
+
+      const updateIndex = () => {
+        index += 1;
+        shallowMatchedRouteConfig.__pollingIndex = index;
+        if (matchedRouteConfig.queue.length === index) index = 0;
+      };
+
+      if (time && !shallowMatchedRouteConfig.__timeout) {
+        shallowMatchedRouteConfig.__timeout = true;
+        if (shallowMatchedRouteConfig.__timeout) {
+          setTimeout(() => {
+            shallowMatchedRouteConfig.__timeout = false;
+            updateIndex();
+          }, time);
+        }
+      }
+
+      if (!time && !shallowMatchedRouteConfig.__timeout) {
+        updateIndex();
+      }
+
+      matchedRouteConfigData = data;
+    }
+
+    if ('data' in matchedRouteConfig) {
+      matchedRouteConfigData = matchedRouteConfig.data;
+    }
+
+    const resolvedData =
+      typeof matchedRouteConfigData === 'function'
+        ? await matchedRouteConfigData(request, matchedRouteConfig.entities ?? {})
+        : matchedRouteConfigData;
 
     const data = await callResponseInterceptors({
-      data: matchedRouteConfigData,
+      data: resolvedData,
       request,
       response,
       interceptors: {
