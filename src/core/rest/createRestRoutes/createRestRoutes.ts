@@ -80,9 +80,11 @@ export const createRestRoutes = (
         if (matchedRouteConfig.settings?.polling && 'queue' in matchedRouteConfig) {
           if (!matchedRouteConfig.queue.length) return next();
 
-          const shallowMatchedRouteConfig = {
-            ...matchedRouteConfig
-          } as typeof matchedRouteConfig & { __pollingIndex: number; __timeout: boolean };
+          const shallowMatchedRouteConfig =
+            matchedRouteConfig as unknown as typeof matchedRouteConfig & {
+              __pollingIndex: number;
+              __timeout: boolean;
+            };
 
           let index = shallowMatchedRouteConfig.__pollingIndex ?? 0;
           if (matchedRouteConfig.queue.length === index) index = 0;
