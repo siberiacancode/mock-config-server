@@ -3,12 +3,12 @@ import type { RestEntityNamesByMethod, RestMethod } from '@/utils/types';
 
 import { isCheckModeValid, isDescriptorValueValid } from '../../helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
+import { validateSettings } from '../../validateSettings/validateSettings';
 
 type AllowedEntityNamesByMethod = {
   [Method in keyof RestEntityNamesByMethod]: RestEntityNamesByMethod[Method][];
 };
 
-const ALLOWED_ENTITIES_SETTINGS = ['polling'];
 const ALLOWED_ENTITIES_BY_METHOD: AllowedEntityNamesByMethod = {
   get: ['headers', 'cookies', 'query', 'params'],
   delete: ['headers', 'cookies', 'query', 'params'],
@@ -88,35 +88,6 @@ const validateEntities = (entities: unknown, method: RestMethod) => {
   }
 };
 
-const validateSetting = (setting: unknown, settingName: string) => {
-  if (settingName === 'polling' && typeof setting !== 'boolean') {
-    throw new Error('polling');
-  }
-};
-
-const validateSettings = (settings: unknown) => {
-  const isSettingsObject = isPlainObject(settings);
-  if (isSettingsObject) {
-    Object.keys(settings).forEach((settingName) => {
-      const isEntityAllowed = ALLOWED_ENTITIES_SETTINGS.includes(settingName as any);
-      if (!isEntityAllowed) {
-        throw new Error(`settings.${settingName}`);
-      }
-
-      try {
-        validateSetting(settings[settingName], settingName);
-      } catch (error: any) {
-        throw new Error(`settings.${error.message}`);
-      }
-    });
-    return;
-  }
-
-  if (typeof settings !== 'undefined') {
-    throw new Error('settings');
-  }
-};
-
 export const validateRoutes = (routes: unknown, method: RestMethod) => {
   const isRoutesArray = Array.isArray(routes);
   if (isRoutesArray) {
@@ -132,8 +103,12 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
 
         const { settings } = route;
         const isRouteSettingsObject = isPlainObject(settings);
+        const isRouteQueueArray = Array.isArray(route.queue);
 
-        if (isRouteHasQueueProperty && !(isRouteSettingsObject && settings?.polling)) {
+        if (
+          isRouteHasQueueProperty &&
+          (!(isRouteSettingsObject && settings?.polling) || !isRouteQueueArray)
+        ) {
           throw new Error(`routes[${index}]`);
         }
 

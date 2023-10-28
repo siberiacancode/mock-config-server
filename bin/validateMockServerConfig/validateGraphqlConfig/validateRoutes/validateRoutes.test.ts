@@ -562,4 +562,28 @@ describe('validateRoutes (graphql)', () => {
       ).toThrow(new Error('routes[0].entities.query.key'));
     });
   });
+
+  test('Should correctly handle route content only with polling setting', () => {
+    const correctRouteMappedValues = [
+      { data: null },
+      { queue: [null], settings: { polling: true } }
+    ];
+
+    correctRouteMappedValues.forEach((correctRouteMappedValue) => {
+      expect(() => validateRoutes([correctRouteMappedValue], 'query')).not.toThrow(Error);
+    });
+
+    const incorrectRouteMappedValues = [
+      { queue: [null] },
+      { queue: [null], settings: { polling: false } },
+      { queue: null, settings: { polling: true } },
+      { data: null, settings: { polling: true } }
+    ];
+
+    incorrectRouteMappedValues.forEach((incorrectRouteMappedValue) => {
+      expect(() => validateRoutes([incorrectRouteMappedValue], 'query')).toThrow(
+        new Error('routes[0]')
+      );
+    });
+  });
 });

@@ -3,11 +3,12 @@ import type { GraphQLEntityNamesByOperationType, GraphQLOperationType } from '@/
 
 import { isCheckModeValid, isDescriptorValueValid } from '../../helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
+import { validateSettings } from '../../validateSettings/validateSettings';
 
 type AllowedEntityNamesByOperationType = {
   [OperationType in keyof GraphQLEntityNamesByOperationType]: GraphQLEntityNamesByOperationType[OperationType][];
 };
-const ALLOWED_ENTITIES_SETTINGS = ['polling'];
+
 const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntityNamesByOperationType = {
   query: ['headers', 'cookies', 'query', 'variables'],
   mutation: ['headers', 'cookies', 'query', 'variables']
@@ -84,34 +85,7 @@ const validateEntities = (entities: unknown, operationType: GraphQLOperationType
     throw new Error('entities');
   }
 };
-const validateSetting = (setting: unknown, settingName: string) => {
-  if (settingName === 'polling' && typeof setting !== 'boolean') {
-    throw new Error('polling');
-  }
-};
 
-const validateSettings = (settings: unknown) => {
-  const isSettingsObject = isPlainObject(settings);
-  if (isSettingsObject) {
-    Object.keys(settings).forEach((settingName) => {
-      const isEntityAllowed = ALLOWED_ENTITIES_SETTINGS.includes(settingName as any);
-      if (!isEntityAllowed) {
-        throw new Error(`settings.${settingName}`);
-      }
-
-      try {
-        validateSetting(settings[settingName], settingName);
-      } catch (error: any) {
-        throw new Error(`settings.${error.message}`);
-      }
-    });
-    return;
-  }
-
-  if (typeof settings !== 'undefined') {
-    throw new Error('settings');
-  }
-};
 export const validateRoutes = (routes: unknown, operationType: GraphQLOperationType) => {
   const isRoutesArray = Array.isArray(routes);
   if (isRoutesArray) {
@@ -127,8 +101,12 @@ export const validateRoutes = (routes: unknown, operationType: GraphQLOperationT
 
         const { settings } = route;
         const isRouteSettingsObject = isPlainObject(settings);
+        const isRouteQueueArray = Array.isArray(route.queue);
 
-        if (isRouteHasQueueProperty && !(isRouteSettingsObject && settings?.polling)) {
+        if (
+          isRouteHasQueueProperty &&
+          (!(isRouteSettingsObject && settings?.polling) || !isRouteQueueArray)
+        ) {
           throw new Error(`routes[${index}]`);
         }
 
