@@ -1,10 +1,12 @@
 import type { IRouter } from 'express';
+import type { ParsedUrlQuery } from 'node:querystring';
 
 import type { NestedDatabase } from '@/utils/types';
 
 import type { MemoryStorage } from '../../storages';
 import { createNewId, findIndexById } from '../array';
 import { filter } from '../filter/filter';
+import { pagination } from '../pagination/pagination';
 
 export const createNestedDatabaseRoutes = (
   router: IRouter,
@@ -19,7 +21,14 @@ export const createNestedDatabaseRoutes = (
       let data = storage.read(key);
 
       if (request.query && Object.keys(request.query).length) {
-        data = filter(data, request.query as any);
+        const { _page, _limit, ...fillters } = request.query;
+        data = filter(data, fillters as ParsedUrlQuery);
+      }
+
+      if (request.query && request.query._page) {
+        console.log('@data', data);
+        data = pagination(data, request.query as ParsedUrlQuery);
+        if (data._link) response.set('Link', JSON.stringify(data._link));
       }
 
       // ✅ important:
