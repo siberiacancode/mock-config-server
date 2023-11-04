@@ -216,13 +216,17 @@ describe('createRestRoutes: settings', () => {
       }
     });
 
-    const firstResponse = await request(server).get('/users').query({ key1: 'value1' });
+    const firstResponse = await request(server).get('/users');
     expect(firstResponse.statusCode).toBe(200);
     expect(firstResponse.body).toEqual({ name: 'John', surname: 'Doe' });
 
-    const secondResponse = await request(server).get('/users').query({ key1: 'value1' });
+    const secondResponse = await request(server).get('/users');
     expect(secondResponse.statusCode).toBe(200);
     expect(secondResponse.body).toEqual({ name: 'John', surname: 'Smith' });
+
+    const thirdResponse = await request(server).get('/users');
+    expect(thirdResponse.statusCode).toBe(200);
+    expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Doe' });
   });
 });
 

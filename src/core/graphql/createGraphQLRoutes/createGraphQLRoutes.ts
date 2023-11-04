@@ -144,12 +144,10 @@ export const createGraphQLRoutes = (
 
       if (time && !shallowMatchedRouteConfig.__timeout) {
         shallowMatchedRouteConfig.__timeout = true;
-        if (shallowMatchedRouteConfig.__timeout) {
-          setTimeout(() => {
-            shallowMatchedRouteConfig.__timeout = false;
-            updateIndex();
-          }, time);
-        }
+        setTimeout(() => {
+          shallowMatchedRouteConfig.__timeout = false;
+          updateIndex();
+        }, time);
       }
 
       if (!time && !shallowMatchedRouteConfig.__timeout) {

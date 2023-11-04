@@ -261,6 +261,47 @@ describe('createRestRoutes: content', () => {
     expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Smith' });
   });
 });
+
+describe('createRestRoutes: settings', () => {
+  test('Should correctly process the request with polling', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            operationName: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                settings: { polling: true },
+                queue: [
+                  { data: { name: 'John', surname: 'Doe' } },
+                  { data: { name: 'John', surname: 'Smith' } }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const query = {
+      query: 'query GetUsers { users { name } }'
+    };
+
+    const firstResponse = await request(server).get('/').query(query);
+    expect(firstResponse.statusCode).toBe(200);
+    expect(firstResponse.body).toEqual({ name: 'John', surname: 'Doe' });
+
+    const secondResponse = await request(server).get('/').query(query);
+    expect(secondResponse.statusCode).toBe(200);
+    expect(secondResponse.body).toEqual({ name: 'John', surname: 'Smith' });
+
+    const thirdResponse = await request(server).get('/').query(query);
+    expect(thirdResponse.statusCode).toBe(200);
+    expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Doe' });
+  });
+});
+
 describe('createRestRoutes: entities', () => {
   test('Should match config by entities "includes" behavior', async () => {
     const server = createServer({
