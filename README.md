@@ -547,6 +547,35 @@ GET /users?id=1&id=2
 GET /users?author.name=siberiacancode
 ```
 
+### Pagination
+
+> Use \_page and optionally \_limit to paginate returned data.
+
+```
+GET /users?_page=1
+GET /users?_page=1&_limit=5
+```
+
+> **\_limit** is 10 by default
+
+The returned data has the format:
+
+```
+{
+  _link: Link,
+  results: Data[]
+}
+```
+
+In the **Link** header you'll get **count**, **pages**, **next** and **prev** links.
+
+#### Link
+
+- `count` {number} count of elements
+- `pages` {number} count of elements
+- `next` {string | null} querys string for next link
+- `prev` {string | null} querys string for prev link
+
 ### File example
 
 ```javascript

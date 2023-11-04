@@ -207,4 +207,75 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
   });
+
+  describe('createNestedDatabaseRoutes: pagination function', () => {
+    const nestedDatabase = createNestedDatabase();
+    const server = createServer(nestedDatabase);
+
+    test('Should return paginationed data by query', async () => {
+      const response = await request(server).get('/users?_page=1');
+
+      expect(response.body).toStrictEqual({
+        _link: {
+          count: 2,
+          pages: 1,
+          next: null,
+          prev: null
+        },
+        results: [
+          { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
+          { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+        ]
+      });
+    });
+
+    test('Should return paginationed data by query with limit', async () => {
+      const response = await request(server).get('/users?_page=1&_limit=1');
+
+      expect(response.body).toStrictEqual({
+        _link: {
+          count: 2,
+          pages: 2,
+          next: '?_page=2&_limit=1',
+          prev: null
+        },
+        results: [{ id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }]
+      });
+    });
+
+    test('Should return correct _link for paginationed data', async () => {
+      const firstResponse = await request(server).get('/users?_page=1&_limit=1');
+
+      expect(firstResponse.body).toStrictEqual({
+        _link: {
+          count: 2,
+          pages: 2,
+          next: '?_page=2&_limit=1',
+          prev: null
+        },
+        results: [{ id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }]
+      });
+
+      const secondResponse = await request(server).get('/users?_page=2&_limit=1');
+
+      expect(secondResponse.body).toStrictEqual({
+        _link: {
+          count: 2,
+          pages: 2,
+          next: null,
+          prev: '?_page=1&_limit=1'
+        },
+        results: [{ id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }]
+      });
+    });
+
+    test('Should return normal data by invalid pagination data', async () => {
+      const response = await request(server).get('/users?_page=2');
+
+      expect(response.body).toStrictEqual([
+        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+    });
+  });
 });
