@@ -572,9 +572,9 @@ In the **Link** header you'll get **count**, **pages**, **next** and **prev** li
 #### Link
 
 - `count` {number} count of elements
-- `pages` {number} count of elements
-- `next` {string | null} querys string for next link
-- `prev` {string | null} querys string for prev link
+- `pages` {number} count of pages
+- `next` {string | null} query string for next link
+- `prev` {string | null} query string for prev link
 
 ### File example
 

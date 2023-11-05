@@ -21,12 +21,11 @@ export const createNestedDatabaseRoutes = (
       let data = storage.read(key);
 
       if (request.query && Object.keys(request.query).length) {
-        const { _page, _limit, ...fillters } = request.query;
-        data = filter(data, fillters as ParsedUrlQuery);
+        const { _page, _limit, ...filters } = request.query;
+        data = filter(data, filters as ParsedUrlQuery);
       }
 
       if (request.query && request.query._page) {
-        console.log('@data', data);
         data = pagination(data, request.query as ParsedUrlQuery);
         if (data._link) response.set('Link', JSON.stringify(data._link));
       }

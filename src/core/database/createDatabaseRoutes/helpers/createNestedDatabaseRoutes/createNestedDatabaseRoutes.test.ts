@@ -256,7 +256,7 @@ describe('CreateNestedDatabaseRoutes', () => {
         results: [{ id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }]
       });
 
-      const secondResponse = await request(server).get('/users?_page=2&_limit=1');
+      const secondResponse = await request(server).get(`/users${firstResponse.body._link.next}`);
 
       expect(secondResponse.body).toStrictEqual({
         _link: {
