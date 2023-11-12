@@ -68,6 +68,6 @@ export const isDescriptorValueValid = (checkMode: CheckMode, value: unknown) => 
     return typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string';
   }
 
-  if (checkMode === 'function') return typeof value === 'function';
+  if (checkMode === 'function') return typeof value === 'function' && value.length <= 2;
   if (checkMode === 'regExp') return value instanceof RegExp;
 };

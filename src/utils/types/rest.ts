@@ -13,18 +13,9 @@ import type { Data } from './values';
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options';
 export type RestEntityName = 'headers' | 'cookies' | 'query' | 'params' | 'body';
-type RestPlainEntityName = Extract<RestEntityName, 'body'>;
-type RestMappedEntityName = Exclude<RestEntityName, 'body'>;
 
 type RestPlainEntityValue = string | number | boolean | null;
 type RestMappedEntityValue = string | number | boolean;
-
-type RestEntityValue<EntityName extends RestEntityName> = EntityName extends RestPlainEntityName
-  ? RestPlainEntityValue
-  : RestMappedEntityValue;
-type RestEntityValueOrValues<EntityName extends RestEntityName> =
-  | RestEntityValue<EntityName>
-  | RestEntityValue<EntityName>[];
 
 export type RestTopLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
   Check extends 'function'
@@ -81,7 +72,7 @@ type RestMappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check ext
   : Check extends CompareWithDescriptorValueCheckMode
   ? {
       checkMode: Check;
-      value: RestEntityValueOrValues<RestMappedEntityName>;
+      value: RestMappedEntityValue | RestMappedEntityValue[];
     }
   : Check extends CheckActualValueCheckMode
   ? {
@@ -91,17 +82,12 @@ type RestMappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check ext
   : never;
 
 export type RestEntityDescriptorOrValue<EntityName extends RestEntityName = RestEntityName> =
-  EntityName extends RestPlainEntityName
+  EntityName extends 'body'
     ?
         | RestTopLevelPlainEntityDescriptor
+        | Record<string, RestPropertyLevelPlainEntityDescriptor>
         | NestedObjectOrArray<RestPlainEntityValue>
-        | Record<
-            string,
-            | RestPropertyLevelPlainEntityDescriptor
-            | RestPlainEntityValue
-            | NestedObjectOrArray<RestPlainEntityValue>
-          >
-    : Record<string, RestMappedEntityDescriptor | RestEntityValueOrValues<EntityName>>;
+    : Record<string, RestMappedEntityDescriptor | RestMappedEntityValue | RestMappedEntityValue[]>;
 
 export type RestEntityNamesByMethod = {
   [key in RestMethod]: key extends 'get' | 'delete' | 'options'

@@ -18,25 +18,41 @@ const ALLOWED_ENTITIES_BY_METHOD: AllowedEntityNamesByMethod = {
 
 const validateEntity = (entity: unknown, entityName: RestEntityName) => {
   const isBody = entityName === 'body';
-  const isTopLevelDescriptor = isEntityDescriptor(entity);
-  if (isTopLevelDescriptor && isBody) {
+
+  const isEntityTopLevelDescriptor = isEntityDescriptor(entity);
+  if (isEntityTopLevelDescriptor) {
+    if (!isBody) {
+      throw new Error(entityName);
+    }
+
     if (!isCheckModeValid(entity.checkMode, 'body')) {
       throw new Error('body.checkMode');
     }
 
-    const isDescriptorValueObjectOrArray =
-      isPlainObject(entity.value) || Array.isArray(entity.value);
-    if (
-      !isDescriptorValueObjectOrArray ||
-      !isDescriptorValueValid(entity.checkMode, entity.value)
-    ) {
+    if (!isDescriptorValueValid(entity.checkMode, entity.value)) {
       throw new Error('body.value');
     }
+
+    return;
+  }
+
+  const isEntityArray = Array.isArray(entity);
+  if (isEntityArray) {
+    if (!isBody) {
+      throw new Error(entityName);
+    }
+
+    entity.forEach((entityElement, index) => {
+      if (!isDescriptorValueValid('equals', entityElement)) {
+        throw new Error(`body[${index}]`);
+      }
+    });
+
+    return;
   }
 
   const isEntityObject = isPlainObject(entity);
-  const isEntityBodyArray = Array.isArray(entity) && isBody;
-  if (isEntityObject || isEntityBodyArray) {
+  if (isEntityObject) {
     Object.entries(entity).forEach(([key, valueOrDescriptor]) => {
       const { checkMode, value } = convertToEntityDescriptor(valueOrDescriptor);
       if (!isCheckModeValid(checkMode)) {

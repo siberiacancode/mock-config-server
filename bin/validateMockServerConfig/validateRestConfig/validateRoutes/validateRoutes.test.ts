@@ -1,4 +1,8 @@
-import { CHECK_MODES, PLAIN_ENTITY_CHECK_MODES } from '@/utils/constants';
+import {
+  CHECK_MODES,
+  COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES,
+  PLAIN_ENTITY_CHECK_MODES
+} from '@/utils/constants';
 import type { CompareWithDescriptorValueCheckMode, RestEntityName } from '@/utils/types';
 
 import { validateRoutes } from './validateRoutes';
@@ -12,16 +16,14 @@ const generateCorrectCompareWithDescriptorMappedEntity = (
   [`${checkMode}-array`]: { checkMode, value: [true, 1, 'string'] }
 });
 
-const generateAllCorrectCompareWithExpectedValueMappedEntities = () => ({
-  ...generateCorrectCompareWithDescriptorMappedEntity('equals'),
-  ...generateCorrectCompareWithDescriptorMappedEntity('notEquals'),
-  ...generateCorrectCompareWithDescriptorMappedEntity('includes'),
-  ...generateCorrectCompareWithDescriptorMappedEntity('notIncludes'),
-  ...generateCorrectCompareWithDescriptorMappedEntity('startsWith'),
-  ...generateCorrectCompareWithDescriptorMappedEntity('notStartsWith'),
-  ...generateCorrectCompareWithDescriptorMappedEntity('endsWith'),
-  ...generateCorrectCompareWithDescriptorMappedEntity('notEndsWith')
-});
+const generateAllCorrectCompareWithExpectedValueMappedEntities = () =>
+  COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES.reduce(
+    (acc, checkMode) => ({
+      ...acc,
+      ...generateCorrectCompareWithDescriptorMappedEntity(checkMode)
+    }),
+    {}
+  );
 
 describe('validateRoutes (rest)', () => {
   test('Should correctly handle routes only with correct type', () => {
@@ -35,6 +37,38 @@ describe('validateRoutes (rest)', () => {
     const incorrectRouteValues = ['string', true, 3000, null, undefined, {}, [], () => {}, /\d/];
     incorrectRouteValues.forEach((incorrectRouteValue) => {
       expect(() => validateRoutes([incorrectRouteValue], 'get')).toThrow(new Error('routes[0]'));
+    });
+  });
+
+  test('Should correctly handle entities only with correct type', () => {
+    const correctEntitiesValues = [{}, undefined];
+    correctEntitiesValues.forEach((correctEntitiesValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: correctEntitiesValue,
+              data: null
+            }
+          ],
+          'get'
+        )
+      ).not.toThrow(Error);
+    });
+
+    const incorrectEntitiesValues = ['string', true, 3000, null, [], () => {}, /\d/];
+    incorrectEntitiesValues.forEach((incorrectEntitiesValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: incorrectEntitiesValue,
+              data: null
+            }
+          ],
+          'get'
+        )
+      ).toThrow(new Error('routes[0].entities'));
     });
   });
 
