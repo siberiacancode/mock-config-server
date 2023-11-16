@@ -105,9 +105,7 @@ export const createGraphQLRoutes = (
           // ✅ important: transform header keys to lower case because browsers send headers in lowercase
           return resolveEntityValues(
             checkMode,
-            flattenEntity[
-              entityName === 'headers' ? (entityKey as string).toLowerCase() : entityKey
-            ],
+            flattenEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey],
             descriptorValue
           );
         });
