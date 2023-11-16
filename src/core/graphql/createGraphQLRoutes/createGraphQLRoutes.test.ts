@@ -209,7 +209,7 @@ describe('createGraphQLRoutes', () => {
       expect(getResponse.statusCode).toBe(404);
     });
 
-    test('Should return 404 if actual query operationName does not mathc to config string operationName', async () => {
+    test('Should return 404 if actual query operationName does not match to config string operationName', async () => {
       const server = createServer({
         graphql: {
           configs: [

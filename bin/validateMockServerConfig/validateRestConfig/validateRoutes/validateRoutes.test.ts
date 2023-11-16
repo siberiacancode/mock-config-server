@@ -516,7 +516,7 @@ describe('validateRoutes (rest)', () => {
     });
   });
 
-  test('Should correctly hanlde body entity only with correct type', () => {
+  test('Should correctly handle body entity only with correct type', () => {
     const correctBodyValues = [[], {}];
     correctBodyValues.forEach((correctBodyValue) => {
       expect(() =>
