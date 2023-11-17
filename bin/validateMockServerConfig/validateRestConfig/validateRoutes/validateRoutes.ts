@@ -83,6 +83,7 @@ const validateEntity = (entity: unknown, entityName: RestEntityName) => {
         throw new Error(errorMessage);
       }
 
+      // FIXME useless array checking
       const isValueObjectOrArray = isPlainObject(value) || Array.isArray(value);
       if (isValueObjectOrArray || !isDescriptorValueValid(checkMode, value)) {
         throw new Error(errorMessage);
