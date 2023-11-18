@@ -19,9 +19,14 @@ export const createNestedDatabaseRoutes = (
       let data = storage.read(key);
 
       if (request.query && Object.keys(request.query).length) {
-        data = filter(data, request.query as any);
+        const { _begin, _end, ...filters } = request.query;
+        data = filter(data, filters as any);
       }
 
+      if (request.query._begin || request.query._end) {
+        data = data.slice(request.query._begin ?? 0, request.query._end);
+        response.set('X-Total-Count', data.length);
+      }
       // ✅ important:
       // set 'Cache-Control' header for explicit browsers response revalidate
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control

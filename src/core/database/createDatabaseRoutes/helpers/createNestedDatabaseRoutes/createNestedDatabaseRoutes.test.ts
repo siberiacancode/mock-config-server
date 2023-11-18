@@ -207,4 +207,27 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
   });
+
+  describe('createNestedDatabaseRoutes: slice function', () => {
+    const nestedDatabase = createNestedDatabase();
+    const server = createServer(nestedDatabase);
+
+    test('Should return sliced array by _begin query', async () => {
+      const response = await request(server).get('/users?_begin=1');
+
+      expect(response.body).toStrictEqual(nestedDatabase.users.slice(1));
+    });
+
+    test('Should return sliced array by _end query', async () => {
+      const response = await request(server).get('/users?_end=1');
+
+      expect(response.body).toStrictEqual(nestedDatabase.users.slice(0, 1));
+    });
+
+    test('Should return sliced array by _begin and _end query', async () => {
+      const response = await request(server).get('/users?_begin=0&_end=2');
+
+      expect(response.body).toStrictEqual(nestedDatabase.users.slice(0, 2));
+    });
+  });
 });

@@ -547,6 +547,17 @@ GET /users?id=1&id=2
 GET /users?author.name=siberiacancode
 ```
 
+### Slice
+
+> X-Total-Count header is included in the response
+
+```
+GET /users?_begin=20
+GET /users?_begin=20&_end=30
+```
+
+Works exactly as [slice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice), \_begin and \_end are optional
+
 ### File example
 
 ```javascript

@@ -7,6 +7,7 @@ module.exports = {
     {
       files: ['*.ts'],
       rules: {
+        '@typescript-eslint/naming-convention': 'off',
         '@typescript-eslint/no-floating-promises': 'off',
         '@typescript-eslint/await-thenable': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',
@@ -15,6 +16,7 @@ module.exports = {
         '@typescript-eslint/no-unsafe-call': 'off',
         '@typescript-eslint/no-unsafe-enum-comparison': 'off',
         '@typescript-eslint/no-var-requires': 'off',
+        'no-underscore-dangle': 'off',
         'no-restricted-syntax': 'off',
         'promise/always-return': 'off'
       }
