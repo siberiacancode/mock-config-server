@@ -20,17 +20,23 @@ import type {
 
 import { prepareRestRequestConfigs } from './helpers';
 
-export const createRestRoutes = (
-  router: IRouter,
-  restConfig: RestConfig,
-  serverResponseInterceptors?: Interceptors['response']
-) => {
+interface CreateRestRoutesParams {
+  router: IRouter;
+  restConfig: RestConfig;
+  serverResponseInterceptor?: Interceptors['response'];
+}
+
+export const createRestRoutes = ({
+  router,
+  restConfig,
+  serverResponseInterceptor
+}: CreateRestRoutesParams) => {
   prepareRestRequestConfigs(restConfig.configs).forEach((requestConfig) => {
     router.route(requestConfig.path)[requestConfig.method](
       asyncHandler(async (request, response, next) => {
-        const requestInterceptor = requestConfig.interceptors?.request;
-        if (requestInterceptor) {
-          await callRequestInterceptor({ request, interceptor: requestInterceptor });
+        const requestRequestInterceptor = requestConfig.interceptors?.request;
+        if (requestRequestInterceptor) {
+          await callRequestInterceptor({ request, interceptor: requestRequestInterceptor });
         }
 
         const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
@@ -89,7 +95,7 @@ export const createRestRoutes = (
             routeInterceptor: matchedRouteConfig.interceptors?.response,
             requestInterceptor: requestConfig.interceptors?.response,
             apiInterceptor: restConfig.interceptors?.response,
-            serverInterceptor: serverResponseInterceptors
+            serverInterceptor: serverResponseInterceptor
           }
         });
 

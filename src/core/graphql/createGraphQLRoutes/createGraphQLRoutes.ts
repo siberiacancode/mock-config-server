@@ -22,11 +22,17 @@ import type {
 
 import { prepareGraphQLRequestConfigs } from './helpers';
 
-export const createGraphQLRoutes = (
-  router: IRouter,
-  graphqlConfig: GraphqlConfig,
-  serverResponseInterceptors?: Interceptors['response']
-) => {
+interface CreateGraphQLRoutesParams {
+  router: IRouter;
+  graphqlConfig: GraphqlConfig;
+  serverResponseInterceptor?: Interceptors['response'];
+}
+
+export const createGraphQLRoutes = ({
+  router,
+  graphqlConfig,
+  serverResponseInterceptor
+}: CreateGraphQLRoutesParams) => {
   const preparedGraphQLRequestConfig = prepareGraphQLRequestConfigs(graphqlConfig.configs);
 
   const graphqlMiddleware = async (request: Request, response: Response, next: NextFunction) => {
@@ -69,9 +75,9 @@ export const createGraphQLRoutes = (
       return next();
     }
 
-    const requestInterceptor = matchedRequestConfig.interceptors?.request;
-    if (requestInterceptor) {
-      await callRequestInterceptor({ request, interceptor: requestInterceptor });
+    const requestRequestInterceptor = matchedRequestConfig.interceptors?.request;
+    if (requestRequestInterceptor) {
+      await callRequestInterceptor({ request, interceptor: requestRequestInterceptor });
     }
 
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
@@ -134,7 +140,7 @@ export const createGraphQLRoutes = (
         routeInterceptor: matchedRouteConfig.interceptors?.response,
         requestInterceptor: matchedRequestConfig.interceptors?.response,
         apiInterceptor: graphqlConfig.interceptors?.response,
-        serverInterceptor: serverResponseInterceptors
+        serverInterceptor: serverResponseInterceptor
       }
     });
 

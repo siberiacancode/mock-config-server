@@ -5,13 +5,13 @@ import express from 'express';
 import { createDatabaseRoutes } from '@/core/database';
 import { createGraphQLRoutes } from '@/core/graphql';
 import {
-  corsMiddleware,
   cookieParseMiddleware,
+  corsMiddleware,
+  errorMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
   requestInterceptorMiddleware,
-  staticMiddleware,
-  errorMiddleware
+  staticMiddleware
 } from '@/core/middlewares';
 import { urlJoin } from '@/utils/helpers';
 import type { GraphQLMockServerConfig } from '@/utils/types';
@@ -52,11 +52,11 @@ export const createGraphQLMockServer = (
     staticMiddleware(server, baseUrl, staticPath);
   }
 
-  const routerWithGraphqlRoutes = createGraphQLRoutes(
-    express.Router(),
-    { configs },
-    interceptors?.response
-  );
+  const routerWithGraphqlRoutes = createGraphQLRoutes({
+    router: express.Router(),
+    graphqlConfig: { configs },
+    serverResponseInterceptor: interceptors?.response
+  });
 
   server.use(baseUrl, routerWithGraphqlRoutes);
 

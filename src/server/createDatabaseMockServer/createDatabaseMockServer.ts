@@ -4,13 +4,13 @@ import express from 'express';
 
 import { createDatabaseRoutes } from '@/core/database';
 import {
-  corsMiddleware,
   cookieParseMiddleware,
+  corsMiddleware,
+  errorMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
   requestInterceptorMiddleware,
-  staticMiddleware,
-  errorMiddleware
+  staticMiddleware
 } from '@/core/middlewares';
 import { urlJoin } from '@/utils/helpers';
 import type { DatabaseMockServerConfig } from '@/utils/types';

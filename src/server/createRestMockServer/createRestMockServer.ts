@@ -4,13 +4,13 @@ import express from 'express';
 
 import { createDatabaseRoutes } from '@/core/database';
 import {
-  corsMiddleware,
   cookieParseMiddleware,
+  corsMiddleware,
+  errorMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
   requestInterceptorMiddleware,
-  staticMiddleware,
-  errorMiddleware
+  staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
@@ -52,11 +52,11 @@ export const createRestMockServer = (
     staticMiddleware(server, baseUrl, staticPath);
   }
 
-  const routerWithRestRoutes = createRestRoutes(
-    express.Router(),
-    { configs },
-    interceptors?.response
-  );
+  const routerWithRestRoutes = createRestRoutes({
+    router: express.Router(),
+    restConfig: { configs },
+    serverResponseInterceptor: interceptors?.response
+  });
 
   server.use(baseUrl, routerWithRestRoutes);
 
