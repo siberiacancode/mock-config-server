@@ -4,7 +4,9 @@ import { flatten } from 'flat';
 import {
   asyncHandler,
   callRequestInterceptor,
+  callRequestLogger,
   callResponseInterceptors,
+  callResponseLoggers,
   convertToEntityDescriptor,
   getGraphQLInput,
   isEntityDescriptor,
@@ -17,16 +19,29 @@ import type {
   GraphQLEntityDescriptorOrValue,
   GraphQLEntityName,
   GraphQLMappedEntityName,
-  Interceptors
+  Interceptors,
+  Loggers
 } from '@/utils/types';
 
 import { prepareGraphQLRequestConfigs } from './helpers';
 
-export const createGraphQLRoutes = (
-  router: IRouter,
-  graphqlConfig: GraphqlConfig,
-  serverResponseInterceptors?: Interceptors['response']
-) => {
+interface CreateGraphQLRoutesParams {
+  router: IRouter;
+  graphqlConfig: GraphqlConfig;
+  apiInterceptors?: Interceptors;
+  serverInterceptors?: Interceptors;
+  apiLoggers?: Loggers;
+  serverLoggers?: Loggers;
+}
+
+export const createGraphQLRoutes = ({
+  router,
+  graphqlConfig,
+  apiInterceptors,
+  serverInterceptors,
+  apiLoggers,
+  serverLoggers
+}: CreateGraphQLRoutesParams) => {
   const preparedGraphQLRequestConfig = prepareGraphQLRequestConfigs(graphqlConfig.configs);
 
   const graphqlMiddleware = async (request: Request, response: Response, next: NextFunction) => {
@@ -67,11 +82,6 @@ export const createGraphQLRoutes = (
 
     if (!matchedRequestConfig) {
       return next();
-    }
-
-    const requestInterceptor = matchedRequestConfig.interceptors?.request;
-    if (requestInterceptor) {
-      await callRequestInterceptor({ request, interceptor: requestInterceptor });
     }
 
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
@@ -117,8 +127,35 @@ export const createGraphQLRoutes = (
       });
     });
 
+    let isRequestLoggerResolved = !!serverLoggers?.request;
+
+    const apiRequestInterceptor = apiInterceptors?.request;
+    if (apiRequestInterceptor) {
+      await callRequestInterceptor({ request, interceptor: apiRequestInterceptor });
+    }
+    const apiRequestLogger = apiLoggers?.request;
+    if (!isRequestLoggerResolved && apiRequestLogger) {
+      await callRequestLogger({ request, logger: apiRequestLogger });
+      isRequestLoggerResolved = true;
+    }
+
+    const requestRequestInterceptor = matchedRequestConfig.interceptors?.request;
+    if (requestRequestInterceptor) {
+      await callRequestInterceptor({ request, interceptor: requestRequestInterceptor });
+    }
+    const requestRequestLogger = matchedRequestConfig.loggers?.request;
+    if (!isRequestLoggerResolved && requestRequestLogger) {
+      await callRequestLogger({ request, logger: requestRequestLogger });
+      isRequestLoggerResolved = true;
+    }
+
     if (!matchedRouteConfig) {
       return next();
+    }
+
+    const routeRequestLogger = matchedRouteConfig.loggers?.request;
+    if (routeRequestLogger) {
+      await callRequestLogger({ request, logger: routeRequestLogger });
     }
 
     const matchedRouteConfigData =
@@ -134,8 +171,20 @@ export const createGraphQLRoutes = (
         routeInterceptor: matchedRouteConfig.interceptors?.response,
         requestInterceptor: matchedRequestConfig.interceptors?.response,
         apiInterceptor: graphqlConfig.interceptors?.response,
-        serverInterceptor: serverResponseInterceptors
+        serverInterceptor: serverInterceptors?.response
       }
+    });
+
+    await callResponseLoggers({
+      request,
+      response,
+      responseLoggers: {
+        routeLogger: matchedRouteConfig.loggers?.response,
+        requestLogger: matchedRequestConfig.loggers?.response,
+        apiLogger: graphqlConfig.loggers?.response,
+        serverLogger: serverLoggers?.response
+      },
+      data
     });
 
     // ✅ important:

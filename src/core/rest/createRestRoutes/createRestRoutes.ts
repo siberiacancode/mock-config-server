@@ -4,13 +4,16 @@ import { flatten } from 'flat';
 import {
   asyncHandler,
   callRequestInterceptor,
+  callRequestLogger,
   callResponseInterceptors,
+  callResponseLoggers,
   convertToEntityDescriptor,
   isEntityDescriptor,
   resolveEntityValues
 } from '@/utils/helpers';
 import type {
   Interceptors,
+  Loggers,
   RestConfig,
   RestEntityDescriptorOnly,
   RestEntityDescriptorOrValue,
@@ -20,19 +23,26 @@ import type {
 
 import { prepareRestRequestConfigs } from './helpers';
 
-export const createRestRoutes = (
-  router: IRouter,
-  restConfig: RestConfig,
-  serverResponseInterceptors?: Interceptors['response']
-) => {
+interface CreateRestRoutesParams {
+  router: IRouter;
+  restConfig: RestConfig;
+  apiInterceptors?: Interceptors;
+  serverInterceptors?: Interceptors;
+  apiLoggers?: Loggers;
+  serverLoggers?: Loggers;
+}
+
+export const createRestRoutes = ({
+  router,
+  restConfig,
+  apiInterceptors,
+  serverInterceptors,
+  apiLoggers,
+  serverLoggers
+}: CreateRestRoutesParams) => {
   prepareRestRequestConfigs(restConfig.configs).forEach((requestConfig) => {
     router.route(requestConfig.path)[requestConfig.method](
       asyncHandler(async (request, response, next) => {
-        const requestInterceptor = requestConfig.interceptors?.request;
-        if (requestInterceptor) {
-          await callRequestInterceptor({ request, interceptor: requestInterceptor });
-        }
-
         const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
           if (!entities) return true;
           const entries = Object.entries(entities) as [
@@ -72,8 +82,35 @@ export const createRestRoutes = (
           });
         });
 
+        let isRequestLoggerResolved = !!serverLoggers?.request;
+
+        const apiRequestInterceptor = apiInterceptors?.request;
+        if (apiRequestInterceptor) {
+          await callRequestInterceptor({ request, interceptor: apiRequestInterceptor });
+        }
+        const apiRequestLogger = apiLoggers?.request;
+        if (!isRequestLoggerResolved && apiRequestLogger) {
+          await callRequestLogger({ request, logger: apiRequestLogger });
+          isRequestLoggerResolved = true;
+        }
+
+        const requestRequestInterceptor = requestConfig.interceptors?.request;
+        if (requestRequestInterceptor) {
+          await callRequestInterceptor({ request, interceptor: requestRequestInterceptor });
+        }
+        const requestRequestLogger = requestConfig.loggers?.request;
+        if (!isRequestLoggerResolved && requestRequestLogger) {
+          await callRequestLogger({ request, logger: requestRequestLogger });
+          isRequestLoggerResolved = true;
+        }
+
         if (!matchedRouteConfig) {
           return next();
+        }
+
+        const routeRequestLogger = matchedRouteConfig.loggers?.request;
+        if (routeRequestLogger) {
+          await callRequestLogger({ request, logger: routeRequestLogger });
         }
 
         const matchedRouteConfigData =
@@ -89,8 +126,20 @@ export const createRestRoutes = (
             routeInterceptor: matchedRouteConfig.interceptors?.response,
             requestInterceptor: requestConfig.interceptors?.response,
             apiInterceptor: restConfig.interceptors?.response,
-            serverInterceptor: serverResponseInterceptors
+            serverInterceptor: serverInterceptors?.response
           }
+        });
+
+        await callResponseLoggers({
+          request,
+          response,
+          responseLoggers: {
+            routeLogger: matchedRouteConfig.loggers?.response,
+            requestLogger: requestConfig.loggers?.response,
+            apiLogger: restConfig.loggers?.response,
+            serverLogger: serverLoggers?.response
+          },
+          data
         });
 
         // ✅ important:

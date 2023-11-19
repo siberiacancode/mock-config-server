@@ -4,5 +4,7 @@ export * from './destroyerMiddleware/destroyerMiddleware';
 export * from './errorMiddleware/errorMiddleware';
 export * from './noCorsMiddleware/noCorsMiddleware';
 export * from './notFoundMiddleware/notFoundMiddleware';
+export * from './requestInfoMiddleware/requestInfoMiddleware';
 export * from './requestInterceptorMiddleware/requestInterceptorMiddleware';
+export * from './requestLoggerMiddleware/requestLoggerMiddleware';
 export * from './staticMiddleware/staticMiddleware';

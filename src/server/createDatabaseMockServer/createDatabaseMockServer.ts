@@ -4,13 +4,14 @@ import express from 'express';
 
 import { createDatabaseRoutes } from '@/core/database';
 import {
-  corsMiddleware,
   cookieParseMiddleware,
+  corsMiddleware,
+  errorMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
+  requestInfoMiddleware,
   requestInterceptorMiddleware,
-  staticMiddleware,
-  errorMiddleware
+  staticMiddleware
 } from '@/core/middlewares';
 import { urlJoin } from '@/utils/helpers';
 import type { DatabaseMockServerConfig } from '@/utils/types';
@@ -31,6 +32,8 @@ export const createDatabaseMockServer = (
   server.set('json spaces', 2);
 
   server.use(bodyParser.text());
+
+  requestInfoMiddleware(server);
 
   cookieParseMiddleware(server);
 

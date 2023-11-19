@@ -9,6 +9,7 @@ import type {
   CompareWithDescriptorValueCheckMode
 } from './checkModes';
 import type { Interceptors } from './interceptors';
+import type { Loggers } from './logger';
 import type { Data, Primitive } from './values';
 
 export type GraphQLEntityName = 'headers' | 'cookies' | 'query' | 'variables';
@@ -51,7 +52,7 @@ export interface GraphQLInput {
   variables: GraphQLVariables;
 }
 
-type GraphQLEntityValue<EntityName = GraphQLEntityName> = EntityName extends 'variables'
+export type GraphQLEntityValue<EntityName = GraphQLEntityName> = EntityName extends 'variables'
   ? GraphQLPlainEntityValue
   : GraphQLMappedEntityValue;
 
@@ -132,9 +133,11 @@ export interface GraphQLRouteConfig<
   entities?: Entities;
   data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
   interceptors?: Pick<Interceptors, 'response'>;
+  loggers?: Loggers<GraphQLEntityName, GraphQLEntityName | 'data'>;
 }
 
 export interface GraphQLRequestConfig extends GraphQLQuery {
   routes: GraphQLRouteConfig[];
   interceptors?: Interceptors;
+  loggers?: Loggers<GraphQLEntityName, GraphQLEntityName | 'data'>;
 }

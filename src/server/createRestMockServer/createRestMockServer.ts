@@ -4,13 +4,14 @@ import express from 'express';
 
 import { createDatabaseRoutes } from '@/core/database';
 import {
-  corsMiddleware,
   cookieParseMiddleware,
+  corsMiddleware,
+  errorMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
+  requestInfoMiddleware,
   requestInterceptorMiddleware,
-  staticMiddleware,
-  errorMiddleware
+  staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
@@ -20,7 +21,7 @@ export const createRestMockServer = (
   restMockServerConfig: Omit<RestMockServerConfig, 'port'>,
   server: Express = express()
 ) => {
-  const { cors, staticPath, configs, database, interceptors } = restMockServerConfig;
+  const { cors, staticPath, configs, database, interceptors, loggers } = restMockServerConfig;
 
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../static/views'));
@@ -33,12 +34,19 @@ export const createRestMockServer = (
 
   server.use(bodyParser.text());
 
+  requestInfoMiddleware(server);
+
   cookieParseMiddleware(server);
 
   const serverRequestInterceptor = restMockServerConfig.interceptors?.request;
   if (serverRequestInterceptor) {
     requestInterceptorMiddleware(server, serverRequestInterceptor);
   }
+
+  // const serverRequestLoggers = restMockServerConfig.loggers;
+  // if (serverRequestLoggers?.request) {
+  //   requestLoggerMiddleware(server, serverRequestLoggers.request);
+  // }
 
   const baseUrl = restMockServerConfig.baseUrl ?? '/';
 
@@ -52,11 +60,12 @@ export const createRestMockServer = (
     staticMiddleware(server, baseUrl, staticPath);
   }
 
-  const routerWithRestRoutes = createRestRoutes(
-    express.Router(),
-    { configs },
-    interceptors?.response
-  );
+  const routerWithRestRoutes = createRestRoutes({
+    router: express.Router(),
+    restConfig: { configs },
+    serverInterceptors: interceptors,
+    serverLoggers: loggers
+  });
 
   server.use(baseUrl, routerWithRestRoutes);
 

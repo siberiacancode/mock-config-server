@@ -5,13 +5,15 @@ import express from 'express';
 import { createDatabaseRoutes } from '@/core/database';
 import { createGraphQLRoutes } from '@/core/graphql';
 import {
-  corsMiddleware,
   cookieParseMiddleware,
+  corsMiddleware,
+  errorMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
+  requestInfoMiddleware,
   requestInterceptorMiddleware,
-  staticMiddleware,
-  errorMiddleware
+  requestLoggerMiddleware,
+  staticMiddleware
 } from '@/core/middlewares';
 import { urlJoin } from '@/utils/helpers';
 import type { GraphQLMockServerConfig } from '@/utils/types';
@@ -20,7 +22,7 @@ export const createGraphQLMockServer = (
   graphqlMockServerConfig: Omit<GraphQLMockServerConfig, 'port'>,
   server: Express = express()
 ) => {
-  const { cors, staticPath, configs, database, interceptors } = graphqlMockServerConfig;
+  const { cors, staticPath, configs, database, interceptors, loggers } = graphqlMockServerConfig;
 
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../static/views'));
@@ -33,11 +35,18 @@ export const createGraphQLMockServer = (
 
   server.use(bodyParser.text());
 
+  requestInfoMiddleware(server);
+
   cookieParseMiddleware(server);
 
   const serverRequestInterceptor = graphqlMockServerConfig.interceptors?.request;
   if (serverRequestInterceptor) {
     requestInterceptorMiddleware(server, serverRequestInterceptor);
+  }
+
+  const serverRequestLoggers = graphqlMockServerConfig.loggers;
+  if (serverRequestLoggers?.request) {
+    requestLoggerMiddleware(server, serverRequestLoggers.request);
   }
 
   const baseUrl = graphqlMockServerConfig.baseUrl ?? '/';
@@ -52,11 +61,12 @@ export const createGraphQLMockServer = (
     staticMiddleware(server, baseUrl, staticPath);
   }
 
-  const routerWithGraphqlRoutes = createGraphQLRoutes(
-    express.Router(),
-    { configs },
-    interceptors?.response
-  );
+  const routerWithGraphqlRoutes = createGraphQLRoutes({
+    router: express.Router(),
+    graphqlConfig: { configs },
+    serverInterceptors: interceptors,
+    serverLoggers: loggers
+  });
 
   server.use(baseUrl, routerWithGraphqlRoutes);
 

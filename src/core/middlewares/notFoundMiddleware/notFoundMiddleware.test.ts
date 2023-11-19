@@ -20,19 +20,19 @@ const createServer = (
   const serverBaseUrl = baseUrl ?? '/';
 
   const restBaseUrl = urlJoin(serverBaseUrl, rest?.baseUrl ?? '/');
-  const routerWithRestRoutes = createRestRoutes(
-    express.Router(),
-    { configs: rest?.configs ?? [] },
-    interceptors?.response
-  );
+  const routerWithRestRoutes = createRestRoutes({
+    router: express.Router(),
+    restConfig: { configs: rest?.configs ?? [] },
+    serverInterceptors: interceptors
+  });
   server.use(restBaseUrl, routerWithRestRoutes);
 
   const graphqlBaseUrl = urlJoin(serverBaseUrl, graphql?.baseUrl ?? '/');
-  const routerWithGraphqlRoutes = createGraphQLRoutes(
-    express.Router(),
-    { configs: graphql?.configs ?? [] },
-    interceptors?.response
-  );
+  const routerWithGraphqlRoutes = createGraphQLRoutes({
+    router: express.Router(),
+    graphqlConfig: { configs: graphql?.configs ?? [] },
+    serverInterceptors: interceptors
+  });
   server.use(graphqlBaseUrl, routerWithGraphqlRoutes);
 
   server.set('view engine', 'ejs');
