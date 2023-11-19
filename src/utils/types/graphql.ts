@@ -12,17 +12,9 @@ import type { NestedObjectOrArray } from './utils';
 import type { Data } from './values';
 
 export type GraphQLEntityName = 'headers' | 'cookies' | 'query' | 'variables';
-type GraphQLPlainEntityName = Extract<GraphQLEntityName, 'variables'>;
-type GraphQLMappedEntityName = Exclude<GraphQLEntityName, 'variables'>;
 
 type GraphQLPlainEntityValue = string | number | boolean | null;
 type GraphQLMappedEntityValue = string | number | boolean;
-
-type GraphQLEntityValue<EntityName extends GraphQLEntityName> =
-  EntityName extends GraphQLPlainEntityName ? GraphQLPlainEntityValue : GraphQLMappedEntityValue;
-type GraphQLEntityValueOrValues<EntityName extends GraphQLEntityName> =
-  | GraphQLEntityValue<EntityName>
-  | GraphQLEntityValue<EntityName>[];
 
 export type GraphQLTopLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
   Check extends 'function'
@@ -79,7 +71,7 @@ type GraphQLMappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check 
   : Check extends CompareWithDescriptorValueCheckMode
   ? {
       checkMode: Check;
-      value: GraphQLEntityValueOrValues<GraphQLMappedEntityName>;
+      value: GraphQLMappedEntityValue | GraphQLMappedEntityValue[];
     }
   : Check extends CheckActualValueCheckMode
   ? {
@@ -90,12 +82,15 @@ type GraphQLMappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check 
 
 export type GraphQLEntityDescriptorOrValue<
   EntityName extends GraphQLEntityName = GraphQLEntityName
-> = EntityName extends GraphQLPlainEntityName
+> = EntityName extends 'variables'
   ?
       | GraphQLTopLevelPlainEntityDescriptor
       | Record<string, GraphQLPropertyLevelPlainEntityDescriptor>
       | NestedObjectOrArray<GraphQLPlainEntityValue>
-  : Record<string, GraphQLMappedEntityDescriptor | GraphQLEntityValueOrValues<EntityName>>;
+  : Record<
+      string,
+      GraphQLMappedEntityDescriptor | GraphQLMappedEntityValue | GraphQLMappedEntityValue[]
+    >;
 
 export type GraphQLOperationType = 'query' | 'mutation';
 export type GraphQLOperationName = string | RegExp;

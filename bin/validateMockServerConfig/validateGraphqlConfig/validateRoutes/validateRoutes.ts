@@ -11,6 +11,7 @@ import { validateInterceptors } from '../../validateInterceptors/validateInterce
 type AllowedEntityNamesByOperationType = {
   [OperationType in keyof GraphQLEntityNamesByOperationType]: GraphQLEntityNamesByOperationType[OperationType][];
 };
+
 const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntityNamesByOperationType = {
   query: ['headers', 'cookies', 'query', 'variables'],
   mutation: ['headers', 'cookies', 'query', 'variables']
@@ -18,8 +19,13 @@ const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntityNamesByOperationType = {
 
 const validateEntity = (entity: unknown, entityName: GraphQLEntityName) => {
   const isVariables = entityName === 'variables';
-  const isTopLevelDescriptor = isEntityDescriptor(entity);
-  if (isTopLevelDescriptor && isVariables) {
+
+  const isEntityTopLevelDescriptor = isEntityDescriptor(entity);
+  if (isEntityTopLevelDescriptor) {
+    if (!isVariables) {
+      throw new Error(entityName);
+    }
+
     if (!isCheckModeValid(entity.checkMode, 'variables')) {
       throw new Error('variables.checkMode');
     }
@@ -36,9 +42,25 @@ const validateEntity = (entity: unknown, entityName: GraphQLEntityName) => {
     return;
   }
 
+  const isEntityArray = Array.isArray(entity);
+  if (isEntityArray) {
+    if (!isVariables) {
+      throw new Error(entityName);
+    }
+
+    entity.forEach((entityElement, index) => {
+      const isEntityElementObjectOrArray =
+        isPlainObject(entityElement) || Array.isArray(entityElement);
+      if (!isEntityElementObjectOrArray || !isDescriptorValueValid('equals', entityElement)) {
+        throw new Error(`${entityName}[${index}]`);
+      }
+    });
+
+    return;
+  }
+
   const isEntityObject = isPlainObject(entity);
-  const isEntityVariablesArray = Array.isArray(entity) && isVariables;
-  if (isEntityObject || isEntityVariablesArray) {
+  if (isEntityObject) {
     Object.entries(entity).forEach(([key, valueOrDescriptor]) => {
       const { checkMode, value } = convertToEntityDescriptor(valueOrDescriptor);
       if (!isCheckModeValid(checkMode)) {
@@ -69,8 +91,8 @@ const validateEntity = (entity: unknown, entityName: GraphQLEntityName) => {
         throw new Error(errorMessage);
       }
 
-      const isValueObjectOrArray = isPlainObject(value) || Array.isArray(value);
-      if (isValueObjectOrArray || !isDescriptorValueValid(checkMode, value)) {
+      const isValueObject = isPlainObject(value);
+      if (isValueObject || !isDescriptorValueValid(checkMode, value)) {
         throw new Error(errorMessage);
       }
     });

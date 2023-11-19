@@ -1,4 +1,8 @@
-import { CHECK_MODES, PLAIN_ENTITY_CHECK_MODES } from '@/utils/constants';
+import {
+  CHECK_MODES,
+  COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES,
+  PLAIN_ENTITY_CHECK_MODES
+} from '@/utils/constants';
 import type { CompareWithDescriptorValueCheckMode, GraphQLEntityName } from '@/utils/types';
 
 import { validateRoutes } from './validateRoutes';
@@ -12,16 +16,14 @@ const generateCorrectCompareWithDescriptorValueMappedEntity = (
   [`${checkMode}-array`]: { checkMode, value: [true, 1, 'string'] }
 });
 
-const generateAllCorrectCompareWithExpectedValueMappedEntities = () => ({
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('equals'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('notEquals'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('includes'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('notIncludes'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('startsWith'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('notStartsWith'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('endsWith'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('notEndsWith')
-});
+const generateAllCorrectCompareWithExpectedValueMappedEntities = () =>
+  COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES.reduce(
+    (acc, checkMode) => ({
+      ...acc,
+      ...generateCorrectCompareWithDescriptorValueMappedEntity(checkMode)
+    }),
+    {}
+  );
 
 describe('validateRoutes (graphql)', () => {
   test('Should correctly handle routes only with correct type', () => {

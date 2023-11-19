@@ -7,6 +7,7 @@ import { validateInterceptors } from '../../validateInterceptors/validateInterce
 type AllowedEntityNamesByMethod = {
   [Method in keyof RestEntityNamesByMethod]: RestEntityNamesByMethod[Method][];
 };
+
 const ALLOWED_ENTITIES_BY_METHOD: AllowedEntityNamesByMethod = {
   get: ['headers', 'cookies', 'query', 'params'],
   delete: ['headers', 'cookies', 'query', 'params'],
@@ -29,7 +30,12 @@ const validateEntity = (entity: unknown, entityName: RestEntityName) => {
       throw new Error('body.checkMode');
     }
 
-    if (!isDescriptorValueValid(entity.checkMode, entity.value)) {
+    const isDescriptorValueObjectOrArray =
+      isPlainObject(entity.value) || Array.isArray(entity.value);
+    if (
+      !isDescriptorValueObjectOrArray ||
+      !isDescriptorValueValid(entity.checkMode, entity.value)
+    ) {
       throw new Error('body.value');
     }
 
@@ -43,8 +49,10 @@ const validateEntity = (entity: unknown, entityName: RestEntityName) => {
     }
 
     entity.forEach((entityElement, index) => {
-      if (!isDescriptorValueValid('equals', entityElement)) {
-        throw new Error(`body[${index}]`);
+      const isEntityElementObjectOrArray =
+        isPlainObject(entityElement) || Array.isArray(entityElement);
+      if (!isEntityElementObjectOrArray || !isDescriptorValueValid('equals', entityElement)) {
+        throw new Error(`${entityName}[${index}]`);
       }
     });
 
@@ -83,9 +91,8 @@ const validateEntity = (entity: unknown, entityName: RestEntityName) => {
         throw new Error(errorMessage);
       }
 
-      // FIXME useless array checking
-      const isValueObjectOrArray = isPlainObject(value) || Array.isArray(value);
-      if (isValueObjectOrArray || !isDescriptorValueValid(checkMode, value)) {
+      const isValueObject = isPlainObject(value);
+      if (isValueObject || !isDescriptorValueValid(checkMode, value)) {
         throw new Error(errorMessage);
       }
     });

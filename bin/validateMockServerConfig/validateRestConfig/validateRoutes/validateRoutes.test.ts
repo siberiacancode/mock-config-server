@@ -7,7 +7,7 @@ import type { CompareWithDescriptorValueCheckMode, RestEntityName } from '@/util
 
 import { validateRoutes } from './validateRoutes';
 
-const generateCorrectCompareWithDescriptorMappedEntity = (
+const generateCorrectCompareWithDescriptorValueMappedEntity = (
   checkMode: CompareWithDescriptorValueCheckMode
 ) => ({
   [`${checkMode}-boolean`]: { checkMode, value: true },
@@ -20,7 +20,7 @@ const generateAllCorrectCompareWithExpectedValueMappedEntities = () =>
   COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES.reduce(
     (acc, checkMode) => ({
       ...acc,
-      ...generateCorrectCompareWithDescriptorMappedEntity(checkMode)
+      ...generateCorrectCompareWithDescriptorValueMappedEntity(checkMode)
     }),
     {}
   );
@@ -186,13 +186,13 @@ describe('validateRoutes (rest)', () => {
         ).toThrow(new Error('routes[0].entities.body'));
       });
 
-      const correctBodyPropertyValues = [{}, [], 'string', 3000, true, null];
-      correctBodyPropertyValues.forEach((correctBodyPropertyValue) => {
+      const correctBodyObjectPropertyValues = [{}, [], 'string', 3000, true, null];
+      correctBodyObjectPropertyValues.forEach((correctBodyObjectPropertyValue) => {
         expect(() =>
           validateRoutes(
             [
               {
-                entities: { body: { key: correctBodyPropertyValue } },
+                entities: { body: { key: correctBodyObjectPropertyValue } },
                 data: null
               }
             ],
@@ -203,18 +203,7 @@ describe('validateRoutes (rest)', () => {
           validateRoutes(
             [
               {
-                entities: { body: { key: [correctBodyPropertyValue] } },
-                data: null
-              }
-            ],
-            'post'
-          )
-        ).not.toThrow(Error);
-        expect(() =>
-          validateRoutes(
-            [
-              {
-                entities: { body: [correctBodyPropertyValue] },
+                entities: { body: { key: [correctBodyObjectPropertyValue] } },
                 data: null
               }
             ],
@@ -223,13 +212,13 @@ describe('validateRoutes (rest)', () => {
         ).not.toThrow(Error);
       });
 
-      const incorrectBodyPropertyValues = [undefined, () => {}, /\d/];
-      incorrectBodyPropertyValues.forEach((incorrectBodyPropertyValue) => {
+      const incorrectBodyObjectPropertyValues = [undefined, () => {}, /\d/];
+      incorrectBodyObjectPropertyValues.forEach((incorrectBodyObjectPropertyValue) => {
         expect(() =>
           validateRoutes(
             [
               {
-                entities: { body: { key: incorrectBodyPropertyValue } },
+                entities: { body: { key: incorrectBodyObjectPropertyValue } },
                 data: null
               }
             ],
@@ -240,18 +229,45 @@ describe('validateRoutes (rest)', () => {
           validateRoutes(
             [
               {
-                entities: { body: { key: [incorrectBodyPropertyValue] } },
+                entities: { body: { key: [incorrectBodyObjectPropertyValue] } },
                 data: null
               }
             ],
             'post'
           )
         ).toThrow(new Error('routes[0].entities.body.key[0]'));
+      });
+
+      const correctBodyArrayPropertyValues = [{}, []];
+      correctBodyArrayPropertyValues.forEach((correctBodyArrayPropertyValue) => {
         expect(() =>
           validateRoutes(
             [
               {
-                entities: { body: [incorrectBodyPropertyValue] },
+                entities: { body: [correctBodyArrayPropertyValue] },
+                data: null
+              }
+            ],
+            'post'
+          )
+        ).not.toThrow(Error);
+      });
+
+      const incorrectBodyArrayPropertyValues = [
+        'string',
+        3000,
+        true,
+        null,
+        undefined,
+        () => {},
+        /\d/
+      ];
+      incorrectBodyArrayPropertyValues.forEach((incorrectBodyArrayPropertyValue) => {
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: { body: [incorrectBodyArrayPropertyValue] },
                 data: null
               }
             ],
