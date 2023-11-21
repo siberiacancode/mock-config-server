@@ -28,8 +28,7 @@ import { prepareGraphQLRequestConfigs } from './helpers';
 interface CreateGraphQLRoutesParams {
   router: IRouter;
   graphqlConfig: GraphqlConfig;
-  apiInterceptors?: Interceptors;
-  serverInterceptors?: Interceptors;
+  serverResponseInterceptor?: Interceptors['response'];
   apiLoggers?: Loggers;
   serverLoggers?: Loggers;
 }
@@ -37,8 +36,7 @@ interface CreateGraphQLRoutesParams {
 export const createGraphQLRoutes = ({
   router,
   graphqlConfig,
-  apiInterceptors,
-  serverInterceptors,
+  serverResponseInterceptor,
   apiLoggers,
   serverLoggers
 }: CreateGraphQLRoutesParams) => {
@@ -82,6 +80,11 @@ export const createGraphQLRoutes = ({
 
     if (!matchedRequestConfig) {
       return next();
+    }
+
+    const requestRequestInterceptor = matchedRequestConfig.interceptors?.request;
+    if (requestRequestInterceptor) {
+      await callRequestInterceptor({ request, interceptor: requestRequestInterceptor });
     }
 
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
@@ -129,19 +132,10 @@ export const createGraphQLRoutes = ({
 
     let isRequestLoggerResolved = !!serverLoggers?.request;
 
-    const apiRequestInterceptor = apiInterceptors?.request;
-    if (apiRequestInterceptor) {
-      await callRequestInterceptor({ request, interceptor: apiRequestInterceptor });
-    }
     const apiRequestLogger = apiLoggers?.request;
     if (!isRequestLoggerResolved && apiRequestLogger) {
       await callRequestLogger({ request, logger: apiRequestLogger });
       isRequestLoggerResolved = true;
-    }
-
-    const requestRequestInterceptor = matchedRequestConfig.interceptors?.request;
-    if (requestRequestInterceptor) {
-      await callRequestInterceptor({ request, interceptor: requestRequestInterceptor });
     }
     const requestRequestLogger = matchedRequestConfig.loggers?.request;
     if (!isRequestLoggerResolved && requestRequestLogger) {
@@ -171,7 +165,7 @@ export const createGraphQLRoutes = ({
         routeInterceptor: matchedRouteConfig.interceptors?.response,
         requestInterceptor: matchedRequestConfig.interceptors?.response,
         apiInterceptor: graphqlConfig.interceptors?.response,
-        serverInterceptor: serverInterceptors?.response
+        serverInterceptor: serverResponseInterceptor
       }
     });
 

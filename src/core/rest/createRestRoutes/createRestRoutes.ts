@@ -26,8 +26,7 @@ import { prepareRestRequestConfigs } from './helpers';
 interface CreateRestRoutesParams {
   router: IRouter;
   restConfig: RestConfig;
-  apiInterceptors?: Interceptors;
-  serverInterceptors?: Interceptors;
+  serverResponseInterceptor?: Interceptors['response'];
   apiLoggers?: Loggers;
   serverLoggers?: Loggers;
 }
@@ -35,14 +34,18 @@ interface CreateRestRoutesParams {
 export const createRestRoutes = ({
   router,
   restConfig,
-  apiInterceptors,
-  serverInterceptors,
+  serverResponseInterceptor,
   apiLoggers,
   serverLoggers
 }: CreateRestRoutesParams) => {
   prepareRestRequestConfigs(restConfig.configs).forEach((requestConfig) => {
     router.route(requestConfig.path)[requestConfig.method](
       asyncHandler(async (request, response, next) => {
+        const requestRequestInterceptor = requestConfig.interceptors?.request;
+        if (requestRequestInterceptor) {
+          await callRequestInterceptor({ request, interceptor: requestRequestInterceptor });
+        }
+
         const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
           if (!entities) return true;
           const entries = Object.entries(entities) as [
@@ -84,19 +87,10 @@ export const createRestRoutes = ({
 
         let isRequestLoggerResolved = !!serverLoggers?.request;
 
-        const apiRequestInterceptor = apiInterceptors?.request;
-        if (apiRequestInterceptor) {
-          await callRequestInterceptor({ request, interceptor: apiRequestInterceptor });
-        }
         const apiRequestLogger = apiLoggers?.request;
         if (!isRequestLoggerResolved && apiRequestLogger) {
           await callRequestLogger({ request, logger: apiRequestLogger });
           isRequestLoggerResolved = true;
-        }
-
-        const requestRequestInterceptor = requestConfig.interceptors?.request;
-        if (requestRequestInterceptor) {
-          await callRequestInterceptor({ request, interceptor: requestRequestInterceptor });
         }
         const requestRequestLogger = requestConfig.loggers?.request;
         if (!isRequestLoggerResolved && requestRequestLogger) {
@@ -126,7 +120,7 @@ export const createRestRoutes = ({
             routeInterceptor: matchedRouteConfig.interceptors?.response,
             requestInterceptor: requestConfig.interceptors?.response,
             apiInterceptor: restConfig.interceptors?.response,
-            serverInterceptor: serverInterceptors?.response
+            serverInterceptor: serverResponseInterceptor
           }
         });
 

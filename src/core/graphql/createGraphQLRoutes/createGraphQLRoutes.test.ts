@@ -18,7 +18,7 @@ describe('createGraphQLRoutes', () => {
     const routerWithRoutes = createGraphQLRoutes({
       router: routerBase,
       graphqlConfig: graphql,
-      serverInterceptors: interceptors
+      serverResponseInterceptor: interceptors?.response
     });
 
     const serverBaseUrl = baseUrl ?? '/';

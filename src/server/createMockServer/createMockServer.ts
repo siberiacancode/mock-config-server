@@ -65,40 +65,38 @@ export const createMockServer = (
     const routerWithRestRoutes = createRestRoutes({
       router: express.Router(),
       restConfig: rest,
-      apiInterceptors: rest.interceptors,
-      serverInterceptors: interceptors,
+      serverResponseInterceptor: interceptors?.response,
       apiLoggers: rest.loggers,
       serverLoggers: loggers
     });
 
     const restBaseUrl = urlJoin(baseUrl, rest.baseUrl ?? '/');
 
-    server.use(restBaseUrl, routerWithRestRoutes);
-
     const apiRequestInterceptor = rest.interceptors?.request;
     if (apiRequestInterceptor) {
       requestInterceptorMiddleware(server, apiRequestInterceptor, restBaseUrl);
     }
+
+    server.use(restBaseUrl, routerWithRestRoutes);
   }
 
   if (graphql) {
     const routerWithGraphQLRoutes = createGraphQLRoutes({
       router: express.Router(),
       graphqlConfig: graphql,
-      apiInterceptors: graphql.interceptors,
-      serverInterceptors: interceptors,
+      serverResponseInterceptor: interceptors?.response,
       apiLoggers: graphql.loggers,
       serverLoggers: loggers
     });
 
     const graphqlBaseUrl = urlJoin(baseUrl, graphql.baseUrl ?? '/');
 
-    server.use(graphqlBaseUrl, routerWithGraphQLRoutes);
-
     const apiRequestInterceptor = graphql.interceptors?.request;
     if (apiRequestInterceptor) {
       requestInterceptorMiddleware(server, apiRequestInterceptor, graphqlBaseUrl);
     }
+
+    server.use(graphqlBaseUrl, routerWithGraphQLRoutes);
   }
 
   if (database) {

@@ -18,7 +18,7 @@ describe('createRestRoutes', () => {
     const routerWithRoutes = createRestRoutes({
       router: routerBase,
       restConfig: rest,
-      serverInterceptors: interceptors
+      serverResponseInterceptor: interceptors?.response
     });
 
     const serverBaseUrl = baseUrl ?? '/';

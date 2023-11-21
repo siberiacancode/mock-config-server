@@ -23,7 +23,7 @@ const createServer = (
   const routerWithRestRoutes = createRestRoutes({
     router: express.Router(),
     restConfig: { configs: rest?.configs ?? [] },
-    serverInterceptors: interceptors
+    serverResponseInterceptor: interceptors?.response
   });
   server.use(restBaseUrl, routerWithRestRoutes);
 
@@ -31,7 +31,7 @@ const createServer = (
   const routerWithGraphqlRoutes = createGraphQLRoutes({
     router: express.Router(),
     graphqlConfig: { configs: graphql?.configs ?? [] },
-    serverInterceptors: interceptors
+    serverResponseInterceptor: interceptors?.response
   });
   server.use(graphqlBaseUrl, routerWithGraphqlRoutes);
 

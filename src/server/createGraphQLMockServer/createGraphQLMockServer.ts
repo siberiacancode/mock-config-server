@@ -64,7 +64,7 @@ export const createGraphQLMockServer = (
   const routerWithGraphqlRoutes = createGraphQLRoutes({
     router: express.Router(),
     graphqlConfig: { configs },
-    serverInterceptors: interceptors,
+    serverResponseInterceptor: interceptors?.response,
     serverLoggers: loggers
   });
 
