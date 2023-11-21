@@ -12,6 +12,9 @@ import {
   notFoundMiddleware,
   requestInfoMiddleware,
   requestInterceptorMiddleware,
+  requestLoggerMiddleware,
+  responseInterceptorsMiddleware,
+  responseLoggersMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
@@ -44,11 +47,6 @@ export const createMockServer = (
     requestInterceptorMiddleware(server, serverRequestInterceptor);
   }
 
-  // const serverRequestLoggers = mockServerConfig.loggers;
-  // if (serverRequestLoggers?.request) {
-  //   requestLoggerMiddleware(server, serverRequestLoggers.request);
-  // }
-
   const baseUrl = mockServerConfig.baseUrl ?? '/';
 
   if (cors) {
@@ -78,6 +76,41 @@ export const createMockServer = (
     }
 
     server.use(restBaseUrl, routerWithRestRoutes);
+
+    const apiRequestLogger = rest.loggers?.request;
+    if (apiRequestLogger) {
+      requestLoggerMiddleware(server, apiRequestLogger, 'api', restBaseUrl);
+    }
+    const serverRequestLogger = loggers?.request;
+    if (serverRequestLogger) {
+      requestLoggerMiddleware(server, serverRequestLogger, 'server', restBaseUrl);
+    }
+
+    const serverResponseInterceptor = mockServerConfig.interceptors?.response;
+    const restResponseInterceptor = rest.interceptors?.response;
+    if (serverResponseInterceptor || restResponseInterceptor) {
+      responseInterceptorsMiddleware({
+        server,
+        interceptors: {
+          serverInterceptor: serverResponseInterceptor,
+          apiInterceptor: restResponseInterceptor
+        },
+        path: restBaseUrl
+      });
+    }
+
+    const serverResponseLogger = mockServerConfig.loggers?.response;
+    const restResponseLogger = rest.loggers?.response;
+    if (serverResponseLogger || restResponseLogger) {
+      responseLoggersMiddleware({
+        server,
+        loggers: {
+          serverLogger: serverResponseLogger,
+          apiLogger: restResponseLogger
+        },
+        path: restBaseUrl
+      });
+    }
   }
 
   if (graphql) {
@@ -97,6 +130,41 @@ export const createMockServer = (
     }
 
     server.use(graphqlBaseUrl, routerWithGraphQLRoutes);
+
+    const apiRequestLogger = graphql.loggers?.request;
+    if (apiRequestLogger) {
+      requestLoggerMiddleware(server, apiRequestLogger, 'api', graphqlBaseUrl);
+    }
+    const serverRequestLogger = loggers?.request;
+    if (serverRequestLogger) {
+      requestLoggerMiddleware(server, serverRequestLogger, 'server', graphqlBaseUrl);
+    }
+
+    const serverResponseInterceptor = mockServerConfig.interceptors?.response;
+    const graphqlResponseInterceptor = graphql.interceptors?.response;
+    if (serverResponseInterceptor || graphqlResponseInterceptor) {
+      responseInterceptorsMiddleware({
+        server,
+        interceptors: {
+          serverInterceptor: serverResponseInterceptor,
+          apiInterceptor: graphqlResponseInterceptor
+        },
+        path: graphqlBaseUrl
+      });
+    }
+
+    const serverResponseLogger = mockServerConfig.loggers?.response;
+    const graphqlResponseLogger = graphql.loggers?.response;
+    if (serverResponseLogger || graphqlResponseLogger) {
+      responseLoggersMiddleware({
+        server,
+        loggers: {
+          serverLogger: serverResponseLogger,
+          apiLogger: graphqlResponseLogger
+        },
+        path: graphqlBaseUrl
+      });
+    }
   }
 
   if (database) {

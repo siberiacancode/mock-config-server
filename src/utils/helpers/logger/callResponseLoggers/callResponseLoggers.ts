@@ -3,12 +3,19 @@ import type { ParamsDictionary } from 'express-serve-static-core';
 import type { IncomingHttpHeaders } from 'http';
 import type { ParsedQs } from 'qs';
 
-import type { Data, GraphQLEntityName, ResponseLogger, RestEntityName } from '@/utils/types';
+import type {
+  Data,
+  GraphQLEntityName,
+  LoggerLevel,
+  ResponseLogger,
+  RestEntityName
+} from '@/utils/types';
 
 import { formatUnixTimestamp } from '../../date';
 
 interface ResponseLogFunctionParams {
   logger: ResponseLogger<RestEntityName | GraphQLEntityName | 'data'>;
+  level: LoggerLevel;
   values: {
     headers: IncomingHttpHeaders;
     cookies: any;
@@ -25,34 +32,37 @@ interface ResponseLogFunctionParams {
   response: Response;
 }
 
-const responseLogFunction = ({ logger, values }: ResponseLogFunctionParams) => {
+// TODO: make pretty logs
+const responseLogFunction = ({ logger, values, level }: ResponseLogFunctionParams) => {
   if (!logger.enabled) return;
 
-  console.log(`RES for request#${values.id} at ${formatUnixTimestamp(values.unixTimestamp)}`);
+  console.log(
+    `LOG ${level} RES for request#${values.id} at ${formatUnixTimestamp(values.unixTimestamp)}`
+  );
 
-  if (logger.options?.headers) {
-    console.log('headers=', `${JSON.stringify(values.headers)}`);
-  }
-  if (logger.options?.cookies) {
-    console.log('cookies=', `${JSON.stringify(values.cookies)}`);
-  }
-  if (logger.options?.query) {
-    console.log('query=', `${JSON.stringify(values.query)}`);
-  }
-  if (logger.options?.params) {
-    console.log('params=', `${JSON.stringify(values.params)}`);
-  }
-  if (logger.options?.variables) {
-    console.log('variables=', `${JSON.stringify(values.variables)}`);
-  }
-  if (logger.options?.body) {
-    console.log('body=', `${JSON.stringify(values.body)}`);
-  }
-  console.log('----------\n\n');
+  // if (logger.options?.headers) {
+  //   console.log('headers=', `${JSON.stringify(values.headers)}`);
+  // }
+  // if (logger.options?.cookies) {
+  //   console.log('cookies=', `${JSON.stringify(values.cookies)}`);
+  // }
+  // if (logger.options?.query) {
+  //   console.log('query=', `${JSON.stringify(values.query)}`);
+  // }
+  // if (logger.options?.params) {
+  //   console.log('params=', `${JSON.stringify(values.params)}`);
+  // }
+  // if (logger.options?.variables) {
+  //   console.log('variables=', `${JSON.stringify(values.variables)}`);
+  // }
+  // if (logger.options?.body) {
+  //   console.log('body=', `${JSON.stringify(values.body)}`);
+  // }
+  // console.log('----------\n\n');
 };
 
 interface CallResponseLoggerParams {
-  responseLoggers?: {
+  loggers?: {
     routeLogger?: ResponseLogger;
     requestLogger?: ResponseLogger;
     apiLogger?: ResponseLogger;
@@ -64,7 +74,7 @@ interface CallResponseLoggerParams {
 }
 
 export const callResponseLoggers = async ({
-  responseLoggers,
+  loggers,
   request,
   response,
   data
@@ -82,16 +92,43 @@ export const callResponseLoggers = async ({
     unixTimestamp: Date.now()
   };
 
-  if (responseLoggers?.routeLogger) {
-    await responseLogFunction({ logger: responseLoggers.routeLogger, values, request, response });
+  if (loggers?.routeLogger) {
+    await responseLogFunction({
+      logger: loggers.routeLogger,
+      values,
+      request,
+      response,
+      level: 'route'
+    });
+    return;
   }
-  if (responseLoggers?.requestLogger) {
-    await responseLogFunction({ logger: responseLoggers.requestLogger, values, request, response });
+  if (loggers?.requestLogger) {
+    await responseLogFunction({
+      logger: loggers.requestLogger,
+      values,
+      request,
+      response,
+      level: 'request'
+    });
+    return;
   }
-  if (responseLoggers?.apiLogger) {
-    await responseLogFunction({ logger: responseLoggers.apiLogger, values, request, response });
+  if (loggers?.apiLogger) {
+    await responseLogFunction({
+      logger: loggers.apiLogger,
+      values,
+      request,
+      response,
+      level: 'api'
+    });
+    return;
   }
-  if (responseLoggers?.serverLogger) {
-    await responseLogFunction({ logger: responseLoggers.serverLogger, values, request, response });
+  if (loggers?.serverLogger) {
+    await responseLogFunction({
+      logger: loggers.serverLogger,
+      values,
+      request,
+      response,
+      level: 'server'
+    });
   }
 };

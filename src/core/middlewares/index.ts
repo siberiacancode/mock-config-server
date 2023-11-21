@@ -7,4 +7,6 @@ export * from './notFoundMiddleware/notFoundMiddleware';
 export * from './requestInfoMiddleware/requestInfoMiddleware';
 export * from './requestInterceptorMiddleware/requestInterceptorMiddleware';
 export * from './requestLoggerMiddleware/requestLoggerMiddleware';
+export * from './responseInterceptorsMiddleware/responseInterceptorsMiddleware';
+export * from './responseLoggersMiddleware/responseLoggersMiddleware';
 export * from './staticMiddleware/staticMiddleware';

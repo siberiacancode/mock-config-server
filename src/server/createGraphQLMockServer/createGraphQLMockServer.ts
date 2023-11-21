@@ -46,7 +46,7 @@ export const createGraphQLMockServer = (
 
   const serverRequestLoggers = graphqlMockServerConfig.loggers;
   if (serverRequestLoggers?.request) {
-    requestLoggerMiddleware(server, serverRequestLoggers.request);
+    requestLoggerMiddleware(server, serverRequestLoggers.request, 'server');
   }
 
   const baseUrl = graphqlMockServerConfig.baseUrl ?? '/';

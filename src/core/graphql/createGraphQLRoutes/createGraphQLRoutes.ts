@@ -134,12 +134,12 @@ export const createGraphQLRoutes = ({
 
     const apiRequestLogger = apiLoggers?.request;
     if (!isRequestLoggerResolved && apiRequestLogger) {
-      await callRequestLogger({ request, logger: apiRequestLogger });
+      await callRequestLogger({ request, logger: apiRequestLogger, level: 'api' });
       isRequestLoggerResolved = true;
     }
     const requestRequestLogger = matchedRequestConfig.loggers?.request;
     if (!isRequestLoggerResolved && requestRequestLogger) {
-      await callRequestLogger({ request, logger: requestRequestLogger });
+      await callRequestLogger({ request, logger: requestRequestLogger, level: 'request' });
       isRequestLoggerResolved = true;
     }
 
@@ -149,7 +149,7 @@ export const createGraphQLRoutes = ({
 
     const routeRequestLogger = matchedRouteConfig.loggers?.request;
     if (routeRequestLogger) {
-      await callRequestLogger({ request, logger: routeRequestLogger });
+      await callRequestLogger({ request, logger: routeRequestLogger, level: 'route' });
     }
 
     const matchedRouteConfigData =
@@ -172,7 +172,7 @@ export const createGraphQLRoutes = ({
     await callResponseLoggers({
       request,
       response,
-      responseLoggers: {
+      loggers: {
         routeLogger: matchedRouteConfig.loggers?.response,
         requestLogger: matchedRequestConfig.loggers?.response,
         apiLogger: graphqlConfig.loggers?.response,

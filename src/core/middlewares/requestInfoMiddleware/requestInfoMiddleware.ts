@@ -1,10 +1,13 @@
 import type { Express } from 'express';
 
+import type { LoggerLevel } from '@/utils/types';
+
 declare global {
   namespace Express {
     export interface Request {
       id: number;
       unixTimestamp: number;
+      resolvedRequestLoggerLevel?: LoggerLevel;
     }
   }
 }

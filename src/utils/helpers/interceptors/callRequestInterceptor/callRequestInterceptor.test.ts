@@ -2,7 +2,7 @@ import type { Request } from 'express';
 
 import { callRequestInterceptor } from './callRequestInterceptor';
 
-describe('callRequestInterceptors', () => {
+describe('callRequestInterceptor', () => {
   test('Should call passed request interceptor', () => {
     const request = {} as Request;
     const interceptor = jest.fn();

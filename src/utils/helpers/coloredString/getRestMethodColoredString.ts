@@ -10,5 +10,4 @@ export const getRestMethodColoredString = (restMethod: RestMethod) => {
   if (restMethod.toLowerCase() === 'delete') return c.redBright(restMethod);
   if (restMethod.toLowerCase() === 'options') return c.redBright(restMethod);
   throw new Error('Wrong restMethod');
-
 };

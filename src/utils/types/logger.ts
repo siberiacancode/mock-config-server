@@ -3,6 +3,7 @@
 // import type { GraphQLEntityName } from './graphql';
 // import type { RestEntityName } from './rest';
 
+export type LoggerLevel = 'server' | 'api' | 'request' | 'route';
 
 // export interface RequestLoggerOptions<OptionsKeys extends RestEntityName | GraphQLEntityName> {
 //   // logger: RequestLogger<EntityNames>;
@@ -25,8 +26,6 @@ export interface RequestLogger<OptionsKeys extends string = string> {
   // logFunction?: RequestLogFunction<EntityNames>;
   options?: RequestLoggerOptions<OptionsKeys>;
 }
-
-
 
 // export interface ResponseLogFunctionParams<EntityNames extends RestEntityName | GraphQLEntityName> {
 //   // logger: ResponseLogger<EntityNames>;
@@ -52,9 +51,10 @@ export interface ResponseLogger<OptionsKeys extends string = string> {
   options?: ResponseLoggerOptions<OptionsKeys>;
 }
 
-
-
-export interface Loggers<RequestLoggerOptionsKeys extends string = string, ResponseLoggerOptionsKeys extends string = string> {
+export interface Loggers<
+  RequestLoggerOptionsKeys extends string = string,
+  ResponseLoggerOptionsKeys extends string = string
+> {
   request?: RequestLogger<RequestLoggerOptionsKeys>;
   response?: ResponseLogger<ResponseLoggerOptionsKeys>;
 }

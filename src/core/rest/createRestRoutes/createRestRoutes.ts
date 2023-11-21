@@ -85,26 +85,37 @@ export const createRestRoutes = ({
           });
         });
 
-        let isRequestLoggerResolved = !!serverLoggers?.request;
-
-        const apiRequestLogger = apiLoggers?.request;
-        if (!isRequestLoggerResolved && apiRequestLogger) {
-          await callRequestLogger({ request, logger: apiRequestLogger });
-          isRequestLoggerResolved = true;
-        }
-        const requestRequestLogger = requestConfig.loggers?.request;
-        if (!isRequestLoggerResolved && requestRequestLogger) {
-          await callRequestLogger({ request, logger: requestRequestLogger });
-          isRequestLoggerResolved = true;
-        }
-
         if (!matchedRouteConfig) {
+          const requestRequestLogger = requestConfig.loggers?.request;
+          if (requestRequestLogger) {
+            await callRequestLogger({ request, logger: requestRequestLogger, level: 'request' });
+          }
+          const apiRequestLogger = apiLoggers?.request;
+          if (apiRequestLogger) {
+            await callRequestLogger({ request, logger: apiRequestLogger, level: 'api' });
+          }
+          const serverRequestLogger = serverLoggers?.request;
+          if (serverRequestLogger) {
+            await callRequestLogger({ request, logger: serverRequestLogger, level: 'server' });
+          }
           return next();
         }
 
         const routeRequestLogger = matchedRouteConfig.loggers?.request;
         if (routeRequestLogger) {
-          await callRequestLogger({ request, logger: routeRequestLogger });
+          await callRequestLogger({ request, logger: routeRequestLogger, level: 'route' });
+        }
+        const requestRequestLogger = requestConfig.loggers?.request;
+        if (requestRequestLogger) {
+          await callRequestLogger({ request, logger: requestRequestLogger, level: 'request' });
+        }
+        const apiRequestLogger = apiLoggers?.request;
+        if (apiRequestLogger) {
+          await callRequestLogger({ request, logger: apiRequestLogger, level: 'api' });
+        }
+        const serverRequestLogger = serverLoggers?.request;
+        if (serverRequestLogger) {
+          await callRequestLogger({ request, logger: serverRequestLogger, level: 'server' });
         }
 
         const matchedRouteConfigData =
@@ -127,7 +138,7 @@ export const createRestRoutes = ({
         await callResponseLoggers({
           request,
           response,
-          responseLoggers: {
+          loggers: {
             routeLogger: matchedRouteConfig.loggers?.response,
             requestLogger: requestConfig.loggers?.response,
             apiLogger: restConfig.loggers?.response,
