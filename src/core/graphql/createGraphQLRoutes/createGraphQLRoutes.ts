@@ -130,26 +130,37 @@ export const createGraphQLRoutes = ({
       });
     });
 
-    let isRequestLoggerResolved = !!serverLoggers?.request;
-
-    const apiRequestLogger = apiLoggers?.request;
-    if (!isRequestLoggerResolved && apiRequestLogger) {
-      await callRequestLogger({ request, logger: apiRequestLogger, level: 'api' });
-      isRequestLoggerResolved = true;
-    }
-    const requestRequestLogger = matchedRequestConfig.loggers?.request;
-    if (!isRequestLoggerResolved && requestRequestLogger) {
-      await callRequestLogger({ request, logger: requestRequestLogger, level: 'request' });
-      isRequestLoggerResolved = true;
-    }
-
     if (!matchedRouteConfig) {
+      const requestRequestLogger = matchedRequestConfig.loggers?.request;
+      if (requestRequestLogger) {
+        await callRequestLogger({ request, logger: requestRequestLogger, level: 'request' });
+      }
+      const apiRequestLogger = apiLoggers?.request;
+      if (apiRequestLogger) {
+        await callRequestLogger({ request, logger: apiRequestLogger, level: 'api' });
+      }
+      const serverRequestLogger = serverLoggers?.request;
+      if (serverRequestLogger) {
+        await callRequestLogger({ request, logger: serverRequestLogger, level: 'server' });
+      }
       return next();
     }
 
     const routeRequestLogger = matchedRouteConfig.loggers?.request;
     if (routeRequestLogger) {
       await callRequestLogger({ request, logger: routeRequestLogger, level: 'route' });
+    }
+    const requestRequestLogger = matchedRequestConfig.loggers?.request;
+    if (requestRequestLogger) {
+      await callRequestLogger({ request, logger: requestRequestLogger, level: 'request' });
+    }
+    const apiRequestLogger = apiLoggers?.request;
+    if (apiRequestLogger) {
+      await callRequestLogger({ request, logger: apiRequestLogger, level: 'api' });
+    }
+    const serverRequestLogger = serverLoggers?.request;
+    if (serverRequestLogger) {
+      await callRequestLogger({ request, logger: serverRequestLogger, level: 'server' });
     }
 
     const matchedRouteConfigData =

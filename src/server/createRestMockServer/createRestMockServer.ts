@@ -11,6 +11,9 @@ import {
   notFoundMiddleware,
   requestInfoMiddleware,
   requestInterceptorMiddleware,
+  requestLoggerMiddleware,
+  responseInterceptorsMiddleware,
+  responseLoggersMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
@@ -43,11 +46,6 @@ export const createRestMockServer = (
     requestInterceptorMiddleware(server, serverRequestInterceptor);
   }
 
-  // const serverRequestLoggers = restMockServerConfig.loggers;
-  // if (serverRequestLoggers?.request) {
-  //   requestLoggerMiddleware(server, serverRequestLoggers.request);
-  // }
-
   const baseUrl = restMockServerConfig.baseUrl ?? '/';
 
   if (cors) {
@@ -68,6 +66,33 @@ export const createRestMockServer = (
   });
 
   server.use(baseUrl, routerWithRestRoutes);
+
+  const serverRequestLogger = loggers?.request;
+  if (serverRequestLogger) {
+    requestLoggerMiddleware(server, serverRequestLogger, 'server', baseUrl);
+  }
+
+  const serverResponseInterceptor = restMockServerConfig.interceptors?.response;
+  if (serverResponseInterceptor) {
+    responseInterceptorsMiddleware({
+      server,
+      interceptors: {
+        serverInterceptor: serverResponseInterceptor
+      },
+      path: baseUrl
+    });
+  }
+
+  const serverResponseLogger = restMockServerConfig.loggers?.response;
+  if (serverResponseLogger) {
+    responseLoggersMiddleware({
+      server,
+      loggers: {
+        serverLogger: serverResponseLogger
+      },
+      path: baseUrl
+    });
+  }
 
   if (database) {
     const routerWithDatabaseRoutes = createDatabaseRoutes(express.Router(), database);
