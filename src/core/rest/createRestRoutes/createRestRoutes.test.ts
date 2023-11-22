@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 
-import { sleep, urlJoin } from '@/utils/helpers';
+import { urlJoin } from '@/utils/helpers';
 import type { MockServerConfig, RestConfig } from '@/utils/types';
 
 import { createRestRoutes } from './createRestRoutes';
@@ -76,6 +76,10 @@ describe('createRestRoutes', () => {
 });
 
 describe('createRestRoutes: content', () => {
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   test('Should correctly use data function', async () => {
     const server = createServer({
       rest: {
@@ -154,6 +158,7 @@ describe('createRestRoutes: content', () => {
   });
 
   test('Should return same polling data with time param', async () => {
+    jest.useFakeTimers();
     const server = createServer({
       rest: {
         configs: [
@@ -180,13 +185,13 @@ describe('createRestRoutes: content', () => {
     expect(firstResponse.statusCode).toBe(200);
     expect(firstResponse.body).toEqual({ name: 'John', surname: 'Doe' });
 
-    await sleep(1000);
+    jest.advanceTimersByTime(1000);
 
     const secondResponse = await request(server).get('/users').query(query);
     expect(secondResponse.statusCode).toBe(200);
     expect(secondResponse.body).toEqual({ name: 'John', surname: 'Doe' });
 
-    await sleep(1000);
+    jest.advanceTimersByTime(1000);
 
     const thirdResponse = await request(server).get('/users').query(query);
     expect(thirdResponse.statusCode).toBe(200);
