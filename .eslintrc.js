@@ -16,8 +16,8 @@ module.exports = {
         '@typescript-eslint/no-unsafe-enum-comparison': 'off',
         '@typescript-eslint/no-var-requires': 'off',
         'no-restricted-syntax': 'off',
-        'promise/always-return': 'off',
-        'no-underscore-dangle': 'off'
+        'no-underscore-dangle': 'off',
+        'promise/always-return': ['error', { ignoreLastCallback: true }]
       }
     }
   ]

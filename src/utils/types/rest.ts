@@ -18,10 +18,6 @@ export type RestEntityName = 'headers' | 'cookies' | 'query' | 'params' | 'body'
 export type RestMappedEntityKey = string;
 type RestMappedEntityValue = string | number | boolean;
 
-export interface RestSettings {
-  readonly polling?: boolean;
-}
-
 type RestPlainEntityInnerValue = {
   checkMode?: undefined;
   call?: undefined;
@@ -118,6 +114,10 @@ export type RestEntityByEntityName<Method extends RestMethod> = {
   [EntityName in RestEntityNamesByMethod[Method]]?: RestEntityDescriptorOrValue<EntityName>;
 };
 
+interface RestSettings {
+  readonly polling?: boolean;
+}
+
 export type RestRouteConfig<
   Method extends RestMethod,
   Entities extends RestEntityByEntityName<Method> = RestEntityByEntityName<Method>,
@@ -131,13 +131,13 @@ export type RestRouteConfig<
       }>;
     }
   | {
-      settings?: Settings & { polling?: false };
+      settings?: Settings & { polling: false };
       data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
     }
 ) & { entities?: Entities; interceptors?: Pick<Interceptors, 'response'> };
 
 export type RestPathString = `/${string}`;
-export interface BaseRestRequestConfig<Method extends RestMethod> {
+interface BaseRestRequestConfig<Method extends RestMethod> {
   path: RestPathString | RegExp;
   method: Method;
   routes: RestRouteConfig<Method>[];

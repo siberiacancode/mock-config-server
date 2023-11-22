@@ -16,10 +16,6 @@ export type GraphQLEntityName = 'headers' | 'cookies' | 'query' | 'variables';
 export type GraphQLMappedEntityName = string;
 type GraphQLMappedEntityValue = string | number | boolean;
 
-export type GraphQLSettings = {
-  readonly polling: boolean;
-};
-
 type GraphQLPlainEntityInnerValue = {
   checkMode?: undefined;
   call?: undefined;
@@ -126,6 +122,10 @@ export interface GraphQLEntityNamesByOperationType {
 
 type GraphQLEntityByEntityName<OperationType extends GraphQLOperationType> = {
   [EntityName in GraphQLEntityNamesByOperationType[OperationType]]?: GraphQLEntityDescriptorOrValue<EntityName>;
+};
+
+type GraphQLSettings = {
+  readonly polling: boolean;
 };
 
 export type GraphQLRouteConfig<

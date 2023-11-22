@@ -12,8 +12,8 @@ export const validateSettings = (settings: unknown) => {
   const isSettingsObject = isPlainObject(settings);
   if (isSettingsObject) {
     Object.keys(settings).forEach((settingName) => {
-      const isEntityAllowed = ALLOWED_SETTINGS.includes(settingName as any);
-      if (!isEntityAllowed) {
+      const isSettingAllowed = ALLOWED_SETTINGS.includes(settingName as any);
+      if (!isSettingAllowed) {
         throw new Error(`settings.${settingName}`);
       }
 

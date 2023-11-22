@@ -128,29 +128,31 @@ export const createGraphQLRoutes = (
       const shallowMatchedRouteConfig =
         matchedRouteConfig as unknown as typeof matchedRouteConfig & {
           __pollingIndex: number;
-          __timeout: boolean;
+          __timeoutInProgress: boolean;
         };
 
       let index = shallowMatchedRouteConfig.__pollingIndex ?? 0;
-      if (matchedRouteConfig.queue.length === index) index = 0;
 
       const { time, data } = matchedRouteConfig.queue[index];
 
       const updateIndex = () => {
-        index += 1;
+        if (matchedRouteConfig.queue.length - 1 === index) {
+          index = 0;
+        } else {
+          index += 1;
+        }
         shallowMatchedRouteConfig.__pollingIndex = index;
-        if (matchedRouteConfig.queue.length === index) index = 0;
       };
 
-      if (time && !shallowMatchedRouteConfig.__timeout) {
-        shallowMatchedRouteConfig.__timeout = true;
+      if (time && !shallowMatchedRouteConfig.__timeoutInProgress) {
+        shallowMatchedRouteConfig.__timeoutInProgress = true;
         setTimeout(() => {
-          shallowMatchedRouteConfig.__timeout = false;
+          shallowMatchedRouteConfig.__timeoutInProgress = false;
           updateIndex();
         }, time);
       }
 
-      if (!time && !shallowMatchedRouteConfig.__timeout) {
+      if (!time && !shallowMatchedRouteConfig.__timeoutInProgress) {
         updateIndex();
       }
 
