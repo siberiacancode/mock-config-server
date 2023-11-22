@@ -232,7 +232,7 @@ describe('CreateNestedDatabaseRoutes', () => {
 
     test('Should return sorted data by multiple query', async () => {
       const response = await request(server).get(
-        '/users?_sort=name&_order=acs&_sort=id&_order=desc'
+        '/users?_sort=name&_order=asc&_sort=id&_order=desc'
       );
 
       expect(response.body).toStrictEqual([

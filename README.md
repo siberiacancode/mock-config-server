@@ -553,7 +553,6 @@ GET /users?author.name=siberiacancode
 
 ```
 GET /users?_sort=name
-GET /users?author.name=siberiacancode
 GET /users/1/transfers?_sort=id&_order=asc
 ```
 

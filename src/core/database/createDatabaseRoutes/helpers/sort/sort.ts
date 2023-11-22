@@ -39,7 +39,7 @@ export const sort = (array: any[], queries: ParsedUrlQuery) => {
   const { _sort, _order = DEFAULT_ORDER } = queries;
   if (!_sort) return array;
 
-  const result = array;
+  const result = [...array];
 
   if (Array.isArray(_sort)) {
     const orders = Array.isArray(_order) ? _order : [_order];
