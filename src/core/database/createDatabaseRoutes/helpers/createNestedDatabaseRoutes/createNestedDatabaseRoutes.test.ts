@@ -245,26 +245,30 @@ describe('CreateNestedDatabaseRoutes', () => {
 
     test('Should return correct _link for paginationed data', async () => {
       const firstResponse = await request(server).get('/users?_page=1&_limit=1');
+      const firstLink = {
+        count: 2,
+        pages: 2,
+        next: '?_page=2&_limit=1',
+        prev: null
+      };
 
+      expect(firstResponse.headers['mcs-link']).toStrictEqual(JSON.stringify(firstLink));
       expect(firstResponse.body).toStrictEqual({
-        _link: {
-          count: 2,
-          pages: 2,
-          next: '?_page=2&_limit=1',
-          prev: null
-        },
+        _link: firstLink,
         results: [{ id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }]
       });
 
       const secondResponse = await request(server).get(`/users${firstResponse.body._link.next}`);
+      const secondLink = {
+        count: 2,
+        pages: 2,
+        next: null,
+        prev: '?_page=1&_limit=1'
+      };
 
+      expect(secondResponse.headers['mcs-link']).toStrictEqual(JSON.stringify(secondLink));
       expect(secondResponse.body).toStrictEqual({
-        _link: {
-          count: 2,
-          pages: 2,
-          next: null,
-          prev: '?_page=1&_limit=1'
-        },
+        _link: secondLink,
         results: [{ id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }]
       });
     });

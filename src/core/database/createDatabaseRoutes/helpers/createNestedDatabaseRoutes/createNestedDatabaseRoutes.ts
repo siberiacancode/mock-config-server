@@ -27,7 +27,7 @@ export const createNestedDatabaseRoutes = (
 
       if (request.query && request.query._page) {
         data = pagination(data, request.query as ParsedUrlQuery);
-        if (data._link) response.set('Link', JSON.stringify(data._link));
+        if (data._link) response.set('mcs-link', JSON.stringify(data._link));
       }
 
       // ✅ important:
