@@ -210,13 +210,19 @@ describe('CreateNestedDatabaseRoutes', () => {
 
   describe('createNestedDatabaseRoutes: sort function', () => {
     const nestedDatabase = createNestedDatabase();
-    const server = createServer(nestedDatabase);
+    const server = createServer({
+      users: [
+        ...nestedDatabase.users,
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } }
+      ]
+    });
 
     test('Should return sorted data by query', async () => {
       const response = await request(server).get('/users?_sort=age');
 
       expect(response.body).toStrictEqual([
         { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } },
         { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
       ]);
     });
@@ -226,6 +232,7 @@ describe('CreateNestedDatabaseRoutes', () => {
 
       expect(response.body).toStrictEqual([
         { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } },
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } },
         { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
       ]);
     });
@@ -236,6 +243,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       );
 
       expect(response.body).toStrictEqual([
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } },
         { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } },
         { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
       ]);
@@ -246,7 +254,8 @@ describe('CreateNestedDatabaseRoutes', () => {
 
       expect(response.body).toStrictEqual([
         { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } },
-        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
+        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } }
       ]);
     });
   });

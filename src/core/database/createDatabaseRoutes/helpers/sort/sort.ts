@@ -1,8 +1,6 @@
 import flatten from 'flat';
 import type { ParsedUrlQuery } from 'node:querystring';
 
-import { isPrimitive } from '@/utils/helpers';
-
 type Order = 'asc' | 'desc';
 const DEFAULT_ORDER = 'asc';
 
@@ -16,13 +14,7 @@ const sortArray = (array: any[], key: string, order: Order) =>
     const flattenedA = flatten<any, any>(a);
     const flattenedB = flatten<any, any>(b);
 
-    if (
-      !flattenedA[key] ||
-      !flattenedB[key] ||
-      !isPrimitive(flattenedA[key]) ||
-      !isPrimitive(flattenedB[key])
-    )
-      return 0;
+    if (!flattenedA[key] || !flattenedB[key]) return 0;
 
     if (typeof flattenedA[key] === 'string' && typeof flattenedB[key] === 'string') {
       return order === 'asc'
