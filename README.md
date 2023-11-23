@@ -554,6 +554,7 @@ GET /users?author.name=siberiacancode
 ```
 GET /users?_sort=name
 GET /users/1/transfers?_sort=id&_order=asc
+GET /users?_sort=address.city&_order=desc
 ```
 
 > **\_order** is 'asc' by default
