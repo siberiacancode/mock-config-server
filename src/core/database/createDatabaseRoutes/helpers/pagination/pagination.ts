@@ -15,17 +15,19 @@ export const pagination = (array: any[], queries: ParsedUrlQuery) => {
   const end = page * limit;
   const results = array.slice(start, end);
 
-  const next =
-    page + 1 <= pages ? `?_page=${page + 1}${limit ? `&_limit=${queries._limit}` : ''}` : null;
-  const prev =
-    page - 1 !== 0 ? `?_page=${page - 1}${limit ? `&_limit=${queries._limit}` : ''}` : null;
+  const next = page + 1 <= pages ? page + 1 : null;
+  const prev = page - 1 !== 0 ? page - 1 : null;
+  const last = pages > 0 ? pages : null;
 
   return {
     _link: {
       count: array.length,
       pages,
+      first: 1,
+      current: page,
       next,
-      prev
+      prev,
+      last
     },
     results
   };

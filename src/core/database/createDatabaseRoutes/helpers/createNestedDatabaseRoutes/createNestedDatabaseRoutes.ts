@@ -27,7 +27,26 @@ export const createNestedDatabaseRoutes = (
 
       if (request.query && request.query._page) {
         data = pagination(data, request.query as ParsedUrlQuery);
-        if (data._link) response.set('mcs-link', JSON.stringify(data._link));
+        if (data._link) {
+          const links = {} as any;
+          const fullUrl = `${request.protocol}://${request.get('host')}${request.originalUrl}`;
+
+          if (data._link.first) {
+            links.first = fullUrl.replace(`page=${data._link.current}`, `page=${data._link.first}`);
+          }
+          if (data._link.prev) {
+            links.prev = fullUrl.replace(`page=${data._link.current}`, `page=${data._link.prev}`);
+          }
+          if (data._link.next) {
+            links.next = fullUrl.replace(`page=${data._link.current}`, `page=${data._link.next}`);
+          }
+          if (data._link.last) {
+            links.last = fullUrl.replace(`page=${data._link.current}`, `page=${data._link.last}`);
+          }
+
+          data._link = { ...data._link, ...links };
+          response.links(links);
+        }
       }
 
       // ✅ important:

@@ -215,62 +215,85 @@ describe('CreateNestedDatabaseRoutes', () => {
     test('Should return paginationed data by query', async () => {
       const response = await request(server).get('/users?_page=1');
 
-      expect(response.body).toStrictEqual({
-        _link: {
+      expect(response.body.results).toMatchObject([
+        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+      expect(response.body._link).toEqual(
+        expect.objectContaining({
           count: 2,
           pages: 1,
+          current: 1,
           next: null,
           prev: null
-        },
-        results: [
-          { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
-          { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
-        ]
-      });
+        })
+      );
+      expect(response.body._link.first).toContain('/users?_page=1');
+      expect(response.body._link.last).toContain('/users?_page=1');
     });
 
     test('Should return paginationed data by query with limit', async () => {
       const response = await request(server).get('/users?_page=1&_limit=1');
 
-      expect(response.body).toStrictEqual({
-        _link: {
+      expect(response.body.results).toMatchObject([
+        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
+      ]);
+      expect(response.body._link).toEqual(
+        expect.objectContaining({
           count: 2,
           pages: 2,
-          next: '?_page=2&_limit=1',
+          current: 1,
           prev: null
-        },
-        results: [{ id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }]
-      });
+        })
+      );
+      expect(response.body._link.first).toContain('/users?_page=1&_limit=1');
+      expect(response.body._link.last).toContain('/users?_page=2&_limit=1');
+      expect(response.body._link.next).toContain('/users?_page=2&_limit=1');
     });
 
     test('Should return correct _link for paginationed data', async () => {
+      const linkHeaderRegexp = /<([^>]+)>;\s*rel="([^"]+)"/g;
       const firstResponse = await request(server).get('/users?_page=1&_limit=1');
-      const firstLink = {
-        count: 2,
-        pages: 2,
-        next: '?_page=2&_limit=1',
-        prev: null
-      };
 
-      expect(firstResponse.headers['mcs-link']).toStrictEqual(JSON.stringify(firstLink));
-      expect(firstResponse.body).toStrictEqual({
-        _link: firstLink,
-        results: [{ id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }]
-      });
+      const firstResponseLinks = firstResponse.headers.link.match(linkHeaderRegexp);
+      expect(firstResponse.headers.link).toMatch(linkHeaderRegexp);
+      expect(firstResponseLinks.length).toEqual(3);
 
-      const secondResponse = await request(server).get(`/users${firstResponse.body._link.next}`);
-      const secondLink = {
-        count: 2,
-        pages: 2,
-        next: null,
-        prev: '?_page=1&_limit=1'
-      };
+      expect(firstResponse.body.results).toMatchObject([
+        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
+      ]);
+      expect(firstResponse.body._link).toEqual(
+        expect.objectContaining({
+          count: 2,
+          pages: 2,
+          current: 1,
+          prev: null
+        })
+      );
+      expect(firstResponse.body._link.first).toContain('/users?_page=1&_limit=1');
+      expect(firstResponse.body._link.last).toContain('/users?_page=2&_limit=1');
+      expect(firstResponse.body._link.next).toContain('/users?_page=2&_limit=1');
 
-      expect(secondResponse.headers['mcs-link']).toStrictEqual(JSON.stringify(secondLink));
-      expect(secondResponse.body).toStrictEqual({
-        _link: secondLink,
-        results: [{ id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }]
-      });
+      const secondResponse = await request(server).get('/users?_page=2&_limit=1');
+
+      const secondResponseLinks = firstResponse.headers.link.match(linkHeaderRegexp);
+      expect(secondResponse.headers.link).toMatch(linkHeaderRegexp);
+      expect(secondResponseLinks.length).toEqual(3);
+
+      expect(secondResponse.body.results).toMatchObject([
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+      expect(secondResponse.body._link).toEqual(
+        expect.objectContaining({
+          count: 2,
+          pages: 2,
+          current: 2,
+          next: null
+        })
+      );
+      expect(secondResponse.body._link.first).toContain('/users?_page=1&_limit=1');
+      expect(secondResponse.body._link.last).toContain('/users?_page=2&_limit=1');
+      expect(secondResponse.body._link.prev).toContain('/users?_page=1&_limit=1');
     });
 
     test('Should return normal data by invalid pagination data', async () => {
