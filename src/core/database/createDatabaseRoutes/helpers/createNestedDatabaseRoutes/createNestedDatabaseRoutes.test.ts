@@ -230,4 +230,56 @@ describe('CreateNestedDatabaseRoutes', () => {
       expect(response.body).toStrictEqual(nestedDatabase.users.slice(0, 2));
     });
   });
+
+  describe('createNestedDatabaseRoutes: sort function', () => {
+    const nestedDatabase = createNestedDatabase();
+    const server = createServer({
+      users: [
+        ...nestedDatabase.users,
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } }
+      ]
+    });
+
+    test('Should return sorted data by query', async () => {
+      const response = await request(server).get('/users?_sort=age');
+
+      expect(response.body).toStrictEqual([
+        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } },
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+    });
+
+    test('Should return sorted data by query with order', async () => {
+      const response = await request(server).get('/users?_sort=age&_order=desc');
+
+      expect(response.body).toStrictEqual([
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } },
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } },
+        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
+      ]);
+    });
+
+    test('Should return sorted data by multiple query', async () => {
+      const response = await request(server).get(
+        '/users?_sort=name&_order=asc&_sort=id&_order=desc'
+      );
+
+      expect(response.body).toStrictEqual([
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } },
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } },
+        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
+      ]);
+    });
+
+    test('Should return filtered array by nested query', async () => {
+      const response = await request(server).get('/users?_sort=address.city&_order=desc');
+
+      expect(response.body).toStrictEqual([
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } },
+        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } }
+      ]);
+    });
+  });
 });

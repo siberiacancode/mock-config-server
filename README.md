@@ -547,6 +547,24 @@ GET /users?id=1&id=2
 GET /users?author.name=siberiacancode
 ```
 
+### Sort
+
+> Use \_sort and \_order, use . to access deep properties
+
+```
+GET /users?_sort=name
+GET /users/1/transfers?_sort=id&_order=asc
+GET /users?_sort=address.city&_order=desc
+```
+
+> **\_order** is 'asc' by default
+
+For multiple fields:
+
+```
+GET /users?_sort=id&_order=desc&_sort=name&_order=asc
+```
+
 ### Slice
 
 > X-Total-Count header is included in the response
