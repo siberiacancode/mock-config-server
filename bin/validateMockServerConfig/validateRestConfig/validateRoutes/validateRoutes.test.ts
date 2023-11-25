@@ -732,17 +732,19 @@ describe('validateRoutes (rest)', () => {
       expect(() => validateRoutes([correctRouteMappedValue], 'get')).not.toThrow(Error);
     });
 
-    const incorrectRouteMappedValues = [
-      { queue: [null] },
-      { queue: [null], settings: { polling: false } },
-      { queue: null, settings: { polling: true } },
-      { data: null, settings: { polling: true } }
-    ];
+    const incorrectSettingsRouteMappedValue = { queue: [null] };
+    expect(() => validateRoutes([incorrectSettingsRouteMappedValue], 'get')).toThrow(
+      new Error('routes[0].settings')
+    );
 
-    incorrectRouteMappedValues.forEach((incorrectRouteMappedValue) => {
-      expect(() => validateRoutes([incorrectRouteMappedValue], 'get')).toThrow(
-        new Error('routes[0]')
-      );
-    });
+    const incorrectQueueRouteMappedValue = { queue: null };
+    expect(() => validateRoutes([incorrectQueueRouteMappedValue], 'get')).toThrow(
+      new Error('routes[0].queue')
+    );
+
+    const incorrectSettingPollingRouteMappedValue = { queue: [null], settings: { polling: false } };
+    expect(() => validateRoutes([incorrectSettingPollingRouteMappedValue], 'get')).toThrow(
+      new Error('routes[0].settings.polling')
+    );
   });
 });

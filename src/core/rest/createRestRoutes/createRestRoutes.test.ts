@@ -228,6 +228,28 @@ describe('createRestRoutes: settings', () => {
     expect(thirdResponse.statusCode).toBe(200);
     expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Doe' });
   });
+
+  test('Should correct handle empty queue', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { polling: true },
+                queue: []
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+    expect(response.statusCode).toBe(404);
+  });
 });
 
 describe('createRestRoutes: entities', () => {

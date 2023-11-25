@@ -99,15 +99,26 @@ export const validateRoutes = (routes: unknown, operationType: GraphQLOperationT
           throw new Error(`routes[${index}]`);
         }
 
+        if (isRouteHasDataProperty && isRouteHasQueueProperty) {
+          throw new Error(`routes[${index}]`);
+        }
+
         const { settings } = route;
         const isRouteSettingsObject = isPlainObject(settings);
         const isRouteQueueArray = Array.isArray(route.queue);
 
-        if (
-          isRouteHasQueueProperty &&
-          (!(isRouteSettingsObject && settings?.polling) || !isRouteQueueArray)
-        ) {
-          throw new Error(`routes[${index}]`);
+        if (isRouteHasQueueProperty) {
+          if (!isRouteQueueArray) {
+            throw new Error(`routes[${index}].queue`);
+          }
+
+          if (!isRouteSettingsObject) {
+            throw new Error(`routes[${index}].settings`);
+          }
+
+          if (!(isRouteSettingsObject && settings?.polling)) {
+            throw new Error(`routes[${index}].settings.polling`);
+          }
         }
 
         if (isRouteHasDataProperty && isRouteSettingsObject && settings?.polling) {

@@ -77,7 +77,6 @@ export const createRestRoutes = (
         }
 
         let matchedRouteConfigData = null;
-        console.log('@', matchedRouteConfig.settings?.polling, matchedRouteConfig);
         if (matchedRouteConfig.settings?.polling && 'queue' in matchedRouteConfig) {
           if (!matchedRouteConfig.queue.length) return next();
 

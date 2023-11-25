@@ -260,6 +260,33 @@ describe('createRestRoutes: content', () => {
     expect(thirdResponse.statusCode).toBe(200);
     expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Smith' });
   });
+
+  test('Should correct handle empty queue', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            operationName: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                settings: { polling: true },
+                queue: []
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const query = {
+      query: 'query GetUsers { users { name } }',
+      key1: 'value1'
+    };
+
+    const response = await request(server).get('/').query(query);
+    expect(response.statusCode).toBe(404);
+  });
 });
 
 describe('createRestRoutes: settings', () => {

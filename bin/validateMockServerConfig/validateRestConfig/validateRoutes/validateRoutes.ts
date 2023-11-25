@@ -98,6 +98,13 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
         const isRouteHasQueueProperty = 'queue' in route;
 
         if (!isRouteHasDataProperty && !isRouteHasQueueProperty) {
+          console.log('@route1', route);
+          console.log('@@@@@@@');
+          throw new Error(`routes[${index}]`);
+        }
+
+        if (isRouteHasDataProperty && isRouteHasQueueProperty) {
+          console.log('@route2', route);
           throw new Error(`routes[${index}]`);
         }
 
@@ -105,11 +112,18 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
         const isRouteSettingsObject = isPlainObject(settings);
         const isRouteQueueArray = Array.isArray(route.queue);
 
-        if (
-          isRouteHasQueueProperty &&
-          (!(isRouteSettingsObject && settings?.polling) || !isRouteQueueArray)
-        ) {
-          throw new Error(`routes[${index}]`);
+        if (isRouteHasQueueProperty) {
+          if (!isRouteQueueArray) {
+            throw new Error(`routes[${index}].queue`);
+          }
+
+          if (!isRouteSettingsObject) {
+            throw new Error(`routes[${index}].settings`);
+          }
+
+          if (!(isRouteSettingsObject && settings?.polling)) {
+            throw new Error(`routes[${index}].settings.polling`);
+          }
         }
 
         if (isRouteHasDataProperty && isRouteSettingsObject && settings?.polling) {
@@ -126,6 +140,7 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
         return;
       }
 
+      console.log('@route3', route);
       throw new Error(`routes[${index}]`);
     });
     return;
