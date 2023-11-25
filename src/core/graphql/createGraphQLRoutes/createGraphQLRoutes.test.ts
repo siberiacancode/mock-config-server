@@ -264,6 +264,8 @@ describe('createRestRoutes: content', () => {
     const thirdResponse = await request(server).get('/').query(query);
     expect(thirdResponse.statusCode).toBe(200);
     expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Smith' });
+
+    jest.useRealTimers();
   });
 
   test('Should correct handle empty queue', async () => {
@@ -285,8 +287,7 @@ describe('createRestRoutes: content', () => {
     });
 
     const query = {
-      query: 'query GetUsers { users { name } }',
-      key1: 'value1'
+      query: 'query GetUsers { users { name } }'
     };
 
     const response = await request(server).get('/').query(query);

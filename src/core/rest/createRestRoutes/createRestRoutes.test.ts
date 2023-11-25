@@ -232,6 +232,8 @@ describe('createRestRoutes: settings', () => {
     const thirdResponse = await request(server).get('/users');
     expect(thirdResponse.statusCode).toBe(200);
     expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Doe' });
+
+    jest.useRealTimers();
   });
 
   test('Should correct handle empty queue', async () => {
