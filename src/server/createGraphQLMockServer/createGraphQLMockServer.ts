@@ -12,9 +12,6 @@ import {
   notFoundMiddleware,
   requestInfoMiddleware,
   requestInterceptorMiddleware,
-  requestLoggerMiddleware,
-  responseInterceptorsMiddleware,
-  responseLoggersMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
 import { urlJoin } from '@/utils/helpers';
@@ -46,11 +43,6 @@ export const createGraphQLMockServer = (
     requestInterceptorMiddleware(server, serverRequestInterceptor);
   }
 
-  const serverRequestLoggers = graphqlMockServerConfig.loggers;
-  if (serverRequestLoggers?.request) {
-    requestLoggerMiddleware(server, serverRequestLoggers.request, 'server');
-  }
-
   const baseUrl = graphqlMockServerConfig.baseUrl ?? '/';
 
   if (cors) {
@@ -67,37 +59,10 @@ export const createGraphQLMockServer = (
     router: express.Router(),
     graphqlConfig: { configs },
     serverResponseInterceptor: interceptors?.response,
-    serverLoggers: loggers
+    loggers
   });
 
   server.use(baseUrl, routerWithGraphqlRoutes);
-
-  const serverRequestLogger = loggers?.request;
-  if (serverRequestLogger) {
-    requestLoggerMiddleware(server, serverRequestLogger, 'server', baseUrl);
-  }
-
-  const serverResponseInterceptor = graphqlMockServerConfig.interceptors?.response;
-  if (serverResponseInterceptor) {
-    responseInterceptorsMiddleware({
-      server,
-      interceptors: {
-        serverInterceptor: serverResponseInterceptor
-      },
-      path: baseUrl
-    });
-  }
-
-  const serverResponseLogger = graphqlMockServerConfig.loggers?.response;
-  if (serverResponseLogger) {
-    responseLoggersMiddleware({
-      server,
-      loggers: {
-        serverLogger: serverResponseLogger
-      },
-      path: baseUrl
-    });
-  }
 
   if (database) {
     const routerWithDatabaseRoutes = createDatabaseRoutes(express.Router(), database);

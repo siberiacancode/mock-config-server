@@ -1,5 +1,4 @@
 export * from './asyncHandler';
-export * from './coloredString';
 export * from './config';
 export * from './date';
 export * from './entities';

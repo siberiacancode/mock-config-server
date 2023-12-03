@@ -1,13 +1,18 @@
 import type { Express } from 'express';
 
-import type { LoggerLevel } from '@/utils/types';
+import { getGraphQLInput, parseQuery } from '@/utils/helpers';
+import type { GraphQLOperationName, GraphQLOperationType, GraphQLVariables } from '@/utils/types';
 
 declare global {
   namespace Express {
     export interface Request {
       id: number;
       unixTimestamp: number;
-      resolvedRequestLoggerLevel?: LoggerLevel;
+      graphQL: {
+        operationType: GraphQLOperationType;
+        operationName: GraphQLOperationName;
+        variables: GraphQLVariables;
+      } | null;
     }
   }
 }
@@ -20,6 +25,21 @@ export const requestInfoMiddleware = (server: Express) => {
     request.id = requestId;
 
     request.unixTimestamp = Date.now();
+
+    const graphQLInput = getGraphQLInput(request);
+    const graphQLQuery = parseQuery(graphQLInput.query ?? '');
+    const isValidGraphQLRequest =
+      graphQLInput &&
+      graphQLInput.query &&
+      graphQLQuery?.operationType &&
+      graphQLQuery.operationName;
+    request.graphQL = isValidGraphQLRequest
+      ? {
+          operationType: graphQLQuery.operationType as GraphQLOperationType,
+          operationName: graphQLQuery.operationName,
+          variables: graphQLInput.variables
+        }
+      : null;
 
     return next();
   });

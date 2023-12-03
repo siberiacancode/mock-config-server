@@ -1,3 +1,3 @@
 export * from './callRequestLogger/callRequestLogger';
-export * from './callResponseLoggers/callResponseLoggers';
+export * from './callResponseLogger/callResponseLogger';
 export * from './helpers';

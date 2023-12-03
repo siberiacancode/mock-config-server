@@ -19,7 +19,7 @@ function setScheme(scheme) {
   localStorage.setItem('color-scheme', scheme);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
 function switchScheme() {
   setScheme(getSavedScheme() === 'light' ? 'dark' : 'light');
 }

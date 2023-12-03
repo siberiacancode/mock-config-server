@@ -9,7 +9,6 @@ import type {
   CompareWithDescriptorValueCheckMode
 } from './checkModes';
 import type { Interceptors } from './interceptors';
-import type { Loggers } from './logger';
 import type { Data, Primitive } from './values';
 
 export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options';
@@ -122,7 +121,6 @@ export interface RestRouteConfig<
   entities?: Entities;
   data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
   interceptors?: Pick<Interceptors, 'response'>;
-  loggers?: Loggers<RestEntityName, RestEntityName | 'data'>;
 }
 
 export type RestPathString = `/${string}`;
@@ -132,7 +130,6 @@ interface BaseRestRequestConfig<Method extends RestMethod> {
   method: Method;
   routes: RestRouteConfig<Method>[];
   interceptors?: Interceptors;
-  loggers?: Loggers<RestEntityName, RestEntityName | 'data'>;
 }
 
 type RestGetRequestConfig = BaseRestRequestConfig<'get'>;

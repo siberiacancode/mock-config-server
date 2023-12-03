@@ -11,7 +11,7 @@ interface ResponseInterceptorsMiddlewareParams {
     apiInterceptor?: ResponseInterceptor;
     serverInterceptor?: ResponseInterceptor;
   };
-  path: string;
+  path?: string;
 }
 
 export const responseInterceptorsMiddleware = ({

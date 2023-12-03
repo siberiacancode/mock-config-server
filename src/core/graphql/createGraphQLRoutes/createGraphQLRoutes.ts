@@ -6,7 +6,7 @@ import {
   callRequestInterceptor,
   callRequestLogger,
   callResponseInterceptors,
-  callResponseLoggers,
+  callResponseLogger,
   convertToEntityDescriptor,
   getGraphQLInput,
   isEntityDescriptor,
@@ -29,16 +29,14 @@ interface CreateGraphQLRoutesParams {
   router: IRouter;
   graphqlConfig: GraphqlConfig;
   serverResponseInterceptor?: Interceptors['response'];
-  apiLoggers?: Loggers;
-  serverLoggers?: Loggers;
+  loggers?: Loggers;
 }
 
 export const createGraphQLRoutes = ({
   router,
   graphqlConfig,
   serverResponseInterceptor,
-  apiLoggers,
-  serverLoggers
+  loggers
 }: CreateGraphQLRoutesParams) => {
   const preparedGraphQLRequestConfig = prepareGraphQLRequestConfigs(graphqlConfig.configs);
 
@@ -130,37 +128,11 @@ export const createGraphQLRoutes = ({
       });
     });
 
-    if (!matchedRouteConfig) {
-      const requestRequestLogger = matchedRequestConfig.loggers?.request;
-      if (requestRequestLogger) {
-        await callRequestLogger({ request, logger: requestRequestLogger, level: 'request' });
-      }
-      const apiRequestLogger = apiLoggers?.request;
-      if (apiRequestLogger) {
-        await callRequestLogger({ request, logger: apiRequestLogger, level: 'api' });
-      }
-      const serverRequestLogger = serverLoggers?.request;
-      if (serverRequestLogger) {
-        await callRequestLogger({ request, logger: serverRequestLogger, level: 'server' });
-      }
-      return next();
-    }
+    if (!matchedRouteConfig) return next();
 
-    const routeRequestLogger = matchedRouteConfig.loggers?.request;
-    if (routeRequestLogger) {
-      await callRequestLogger({ request, logger: routeRequestLogger, level: 'route' });
-    }
-    const requestRequestLogger = matchedRequestConfig.loggers?.request;
-    if (requestRequestLogger) {
-      await callRequestLogger({ request, logger: requestRequestLogger, level: 'request' });
-    }
-    const apiRequestLogger = apiLoggers?.request;
-    if (apiRequestLogger) {
-      await callRequestLogger({ request, logger: apiRequestLogger, level: 'api' });
-    }
-    const serverRequestLogger = serverLoggers?.request;
-    if (serverRequestLogger) {
-      await callRequestLogger({ request, logger: serverRequestLogger, level: 'server' });
+    const requestLogger = loggers?.request;
+    if (requestLogger) {
+      await callRequestLogger({ request, logger: requestLogger });
     }
 
     const matchedRouteConfigData =
@@ -180,17 +152,15 @@ export const createGraphQLRoutes = ({
       }
     });
 
-    await callResponseLoggers({
-      request,
-      response,
-      loggers: {
-        routeLogger: matchedRouteConfig.loggers?.response,
-        requestLogger: matchedRequestConfig.loggers?.response,
-        apiLogger: graphqlConfig.loggers?.response,
-        serverLogger: serverLoggers?.response
-      },
-      data
-    });
+    const responseLogger = loggers?.response;
+    if (responseLogger) {
+      await callResponseLogger({
+        request,
+        response,
+        logger: responseLogger,
+        data
+      });
+    }
 
     // ✅ important:
     // set 'Cache-Control' header for explicit browsers response revalidate

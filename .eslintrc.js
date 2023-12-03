@@ -17,7 +17,8 @@ module.exports = {
         '@typescript-eslint/no-var-requires': 'off',
         'no-restricted-syntax': 'off',
         'promise/always-return': 'off',
-        '@typescript-eslint/no-namespace': 'off'
+        '@typescript-eslint/no-namespace': 'off',
+        'no-console': ['warn', { allow: ['info', 'table'] }]
       }
     }
   ]

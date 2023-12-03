@@ -1,23 +1,33 @@
 import c from 'ansi-colors';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 
 import type {
-  RequestLogFunction,
-  RequestLogFunctionParams,
-  RequestLogger,
+  Data,
+  ResponseLogFunction,
+  ResponseLogFunctionParams,
+  ResponseLogger,
   RestMethod
 } from '@/utils/types';
 
 import { formatUnixTimestamp } from '../../date';
-import { getRestMethodColoredString } from '../helpers';
+import { getRestMethodColoredString, getStatusCodeColoredString } from '../helpers';
 
-const requestLogFunction: RequestLogFunction = ({ logger, tokenValues }) => {
+const responseLogFunction: ResponseLogFunction = ({ logger, tokenValues }) => {
   const {
-    meta: { url, method, graphQLOperationType, graphQLOperationName, id, unixTimestamp },
-    entities: { headers, cookies, query, params, variables, body }
+    meta: {
+      url,
+      method,
+      graphQLOperationType,
+      graphQLOperationName,
+      statusCode,
+      id,
+      unixTimestamp
+    },
+    entities: { headers, cookies, query, params, variables, body },
+    data
   } = tokenValues;
 
-  const prefix = `[${id}][REQ]`;
+  const prefix = `[${id}][RES]`;
   const metaPrefix = `${prefix}[meta]`;
   const entitiesPrefix = `${prefix}[entities]`;
 
@@ -32,6 +42,11 @@ const requestLogFunction: RequestLogFunction = ({ logger, tokenValues }) => {
   }
   if (logger.tokens?.meta?.graphQLOperationName) {
     console.info(`${metaPrefix}[${c.green('graphQLOperationName')}] ${graphQLOperationName}`);
+  }
+  if (logger.tokens?.meta?.statusCode) {
+    console.info(
+      `${metaPrefix}[${c.yellowBright('statusCode')}] ${getStatusCodeColoredString(statusCode)}`
+    );
   }
   if (logger.tokens?.meta?.id) {
     console.info(`${metaPrefix}[${c.greenBright('id')}] ${id}`);
@@ -61,18 +76,29 @@ const requestLogFunction: RequestLogFunction = ({ logger, tokenValues }) => {
     console.info(`${entitiesPrefix}[${c.green('body')}]\n${JSON.stringify(body, null, 2)}`);
   }
 
+  if (logger.tokens?.data) {
+    console.info(`${prefix}[${c.yellow('data')}]\n${JSON.stringify(data, null, 2)}`);
+  }
+
   console.info('\n\n');
 };
 
-interface CallRequestLoggerParams {
-  logger: RequestLogger;
+interface CallResponseLoggerParams {
+  logger: ResponseLogger;
+  data: Data;
   request: Request;
+  response: Response;
 }
 
-export const callRequestLogger = async ({ logger, request }: CallRequestLoggerParams) => {
+export const callResponseLogger = async ({
+  logger,
+  request,
+  response,
+  data
+}: CallResponseLoggerParams) => {
   if (!logger.enabled) return;
 
-  const logFunctionParams: RequestLogFunctionParams = {
+  const logFunctionParams: ResponseLogFunctionParams = {
     logger,
     tokenValues: {
       meta: {
@@ -80,6 +106,7 @@ export const callRequestLogger = async ({ logger, request }: CallRequestLoggerPa
         method: request.method.toLowerCase() as RestMethod,
         graphQLOperationType: request.graphQL?.operationType,
         graphQLOperationName: request.graphQL?.operationName,
+        statusCode: response.statusCode,
         id: request.id,
         unixTimestamp: Date.now()
       },
@@ -90,15 +117,17 @@ export const callRequestLogger = async ({ logger, request }: CallRequestLoggerPa
         params: request.params,
         variables: request.graphQL?.variables,
         body: request.body
-      }
+      },
+      data
     },
     request,
-    defaultLogFunction: requestLogFunction
+    response,
+    defaultLogFunction: responseLogFunction
   };
 
   if (logger.logFunction) {
     await logger.logFunction(logFunctionParams);
     return;
   }
-  await requestLogFunction(logFunctionParams);
+  await responseLogFunction(logFunctionParams);
 };

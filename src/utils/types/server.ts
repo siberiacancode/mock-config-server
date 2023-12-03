@@ -1,9 +1,9 @@
 import type { Request } from 'express';
 
-import type { GraphQLEntityName, GraphQLRequestConfig } from './graphql';
+import type { GraphQLRequestConfig } from './graphql';
 import type { Interceptors } from './interceptors';
 import type { Loggers } from './logger';
-import type { RestEntityName, RestMethod, RestRequestConfig } from './rest';
+import type { RestMethod, RestRequestConfig } from './rest';
 
 type StaticPathObject = { prefix: `/${string}`; path: `/${string}` };
 export type StaticPath = `/${string}` | StaticPathObject | (StaticPathObject | `/${string}`)[];
@@ -26,14 +26,12 @@ export interface RestConfig {
   baseUrl?: BaseUrl;
   configs: RestRequestConfig[];
   interceptors?: Interceptors;
-  loggers?: Loggers<RestEntityName, RestEntityName | 'data'>;
 }
 
 export interface GraphqlConfig {
   baseUrl?: BaseUrl;
   configs: GraphQLRequestConfig[];
   interceptors?: Interceptors;
-  loggers?: Loggers<GraphQLEntityName, GraphQLEntityName | 'data'>;
 }
 
 export type DatabaseConfig = {
@@ -46,26 +44,25 @@ export interface BaseMockServerConfig {
   port?: Port;
   staticPath?: StaticPath;
   interceptors?: Interceptors;
-  loggers?: Loggers<
-    RestEntityName | GraphQLEntityName,
-    RestEntityName | GraphQLEntityName | 'data'
-  >;
   cors?: Cors;
 }
 export interface MockServerConfig extends BaseMockServerConfig {
   rest?: RestConfig;
   graphql?: GraphqlConfig;
   database?: DatabaseConfig;
+  loggers?: Loggers;
 }
 
 export interface RestMockServerConfig extends BaseMockServerConfig {
   configs: RestRequestConfig[];
   database?: DatabaseConfig;
+  loggers?: Loggers<'rest'>;
 }
 
 export interface GraphQLMockServerConfig extends BaseMockServerConfig {
   configs: GraphQLRequestConfig[];
   database?: DatabaseConfig;
+  loggers?: Loggers<'graphql'>;
 }
 
 export interface DatabaseMockServerConfig extends BaseMockServerConfig {
