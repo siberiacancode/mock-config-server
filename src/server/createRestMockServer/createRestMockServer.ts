@@ -37,7 +37,7 @@ export const createRestMockServer = (
 
   const serverRequestInterceptor = restMockServerConfig.interceptors?.request;
   if (serverRequestInterceptor) {
-    requestInterceptorMiddleware(server, serverRequestInterceptor);
+    requestInterceptorMiddleware({ server, interceptor: serverRequestInterceptor });
   }
 
   const baseUrl = restMockServerConfig.baseUrl ?? '/';

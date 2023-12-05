@@ -36,7 +36,7 @@ export const createDatabaseMockServer = (
 
   const serverRequestInterceptor = databaseMockServerConfig.interceptors?.request;
   if (serverRequestInterceptor) {
-    requestInterceptorMiddleware(server, serverRequestInterceptor);
+    requestInterceptorMiddleware({ server, interceptor: serverRequestInterceptor });
   }
 
   const baseUrl = databaseMockServerConfig.baseUrl ?? '/';
