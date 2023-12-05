@@ -7,7 +7,7 @@ export const pagination = (array: any[], queries: ParsedUrlQuery) => {
   if (!_page || +_page <= 0) return array;
 
   const page = +_page;
-  const limit = queries._limit && +queries._limit > 0 ? Number(queries._limit) : DEFAULT_LIMIT;
+  const limit = queries._limit && +queries._limit > 0 ? +queries._limit : DEFAULT_LIMIT;
   const pages = Math.ceil(array.length / limit);
   if (page > pages) return array;
 
