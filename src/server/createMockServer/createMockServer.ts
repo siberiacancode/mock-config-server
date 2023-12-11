@@ -38,7 +38,7 @@ export const createMockServer = (
 
   const serverRequestInterceptor = mockServerConfig.interceptors?.request;
   if (serverRequestInterceptor) {
-    requestInterceptorMiddleware(server, serverRequestInterceptor);
+    requestInterceptorMiddleware({ server, interceptor: serverRequestInterceptor });
   }
 
   const baseUrl = mockServerConfig.baseUrl ?? '/';
@@ -54,31 +54,43 @@ export const createMockServer = (
   }
 
   if (rest) {
-    const routerWithRestRoutes = createRestRoutes(express.Router(), rest, interceptors?.response);
+    const routerWithRestRoutes = createRestRoutes({
+      router: express.Router(),
+      restConfig: rest,
+      serverResponseInterceptor: interceptors?.response
+    });
+
+    const restBaseUrl = urlJoin(baseUrl, rest.baseUrl ?? '/');
 
     const apiRequestInterceptor = rest.interceptors?.request;
     if (apiRequestInterceptor) {
-      requestInterceptorMiddleware(server, apiRequestInterceptor);
+      requestInterceptorMiddleware({
+        server,
+        path: restBaseUrl,
+        interceptor: apiRequestInterceptor
+      });
     }
-
-    const restBaseUrl = urlJoin(baseUrl, rest.baseUrl ?? '/');
 
     server.use(restBaseUrl, routerWithRestRoutes);
   }
 
   if (graphql) {
-    const routerWithGraphQLRoutes = createGraphQLRoutes(
-      express.Router(),
-      graphql,
-      interceptors?.response
-    );
+    const routerWithGraphQLRoutes = createGraphQLRoutes({
+      router: express.Router(),
+      graphqlConfig: graphql,
+      serverResponseInterceptor: interceptors?.response
+    });
+
+    const graphqlBaseUrl = urlJoin(baseUrl, graphql.baseUrl ?? '/');
 
     const apiRequestInterceptor = graphql.interceptors?.request;
     if (apiRequestInterceptor) {
-      requestInterceptorMiddleware(server, apiRequestInterceptor);
+      requestInterceptorMiddleware({
+        server,
+        path: graphqlBaseUrl,
+        interceptor: apiRequestInterceptor
+      });
     }
-
-    const graphqlBaseUrl = urlJoin(baseUrl, graphql.baseUrl ?? '/');
 
     server.use(graphqlBaseUrl, routerWithGraphQLRoutes);
   }

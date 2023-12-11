@@ -12,18 +12,16 @@ describe('createGraphQLRoutes', () => {
       graphql: GraphqlConfig;
     }
   ) => {
+    const { baseUrl, graphql, interceptors } = mockServerConfig;
     const server = express();
     const routerBase = express.Router();
-    const routerWithRoutes = createGraphQLRoutes(
-      routerBase,
-      mockServerConfig.graphql,
-      mockServerConfig.interceptors?.response
-    );
+    const routerWithRoutes = createGraphQLRoutes({
+      router: routerBase,
+      graphqlConfig: graphql,
+      serverResponseInterceptor: interceptors?.response
+    });
 
-    const graphqlBaseUrl = urlJoin(
-      mockServerConfig.baseUrl ?? '/',
-      mockServerConfig.graphql?.baseUrl ?? '/'
-    );
+    const graphqlBaseUrl = urlJoin(baseUrl ?? '/', graphql?.baseUrl ?? '/');
 
     server.use(express.json());
     server.use(graphqlBaseUrl, routerWithRoutes);

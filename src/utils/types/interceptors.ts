@@ -10,7 +10,7 @@ export interface RequestInterceptorParams {
   getHeaders: () => Record<string, RequestInterceptorHeaderValue>;
 }
 
-export type RequestInterceptor = (params: RequestInterceptorParams) => void;
+export type RequestInterceptor = (params: RequestInterceptorParams) => void | Promise<void>;
 
 export interface ResponseInterceptorParams {
   request: Request;

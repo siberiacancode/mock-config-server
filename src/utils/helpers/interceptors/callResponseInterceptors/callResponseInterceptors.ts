@@ -48,7 +48,7 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
     response.attachment(filename);
   };
 
-  const ResponseInterceptorParams: ResponseInterceptorParams = {
+  const responseInterceptorParams: ResponseInterceptorParams = {
     request,
     response,
     setDelay,
@@ -65,16 +65,16 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
 
   let updatedData = data;
   if (interceptors?.routeInterceptor) {
-    updatedData = await interceptors.routeInterceptor(updatedData, ResponseInterceptorParams);
+    updatedData = await interceptors.routeInterceptor(updatedData, responseInterceptorParams);
   }
   if (interceptors?.requestInterceptor) {
-    updatedData = await interceptors.requestInterceptor(updatedData, ResponseInterceptorParams);
+    updatedData = await interceptors.requestInterceptor(updatedData, responseInterceptorParams);
   }
   if (interceptors?.apiInterceptor) {
-    updatedData = await interceptors.apiInterceptor(updatedData, ResponseInterceptorParams);
+    updatedData = await interceptors.apiInterceptor(updatedData, responseInterceptorParams);
   }
   if (interceptors?.serverInterceptor) {
-    updatedData = await interceptors.serverInterceptor(updatedData, ResponseInterceptorParams);
+    updatedData = await interceptors.serverInterceptor(updatedData, responseInterceptorParams);
   }
 
   return updatedData;

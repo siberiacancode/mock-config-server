@@ -12,18 +12,16 @@ describe('createRestRoutes', () => {
       rest: RestConfig;
     }
   ) => {
+    const { baseUrl, rest, interceptors } = mockServerConfig;
     const server = express();
     const routerBase = express.Router();
-    const routerWithRoutes = createRestRoutes(
-      routerBase,
-      mockServerConfig.rest,
-      mockServerConfig.interceptors?.response
-    );
+    const routerWithRoutes = createRestRoutes({
+      router: routerBase,
+      restConfig: rest,
+      serverResponseInterceptor: interceptors?.response
+    });
 
-    const restBaseUrl = urlJoin(
-      mockServerConfig.baseUrl ?? '/',
-      mockServerConfig.rest?.baseUrl ?? '/'
-    );
+    const restBaseUrl = urlJoin(baseUrl ?? '/', rest?.baseUrl ?? '/');
 
     server.use(express.json());
     server.use(restBaseUrl, routerWithRoutes);
