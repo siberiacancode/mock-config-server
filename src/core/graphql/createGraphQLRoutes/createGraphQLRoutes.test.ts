@@ -21,9 +21,7 @@ describe('createGraphQLRoutes', () => {
       serverResponseInterceptor: interceptors?.response
     });
 
-    const serverBaseUrl = baseUrl ?? '/';
-
-    const graphqlBaseUrl = urlJoin(serverBaseUrl, graphql?.baseUrl ?? '/');
+    const graphqlBaseUrl = urlJoin(baseUrl ?? '/', graphql?.baseUrl ?? '/');
 
     server.use(express.json());
     server.use(graphqlBaseUrl, routerWithRoutes);

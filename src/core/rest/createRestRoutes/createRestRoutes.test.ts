@@ -21,9 +21,7 @@ describe('createRestRoutes', () => {
       serverResponseInterceptor: interceptors?.response
     });
 
-    const serverBaseUrl = baseUrl ?? '/';
-
-    const restBaseUrl = urlJoin(serverBaseUrl, rest?.baseUrl ?? '/');
+    const restBaseUrl = urlJoin(baseUrl ?? '/', rest?.baseUrl ?? '/');
 
     server.use(express.json());
     server.use(restBaseUrl, routerWithRoutes);
