@@ -251,7 +251,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       expect(response.body._link.next).toContain('/users?_page=2&_limit=1');
     });
 
-    test('Should return correct _link for paginationed data', async () => {
+    test('Should return valid _link for paginationed data', async () => {
       const linkHeaderRegexp = /<([^>]+)>;\s*rel="([^"]+)"/g;
       const firstResponse = await request(server).get('/users?_page=1&_limit=1');
 

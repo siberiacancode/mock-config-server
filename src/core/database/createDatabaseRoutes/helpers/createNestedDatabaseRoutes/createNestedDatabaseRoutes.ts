@@ -25,7 +25,7 @@ export const createNestedDatabaseRoutes = (
         data = filter(data, filters as ParsedUrlQuery);
       }
 
-      if (request.query && request.query._page) {
+      if (request.query?._page) {
         data = pagination(data, request.query as ParsedUrlQuery);
         if (data._link) {
           const links = {} as any;
