@@ -6,6 +6,7 @@ import type { NestedDatabase } from '@/utils/types';
 import type { MemoryStorage } from '../../storages';
 import { createNewId, findIndexById } from '../array';
 import { filter } from '../filter/filter';
+import { pagination } from '../pagination/pagination';
 import { sort } from '../sort/sort';
 
 export const createNestedDatabaseRoutes = (
@@ -21,8 +22,32 @@ export const createNestedDatabaseRoutes = (
       let data = storage.read(key);
 
       if (request.query && Object.keys(request.query).length) {
-        const { _begin, _end, _sort, _order, ...filters } = request.query;
+        const { _page, _limit, _begin, _end, _sort, _order, ...filters } = request.query;
         data = filter(data, filters as ParsedUrlQuery);
+      }
+
+      if (request.query?._page) {
+        data = pagination(data, request.query as ParsedUrlQuery);
+        if (data._link) {
+          const links = {} as any;
+          const fullUrl = `${request.protocol}://${request.get('host')}${request.originalUrl}`;
+
+          if (data._link.first) {
+            links.first = fullUrl.replace(`page=${data._link.current}`, `page=${data._link.first}`);
+          }
+          if (data._link.prev) {
+            links.prev = fullUrl.replace(`page=${data._link.current}`, `page=${data._link.prev}`);
+          }
+          if (data._link.next) {
+            links.next = fullUrl.replace(`page=${data._link.current}`, `page=${data._link.next}`);
+          }
+          if (data._link.last) {
+            links.last = fullUrl.replace(`page=${data._link.current}`, `page=${data._link.last}`);
+          }
+
+          data._link = { ...data._link, ...links };
+          response.links(links);
+        }
       }
 
       if (request.query && request.query._sort) {
