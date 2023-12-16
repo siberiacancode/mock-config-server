@@ -6,6 +6,23 @@ export const mockServerConfig: MockServerConfig = {
     configs: [
       {
         method: 'get',
+        path: '/users',
+        routes: [
+          {
+            data: [{ id: 1, emoji: '🎉' }]
+          },
+          {
+            data: [{ id: 2, emoji: '🔥' }],
+            entities: {
+              query: {
+                emoji: '🔥'
+              }
+            }
+          }
+        ]
+      },
+      {
+        method: 'get',
         path: /^\/us(.+?)rs$/,
         routes: [
           {
@@ -24,6 +41,23 @@ export const mockServerConfig: MockServerConfig = {
       {
         method: 'get',
         path: '/users?/:id',
+        routes: [
+          {
+            data: { id: 1, emoji: '🎉' }
+          },
+          {
+            data: { id: 2, emoji: '🔥' },
+            entities: {
+              params: {
+                id: 2
+              }
+            }
+          }
+        ]
+      },
+      {
+        method: 'get',
+        path: /\/users?\/\d+/,
         routes: [
           {
             data: { id: 1, emoji: '🎉' }

@@ -23,6 +23,26 @@ export const mockServerConfig: MockServerConfig = {
             }
           }
         ]
+      },
+      {
+        method: 'patch',
+        path: /\/users?\/\d+/,
+        routes: [
+          {
+            data: { id: 1, emoji: '🎉' }
+          },
+          {
+            data: { id: 2, emoji: '🔥' },
+            entities: {
+              params: {
+                id: 2
+              },
+              body: {
+                emoji: '🔥'
+              }
+            }
+          }
+        ]
       }
     ]
   }

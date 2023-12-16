@@ -9,10 +9,27 @@ export const mockServerConfig: MockServerConfig = {
         path: '/users?/:id',
         routes: [
           {
-            data: { succes: true }
+            data: { success: true }
           },
           {
-            data: { succes: false },
+            data: { success: false },
+            entities: {
+              params: {
+                id: 2
+              }
+            }
+          }
+        ]
+      },
+      {
+        method: 'delete',
+        path: /\/users?\/\d+/,
+        routes: [
+          {
+            data: { success: true }
+          },
+          {
+            data: { success: false },
             entities: {
               params: {
                 id: 2

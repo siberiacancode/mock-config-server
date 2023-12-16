@@ -12,7 +12,7 @@ export const mockServerConfig: MockServerConfig = {
             data: { success: true }
           },
           {
-            data: { succes: false },
+            data: { success: false },
             entities: {
               headers: {
                 cors: true
