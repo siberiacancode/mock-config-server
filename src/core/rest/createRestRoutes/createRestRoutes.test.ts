@@ -76,10 +76,6 @@ describe('createRestRoutes', () => {
 });
 
 describe('createRestRoutes: content', () => {
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   test('Should correctly use data function', async () => {
     const server = createServer({
       rest: {

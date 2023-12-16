@@ -98,13 +98,10 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
         const isRouteHasQueueProperty = 'queue' in route;
 
         if (!isRouteHasDataProperty && !isRouteHasQueueProperty) {
-          console.log('@route1', route);
-          console.log('@@@@@@@');
           throw new Error(`routes[${index}]`);
         }
 
         if (isRouteHasDataProperty && isRouteHasQueueProperty) {
-          console.log('@route2', route);
           throw new Error(`routes[${index}]`);
         }
 
@@ -140,7 +137,6 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
         return;
       }
 
-      console.log('@route3', route);
       throw new Error(`routes[${index}]`);
     });
     return;
