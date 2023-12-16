@@ -9,16 +9,16 @@ export const mockServerConfig: MockServerConfig = {
         path: '/users',
         routes: [
           {
-            data: [{ id: 1, emoji: '🎉' }]
+            data: [{ id: 1, emoji: '🎉' }],
+            interceptors: {
+              response: (data, params) => {
+                console.log(data);
+                console.log(params.getHeaders());
+                return data;
+              }
+            }
           }
-        ],
-        interceptors: {
-          response: (data, params) => {
-            console.log(data);
-            console.log(params.getHeaders());
-            return data;
-          }
-        }
+        ]
       }
     ]
   }

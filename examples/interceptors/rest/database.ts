@@ -1,4 +1,5 @@
 import type { MockServerConfig } from 'mock-config-server';
+import { createMockServer, startMockServer } from 'mock-config-server';
 
 let todos = [
   { id: '1', name: 'todo 1', checked: false },
@@ -8,7 +9,7 @@ let todos = [
 
 export const mockServerConfig: MockServerConfig = {
   interceptors: {
-    request: async (params) => params.setDelay(1000)
+    request: (params) => params.setDelay(1000)
   },
   rest: {
     configs: [
@@ -81,4 +82,5 @@ export const mockServerConfig: MockServerConfig = {
   }
 };
 
-export default mockServerConfig;
+createMockServer(mockServerConfig);
+startMockServer(mockServerConfig);
