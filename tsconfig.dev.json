@@ -19,7 +19,6 @@
     "baseUrl": "./",
     "paths": {
       "mock-config-server": ["./dist"],
-      "mock-config-server/*": ["./dist"],
       "@/server": ["./src/server"],
       "@/core/database": ["./src/core/database"],
       "@/core/rest": ["./src/core/rest"],
