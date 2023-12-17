@@ -26,10 +26,10 @@ export const mockServerConfig: MockServerConfig = {
         operationName: 'DeleteUser',
         routes: [
           {
-            data: { succes: true }
+            data: { success: true }
           },
           {
-            data: { succes: false },
+            data: { success: false },
             entities: {
               variables: {
                 id: 2
