@@ -565,7 +565,11 @@ describe('validateRoutes (graphql)', () => {
 
   describe('Polling', () => {
     test('Should correctly handle route content only with polling setting', () => {
-      const correctRouteMappedValues = [{ data: null }, { queue: [], settings: { polling: true } }];
+      const correctRouteMappedValues = [
+        { data: null },
+        { data: null, settings: { polling: false } },
+        { queue: [], settings: { polling: true } }
+      ];
 
       correctRouteMappedValues.forEach((correctRouteMappedValue) => {
         expect(() => validateRoutes([correctRouteMappedValue], 'query')).not.toThrow(Error);
