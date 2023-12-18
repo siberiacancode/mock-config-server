@@ -723,16 +723,13 @@ describe('validateRoutes (rest)', () => {
   });
 
   test('Should correctly handle route content only with polling setting', () => {
-    const correctRouteMappedValues = [
-      { data: null },
-      { queue: [null], settings: { polling: true } }
-    ];
+    const correctRouteMappedValues = [{ data: null }, { queue: [], settings: { polling: true } }];
 
     correctRouteMappedValues.forEach((correctRouteMappedValue) => {
       expect(() => validateRoutes([correctRouteMappedValue], 'get')).not.toThrow(Error);
     });
 
-    const incorrectSettingsRouteMappedValue = { queue: [null] };
+    const incorrectSettingsRouteMappedValue = { queue: [] };
     expect(() => validateRoutes([incorrectSettingsRouteMappedValue], 'get')).toThrow(
       new Error('routes[0].settings')
     );
@@ -742,7 +739,7 @@ describe('validateRoutes (rest)', () => {
       new Error('routes[0].queue')
     );
 
-    const incorrectSettingPollingRouteMappedValue = { queue: [null], settings: { polling: false } };
+    const incorrectSettingPollingRouteMappedValue = { queue: [], settings: { polling: false } };
     expect(() => validateRoutes([incorrectSettingPollingRouteMappedValue], 'get')).toThrow(
       new Error('routes[0].settings.polling')
     );

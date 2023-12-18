@@ -3,6 +3,7 @@ import type { RestEntityNamesByMethod, RestMethod } from '@/utils/types';
 
 import { isCheckModeValid, isDescriptorValueValid } from '../../helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
+import { validateQueue } from '../../validateQueue/validateQueue';
 import { validateSettings } from '../../validateSettings/validateSettings';
 
 type AllowedEntityNamesByMethod = {
@@ -107,19 +108,20 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
 
         const { settings } = route;
         const isRouteSettingsObject = isPlainObject(settings);
-        const isRouteQueueArray = Array.isArray(route.queue);
 
         if (isRouteHasQueueProperty) {
-          if (!isRouteQueueArray) {
-            throw new Error(`routes[${index}].queue`);
-          }
+          try {
+            validateQueue(route.queue);
 
-          if (!isRouteSettingsObject) {
-            throw new Error(`routes[${index}].settings`);
-          }
+            if (!isRouteSettingsObject) {
+              throw new Error('settings');
+            }
 
-          if (!(isRouteSettingsObject && settings?.polling)) {
-            throw new Error(`routes[${index}].settings.polling`);
+            if (!(isRouteSettingsObject && settings?.polling)) {
+              throw new Error('settings.polling');
+            }
+          } catch (error: any) {
+            throw new Error(`routes[${index}].${error.message}`);
           }
         }
 

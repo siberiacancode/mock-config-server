@@ -563,29 +563,31 @@ describe('validateRoutes (graphql)', () => {
     });
   });
 
-  test('Should correctly handle route content only with polling setting', () => {
-    const correctRouteMappedValues = [
-      { data: null },
-      { queue: [null], settings: { polling: true } }
-    ];
+  describe('Polling', () => {
+    test('Should correctly handle route content only with polling setting', () => {
+      const correctRouteMappedValues = [{ data: null }, { queue: [], settings: { polling: true } }];
 
-    correctRouteMappedValues.forEach((correctRouteMappedValue) => {
-      expect(() => validateRoutes([correctRouteMappedValue], 'query')).not.toThrow(Error);
+      correctRouteMappedValues.forEach((correctRouteMappedValue) => {
+        expect(() => validateRoutes([correctRouteMappedValue], 'query')).not.toThrow(Error);
+      });
+
+      const incorrectSettingsRouteMappedValue = { queue: [] };
+      expect(() => validateRoutes([incorrectSettingsRouteMappedValue], 'query')).toThrow(
+        new Error('routes[0].settings')
+      );
+
+      const incorrectQueueRouteMappedValue = { queue: null };
+      expect(() => validateRoutes([incorrectQueueRouteMappedValue], 'query')).toThrow(
+        new Error('routes[0].queue')
+      );
+
+      const incorrectSettingPollingRouteMappedValue = {
+        queue: [],
+        settings: { polling: false }
+      };
+      expect(() => validateRoutes([incorrectSettingPollingRouteMappedValue], 'query')).toThrow(
+        new Error('routes[0].settings.polling')
+      );
     });
-
-    const incorrectSettingsRouteMappedValue = { queue: [null] };
-    expect(() => validateRoutes([incorrectSettingsRouteMappedValue], 'query')).toThrow(
-      new Error('routes[0].settings')
-    );
-
-    const incorrectQueueRouteMappedValue = { queue: null };
-    expect(() => validateRoutes([incorrectQueueRouteMappedValue], 'query')).toThrow(
-      new Error('routes[0].queue')
-    );
-
-    const incorrectSettingPollingRouteMappedValue = { queue: [null], settings: { polling: false } };
-    expect(() => validateRoutes([incorrectSettingPollingRouteMappedValue], 'query')).toThrow(
-      new Error('routes[0].settings.polling')
-    );
   });
 });
