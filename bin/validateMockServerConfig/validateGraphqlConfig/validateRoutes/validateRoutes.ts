@@ -124,7 +124,7 @@ export const validateRoutes = (routes: unknown, operationType: GraphQLOperationT
         }
 
         if (isRouteHasDataProperty && isRouteSettingsObject && settings?.polling) {
-          throw new Error(`routes[${index}]`);
+          throw new Error(`routes[${index}].settings.polling`);
         }
 
         try {

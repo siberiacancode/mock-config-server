@@ -126,7 +126,7 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
         }
 
         if (isRouteHasDataProperty && isRouteSettingsObject && settings?.polling) {
-          throw new Error(`routes[${index}]`);
+          throw new Error(`routes[${index}].settings.polling`);
         }
 
         try {

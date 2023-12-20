@@ -574,9 +574,9 @@ describe('validateRoutes (graphql)', () => {
         expect(() => validateRoutes([correctRouteMappedValue], 'query')).not.toThrow(Error);
       });
 
-      const incorrectSettingsRouteMappedValues = [{}, { data: null, settings: { polling: true } }];
-      incorrectSettingsRouteMappedValues.forEach((incorrectSettingsRouteMappedValue) => {
-        expect(() => validateRoutes([incorrectSettingsRouteMappedValue], 'query')).toThrow(
+      const incorrectRouteMappedValues = [{}, { data: null, queue: null }];
+      incorrectRouteMappedValues.forEach((incorrectRouteMappedValue) => {
+        expect(() => validateRoutes([incorrectRouteMappedValue], 'query')).toThrow(
           new Error('routes[0]')
         );
       });
@@ -586,12 +586,19 @@ describe('validateRoutes (graphql)', () => {
         new Error('routes[0].settings')
       );
 
-      const incorrectSettingPollingRouteMappedValue = {
-        queue: [],
-        settings: { polling: false }
-      };
-      expect(() => validateRoutes([incorrectSettingPollingRouteMappedValue], 'query')).toThrow(
-        new Error('routes[0].settings.polling')
+      const incorrectSettingPollingRouteMappedValues = [
+        {
+          queue: [],
+          settings: { polling: false }
+        },
+        { data: null, settings: { polling: true } }
+      ];
+      incorrectSettingPollingRouteMappedValues.forEach(
+        (incorrectSettingPollingRouteMappedValue) => {
+          expect(() => validateRoutes([incorrectSettingPollingRouteMappedValue], 'query')).toThrow(
+            new Error('routes[0].settings.polling')
+          );
+        }
       );
     });
   });
