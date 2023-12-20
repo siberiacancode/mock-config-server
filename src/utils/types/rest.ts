@@ -114,14 +114,27 @@ export type RestEntityByEntityName<Method extends RestMethod> = {
   [EntityName in RestEntityNamesByMethod[Method]]?: RestEntityDescriptorOrValue<EntityName>;
 };
 
-export interface RestRouteConfig<
-  Method extends RestMethod,
-  Entities extends RestEntityByEntityName<Method> = RestEntityByEntityName<Method>
-> {
-  entities?: Entities;
-  data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
-  interceptors?: Pick<Interceptors, 'response'>;
+interface RestSettings {
+  readonly polling?: boolean;
 }
+
+export type RestRouteConfig<
+  Method extends RestMethod,
+  Entities extends RestEntityByEntityName<Method> = RestEntityByEntityName<Method>,
+  Settings extends RestSettings = RestSettings
+> = (
+  | {
+      settings: Settings & { polling: true };
+      queue: Array<{
+        time?: number;
+        data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
+      }>;
+    }
+  | {
+      settings?: Settings & { polling: false };
+      data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
+    }
+) & { entities?: Entities; interceptors?: Pick<Interceptors, 'response'> };
 
 export type RestPathString = `/${string}`;
 interface BaseRestRequestConfig<Method extends RestMethod> {

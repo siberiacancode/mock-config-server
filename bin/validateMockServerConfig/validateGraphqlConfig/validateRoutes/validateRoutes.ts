@@ -3,10 +3,13 @@ import type { GraphQLEntityNamesByOperationType, GraphQLOperationType } from '@/
 
 import { isCheckModeValid, isDescriptorValueValid } from '../../helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
+import { validateQueue } from '../../validateQueue/validateQueue';
+import { validateSettings } from '../../validateSettings/validateSettings';
 
 type AllowedEntityNamesByOperationType = {
   [OperationType in keyof GraphQLEntityNamesByOperationType]: GraphQLEntityNamesByOperationType[OperationType][];
 };
+
 const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntityNamesByOperationType = {
   query: ['headers', 'cookies', 'query', 'variables'],
   mutation: ['headers', 'cookies', 'query', 'variables']
@@ -91,11 +94,41 @@ export const validateRoutes = (routes: unknown, operationType: GraphQLOperationT
       const isRouteObject = isPlainObject(route);
       if (isRouteObject) {
         const isRouteHasDataProperty = 'data' in route;
-        if (!isRouteHasDataProperty) {
+        const isRouteHasQueueProperty = 'queue' in route;
+
+        if (!isRouteHasDataProperty && !isRouteHasQueueProperty) {
           throw new Error(`routes[${index}]`);
         }
 
+        if (isRouteHasDataProperty && isRouteHasQueueProperty) {
+          throw new Error(`routes[${index}]`);
+        }
+
+        const { settings } = route;
+        const isRouteSettingsObject = isPlainObject(settings);
+
+        if (isRouteHasQueueProperty) {
+          try {
+            validateQueue(route.queue);
+
+            if (!isRouteSettingsObject) {
+              throw new Error('settings');
+            }
+
+            if (!(isRouteSettingsObject && settings?.polling)) {
+              throw new Error('settings.polling');
+            }
+          } catch (error: any) {
+            throw new Error(`routes[${index}].${error.message}`);
+          }
+        }
+
+        if (isRouteHasDataProperty && isRouteSettingsObject && settings?.polling) {
+          throw new Error(`routes[${index}].settings.polling`);
+        }
+
         try {
+          validateSettings(route.settings);
           validateEntities(route.entities, operationType);
           validateInterceptors(route.interceptors);
         } catch (error: any) {

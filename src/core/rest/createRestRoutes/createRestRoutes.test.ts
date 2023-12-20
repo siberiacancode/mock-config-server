@@ -6,28 +6,254 @@ import type { MockServerConfig, RestConfig } from '@/utils/types';
 
 import { createRestRoutes } from './createRestRoutes';
 
+const createServer = (
+  mockServerConfig: Pick<MockServerConfig, 'interceptors' | 'baseUrl'> & {
+    rest: RestConfig;
+  }
+) => {
+  const { baseUrl, rest, interceptors } = mockServerConfig;
+  const server = express();
+  const routerBase = express.Router();
+  const routerWithRoutes = createRestRoutes({
+    router: routerBase,
+    restConfig: rest,
+    serverResponseInterceptor: interceptors?.response
+  });
+
+  const restBaseUrl = urlJoin(baseUrl ?? '/', rest?.baseUrl ?? '/');
+
+  server.use(express.json());
+  server.use(restBaseUrl, routerWithRoutes);
+  return server;
+};
+
 describe('createRestRoutes', () => {
-  const createServer = (
-    mockServerConfig: Pick<MockServerConfig, 'interceptors' | 'baseUrl'> & {
-      rest: RestConfig;
-    }
-  ) => {
-    const { baseUrl, rest, interceptors } = mockServerConfig;
-    const server = express();
-    const routerBase = express.Router();
-    const routerWithRoutes = createRestRoutes({
-      router: routerBase,
-      restConfig: rest,
-      serverResponseInterceptor: interceptors?.response
+  test('Should return 404 for no matched request configs', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                entities: {
+                  headers: {
+                    key1: 'value1'
+                  }
+                },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
     });
 
-    const restBaseUrl = urlJoin(baseUrl ?? '/', rest?.baseUrl ?? '/');
+    const response = await request(server).get('/users').set({ key2: 'value2' });
 
-    server.use(express.json());
-    server.use(restBaseUrl, routerWithRoutes);
-    return server;
-  };
+    expect(response.statusCode).toBe(404);
+  });
 
+  test('Should have response Cache-Control header equals to max-age=0, must-revalidate', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [{ data: { name: 'John', surname: 'Doe' } }]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+    expect(response.headers['cache-control']).toBe('max-age=0, must-revalidate');
+  });
+});
+
+describe('createRestRoutes: content', () => {
+  test('Should correctly use data function', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                entities: {
+                  query: {
+                    key1: 'value1'
+                  }
+                },
+                data: ({ url }, { query }) => ({
+                  url,
+                  query
+                })
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users').query({ key1: 'value1' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({
+      url: '/users?key1=value1',
+      query: {
+        key1: 'value1'
+      }
+    });
+  });
+
+  test('Should correctly use data function with polling setting', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { polling: true },
+                entities: {
+                  query: {
+                    key1: 'value1'
+                  }
+                },
+                queue: [
+                  {
+                    data: ({ url }, { query }) => ({
+                      url,
+                      query
+                    })
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users').query({ key1: 'value1' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({
+      url: '/users?key1=value1',
+      query: {
+        key1: 'value1'
+      }
+    });
+  });
+
+  test('Should return same polling data with time param', async () => {
+    jest.useFakeTimers();
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { polling: true },
+                queue: [
+                  { time: 2000, data: { name: 'John', surname: 'Doe' } },
+                  { data: { name: 'John', surname: 'Smith' } }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const query = { key1: 'value1' };
+
+    const firstResponse = await request(server).get('/users').query(query);
+    expect(firstResponse.statusCode).toBe(200);
+    expect(firstResponse.body).toEqual({ name: 'John', surname: 'Doe' });
+
+    jest.advanceTimersByTime(1000);
+
+    const secondResponse = await request(server).get('/users').query(query);
+    expect(secondResponse.statusCode).toBe(200);
+    expect(secondResponse.body).toEqual({ name: 'John', surname: 'Doe' });
+
+    jest.advanceTimersByTime(1000);
+
+    const thirdResponse = await request(server).get('/users').query(query);
+    expect(thirdResponse.statusCode).toBe(200);
+    expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Smith' });
+
+    jest.useRealTimers();
+  });
+});
+
+describe('createRestRoutes: settings', () => {
+  test('Should correctly process the request with polling', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { polling: true },
+                queue: [
+                  { data: { name: 'John', surname: 'Doe' } },
+                  { data: { name: 'John', surname: 'Smith' } }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const firstResponse = await request(server).get('/users');
+    expect(firstResponse.statusCode).toBe(200);
+    expect(firstResponse.body).toEqual({ name: 'John', surname: 'Doe' });
+
+    const secondResponse = await request(server).get('/users');
+    expect(secondResponse.statusCode).toBe(200);
+    expect(secondResponse.body).toEqual({ name: 'John', surname: 'Smith' });
+
+    const thirdResponse = await request(server).get('/users');
+    expect(thirdResponse.statusCode).toBe(200);
+    expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Doe' });
+  });
+
+  test('Should correct handle empty queue', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { polling: true },
+                queue: []
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+    expect(response.statusCode).toBe(404);
+  });
+});
+
+describe('createRestRoutes: entities', () => {
   test('Should match config by entities "includes" behavior', async () => {
     const server = createServer({
       rest: {
@@ -98,42 +324,6 @@ describe('createRestRoutes', () => {
     expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should correctly use data function', async () => {
-    const server = createServer({
-      rest: {
-        configs: [
-          {
-            path: '/users',
-            method: 'get',
-            routes: [
-              {
-                entities: {
-                  query: {
-                    key1: 'value1'
-                  }
-                },
-                data: ({ url }, { query }) => ({
-                  url,
-                  query
-                })
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const response = await request(server).get('/users').query({ key1: 'value1' });
-
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toEqual({
-      url: '/users?key1=value1',
-      query: {
-        key1: 'value1'
-      }
-    });
-  });
-
   test('Should give priority to more specific route config', async () => {
     const server = createServer({
       rest: {
@@ -180,33 +370,6 @@ describe('createRestRoutes', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toStrictEqual({ name: 'John', surname: 'Smith' });
-  });
-
-  test('Should return 404 and description text for no matched request configs', async () => {
-    const server = createServer({
-      rest: {
-        configs: [
-          {
-            path: '/users',
-            method: 'get',
-            routes: [
-              {
-                entities: {
-                  headers: {
-                    key1: 'value1'
-                  }
-                },
-                data: { name: 'John', surname: 'Doe' }
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const response = await request(server).get('/users').set({ key2: 'value2' });
-
-    expect(response.statusCode).toBe(404);
   });
 
   test('Should strictly compare plain array body if top level descriptor used', async () => {
@@ -321,6 +484,40 @@ describe('createRestRoutes', () => {
     expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
+  test('Should be case-insensitive for header keys', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                entities: {
+                  headers: {
+                    lowercase: 'lowercase',
+                    UPPERCASE: 'UPPERCASE'
+                  }
+                },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .get('/users')
+      .set('Content-Type', 'application/json')
+      .set({ LowerCase: 'lowercase', upperCase: 'UPPERCASE' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+  });
+});
+
+describe('createRestRoutes: interceptors', () => {
   test('Should call request interceptor', async () => {
     const requestInterceptor = jest.fn();
     const server = createServer({
@@ -447,54 +644,5 @@ describe('createRestRoutes', () => {
     expect(routeInterceptor.mock.calls.length).toBe(1);
     expect(requestInterceptor.mock.calls.length).toBe(1);
     expect(serverInterceptor.mock.calls.length).toBe(2);
-  });
-
-  test('Should have response Cache-Control header equals to max-age=0, must-revalidate', async () => {
-    const server = createServer({
-      rest: {
-        configs: [
-          {
-            path: '/users',
-            method: 'get',
-            routes: [{ data: { name: 'John', surname: 'Doe' } }]
-          }
-        ]
-      }
-    });
-
-    const response = await request(server).get('/users');
-    expect(response.headers['cache-control']).toBe('max-age=0, must-revalidate');
-  });
-
-  test('Should be case-insensitive for header keys', async () => {
-    const server = createServer({
-      rest: {
-        configs: [
-          {
-            path: '/users',
-            method: 'get',
-            routes: [
-              {
-                entities: {
-                  headers: {
-                    lowercase: 'lowercase',
-                    UPPERCASE: 'UPPERCASE'
-                  }
-                },
-                data: { name: 'John', surname: 'Doe' }
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const response = await request(server)
-      .get('/users')
-      .set('Content-Type', 'application/json')
-      .set({ LowerCase: 'lowercase', upperCase: 'UPPERCASE' });
-
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 });

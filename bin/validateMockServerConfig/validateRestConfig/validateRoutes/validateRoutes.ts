@@ -3,10 +3,13 @@ import type { RestEntityNamesByMethod, RestMethod } from '@/utils/types';
 
 import { isCheckModeValid, isDescriptorValueValid } from '../../helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
+import { validateQueue } from '../../validateQueue/validateQueue';
+import { validateSettings } from '../../validateSettings/validateSettings';
 
 type AllowedEntityNamesByMethod = {
   [Method in keyof RestEntityNamesByMethod]: RestEntityNamesByMethod[Method][];
 };
+
 const ALLOWED_ENTITIES_BY_METHOD: AllowedEntityNamesByMethod = {
   get: ['headers', 'cookies', 'query', 'params'],
   delete: ['headers', 'cookies', 'query', 'params'],
@@ -93,11 +96,41 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
       const isRouteObject = isPlainObject(route);
       if (isRouteObject) {
         const isRouteHasDataProperty = 'data' in route;
-        if (!isRouteHasDataProperty) {
+        const isRouteHasQueueProperty = 'queue' in route;
+
+        if (!isRouteHasDataProperty && !isRouteHasQueueProperty) {
           throw new Error(`routes[${index}]`);
         }
 
+        if (isRouteHasDataProperty && isRouteHasQueueProperty) {
+          throw new Error(`routes[${index}]`);
+        }
+
+        const { settings } = route;
+        const isRouteSettingsObject = isPlainObject(settings);
+
+        if (isRouteHasQueueProperty) {
+          try {
+            validateQueue(route.queue);
+
+            if (!isRouteSettingsObject) {
+              throw new Error('settings');
+            }
+
+            if (!(isRouteSettingsObject && settings?.polling)) {
+              throw new Error('settings.polling');
+            }
+          } catch (error: any) {
+            throw new Error(`routes[${index}].${error.message}`);
+          }
+        }
+
+        if (isRouteHasDataProperty && isRouteSettingsObject && settings?.polling) {
+          throw new Error(`routes[${index}].settings.polling`);
+        }
+
         try {
+          validateSettings(route.settings);
           validateEntities(route.entities, method);
           validateInterceptors(route.interceptors);
         } catch (error: any) {

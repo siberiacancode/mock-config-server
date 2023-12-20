@@ -82,13 +82,55 @@ export const createRestRoutes = ({
           return next();
         }
 
-        const matchedRouteConfigData =
-          typeof matchedRouteConfig.data === 'function'
-            ? await matchedRouteConfig.data(request, matchedRouteConfig.entities ?? {})
-            : matchedRouteConfig.data;
+        let matchedRouteConfigData = null;
+        if (matchedRouteConfig.settings?.polling && 'queue' in matchedRouteConfig) {
+          if (!matchedRouteConfig.queue.length) return next();
+
+          const shallowMatchedRouteConfig =
+            matchedRouteConfig as unknown as typeof matchedRouteConfig & {
+              __pollingIndex: number;
+              __timeoutInProgress: boolean;
+            };
+
+          let index = shallowMatchedRouteConfig.__pollingIndex ?? 0;
+
+          const { time, data } = matchedRouteConfig.queue[index];
+
+          const updateIndex = () => {
+            if (matchedRouteConfig.queue.length - 1 === index) {
+              index = 0;
+            } else {
+              index += 1;
+            }
+            shallowMatchedRouteConfig.__pollingIndex = index;
+          };
+
+          if (time && !shallowMatchedRouteConfig.__timeoutInProgress) {
+            shallowMatchedRouteConfig.__timeoutInProgress = true;
+            setTimeout(() => {
+              shallowMatchedRouteConfig.__timeoutInProgress = false;
+              updateIndex();
+            }, time);
+          }
+
+          if (!time && !shallowMatchedRouteConfig.__timeoutInProgress) {
+            updateIndex();
+          }
+
+          matchedRouteConfigData = data;
+        }
+
+        if ('data' in matchedRouteConfig) {
+          matchedRouteConfigData = matchedRouteConfig.data;
+        }
+
+        const resolvedData =
+          typeof matchedRouteConfigData === 'function'
+            ? await matchedRouteConfigData(request, matchedRouteConfig.entities ?? {})
+            : matchedRouteConfigData;
 
         const data = await callResponseInterceptors({
-          data: matchedRouteConfigData,
+          data: resolvedData,
           request,
           response,
           interceptors: {

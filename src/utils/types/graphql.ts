@@ -124,15 +124,28 @@ type GraphQLEntityByEntityName<OperationType extends GraphQLOperationType> = {
   [EntityName in GraphQLEntityNamesByOperationType[OperationType]]?: GraphQLEntityDescriptorOrValue<EntityName>;
 };
 
-export interface GraphQLRouteConfig<
+type GraphQLSettings = {
+  readonly polling: boolean;
+};
+
+export type GraphQLRouteConfig<
   OperationType extends GraphQLOperationType = GraphQLOperationType,
   Entities extends
-    GraphQLEntityByEntityName<OperationType> = GraphQLEntityByEntityName<OperationType>
-> {
-  entities?: Entities;
-  data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
-  interceptors?: Pick<Interceptors, 'response'>;
-}
+    GraphQLEntityByEntityName<OperationType> = GraphQLEntityByEntityName<OperationType>,
+  Settings extends GraphQLSettings = GraphQLSettings
+> = (
+  | {
+      settings: Settings & { polling: true };
+      queue: Array<{
+        time?: number;
+        data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
+      }>;
+    }
+  | {
+      settings?: Settings & { polling?: false };
+      data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
+    }
+) & { entities?: Entities; interceptors?: Pick<Interceptors, 'response'> };
 
 export interface GraphQLRequestConfig extends GraphQLQuery {
   routes: GraphQLRouteConfig[];

@@ -562,4 +562,44 @@ describe('validateRoutes (graphql)', () => {
       ).toThrow(new Error('routes[0].entities.query.key'));
     });
   });
+
+  describe('Polling', () => {
+    test('Should correctly handle route content only with polling setting', () => {
+      const correctRouteMappedValues = [
+        { data: null },
+        { data: null, settings: { polling: false } },
+        { queue: [], settings: { polling: true } }
+      ];
+      correctRouteMappedValues.forEach((correctRouteMappedValue) => {
+        expect(() => validateRoutes([correctRouteMappedValue], 'query')).not.toThrow(Error);
+      });
+
+      const incorrectRouteMappedValues = [{}, { data: null, queue: null }];
+      incorrectRouteMappedValues.forEach((incorrectRouteMappedValue) => {
+        expect(() => validateRoutes([incorrectRouteMappedValue], 'query')).toThrow(
+          new Error('routes[0]')
+        );
+      });
+
+      const incorrectSettingsRouteMappedValue = { queue: [] };
+      expect(() => validateRoutes([incorrectSettingsRouteMappedValue], 'query')).toThrow(
+        new Error('routes[0].settings')
+      );
+
+      const incorrectSettingPollingRouteMappedValues = [
+        {
+          queue: [],
+          settings: { polling: false }
+        },
+        { data: null, settings: { polling: true } }
+      ];
+      incorrectSettingPollingRouteMappedValues.forEach(
+        (incorrectSettingPollingRouteMappedValue) => {
+          expect(() => validateRoutes([incorrectSettingPollingRouteMappedValue], 'query')).toThrow(
+            new Error('routes[0].settings.polling')
+          );
+        }
+      );
+    });
+  });
 });
