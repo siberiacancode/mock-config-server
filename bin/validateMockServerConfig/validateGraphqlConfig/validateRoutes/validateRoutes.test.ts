@@ -570,19 +570,20 @@ describe('validateRoutes (graphql)', () => {
         { data: null, settings: { polling: false } },
         { queue: [], settings: { polling: true } }
       ];
-
       correctRouteMappedValues.forEach((correctRouteMappedValue) => {
         expect(() => validateRoutes([correctRouteMappedValue], 'query')).not.toThrow(Error);
+      });
+
+      const incorrectSettingsRouteMappedValues = [{}, { data: null, settings: { polling: true } }];
+      incorrectSettingsRouteMappedValues.forEach((incorrectSettingsRouteMappedValue) => {
+        expect(() => validateRoutes([incorrectSettingsRouteMappedValue], 'query')).toThrow(
+          new Error('routes[0]')
+        );
       });
 
       const incorrectSettingsRouteMappedValue = { queue: [] };
       expect(() => validateRoutes([incorrectSettingsRouteMappedValue], 'query')).toThrow(
         new Error('routes[0].settings')
-      );
-
-      const incorrectQueueRouteMappedValue = { queue: null };
-      expect(() => validateRoutes([incorrectQueueRouteMappedValue], 'query')).toThrow(
-        new Error('routes[0].queue')
       );
 
       const incorrectSettingPollingRouteMappedValue = {

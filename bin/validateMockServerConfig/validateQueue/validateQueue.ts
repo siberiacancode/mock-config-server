@@ -23,8 +23,6 @@ export const validateQueue = (queue: unknown) => {
       return;
     }
 
-    if (typeof queueElement !== 'undefined') {
-      throw new Error(`queue[${index}]`);
-    }
+    throw new Error(`queue[${index}]`);
   });
 };
