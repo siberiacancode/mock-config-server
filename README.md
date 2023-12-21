@@ -229,8 +229,6 @@ Allowed `checkModes`
 
 Value for `checkMode` except `function` | `exists` | `notExists` can be array, so you can write even more complex logic. For example "does not contain these values" or "must be match to one of these regExp".
 
-> If `checkMode` doesn't defined then `checkMode=equals` is used
-
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
 const mockServerConfig = {

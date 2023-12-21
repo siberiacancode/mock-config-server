@@ -1,7 +1,6 @@
 import express from 'express';
 import request from 'supertest';
 
-import { cookieParseMiddleware } from '@/core/middlewares';
 import { urlJoin } from '@/utils/helpers';
 import type { MockServerConfig, RestConfig } from '@/utils/types';
 
@@ -14,7 +13,6 @@ describe('createRestRoutes', () => {
     }
   ) => {
     const server = express();
-    cookieParseMiddleware(server);
 
     const routerBase = express.Router();
     const routerWithRoutes = createRestRoutes(
