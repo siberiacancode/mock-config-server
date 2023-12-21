@@ -1,5 +1,5 @@
 import { convertToEntityDescriptor, isEntityDescriptor, isPlainObject } from '@/utils/helpers';
-import type { RestEntityNamesByMethod, RestMethod } from '@/utils/types';
+import type { RestEntityName, RestEntityNamesByMethod, RestMethod } from '@/utils/types';
 
 import { isCheckModeValid, isDescriptorValueValid } from '../../helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
@@ -19,26 +19,51 @@ const ALLOWED_ENTITIES_BY_METHOD: AllowedEntityNamesByMethod = {
   options: ['headers', 'cookies', 'query', 'params']
 };
 
-const validateEntity = (entity: unknown, entityName: string) => {
-  const { checkMode: topLevelCheckMode, value: topLevelValue } = convertToEntityDescriptor(entity);
+const validateEntity = (entity: unknown, entityName: RestEntityName) => {
   const isBody = entityName === 'body';
 
-  const isTopLevelDescriptor = isEntityDescriptor(entity);
-  if (isTopLevelDescriptor && isBody) {
-    if (!isCheckModeValid(topLevelCheckMode, 'body')) {
+  const isEntityTopLevelDescriptor = isEntityDescriptor(entity);
+  if (isEntityTopLevelDescriptor) {
+    if (!isBody) {
+      throw new Error(entityName);
+    }
+
+    if (!isCheckModeValid(entity.checkMode, 'body')) {
       throw new Error('body.checkMode');
     }
 
-    if (!isDescriptorValueValid(topLevelCheckMode, topLevelValue, 'body')) {
-      const errorMessage = 'body.value';
-      throw new Error(errorMessage);
+    const isDescriptorValueObjectOrArray =
+      isPlainObject(entity.value) || Array.isArray(entity.value);
+    if (
+      !isDescriptorValueObjectOrArray ||
+      !isDescriptorValueValid(entity.checkMode, entity.value)
+    ) {
+      throw new Error('body.value');
     }
+
+    return;
   }
 
-  const isEntityObject = isPlainObject(entity) && !(entity instanceof RegExp);
-  const isEntityArray = Array.isArray(entity) && isBody;
-  if (isEntityObject || isEntityArray) {
-    Object.entries(topLevelValue).forEach(([key, valueOrDescriptor]) => {
+  const isEntityArray = Array.isArray(entity);
+  if (isEntityArray) {
+    if (!isBody) {
+      throw new Error(entityName);
+    }
+
+    entity.forEach((entityElement, index) => {
+      const isEntityElementObjectOrArray =
+        isPlainObject(entityElement) || Array.isArray(entityElement);
+      if (!isEntityElementObjectOrArray || !isDescriptorValueValid('equals', entityElement)) {
+        throw new Error(`${entityName}[${index}]`);
+      }
+    });
+
+    return;
+  }
+
+  const isEntityObject = isPlainObject(entity);
+  if (isEntityObject) {
+    Object.entries(entity).forEach(([key, valueOrDescriptor]) => {
       const { checkMode, value } = convertToEntityDescriptor(valueOrDescriptor);
       if (!isCheckModeValid(checkMode)) {
         throw new Error(`${entityName}.${key}.checkMode`);
@@ -48,15 +73,28 @@ const validateEntity = (entity: unknown, entityName: string) => {
       const errorMessage = `${entityName}.${key}${isDescriptor ? '.value' : ''}`;
 
       const isValueArray = Array.isArray(value);
-      if (isValueArray && !isBody) {
+      if (isValueArray) {
         value.forEach((element, index) => {
-          if (!isDescriptorValueValid(checkMode, element)) {
+          if (isBody) {
+            if (isDescriptorValueValid(checkMode, element)) return;
+            throw new Error(`${errorMessage}[${index}]`);
+          }
+
+          const isElementObjectOrArray = isPlainObject(element) || Array.isArray(element);
+          if (isElementObjectOrArray || !isDescriptorValueValid(checkMode, element)) {
             throw new Error(`${errorMessage}[${index}]`);
           }
         });
         return;
       }
-      if (!isDescriptorValueValid(checkMode, value)) {
+
+      if (isBody) {
+        if (isDescriptorValueValid(checkMode, value)) return;
+        throw new Error(errorMessage);
+      }
+
+      const isValueObject = isPlainObject(value);
+      if (isValueObject || !isDescriptorValueValid(checkMode, value)) {
         throw new Error(errorMessage);
       }
     });
@@ -76,7 +114,7 @@ const validateEntities = (entities: unknown, method: RestMethod) => {
       }
 
       try {
-        validateEntity(entities[entityName], entityName);
+        validateEntity(entities[entityName], entityName as RestEntityName);
       } catch (error: any) {
         throw new Error(`entities.${error.message}`);
       }

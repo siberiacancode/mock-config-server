@@ -1,7 +1,11 @@
 import type { Express } from 'express';
 
 import { parseGraphQLRequest } from '@/utils/helpers';
-import type { MockServerConfig, RestPathString } from '@/utils/types';
+import type {
+  MockServerConfig,
+  OperationNameGraphQLRequestConfig,
+  RestPathString
+} from '@/utils/types';
 
 import type { GraphqlRequestSuggestionConfigs, RestRequestSuggestionConfigs } from './helpers';
 import { getGraphqlUrlSuggestions, getRestUrlSuggestions } from './helpers';
@@ -22,10 +26,12 @@ export const notFoundMiddleware = (
 
   const graphqlRequestConfigs =
     graphql?.configs
-      .filter(({ operationName }) => !(operationName instanceof RegExp))
+      .filter((request) => 'operationName' in request && !(request.operationName instanceof RegExp))
       .map((request) => ({
         operationType: request.operationType,
-        operationName: `${serverBaseUrl ?? ''}${graphql?.baseUrl ?? ''} ${request.operationName}`
+        operationName: `${serverBaseUrl ?? ''}${graphql?.baseUrl ?? ''} ${
+          (request as OperationNameGraphQLRequestConfig).operationName
+        }`
       })) ?? [];
 
   server.use((request, response) => {

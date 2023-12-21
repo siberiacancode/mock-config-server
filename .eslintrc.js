@@ -18,7 +18,6 @@ module.exports = {
         '@typescript-eslint/naming-convention': 'off',
         'no-underscore-dangle': 'off',
         'no-restricted-syntax': 'off',
-        'no-underscore-dangle': 'off',
         'promise/always-return': ['error', { ignoreLastCallback: true }]
       }
     }

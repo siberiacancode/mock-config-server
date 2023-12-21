@@ -73,7 +73,7 @@ $ npx mock-config-server
   - `baseUrl?` {string} part of the url that will be substituted at the beginning of graphql request url (default: `'/'`)
   - `configs` {Array<GraphQLRequestConfig>} configs for mock requests, [read](#configs)
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
-- `database?` Database config for mock requests [read](#Database)
+- `database?` Database config for mock requests [read](#database)
   - `data` {Object | string} initial data for database
   - `routes?` {Object | string} map of custom routes for database
 - `staticPath?` {StaticPath} entity for working with static files, [read](#static-path)
@@ -99,12 +99,15 @@ Configs are the fundamental part of the mock server. These configs are easy to f
 ##### GraphQL request config
 
 - `operationType` {query | mutation} graphql operation type
-- `operationName` {string} graphql operation name
+- `operationName?` {string | RegExp} graphql operation name
+- `query?`: {string} graphql query as string
 - `routes` {GraphQLRouteConfig[]} request routes
   - `data` {any} mock data of request
   - `entities?` Object<headers | cookies | query | variables> object that helps in data retrieval
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
+
+> Every graphql config should contain `operationName` or `query` or both of them
 
 ##### Rest example
 
@@ -260,6 +263,35 @@ const mockServerConfig = {
               }
             },
             data: 'Some user data for Dmitriy and Nursultan'
+          }
+        ]
+      }
+    ]
+  }
+};
+
+module.exports = mockServerConfig;
+```
+
+Also you can use array as value for REST body and GraphQL variables entities: in this case mock-config-server will iterate
+over array until `checkMode=equals` finds a match or return 404
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/user',
+        method: 'post',
+        routes: [
+          {
+            entities: {
+              // if body equals to { key1: 'value1' } or ['value1'] then mock-config-server return data
+              body: [{ key1: 'value1' }, ['value1']]
+            },
+            data: 'Some user data'
           }
         ]
       }
@@ -659,7 +691,7 @@ Examples:
             <br />
             <sub style="font-size:13px"><b>👹 MiaInturi</b></sub>
         </a>
-    </td> 
+    </td>
       <td align="center" style="word-wrap: break-word; width: 100.0; height: 100.0">
         <a href="https://github.com/RiceWithMeat">
             <img src="https://avatars.githubusercontent.com/u/47690223?v=4"

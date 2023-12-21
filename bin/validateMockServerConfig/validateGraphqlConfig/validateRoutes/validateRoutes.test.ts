@@ -1,4 +1,8 @@
-import { CHECK_MODES, PLAIN_ENTITY_CHECK_MODES } from '@/utils/constants';
+import {
+  CHECK_MODES,
+  COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES,
+  PLAIN_ENTITY_CHECK_MODES
+} from '@/utils/constants';
 import type { CompareWithDescriptorValueCheckMode, GraphQLEntityName } from '@/utils/types';
 
 import { validateRoutes } from './validateRoutes';
@@ -12,68 +16,355 @@ const generateCorrectCompareWithDescriptorValueMappedEntity = (
   [`${checkMode}-array`]: { checkMode, value: [true, 1, 'string'] }
 });
 
-const generateAllCorrectCompareWithExpectedValueMappedEntities = () => ({
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('equals'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('notEquals'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('includes'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('notIncludes'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('startsWith'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('notStartsWith'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('endsWith'),
-  ...generateCorrectCompareWithDescriptorValueMappedEntity('notEndsWith')
-});
+const generateAllCorrectCompareWithExpectedValueMappedEntities = () =>
+  COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES.reduce(
+    (acc, checkMode) => ({
+      ...acc,
+      ...generateCorrectCompareWithDescriptorValueMappedEntity(checkMode)
+    }),
+    {}
+  );
 
 describe('validateRoutes (graphql)', () => {
-  test('Should correctly handle routes only with correct type', () => {
-    expect(() => validateRoutes([{ data: null }], 'query')).not.toThrow(Error);
+  describe('validateRoutes (graphql): validate routes and entities types', () => {
+    test('Should correctly handle routes only with correct type', () => {
+      const correctRoutesValues = [[]];
+      correctRoutesValues.forEach((correctRouteValue) => {
+        expect(() => validateRoutes(correctRouteValue, 'query')).not.toThrow(Error);
+      });
 
-    const incorrectRouteArrayValues = ['string', true, 3000, null, undefined, {}, () => {}, /\d/];
-    incorrectRouteArrayValues.forEach((incorrectRouteArrayValue) => {
-      expect(() => validateRoutes(incorrectRouteArrayValue, 'query')).toThrow(new Error('routes'));
+      const incorrectRoutesValues = ['string', true, 3000, null, undefined, {}, () => {}, /\d/];
+      incorrectRoutesValues.forEach((incorrectRoutesValue) => {
+        expect(() => validateRoutes(incorrectRoutesValue, 'query')).toThrow(new Error('routes'));
+      });
+
+      const correctRouteElementValues = [{ data: null }];
+      correctRouteElementValues.forEach((correctRouteElementValue) => {
+        expect(() => validateRoutes([correctRouteElementValue], 'query')).not.toThrow(Error);
+      });
+
+      const incorrectRouteElementValues = [
+        'string',
+        true,
+        3000,
+        null,
+        undefined,
+        {},
+        [],
+        () => {},
+        /\d/
+      ];
+      incorrectRouteElementValues.forEach((incorrectRouteElementValue) => {
+        expect(() => validateRoutes([incorrectRouteElementValue], 'query')).toThrow(
+          new Error('routes[0]')
+        );
+      });
     });
 
-    const incorrectRouteValues = ['string', true, 3000, null, undefined, {}, [], () => {}, /\d/];
-    incorrectRouteValues.forEach((incorrectRouteValue) => {
-      expect(() => validateRoutes([incorrectRouteValue], 'query')).toThrow(new Error('routes[0]'));
+    test('Should correctly handle entities only with correct type', () => {
+      const correctEntitiesValues = [{}, undefined];
+      correctEntitiesValues.forEach((correctEntitiesValue) => {
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: correctEntitiesValue,
+                data: null
+              }
+            ],
+            'query'
+          )
+        ).not.toThrow(Error);
+      });
+
+      const incorrectEntitiesValues = ['string', true, 3000, null, [], () => {}, /\d/];
+      incorrectEntitiesValues.forEach((incorrectEntitiesValue) => {
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: incorrectEntitiesValue,
+                data: null
+              }
+            ],
+            'query'
+          )
+        ).toThrow(new Error('routes[0].entities'));
+      });
+    });
+
+    test('Should correctly handle query|mutation operation type only with correct entities', () => {
+      const correctEntities = ['headers', 'cookies', 'query', 'variables'];
+      correctEntities.forEach((correctEntity) => {
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: { [correctEntity]: { key: 'value' } },
+                data: null
+              }
+            ],
+            'query'
+          )
+        ).not.toThrow(Error);
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: { [correctEntity]: { key: 'value' } },
+                data: null
+              }
+            ],
+            'mutation'
+          )
+        ).not.toThrow(Error);
+      });
+
+      const incorrectEntities = ['other'];
+      incorrectEntities.forEach((incorrectEntity) => {
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: { [incorrectEntity]: { key: 'value' } },
+                data: null
+              }
+            ],
+            'query'
+          )
+        ).toThrow(new Error(`routes[0].entities.${incorrectEntity}`));
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: { [incorrectEntity]: { key: 'value' } },
+                data: null
+              }
+            ],
+            'mutation'
+          )
+        ).toThrow(new Error(`routes[0].entities.${incorrectEntity}`));
+      });
+    });
+
+    test('Should correctly handle variables entity (plain entities) only with correct type', () => {
+      const correctVariablesValues = [[], {}];
+      correctVariablesValues.forEach((correctVariablesValue) => {
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: { variables: correctVariablesValue },
+                data: null
+              }
+            ],
+            'query'
+          )
+        ).not.toThrow(Error);
+      });
+
+      const incorrectVariablesValues = ['string', 3000, true, null, undefined, () => {}, /\d/];
+      incorrectVariablesValues.forEach((incorrectVariablesValue) => {
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: { variables: incorrectVariablesValue },
+                data: null
+              }
+            ],
+            'query'
+          )
+        ).toThrow(new Error('routes[0].entities.variables'));
+      });
+
+      const correctVariablesObjectPropertyValues = [{}, [], 'string', 3000, true, null];
+      correctVariablesObjectPropertyValues.forEach((correctVariablesObjectPropertyValue) => {
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: { variables: { key: correctVariablesObjectPropertyValue } },
+                data: null
+              }
+            ],
+            'query'
+          )
+        ).not.toThrow(Error);
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: { variables: { key: [correctVariablesObjectPropertyValue] } },
+                data: null
+              }
+            ],
+            'query'
+          )
+        ).not.toThrow(Error);
+      });
+
+      const incorrectVariablesObjectPropertyValues = [undefined, () => {}, /\d/];
+      incorrectVariablesObjectPropertyValues.forEach((incorrectVariablesObjectPropertyValue) => {
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: { variables: { key: incorrectVariablesObjectPropertyValue } },
+                data: null
+              }
+            ],
+            'query'
+          )
+        ).toThrow(new Error('routes[0].entities.variables.key'));
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: { variables: { key: [incorrectVariablesObjectPropertyValue] } },
+                data: null
+              }
+            ],
+            'query'
+          )
+        ).toThrow(new Error('routes[0].entities.variables.key[0]'));
+      });
+
+      const correctVariablesArrayPropertyValues = [{}, []];
+      correctVariablesArrayPropertyValues.forEach((correctVariablesArrayPropertyValue) => {
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: { variables: [correctVariablesArrayPropertyValue] },
+                data: null
+              }
+            ],
+            'query'
+          )
+        ).not.toThrow(Error);
+      });
+
+      const incorrectVariablesArrayPropertyValues = [
+        'string',
+        3000,
+        true,
+        null,
+        undefined,
+        () => {},
+        /\d/
+      ];
+      incorrectVariablesArrayPropertyValues.forEach((incorrectVariablesArrayPropertyValue) => {
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: { variables: [incorrectVariablesArrayPropertyValue] },
+                data: null
+              }
+            ],
+            'query'
+          )
+        ).toThrow(new Error('routes[0].entities.variables[0]'));
+      });
+    });
+
+    test('Should correctly handle headers|cookies|query entity (mapped entities) only with correct type', () => {
+      const entities = ['headers', 'cookies', 'query'];
+      entities.forEach((entity) => {
+        const correctEntityValues = [{}];
+        correctEntityValues.forEach((correctEntityValue) => {
+          expect(() =>
+            validateRoutes(
+              [
+                {
+                  entities: { [entity]: correctEntityValue },
+                  data: null
+                }
+              ],
+              'query'
+            )
+          ).not.toThrow(Error);
+        });
+
+        const incorrectEntityValues = ['string', true, 3000, null, undefined, [], () => {}, /\d/];
+        incorrectEntityValues.forEach((incorrectEntityValue) => {
+          expect(() =>
+            validateRoutes(
+              [
+                {
+                  entities: { [entity]: incorrectEntityValue },
+                  data: null
+                }
+              ],
+              'query'
+            )
+          ).toThrow(new Error(`routes[0].entities.${entity}`));
+        });
+
+        const correctEntityPropertyValues = ['string', 3000, true, null];
+        correctEntityPropertyValues.forEach((correctEntityPropertyValue) => {
+          expect(() =>
+            validateRoutes(
+              [
+                {
+                  entities: { [entity]: { key: correctEntityPropertyValue } },
+                  data: null
+                }
+              ],
+              'query'
+            )
+          ).not.toThrow(Error);
+          expect(() =>
+            validateRoutes(
+              [
+                {
+                  entities: { [entity]: { key: [correctEntityPropertyValue] } },
+                  data: null
+                }
+              ],
+              'query'
+            )
+          ).not.toThrow(Error);
+        });
+
+        const incorrectEntityPropertyValues = [undefined, {}, () => {}, /\d/];
+        incorrectEntityPropertyValues.forEach((incorrectEntityPropertyValue) => {
+          expect(() =>
+            validateRoutes(
+              [
+                {
+                  entities: { [entity]: { key: incorrectEntityPropertyValue } },
+                  data: null
+                }
+              ],
+              'query'
+            )
+          ).toThrow(new Error(`routes[0].entities.${entity}.key`));
+          expect(() =>
+            validateRoutes(
+              [
+                {
+                  entities: { [entity]: { key: [incorrectEntityPropertyValue] } },
+                  data: null
+                }
+              ],
+              'query'
+            )
+          ).toThrow(new Error(`routes[0].entities.${entity}.key[0]`));
+        });
+      });
     });
   });
 
-  test('Should correctly handle entities only with correct type', () => {
-    const correctMappedEntity = {
-      exists: { checkMode: 'exists' },
-
-      notExists: { checkMode: 'notExists' },
-
-      'equals-plain-boolean': true,
-      'equals-plain-number': 1,
-      'equals-plain-string': 'string',
-      'equals-plain-array': [true, 1, 'string'],
-      ...generateAllCorrectCompareWithExpectedValueMappedEntities(),
-
-      'regExp-value': { checkMode: 'regExp', value: /^regExp$/ },
-      'regExp-array': { checkMode: 'regExp', value: [/^regExp1$/, /^regExp2$/] },
-
-      function: {
-        checkMode: 'function',
-        value: (actualValue: string) => actualValue === 'actualValue'
-      }
-    };
-
-    const correctEntitiesValues = [
-      {},
-      {
-        headers: correctMappedEntity,
-        cookies: correctMappedEntity,
-        query: correctMappedEntity
-      },
-      undefined
-    ];
-    correctEntitiesValues.forEach((correctEntitiesValue) => {
+  test('Should correctly handle variables entity only with correct type', () => {
+    const correctVariablesValues = [[], {}];
+    correctVariablesValues.forEach((correctVariablesValue) => {
       expect(() =>
         validateRoutes(
           [
             {
-              entities: correctEntitiesValue,
+              entities: { variables: correctVariablesValue },
               data: null
             }
           ],
@@ -82,23 +373,120 @@ describe('validateRoutes (graphql)', () => {
       ).not.toThrow(Error);
     });
 
-    const incorrectEntitiesValues = ['string', true, 3000, null, [], () => {}, /\d/];
-    incorrectEntitiesValues.forEach((incorrectEntitiesValue) => {
+    const incorrectVariablesValues = ['string', 3000, true, null, undefined, () => {}, /\d/];
+    incorrectVariablesValues.forEach((incorrectVariablesValue) => {
       expect(() =>
         validateRoutes(
           [
             {
-              entities: incorrectEntitiesValue,
+              entities: { variables: incorrectVariablesValue },
               data: null
             }
           ],
           'query'
         )
-      ).toThrow(new Error('routes[0].entities'));
+      ).toThrow(new Error('routes[0].entities.variables'));
+    });
+
+    const correctVariablesMappedValues = [{}, [], 'string', 3000, true, null];
+    correctVariablesMappedValues.forEach((correctVariablesMappedValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { variables: { key: correctVariablesMappedValue } },
+              data: null
+            }
+          ],
+          'query'
+        )
+      ).not.toThrow(Error);
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { variables: { key: [correctVariablesMappedValue] } },
+              data: null
+            }
+          ],
+          'query'
+        )
+      ).not.toThrow(Error);
+    });
+
+    const incorrectVariablesMappedValues = [undefined, () => {}, /\d/];
+    incorrectVariablesMappedValues.forEach((incorrectVariablesMappedValue) => {
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { variables: { key: incorrectVariablesMappedValue } },
+              data: null
+            }
+          ],
+          'query'
+        )
+      ).toThrow(new Error('routes[0].entities.variables.key'));
+      expect(() =>
+        validateRoutes(
+          [
+            {
+              entities: { variables: { key: [incorrectVariablesMappedValue] } },
+              data: null
+            }
+          ],
+          'query'
+        )
+      ).toThrow(new Error('routes[0].entities.variables.key[0]'));
     });
   });
 
-  describe('Entity descriptors', () => {
+  describe('validateRoutes (graphql): entity descriptors', () => {
+    test('Should correctly handle entities only with correct type', () => {
+      const correctMappedEntity = {
+        exists: { checkMode: 'exists' },
+
+        notExists: { checkMode: 'notExists' },
+
+        'equals-plain-boolean': true,
+        'equals-plain-number': 1,
+        'equals-plain-string': 'string',
+        'equals-plain-array': [true, 1, 'string'],
+        ...generateAllCorrectCompareWithExpectedValueMappedEntities(),
+
+        'regExp-value': { checkMode: 'regExp', value: /^regExp$/ },
+        'regExp-array': { checkMode: 'regExp', value: [/^regExp1$/, /^regExp2$/] },
+
+        function: {
+          checkMode: 'function',
+          value: (actualValue: string) => actualValue === 'actualValue'
+        }
+      };
+
+      const correctEntitiesValues = [
+        {},
+        {
+          headers: correctMappedEntity,
+          cookies: correctMappedEntity,
+          query: correctMappedEntity
+        },
+        undefined
+      ];
+      correctEntitiesValues.forEach((correctEntitiesValue) => {
+        expect(() =>
+          validateRoutes(
+            [
+              {
+                entities: correctEntitiesValue,
+                data: null
+              }
+            ],
+            'query'
+          )
+        ).not.toThrow(Error);
+      });
+    });
+
     test('Should allow only correct descriptor checkModes for mapped entities', () => {
       const MAPPED_ENTITY_NAMES: Exclude<GraphQLEntityName, 'variables'>[] = [
         'headers',
@@ -215,7 +603,7 @@ describe('validateRoutes (graphql)', () => {
         ).toThrow(new Error('routes[0].entities.headers.key.value'));
       });
 
-      const incorrectMappedEntityValues = [null, {}, () => {}, /\d/];
+      const incorrectMappedEntityValues = [undefined, {}, () => {}, /\d/];
       incorrectMappedEntityValues.forEach((incorrectMappedEntityValue) => {
         expect(() =>
           validateRoutes(
@@ -355,211 +743,6 @@ describe('validateRoutes (graphql)', () => {
           'query'
         )
       ).toThrow(new Error('routes[0].entities.variables.a.b.value'));
-    });
-  });
-
-  test('Should correctly handle query operation type entities only with correct type', () => {
-    const correctEntities = ['headers', 'cookies', 'query', 'variables'];
-    correctEntities.forEach((correctEntity) => {
-      expect(() =>
-        validateRoutes(
-          [
-            {
-              entities: { [correctEntity]: { key: 'value' } },
-              data: null
-            }
-          ],
-          'query'
-        )
-      ).not.toThrow(Error);
-    });
-
-    const incorrectEntities = ['body', 'other'];
-    incorrectEntities.forEach((incorrectEntity) => {
-      expect(() =>
-        validateRoutes(
-          [
-            {
-              entities: { [incorrectEntity]: { key: 'value' } },
-              data: null
-            }
-          ],
-          'query'
-        )
-      ).toThrow(new Error(`routes[0].entities.${incorrectEntity}`));
-    });
-  });
-
-  test('Should correctly handle mutation operation type entities only with correct type', () => {
-    const correctEntities = ['headers', 'cookies', 'query', 'variables'];
-    correctEntities.forEach((correctEntity) => {
-      expect(() =>
-        validateRoutes(
-          [
-            {
-              entities: { [correctEntity]: { key: 'value' } },
-              data: null
-            }
-          ],
-          'mutation'
-        )
-      ).not.toThrow(Error);
-    });
-
-    const incorrectEntities = ['body', 'other'];
-    incorrectEntities.forEach((incorrectEntity) => {
-      expect(() =>
-        validateRoutes(
-          [
-            {
-              entities: { [incorrectEntity]: { key: 'value' } },
-              data: null
-            }
-          ],
-          'mutation'
-        )
-      ).toThrow(new Error(`routes[0].entities.${incorrectEntity}`));
-    });
-  });
-
-  test('Should correctly handle headers entity only with correct type', () => {
-    const correctHeadersMappedValues = ['string'];
-    correctHeadersMappedValues.forEach((correctHeadersMappedValue) => {
-      expect(() =>
-        validateRoutes(
-          [
-            {
-              entities: { headers: { key: correctHeadersMappedValue } },
-              data: null
-            }
-          ],
-          'query'
-        )
-      ).not.toThrow(Error);
-    });
-
-    const incorrectHeadersValues = [true, null, undefined, [], () => {}, /\d/];
-    incorrectHeadersValues.forEach((incorrectHeaderValue) => {
-      expect(() =>
-        validateRoutes(
-          [
-            {
-              entities: { headers: incorrectHeaderValue },
-              data: null
-            }
-          ],
-          'query'
-        )
-      ).toThrow(new Error('routes[0].entities.headers'));
-    });
-
-    const incorrectHeadersMappedValues = [null, undefined, {}, () => {}, /\d/];
-    incorrectHeadersMappedValues.forEach((incorrectHeadersMappedValue) => {
-      expect(() =>
-        validateRoutes(
-          [
-            {
-              entities: { headers: { key: incorrectHeadersMappedValue } },
-              data: null
-            }
-          ],
-          'query'
-        )
-      ).toThrow(new Error('routes[0].entities.headers.key'));
-    });
-  });
-
-  test('Should correctly handle cookies entity only with correct type', () => {
-    const correctCookiesMappedValues = ['string', 3000, true];
-    correctCookiesMappedValues.forEach((correctCookiesMappedValue) => {
-      expect(() =>
-        validateRoutes(
-          [
-            {
-              entities: { cookies: { key: correctCookiesMappedValue } },
-              data: null
-            }
-          ],
-          'query'
-        )
-      ).not.toThrow(Error);
-    });
-
-    const incorrectCookiesValues = [true, 3000, null, undefined, [], () => {}, /\d/];
-    incorrectCookiesValues.forEach((incorrectCookieValue) => {
-      expect(() =>
-        validateRoutes(
-          [
-            {
-              entities: { cookies: incorrectCookieValue },
-              data: null
-            }
-          ],
-          'query'
-        )
-      ).toThrow(new Error('routes[0].entities.cookies'));
-    });
-
-    const incorrectCookiesMappedValues = [null, undefined, {}, () => {}, /\d/];
-    incorrectCookiesMappedValues.forEach((incorrectCookiesMappedValue) => {
-      expect(() =>
-        validateRoutes(
-          [
-            {
-              entities: { cookies: { key: incorrectCookiesMappedValue } },
-              data: null
-            }
-          ],
-          'query'
-        )
-      ).toThrow(new Error('routes[0].entities.cookies.key'));
-    });
-  });
-
-  test('Should correctly handle query entity only with correct type', () => {
-    const correctQueryMappedValues = ['string', 3000, true];
-    correctQueryMappedValues.forEach((correctQueryMappedValue) => {
-      expect(() =>
-        validateRoutes(
-          [
-            {
-              entities: { query: { key: correctQueryMappedValue } },
-              data: null
-            }
-          ],
-          'query'
-        )
-      ).not.toThrow(Error);
-    });
-
-    const incorrectQueryValues = ['string', true, 3000, null, undefined, [], () => {}, /\d/];
-    incorrectQueryValues.forEach((incorrectQueryValue) => {
-      expect(() =>
-        validateRoutes(
-          [
-            {
-              entities: { query: incorrectQueryValue },
-              data: null
-            }
-          ],
-          'query'
-        )
-      ).toThrow(new Error('routes[0].entities.query'));
-    });
-
-    const incorrectQueryMappedValues = [null, undefined, {}, () => {}, /\d/];
-    incorrectQueryMappedValues.forEach((incorrectQueryMappedValue) => {
-      expect(() =>
-        validateRoutes(
-          [
-            {
-              entities: { query: { key: incorrectQueryMappedValue } },
-              data: null
-            }
-          ],
-          'query'
-        )
-      ).toThrow(new Error('routes[0].entities.query.key'));
     });
   });
 

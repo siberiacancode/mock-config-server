@@ -28,7 +28,7 @@ describe('corsMiddleware', () => {
     });
   });
 
-  test(`Should set default cors for request if does not set custom cors settings`, async () => {
+  test('Should set default cors for request if does not set custom cors settings', async () => {
     const server = express();
     const cors: Cors = {
       origin: testOrigin
@@ -80,7 +80,7 @@ describe('corsMiddleware', () => {
       });
     });
 
-    test(`Should not set cors for request if origin does not match`, async () => {
+    test('Should not set cors for request if origin does not match', async () => {
       const server = express();
       const cors: Cors = {
         origin: unsuitableOrigin
