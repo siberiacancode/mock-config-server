@@ -58,7 +58,7 @@ export default mockServerConfig;
 Start **🎉 Mock Config Server**
 
 ```bash
-npx mock-config-server
+$ npx mock-config-server
 ```
 
 > If the package is already installed you can use short command `mcs`

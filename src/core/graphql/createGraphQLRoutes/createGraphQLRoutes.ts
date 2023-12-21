@@ -47,7 +47,11 @@ export const createGraphQLRoutes = (
     const matchedRequestConfig = preparedGraphQLRequestConfig.find((requestConfig) => {
       if (requestConfig.operationType !== query.operationType) return false;
 
-      if ('query' in requestConfig && requestConfig.query !== graphQLInput.query) return false;
+      if (
+        'query' in requestConfig &&
+        requestConfig.query.replace(/\s+/gi, ' ') !== graphQLInput.query?.replace(/\s+/gi, ' ')
+      )
+        return false;
 
       if ('operationName' in requestConfig) {
         if (!query.operationName) return false;
