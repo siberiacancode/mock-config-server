@@ -1,43 +1,29 @@
-import { isPlainObject } from '@/utils/helpers';
+import { z } from 'zod';
 
-const validateData = (data: unknown) => {
-  const isDataObject = isPlainObject(data);
-  const isDataJsonFilePath = typeof data === 'string' && data.endsWith('.json');
-  if (!isDataObject && !isDataJsonFilePath) throw new Error('data');
-};
-
-const validateRoutes = (routes: unknown) => {
-  const isRoutesObject = isPlainObject(routes);
-  if (isRoutesObject) {
-    Object.entries(routes).forEach(([routeKey, routeValue]) => {
-      const isKeyRoutePath = routeKey.startsWith('/');
-      const isValueRoutePath = typeof routeValue === 'string' && routeValue.startsWith('/');
-      if (!isKeyRoutePath || !isValueRoutePath) {
-        throw new Error(`routes.${routeKey}`);
-      }
-    });
-    return;
-  }
-
-  const isRoutesJsonFilePath = typeof routes === 'string' && routes.endsWith('.json');
-  if (!isRoutesJsonFilePath && typeof routes !== 'undefined') {
-    throw new Error('routes');
-  }
-};
+import { getMostSpecificPathFromError, getValidationMessageFromPath } from '@/utils/helpers';
 
 export const validateDatabaseConfig = (databaseConfig: unknown) => {
-  const isDatabaseConfigObject = isPlainObject(databaseConfig);
-  if (isDatabaseConfigObject) {
-    try {
-      validateData(databaseConfig.data);
-      validateRoutes(databaseConfig.routes);
-    } catch (error: any) {
-      throw new Error(`database.${error.message}`);
-    }
-    return;
-  }
+  const ForwardSlashStringSchema = z.string().startsWith('/');
+  const JsonFilenameStringSchema = z.string().endsWith('.json');
 
-  if (typeof databaseConfig !== 'undefined') {
-    throw new Error('database');
+  const DataSchema = z.union([z.record(z.string(), z.unknown()), JsonFilenameStringSchema]);
+  const RoutesSchema = z
+    .union([z.record(ForwardSlashStringSchema, ForwardSlashStringSchema), JsonFilenameStringSchema])
+    .optional();
+
+  const DatabaseConfigSchema = z
+    .object({
+      data: DataSchema,
+      routes: RoutesSchema
+    })
+    .strict()
+    .optional();
+
+  const result = DatabaseConfigSchema.safeParse(databaseConfig);
+  if (!result.success) {
+    const path = getMostSpecificPathFromError(result.error);
+    const validationMessage = getValidationMessageFromPath(path);
+
+    throw new Error(`database${validationMessage}`);
   }
 };

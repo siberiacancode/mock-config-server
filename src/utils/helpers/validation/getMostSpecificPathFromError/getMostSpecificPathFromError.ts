@@ -1,0 +1,21 @@
+import { z } from 'zod';
+
+export const getMostSpecificPathFromError = (error: z.ZodError): (string | number)[] => {
+  let currentMostSpecificPath: (string | number)[] = [];
+  for (const issue of error.issues) {
+    if (issue.code === z.ZodIssueCode.invalid_union) {
+      for (const unionError of issue.unionErrors) {
+        const unionErrorMostSpecificPath = getMostSpecificPathFromError(unionError);
+        if (unionErrorMostSpecificPath.length > currentMostSpecificPath.length) {
+          currentMostSpecificPath = unionErrorMostSpecificPath;
+        }
+      }
+    }
+
+    if (issue.path.length > currentMostSpecificPath.length) {
+      currentMostSpecificPath = issue.path;
+    }
+  }
+
+  return currentMostSpecificPath;
+};
