@@ -21,28 +21,34 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
 
   const getHeader = (field: string) => response.getHeader(field);
   const getHeaders = () => response.getHeaders();
-
-  const getCookie = (name: string) => request.cookies[name];
+  const setHeader = (field: string, value?: string | string[]) => {
+    response.set(field, value);
+  };
+  const appendHeader = (field: string, value?: string | string[]) => {
+    response.append(field, value);
+  };
 
   const setStatusCode = (statusCode: number) => {
     response.statusCode = statusCode;
   };
 
-  const setHeader = (field: string, value?: string | string[]) => response.set(field, value);
-  const appendHeader = (field: string, value?: string[] | string) => response.append(field, value);
-
+  const getCookie = (name: string) => request.cookies[name];
   const setCookie = (name: string, value: string, options?: CookieOptions) => {
     if (options) {
       response.cookie(name, value, options);
+      return;
     }
     response.cookie(name, value);
   };
-  const clearCookie = (name: string, options?: CookieOptions) =>
+  const clearCookie = (name: string, options?: CookieOptions) => {
     response.clearCookie(name, options);
+  };
 
-  const attachment = (filename: string) => response.attachment(filename);
+  const attachment = (filename: string) => {
+    response.attachment(filename);
+  };
 
-  const ResponseInterceptorParams: ResponseInterceptorParams = {
+  const responseInterceptorParams: ResponseInterceptorParams = {
     request,
     response,
     setDelay,
@@ -59,16 +65,16 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
 
   let updatedData = data;
   if (interceptors?.routeInterceptor) {
-    updatedData = await interceptors.routeInterceptor(updatedData, ResponseInterceptorParams);
+    updatedData = await interceptors.routeInterceptor(updatedData, responseInterceptorParams);
   }
   if (interceptors?.requestInterceptor) {
-    updatedData = await interceptors.requestInterceptor(updatedData, ResponseInterceptorParams);
+    updatedData = await interceptors.requestInterceptor(updatedData, responseInterceptorParams);
   }
   if (interceptors?.apiInterceptor) {
-    updatedData = await interceptors.apiInterceptor(updatedData, ResponseInterceptorParams);
+    updatedData = await interceptors.apiInterceptor(updatedData, responseInterceptorParams);
   }
   if (interceptors?.serverInterceptor) {
-    updatedData = await interceptors.serverInterceptor(updatedData, ResponseInterceptorParams);
+    updatedData = await interceptors.serverInterceptor(updatedData, responseInterceptorParams);
   }
 
   return updatedData;

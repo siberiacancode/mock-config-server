@@ -9,16 +9,26 @@ const validateConfigs = (configs: unknown) => {
   const isConfigsArray = Array.isArray(configs);
   if (isConfigsArray) {
     configs.forEach((config, index) => {
-      const { operationType, operationName } = config;
+      const { operationType, operationName, query } = config;
+
+      if (typeof operationName === 'undefined' && typeof query === 'undefined') {
+        throw new Error(`configs[${index}]`);
+      }
 
       if (operationType !== 'query' && operationType !== 'mutation') {
         throw new Error(`configs[${index}].operationType`);
       }
 
-      const isOperationNameStringOrRegExp =
-        typeof operationName === 'string' || operationName instanceof RegExp;
-      if (!isOperationNameStringOrRegExp) {
+      if (
+        typeof operationName !== 'undefined' &&
+        typeof operationName !== 'string' &&
+        !(operationName instanceof RegExp)
+      ) {
         throw new Error(`configs[${index}].operationName`);
+      }
+
+      if (typeof query !== 'undefined' && typeof query !== 'string') {
+        throw new Error(`configs[${index}].query`);
       }
 
       try {

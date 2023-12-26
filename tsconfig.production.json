@@ -4,7 +4,7 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "target": "esnext",
-    "lib": ["dom", "es2021"],
+    "lib": ["dom", "esnext"],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

@@ -12,57 +12,63 @@ import {
   resolveEntityValues
 } from '@/utils/helpers';
 import type {
+  Entries,
   GraphqlConfig,
-  GraphQLEntityDescriptorOnly,
+  GraphQLEntitiesByEntityName,
   GraphQLEntityDescriptorOrValue,
-  GraphQLEntityName,
-  GraphQLMappedEntityName,
+  GraphQLTopLevelPlainEntityDescriptor,
   Interceptors
 } from '@/utils/types';
 
 import { prepareGraphQLRequestConfigs } from './helpers';
 
-export const createGraphQLRoutes = (
-  router: IRouter,
-  graphqlConfig: GraphqlConfig,
-  serverResponseInterceptors?: Interceptors['response']
-) => {
+interface CreateGraphQLRoutesParams {
+  router: IRouter;
+  graphqlConfig: GraphqlConfig;
+  serverResponseInterceptor?: Interceptors['response'];
+}
+
+export const createGraphQLRoutes = ({
+  router,
+  graphqlConfig,
+  serverResponseInterceptor
+}: CreateGraphQLRoutesParams) => {
   const preparedGraphQLRequestConfig = prepareGraphQLRequestConfigs(graphqlConfig.configs);
 
   const graphqlMiddleware = async (request: Request, response: Response, next: NextFunction) => {
     const graphQLInput = getGraphQLInput(request);
-    if (!graphQLInput || !graphQLInput.query) {
+    if (!graphQLInput.query) {
       return response
         .status(400)
         .json({ message: 'Query is missing, you must pass a valid GraphQL query' });
     }
 
     const query = parseQuery(graphQLInput.query);
-
     if (!query) {
       return response
         .status(400)
         .json({ message: 'Query is invalid, you must use a valid GraphQL query' });
     }
 
-    if (!query.operationName || !query.operationType) {
-      return response.status(400).json({
-        message: `You should to specify operationName and operationType for ${request.method}:${request.baseUrl}${request.path}`
-      });
-    }
-
     const matchedRequestConfig = preparedGraphQLRequestConfig.find((requestConfig) => {
-      if (requestConfig.operationName instanceof RegExp) {
-        return (
-          new RegExp(requestConfig.operationName).test(query.operationName) &&
-          requestConfig.operationType === query.operationType
-        );
+      if (requestConfig.operationType !== query.operationType) return false;
+
+      if (
+        'query' in requestConfig &&
+        requestConfig.query.replace(/\s+/gi, ' ') !== graphQLInput.query?.replace(/\s+/gi, ' ')
+      )
+        return false;
+
+      if ('operationName' in requestConfig) {
+        if (!query.operationName) return false;
+
+        if (requestConfig.operationName instanceof RegExp)
+          return new RegExp(requestConfig.operationName).test(query.operationName);
+
+        return requestConfig.operationName === query.operationName;
       }
 
-      return (
-        requestConfig.operationName === query.operationName &&
-        requestConfig.operationType === query.operationType
-      );
+      return true;
     });
 
     if (!matchedRequestConfig) {
@@ -76,37 +82,36 @@ export const createGraphQLRoutes = (
 
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
       if (!entities) return true;
-      const entries = Object.entries(entities) as [
-        GraphQLEntityName,
-        GraphQLEntityDescriptorOrValue
-      ][];
-      return entries.every(([entityName, valueOrDescriptor]) => {
-        const { checkMode, value: descriptorValue } = convertToEntityDescriptor(valueOrDescriptor);
+
+      const entries = Object.entries(entities) as Entries<Required<GraphQLEntitiesByEntityName>>;
+      return entries.every(([entityName, entityDescriptorOrValue]) => {
+        const { checkMode, value: entityDescriptorValue } =
+          convertToEntityDescriptor(entityDescriptorOrValue);
 
         // ✅ important: check whole variables as plain value strictly if descriptor used for variables
-        const isVariablesPlain =
-          entityName === 'variables' && isEntityDescriptor(valueOrDescriptor);
-        if (isVariablesPlain) {
-          // ✅ important: getGraphQLInput returns empty object if variables not sent or invalid, so count {} as undefined
-          return resolveEntityValues(
-            checkMode,
-            Object.keys(graphQLInput.variables).length ? graphQLInput.variables : undefined,
-            descriptorValue
+        const isEntityVariablesByTopLevelDescriptor =
+          entityName === 'variables' && isEntityDescriptor(entityDescriptorOrValue);
+        if (isEntityVariablesByTopLevelDescriptor) {
+          return resolveEntityValues(checkMode, graphQLInput.variables, entityDescriptorValue);
+        }
+
+        const isEntityVariablesByTopLevelArray =
+          entityName === 'variables' && Array.isArray(entityDescriptorOrValue);
+        if (isEntityVariablesByTopLevelArray) {
+          return entityDescriptorOrValue.some((entityDescriptorOrValueElement) =>
+            resolveEntityValues(checkMode, graphQLInput.variables, entityDescriptorOrValueElement)
           );
         }
 
-        const mappedEntityDescriptors = Object.entries(valueOrDescriptor) as [
-          GraphQLMappedEntityName,
-          GraphQLEntityDescriptorOnly<
-            Exclude<GraphQLEntityName, 'variables'>
-          >[GraphQLMappedEntityName]
-        ][];
-        return mappedEntityDescriptors.every(([entityKey, mappedEntityDescriptor]) => {
-          const { checkMode, value: descriptorValue } =
-            convertToEntityDescriptor(mappedEntityDescriptor);
+        const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
+          Exclude<GraphQLEntityDescriptorOrValue, GraphQLTopLevelPlainEntityDescriptor | Array<any>>
+        >;
+        return recordOrArrayEntries.every(([entityKey, entityValue]) => {
+          const { checkMode, value: descriptorValue } = convertToEntityDescriptor(entityValue);
           const flattenEntity = flatten<any, any>(
             entityName === 'variables' ? graphQLInput.variables : request[entityName]
           );
+
           // ✅ important: transform header keys to lower case because browsers send headers in lowercase
           return resolveEntityValues(
             checkMode,
@@ -121,20 +126,62 @@ export const createGraphQLRoutes = (
       return next();
     }
 
-    const matchedRouteConfigData =
-      typeof matchedRouteConfig.data === 'function'
-        ? await matchedRouteConfig.data(request, matchedRouteConfig.entities ?? {})
-        : matchedRouteConfig.data;
+    let matchedRouteConfigData = null;
+    if (matchedRouteConfig.settings?.polling && 'queue' in matchedRouteConfig) {
+      if (!matchedRouteConfig.queue.length) return next();
+
+      const shallowMatchedRouteConfig =
+        matchedRouteConfig as unknown as typeof matchedRouteConfig & {
+          __pollingIndex: number;
+          __timeoutInProgress: boolean;
+        };
+
+      let index = shallowMatchedRouteConfig.__pollingIndex ?? 0;
+
+      const { time, data } = matchedRouteConfig.queue[index];
+
+      const updateIndex = () => {
+        if (matchedRouteConfig.queue.length - 1 === index) {
+          index = 0;
+        } else {
+          index += 1;
+        }
+        shallowMatchedRouteConfig.__pollingIndex = index;
+      };
+
+      if (time && !shallowMatchedRouteConfig.__timeoutInProgress) {
+        shallowMatchedRouteConfig.__timeoutInProgress = true;
+        setTimeout(() => {
+          shallowMatchedRouteConfig.__timeoutInProgress = false;
+          updateIndex();
+        }, time);
+      }
+
+      if (!time && !shallowMatchedRouteConfig.__timeoutInProgress) {
+        updateIndex();
+      }
+
+      matchedRouteConfigData = data;
+    }
+
+    if ('data' in matchedRouteConfig) {
+      matchedRouteConfigData = matchedRouteConfig.data;
+    }
+
+    const resolvedData =
+      typeof matchedRouteConfigData === 'function'
+        ? await matchedRouteConfigData(request, matchedRouteConfig.entities ?? {})
+        : matchedRouteConfigData;
 
     const data = await callResponseInterceptors({
-      data: matchedRouteConfigData,
+      data: resolvedData,
       request,
       response,
       interceptors: {
         routeInterceptor: matchedRouteConfig.interceptors?.response,
         requestInterceptor: matchedRequestConfig.interceptors?.response,
         apiInterceptor: graphqlConfig.interceptors?.response,
-        serverInterceptor: serverResponseInterceptors
+        serverInterceptor: serverResponseInterceptor
       }
     });
 

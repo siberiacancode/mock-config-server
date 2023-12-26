@@ -1,37 +1,69 @@
 import { convertToEntityDescriptor, isEntityDescriptor, isPlainObject } from '@/utils/helpers';
-import type { GraphQLEntityNamesByOperationType, GraphQLOperationType } from '@/utils/types';
+import type {
+  GraphQLEntityName,
+  GraphQLEntityNamesByOperationType,
+  GraphQLOperationType
+} from '@/utils/types';
 
 import { isCheckModeValid, isDescriptorValueValid } from '../../helpers';
 import { validateInterceptors } from '../../validateInterceptors/validateInterceptors';
+import { validateQueue } from '../../validateQueue/validateQueue';
+import { validateSettings } from '../../validateSettings/validateSettings';
 
 type AllowedEntityNamesByOperationType = {
   [OperationType in keyof GraphQLEntityNamesByOperationType]: GraphQLEntityNamesByOperationType[OperationType][];
 };
+
 const ALLOWED_ENTITIES_BY_OPERATION_TYPE: AllowedEntityNamesByOperationType = {
   query: ['headers', 'cookies', 'query', 'variables'],
   mutation: ['headers', 'cookies', 'query', 'variables']
 };
 
-const validateEntity = (entity: unknown, entityName: string) => {
-  const { checkMode: topLevelCheckMode, value: topLevelValue } = convertToEntityDescriptor(entity);
+const validateEntity = (entity: unknown, entityName: GraphQLEntityName) => {
   const isVariables = entityName === 'variables';
 
-  const isTopLevelDescriptor = isEntityDescriptor(entity);
-  if (isTopLevelDescriptor && isVariables) {
-    if (!isCheckModeValid(topLevelCheckMode, 'variables')) {
+  const isEntityTopLevelDescriptor = isEntityDescriptor(entity);
+  if (isEntityTopLevelDescriptor) {
+    if (!isVariables) {
+      throw new Error(entityName);
+    }
+
+    if (!isCheckModeValid(entity.checkMode, 'variables')) {
       throw new Error('variables.checkMode');
     }
 
-    if (!isDescriptorValueValid(topLevelCheckMode, topLevelValue, 'variables')) {
-      const errorMessage = 'variables.value';
-      throw new Error(errorMessage);
+    const isDescriptorValueObjectOrArray =
+      isPlainObject(entity.value) || Array.isArray(entity.value);
+    if (
+      !isDescriptorValueObjectOrArray ||
+      !isDescriptorValueValid(entity.checkMode, entity.value)
+    ) {
+      throw new Error('variables.value');
     }
+
+    return;
   }
 
-  const isEntityObject = isPlainObject(entity) && !(entity instanceof RegExp);
-  const isEntityArray = Array.isArray(entity) && isVariables;
-  if (isEntityObject || isEntityArray) {
-    Object.entries(topLevelValue).forEach(([key, valueOrDescriptor]) => {
+  const isEntityArray = Array.isArray(entity);
+  if (isEntityArray) {
+    if (!isVariables) {
+      throw new Error(entityName);
+    }
+
+    entity.forEach((entityElement, index) => {
+      const isEntityElementObjectOrArray =
+        isPlainObject(entityElement) || Array.isArray(entityElement);
+      if (!isEntityElementObjectOrArray || !isDescriptorValueValid('equals', entityElement)) {
+        throw new Error(`${entityName}[${index}]`);
+      }
+    });
+
+    return;
+  }
+
+  const isEntityObject = isPlainObject(entity);
+  if (isEntityObject) {
+    Object.entries(entity).forEach(([key, valueOrDescriptor]) => {
       const { checkMode, value } = convertToEntityDescriptor(valueOrDescriptor);
       if (!isCheckModeValid(checkMode)) {
         throw new Error(`${entityName}.${key}.checkMode`);
@@ -41,15 +73,28 @@ const validateEntity = (entity: unknown, entityName: string) => {
       const errorMessage = `${entityName}.${key}${isDescriptor ? '.value' : ''}`;
 
       const isValueArray = Array.isArray(value);
-      if (isValueArray && !isVariables) {
+      if (isValueArray) {
         value.forEach((element, index) => {
-          if (!isDescriptorValueValid(checkMode, element)) {
+          if (isVariables) {
+            if (isDescriptorValueValid(checkMode, element)) return;
+            throw new Error(`${errorMessage}[${index}]`);
+          }
+
+          const isElementObjectOrArray = isPlainObject(element) || Array.isArray(element);
+          if (isElementObjectOrArray || !isDescriptorValueValid(checkMode, element)) {
             throw new Error(`${errorMessage}[${index}]`);
           }
         });
         return;
       }
-      if (!isDescriptorValueValid(checkMode, value)) {
+
+      if (isVariables) {
+        if (isDescriptorValueValid(checkMode, value)) return;
+        throw new Error(errorMessage);
+      }
+
+      const isValueObject = isPlainObject(value);
+      if (isValueObject || !isDescriptorValueValid(checkMode, value)) {
         throw new Error(errorMessage);
       }
     });
@@ -71,7 +116,7 @@ const validateEntities = (entities: unknown, operationType: GraphQLOperationType
       }
 
       try {
-        validateEntity(entities[entityName], entityName);
+        validateEntity(entities[entityName], entityName as GraphQLEntityName);
       } catch (error: any) {
         throw new Error(`entities.${error.message}`);
       }
@@ -91,11 +136,41 @@ export const validateRoutes = (routes: unknown, operationType: GraphQLOperationT
       const isRouteObject = isPlainObject(route);
       if (isRouteObject) {
         const isRouteHasDataProperty = 'data' in route;
-        if (!isRouteHasDataProperty) {
+        const isRouteHasQueueProperty = 'queue' in route;
+
+        if (!isRouteHasDataProperty && !isRouteHasQueueProperty) {
           throw new Error(`routes[${index}]`);
         }
 
+        if (isRouteHasDataProperty && isRouteHasQueueProperty) {
+          throw new Error(`routes[${index}]`);
+        }
+
+        const { settings } = route;
+        const isRouteSettingsObject = isPlainObject(settings);
+
+        if (isRouteHasQueueProperty) {
+          try {
+            validateQueue(route.queue);
+
+            if (!isRouteSettingsObject) {
+              throw new Error('settings');
+            }
+
+            if (!(isRouteSettingsObject && settings?.polling)) {
+              throw new Error('settings.polling');
+            }
+          } catch (error: any) {
+            throw new Error(`routes[${index}].${error.message}`);
+          }
+        }
+
+        if (isRouteHasDataProperty && isRouteSettingsObject && settings?.polling) {
+          throw new Error(`routes[${index}].settings.polling`);
+        }
+
         try {
+          validateSettings(route.settings);
           validateEntities(route.entities, operationType);
           validateInterceptors(route.interceptors);
         } catch (error: any) {

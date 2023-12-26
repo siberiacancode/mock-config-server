@@ -6,7 +6,7 @@ then
     branch=$(git symbolic-ref --short HEAD)
     emoji=$(cat .emoji)
     message=$(cat "$1")
-    if echo "$message" | (! grep -q "^${branch} ${emoji}*")
+    if echo "$message" | (! grep -q "^${branch} ${emoji}*") && echo "$message" | (! grep -q "^Merge pull request*")
     then
         echo "$branch $emoji $(cat $1)" > "$1"
     fi

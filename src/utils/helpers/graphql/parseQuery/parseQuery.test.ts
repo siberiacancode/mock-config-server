@@ -26,7 +26,7 @@ describe('parseQuery', () => {
 
     expect(parsedQuery).toStrictEqual({
       operationType: 'query',
-      operationName: ''
+      operationName: undefined
     });
   });
 });
