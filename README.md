@@ -381,6 +381,66 @@ const mockServerConfig = {
 module.exports = mockServerConfig;
 ```
 
+#### Polling
+
+Routes support polling for data. To add polling for data, you must specify the `polling setting` and change `data` property to `queue`.
+
+> After receiving the last value from polling, the queue is reset and the next request will return the first value from the queue.
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/user',
+        method: 'get',
+        routes: [
+          {
+            settings: { polling: true },
+            queue: [
+              { data: { emoji: '🦁', name: 'Nursultan' } },
+              { data: { emoji: '☄', name: 'Dmitriy' } }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export default mockServerConfig;
+```
+
+Using the additional `time` properties in milliseconds, you can specify how much time certain data should be returned
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/user',
+        method: 'get',
+        routes: [
+          {
+            settings: { polling: true },
+            queue: [
+              { time: 5000, data: { emoji: '🦁', name: 'Nursultan' } },
+              { data: { emoji: '☄', name: 'Dmitriy' } }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export default mockServerConfig;
+```
+
 #### Static Path
 
 Entity for connecting statics to the server, like HTML, JSON, PNG, etc.
