@@ -116,7 +116,7 @@ export type GraphQLRouteConfig<Settings extends GraphQLSettings = GraphQLSetting
       }>;
     }
   | {
-      settings?: Settings & { polling?: false };
+      settings?: Settings & { polling: false };
       data:
         | ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>)
         | Data;

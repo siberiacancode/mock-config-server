@@ -14,7 +14,7 @@ import type {
   Interceptors,
   RestConfig,
   RestEntitiesByEntityName,
-  RestEntityDescriptorOrValue,
+  RestEntity,
   RestTopLevelPlainEntityDescriptor
 } from '@/utils/types';
 
@@ -73,7 +73,7 @@ export const createRestRoutes = ({
             }
 
             const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
-              Exclude<RestEntityDescriptorOrValue, RestTopLevelPlainEntityDescriptor | Array<any>>
+              Exclude<RestEntity, RestTopLevelPlainEntityDescriptor | Array<any>>
             >;
             return recordOrArrayEntries.every(([entityKey, mappedEntityDescriptor]) => {
               const { checkMode, value: descriptorValue } =

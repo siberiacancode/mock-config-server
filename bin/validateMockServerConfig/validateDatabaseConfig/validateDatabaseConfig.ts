@@ -6,7 +6,7 @@ export const validateDatabaseConfig = (databaseConfig: unknown) => {
   const ForwardSlashStringSchema = z.string().startsWith('/');
   const JsonFilenameStringSchema = z.string().endsWith('.json');
 
-  const DataSchema = z.union([z.record(z.string(), z.unknown()), JsonFilenameStringSchema]);
+  const DataSchema = z.union([z.record(z.unknown()), JsonFilenameStringSchema]);
   const RoutesSchema = z
     .union([z.record(ForwardSlashStringSchema, ForwardSlashStringSchema), JsonFilenameStringSchema])
     .optional();

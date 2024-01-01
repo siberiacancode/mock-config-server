@@ -5,6 +5,7 @@ import type {
   CheckFunction,
   CheckMode,
   CompareWithDescriptorAnyValueCheckMode,
+  CompareWithDescriptorStringValueCheckMode,
   CompareWithDescriptorValueCheckMode
 } from './checkModes';
 import type { Interceptors } from './interceptors';
@@ -52,6 +53,11 @@ type RestPropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode>
         checkMode: Check;
         value: RestPlainEntityValue | NestedObjectOrArray<RestPlainEntityValue>;
       }
+    : Check extends CompareWithDescriptorStringValueCheckMode
+    ? {
+        checkMode: Check;
+        value: RestPlainEntityValue | RestPlainEntityValue[];
+      }
     : Check extends CheckActualValueCheckMode
     ? {
         checkMode: Check;
@@ -81,7 +87,7 @@ type RestMappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check ext
     }
   : never;
 
-export type RestEntityDescriptorOrValue<EntityName extends RestEntityName = RestEntityName> =
+export type RestEntity<EntityName extends RestEntityName = RestEntityName> =
   EntityName extends 'body'
     ?
         | RestTopLevelPlainEntityDescriptor
@@ -95,30 +101,30 @@ export type RestEntityNamesByMethod = {
     : RestEntityName;
 };
 export type RestEntitiesByEntityName<Method extends RestMethod = RestMethod> = {
-  [EntityName in RestEntityNamesByMethod[Method]]?: RestEntityDescriptorOrValue<EntityName>;
+  [EntityName in RestEntityNamesByMethod[Method]]?: RestEntity<EntityName>;
 };
 
 interface RestSettings {
   readonly polling?: boolean;
 }
 
-export type RestRouteConfig<
-  Method extends RestMethod,
-  Entities extends RestEntitiesByEntityName<Method> = RestEntitiesByEntityName<Method>,
-  Settings extends RestSettings = RestSettings
-> = (
+export type RestRouteConfig<Method extends RestMethod> = (
   | {
-      settings: Settings & { polling: true };
+      settings: RestSettings & { polling: true };
       queue: Array<{
         time?: number;
-        data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
+        data:
+          | ((request: Request, entities: RestEntitiesByEntityName<Method>) => Data | Promise<Data>)
+          | Data;
       }>;
     }
   | {
-      settings?: Settings & { polling: false };
-      data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
+      settings?: RestSettings & { polling: false };
+      data:
+        | ((request: Request, entities: RestEntitiesByEntityName<Method>) => Data | Promise<Data>)
+        | Data;
     }
-) & { entities?: Entities; interceptors?: Pick<Interceptors, 'response'> };
+) & { entities?: RestEntitiesByEntityName<Method>; interceptors?: Pick<Interceptors, 'response'> };
 
 export type RestPathString = `/${string}`;
 interface BaseRestRequestConfig<Method extends RestMethod> {
