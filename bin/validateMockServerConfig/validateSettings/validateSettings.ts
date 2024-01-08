@@ -1,10 +1,18 @@
 import { isPlainObject } from '@/utils/helpers';
 
-const ALLOWED_SETTINGS = ['polling'];
+const ALLOWED_SETTINGS = ['polling', 'delay', 'status'];
 
 const validateSetting = (setting: unknown, settingName: string) => {
   if (settingName === 'polling' && typeof setting !== 'boolean') {
     throw new Error('polling');
+  }
+
+  if (settingName === 'delay' && typeof setting !== 'number') {
+    throw new Error('delay');
+  }
+
+  if (settingName === 'status' && typeof setting !== 'number') {
+    throw new Error('status');
   }
 };
 

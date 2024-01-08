@@ -102,7 +102,9 @@ export type GraphQLEntitiesByEntityName = {
 };
 
 type GraphQLSettings = {
-  readonly polling: boolean;
+  readonly polling?: boolean;
+  readonly status?: number;
+  readonly delay?: number;
 };
 
 export type GraphQLRouteConfig<Settings extends GraphQLSettings = GraphQLSettings> = (

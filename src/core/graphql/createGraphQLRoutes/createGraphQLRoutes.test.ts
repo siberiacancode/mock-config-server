@@ -290,6 +290,33 @@ describe('createRestRoutes: content', () => {
 });
 
 describe('createRestRoutes: settings', () => {
+  test('Should correctly set statusCode into response with status setting', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            operationName: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                settings: { status: 500 },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const query = {
+      query: 'query GetUsers { users { name } }'
+    };
+
+    const response = await request(server).get('/').query(query);
+    expect(response.statusCode).toBe(500);
+    expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
+  });
+
   test('Should correctly process the request with polling', async () => {
     const server = createServer({
       graphql: {
