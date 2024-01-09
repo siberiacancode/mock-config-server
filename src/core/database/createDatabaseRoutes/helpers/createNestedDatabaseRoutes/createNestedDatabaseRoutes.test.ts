@@ -390,4 +390,49 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
   });
+
+  describe('createNestedDatabaseRoutes: search function', () => {
+    const nestedDatabase = createNestedDatabase();
+    const server = createServer(nestedDatabase);
+
+    test('Should return filtered data by query', async () => {
+      const firstResponse = await request(server).get('/users?q=o');
+
+      expect(firstResponse.body).toStrictEqual([
+        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+
+      const secondResponse = await request(server).get('/users?q=Doe');
+
+      expect(secondResponse.body).toStrictEqual([
+        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
+      ]);
+    });
+
+    test('Should filter data by digital query', async () => {
+      const thirdResponse = await request(server).get('/users?q=30');
+
+      expect(thirdResponse.body).toStrictEqual([
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+    });
+
+    test('Should filter data by query when nested text', async () => {
+      const response = await request(server).get('/users?q=Tomsk');
+
+      expect(response.body).toStrictEqual([
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+    });
+
+    test('Should filter data by multiple query', async () => {
+      const response = await request(server).get('/users?q=Tomsk&q=Novosibirsk');
+
+      expect(response.body).toStrictEqual([
+        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+    });
+  });
 });

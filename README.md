@@ -697,6 +697,20 @@ GET /users?_begin=20&_end=30
 
 Works exactly as [slice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice), \_begin and \_end are optional
 
+### Full text search
+
+> Add q parameter for search data, search can be done by strings and numbers
+
+```
+GET /users?q=siberia
+```
+
+For multiple search
+
+```
+GET /users?q=siberia&q=24
+```
+
 ### File example
 
 ```javascript
