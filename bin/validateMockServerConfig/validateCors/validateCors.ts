@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { getMostSpecificPathFromError, getValidationMessageFromPath } from '@/utils/helpers';
+import { getMostSpecificIssueFromError, getValidationMessageFromPath } from '@/utils/helpers';
 
 export const validateCors = (cors: unknown) => {
   const StringOrRegExpSchema = z.union([z.string(), z.instanceof(RegExp)]);
@@ -20,8 +20,8 @@ export const validateCors = (cors: unknown) => {
 
   const result = CorsSchema.safeParse(cors);
   if (!result.success) {
-    const path = getMostSpecificPathFromError(result.error);
-    const validationMessage = getValidationMessageFromPath(path);
+    const issue = getMostSpecificIssueFromError(result.error);
+    const validationMessage = getValidationMessageFromPath(issue.path);
 
     throw new Error(`cors${validationMessage}`);
   }

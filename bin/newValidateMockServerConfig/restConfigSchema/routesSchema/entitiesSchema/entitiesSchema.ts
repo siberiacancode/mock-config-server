@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { validateNonOptionalUndefined } from '@/utils/helpers';
 import type { RestMethod } from '@/utils/types';
 
 import {
@@ -14,26 +15,29 @@ import {
 
 const mappedEntityValueSchema = z.union([z.string(), z.number(), z.boolean()]);
 
-const mappedEntityDescriptorSchema = z.discriminatedUnion('checkMode', [
-  z.object({ checkMode: z.literal('function'), value: z.function() }).strict(),
-  z
-    .object({
-      checkMode: z.literal('regExp'),
-      value: z.union([z.instanceof(RegExp), z.array(z.instanceof(RegExp))])
-    })
-    .strict(),
-  z
-    .object({
-      checkMode: compareWithDescriptorValueCheckModeSchema,
-      value: z.union([mappedEntityValueSchema, z.array(mappedEntityValueSchema)])
-    })
-    .strict(),
-  z
-    .object({
-      checkMode: checkActualValueCheckModeSchema
-    })
-    .strict()
-]);
+const mappedEntityDescriptorSchema = validateNonOptionalUndefined(
+  z.discriminatedUnion('checkMode', [
+    z.object({ checkMode: z.literal('function'), value: z.function() }).strict(),
+    z
+      .object({
+        checkMode: z.literal('regExp'),
+        value: z.union([z.instanceof(RegExp), z.array(z.instanceof(RegExp))])
+      })
+      .strict(),
+    z
+      .object({
+        checkMode: compareWithDescriptorValueCheckModeSchema,
+        value: z.union([mappedEntityValueSchema, z.array(mappedEntityValueSchema)])
+      })
+      .strict(),
+    z
+      .object({
+        checkMode: checkActualValueCheckModeSchema
+      })
+      .strict()
+  ]),
+  ['checkMode']
+);
 
 export const mappedEntitySchema = z.record(
   z.union([mappedEntityValueSchema, z.array(mappedEntityValueSchema), mappedEntityDescriptorSchema])
@@ -43,46 +47,67 @@ export const mappedEntitySchema = z.record(
 
 const plainEntityValueSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
 
-const topLevelPlainEntityDescriptorSchema = z.discriminatedUnion('checkMode', [
-  z.object({ checkMode: z.literal('function'), value: z.function() }).strict(),
-  z
-    .object({
-      checkMode: compareWithDescriptorAnyValueCheckModeSchema,
-      value: nestedObjectOrArraySchema(plainEntityValueSchema)
-    })
-    .strict(),
-  z
-    .object({
-      checkMode: checkActualValueCheckModeSchema
-    })
-    .strict()
+const topLevelPlainEntityDescriptorSchema = validateNonOptionalUndefined(
+  z.discriminatedUnion('checkMode', [
+    z.object({ checkMode: z.literal('function'), value: z.function() }).strict(),
+    z
+      .object({
+        checkMode: compareWithDescriptorAnyValueCheckModeSchema,
+        value: nestedObjectOrArraySchema(plainEntityValueSchema)
+      })
+      .strict(),
+    z
+      .object({
+        checkMode: checkActualValueCheckModeSchema
+      })
+      .strict()
+  ]),
+  ['checkMode']
+);
+
+const propertyLevelPlainEntityDescriptorSchema = validateNonOptionalUndefined(
+  z.discriminatedUnion('checkMode', [
+    z.object({ checkMode: z.literal('function'), value: z.function() }).strict(),
+    z
+      .object({
+        checkMode: compareWithDescriptorAnyValueCheckModeSchema,
+        value: z.union([plainEntityValueSchema, nestedObjectOrArraySchema(plainEntityValueSchema)])
+      })
+      .strict(),
+    z
+      .object({
+        checkMode: compareWithDescriptorStringValueCheckModeSchema,
+        value: z.union([plainEntityValueSchema, z.array(plainEntityValueSchema)])
+      })
+      .strict(),
+    z
+      .object({
+        checkMode: checkActualValueCheckModeSchema
+      })
+      .strict()
+  ]),
+  ['checkMode']
+);
+
+const topLevelRecordValueSchema = z.union([
+  plainEntityValueSchema,
+  nestedObjectOrArraySchema(plainEntityValueSchema).and(
+    z.object({ checkMode: z.never().optional() }).or(z.array(z.any()))
+  )
 ]);
 
-const propertyLevelPlainEntityDescriptorSchema = z.discriminatedUnion('checkMode', [
-  z.object({ checkMode: z.literal('function'), value: z.function() }).strict(),
-  z
-    .object({
-      checkMode: compareWithDescriptorAnyValueCheckModeSchema,
-      value: z.union([plainEntityValueSchema, nestedObjectOrArraySchema(plainEntityValueSchema)])
-    })
-    .strict(),
-  z
-    .object({
-      checkMode: compareWithDescriptorStringValueCheckModeSchema,
-      value: z.union([plainEntityValueSchema, z.array(plainEntityValueSchema)])
-    })
-    .strict(),
-  z
-    .object({
-      checkMode: checkActualValueCheckModeSchema
-    })
-    .strict()
-]);
+const topLevelRecordSchema = z
+  .record(z.union([topLevelRecordValueSchema, propertyLevelPlainEntityDescriptorSchema]))
+  .and(z.object({ checkMode: z.never().optional() }));
+
+const topLevelArraySchema = z.array(
+  z.union([plainEntityValueSchema, nestedObjectOrArraySchema(plainEntityValueSchema)])
+);
 
 export const plainEntitySchema = z.union([
   topLevelPlainEntityDescriptorSchema,
-  z.record(propertyLevelPlainEntityDescriptorSchema),
-  nestedObjectOrArraySchema(plainEntityValueSchema)
+  topLevelRecordSchema,
+  topLevelArraySchema
 ]);
 
 /* ----- Entities by entity name schema ----- */

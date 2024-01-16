@@ -15,15 +15,15 @@ export const compareWithDescriptorStringValueCheckModeSchema = z.enum([
   'notEndsWith'
 ]);
 
-export const compareWithDescriptorValueCheckModeSchema = z.union([
-  compareWithDescriptorAnyValueCheckModeSchema,
-  compareWithDescriptorStringValueCheckModeSchema
+export const compareWithDescriptorValueCheckModeSchema = z.enum([
+  ...compareWithDescriptorAnyValueCheckModeSchema.options,
+  ...compareWithDescriptorStringValueCheckModeSchema.options
 ]);
 
 export const calculateByDescriptorValueCheckModeSchema = z.enum(['regExp', 'function']);
 
-export const checkModeSchema = z.union([
-  checkActualValueCheckModeSchema,
-  compareWithDescriptorValueCheckModeSchema,
-  calculateByDescriptorValueCheckModeSchema
+export const checkModeSchema = z.enum([
+  ...checkActualValueCheckModeSchema.options,
+  ...compareWithDescriptorValueCheckModeSchema.options,
+  ...calculateByDescriptorValueCheckModeSchema.options
 ]);

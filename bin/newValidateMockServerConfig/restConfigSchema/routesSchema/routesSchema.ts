@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { validateNonOptionalUndefined } from '@/utils/helpers';
 import type { RestMethod } from '@/utils/types';
 
 import { interceptorsSchema } from '../../interceptorsSchema/interceptorsSchema';
@@ -26,13 +27,16 @@ const queueRouteConfigSchema = (method: RestMethod) =>
     .merge(baseRouteConfigSchema(method));
 
 const dataRouteConfigSchema = (method: RestMethod) =>
-  z
-    .object({
-      settings: settingsSchema.extend({ polling: z.literal(false) }).optional(),
-      data: z.union([z.function(), z.any()])
-    })
-    .strict()
-    .merge(baseRouteConfigSchema(method));
+  validateNonOptionalUndefined(
+    z
+      .object({
+        settings: settingsSchema.extend({ polling: z.literal(false) }).optional(),
+        data: z.union([z.function(), z.any()])
+      })
+      .strict()
+      .merge(baseRouteConfigSchema(method)),
+    ['data']
+  );
 
 export const routeConfigSchema = (method: RestMethod) =>
   z.union([queueRouteConfigSchema(method), dataRouteConfigSchema(method)]);

@@ -1,5 +1,5 @@
 import { isPlainObject } from '@/utils/helpers';
-import type { RestMethod, RestRequestConfig, RestRouteConfig } from '@/utils/types';
+import type { PlainObject, RestMethod, RestRequestConfig, RestRouteConfig } from '@/utils/types';
 
 const calculateRouteConfigWeight = (restRouteConfig: RestRouteConfig<RestMethod>) => {
   const { entities } = restRouteConfig;
@@ -14,7 +14,9 @@ const calculateRouteConfigWeight = (restRouteConfig: RestRouteConfig<RestMethod>
   if (params) routeConfigWeight += Object.keys(params).length;
   if (body) {
     if (isPlainObject(body) && body.checkMode) {
-      routeConfigWeight += isPlainObject(body.value) ? Object.keys(body.value).length : 1;
+      routeConfigWeight += isPlainObject((body as PlainObject).value)
+        ? Object.keys((body as PlainObject).value).length
+        : 1;
       return routeConfigWeight;
     }
     routeConfigWeight += isPlainObject(body) ? Object.keys(body).length : 1;

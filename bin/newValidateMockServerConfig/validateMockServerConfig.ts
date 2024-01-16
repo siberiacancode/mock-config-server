@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { getMostSpecificPathFromError, getValidationMessageFromPath } from '@/utils/helpers';
+import { getMostSpecificIssueFromError, getValidationMessageFromPath } from '@/utils/helpers';
 
 import type { PlainObject } from '../../src';
 
@@ -36,8 +36,8 @@ export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
 
   const validationResult = mockServerConfigSchema.safeParse(mockServerConfig);
   if (!validationResult.success) {
-    const path = getMostSpecificPathFromError(validationResult.error);
-    const validationMessage = getValidationMessageFromPath(path);
+    const path = getMostSpecificIssueFromError(validationResult.error);
+    const validationMessage = getValidationMessageFromPath(path.path);
 
     throw new Error(
       `Validation Error: configuration.${validationMessage} does not match the API schema. Click here to see correct type: https://github.com/siberiacancode/mock-config-server`

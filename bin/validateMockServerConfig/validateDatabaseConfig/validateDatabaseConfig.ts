@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { getMostSpecificPathFromError, getValidationMessageFromPath } from '@/utils/helpers';
+import { getMostSpecificIssueFromError, getValidationMessageFromPath } from '@/utils/helpers';
 
 export const validateDatabaseConfig = (databaseConfig: unknown) => {
   const ForwardSlashStringSchema = z.string().startsWith('/');
@@ -21,8 +21,8 @@ export const validateDatabaseConfig = (databaseConfig: unknown) => {
 
   const result = DatabaseConfigSchema.safeParse(databaseConfig);
   if (!result.success) {
-    const path = getMostSpecificPathFromError(result.error);
-    const validationMessage = getValidationMessageFromPath(path);
+    const issue = getMostSpecificIssueFromError(result.error);
+    const validationMessage = getValidationMessageFromPath(issue.path);
 
     throw new Error(`database${validationMessage}`);
   }
