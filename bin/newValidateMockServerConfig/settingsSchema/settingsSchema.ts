@@ -1,7 +1,5 @@
 import { z } from 'zod';
 
-export const settingsSchema = z
-  .object({
-    polling: z.boolean().optional()
-  })
-  .strict();
+export const settingsSchema = z.strictObject({
+  polling: z.boolean().optional()
+});

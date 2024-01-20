@@ -15,7 +15,9 @@ describe('isCheckModeValid', () => {
     const plainEntityNames = ['body', 'variables'];
     plainEntityNames.forEach((plainEntityName) => {
       CHECK_MODES.forEach((checkMode) => {
-        const isPlainEntityCheckMode = PLAIN_ENTITY_CHECK_MODES.includes(checkMode);
+        const isPlainEntityCheckMode = PLAIN_ENTITY_CHECK_MODES.includes(
+          checkMode as (typeof PLAIN_ENTITY_CHECK_MODES)[number]
+        );
         expect(isCheckModeValid(checkMode, plainEntityName)).toBe(isPlainEntityCheckMode);
       });
 

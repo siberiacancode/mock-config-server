@@ -110,7 +110,7 @@ describe('prepareRestRequestConfigs', () => {
         routes: [
           {
             entities: {
-              body: ['value', 'value', 'value']
+              body: [{}, {}, {}]
             },
             data: { name: 'John', surname: 'Doe' }
           },
@@ -142,7 +142,7 @@ describe('prepareRestRequestConfigs', () => {
           },
           {
             entities: {
-              body: ['value', 'value', 'value']
+              body: [{}, {}, {}]
             },
             data: { name: 'John', surname: 'Doe' }
           }

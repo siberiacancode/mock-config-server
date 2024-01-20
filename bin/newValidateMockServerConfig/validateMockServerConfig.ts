@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { getMostSpecificIssueFromError, getValidationMessageFromPath } from '@/utils/helpers';
+import { getMostSpecificPathFromError, getValidationMessageFromPath } from '@/utils/helpers';
 
 import type { PlainObject } from '../../src';
 
@@ -23,21 +23,19 @@ export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
     );
   }
 
-  const mockServerConfigSchema = z
-    .object({
-      baseUrl: baseUrlSchema.optional(),
-      port: portSchema.optional(),
-      staticPath: staticPathSchema.optional(),
-      interceptors: interceptorsSchema.optional(),
-      cors: corsSchema.optional(),
-      rest: restConfigSchema.optional()
-    })
-    .strict();
+  const mockServerConfigSchema = z.strictObject({
+    baseUrl: baseUrlSchema.optional(),
+    port: portSchema.optional(),
+    staticPath: staticPathSchema.optional(),
+    interceptors: interceptorsSchema.optional(),
+    cors: corsSchema.optional(),
+    rest: restConfigSchema.optional()
+  });
 
   const validationResult = mockServerConfigSchema.safeParse(mockServerConfig);
   if (!validationResult.success) {
-    const path = getMostSpecificIssueFromError(validationResult.error);
-    const validationMessage = getValidationMessageFromPath(path.path);
+    const path = getMostSpecificPathFromError(validationResult.error);
+    const validationMessage = getValidationMessageFromPath(path);
 
     throw new Error(
       `Validation Error: configuration.${validationMessage} does not match the API schema. Click here to see correct type: https://github.com/siberiacancode/mock-config-server`

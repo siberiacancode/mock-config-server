@@ -1,3 +1,2 @@
-export * from './getMostSpecificIssueFromError/getMostSpecificIssueFromError';
+export * from './getMostSpecificPathFromError/getMostSpecificPathFromError';
 export * from './getValidationMessageFromPath/getValidationMessageFromPath';
-export * from './validateNonOptionalUndefined/validateNonOptionalUndefined';

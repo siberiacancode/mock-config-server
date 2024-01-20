@@ -2,12 +2,10 @@ import { z } from 'zod';
 
 import { stringForwardSlashSchema } from '../utils';
 
-const staticPathObjectSchema = z
-  .object({
-    prefix: stringForwardSlashSchema,
-    path: stringForwardSlashSchema
-  })
-  .strict();
+const staticPathObjectSchema = z.strictObject({
+  prefix: stringForwardSlashSchema,
+  path: stringForwardSlashSchema
+});
 
 const staticPathStringOrObjectSchema = z.union([stringForwardSlashSchema, staticPathObjectSchema]);
 

@@ -4,19 +4,17 @@ import type { RestMethod } from '@/utils/types';
 
 import { baseUrlSchema } from '../baseUrlSchema/baseUrlSchema';
 import { interceptorsSchema } from '../interceptorsSchema/interceptorsSchema';
-import { stringForwardSlashSchema } from '../utils';
+import { plainObjectSchema, stringForwardSlashSchema } from '../utils';
 
 import { routeConfigSchema } from './routesSchema/routesSchema';
 
 const baseRequestConfigSchema = (method: RestMethod) =>
-  z
-    .object({
-      path: z.union([stringForwardSlashSchema, z.instanceof(RegExp)]),
-      method: z.literal(method),
-      routes: z.array(routeConfigSchema(method)),
-      interceptors: interceptorsSchema.optional()
-    })
-    .strict();
+  z.strictObject({
+    path: z.union([stringForwardSlashSchema, z.instanceof(RegExp)]),
+    method: z.literal(method),
+    routes: z.array(routeConfigSchema(method)),
+    interceptors: plainObjectSchema(interceptorsSchema).optional()
+  });
 
 const requestConfigSchema = z.union([
   baseRequestConfigSchema('get'),
@@ -27,10 +25,8 @@ const requestConfigSchema = z.union([
   baseRequestConfigSchema('options')
 ]);
 
-export const restConfigSchema = z
-  .object({
-    baseUrl: baseUrlSchema.optional(),
-    configs: z.array(requestConfigSchema),
-    interceptors: interceptorsSchema.optional()
-  })
-  .strict();
+export const restConfigSchema = z.strictObject({
+  baseUrl: baseUrlSchema.optional(),
+  configs: z.array(requestConfigSchema),
+  interceptors: plainObjectSchema(interceptorsSchema).optional()
+});

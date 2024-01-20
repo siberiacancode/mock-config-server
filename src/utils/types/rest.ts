@@ -93,7 +93,7 @@ type RestTopLevelRecord = Record<
   RestTopLevelRecordValue | RestPropertyLevelPlainEntityDescriptor
 > & { checkMode?: never };
 
-type RestTopLevelArray = Array<RestPlainEntityValue | NestedObjectOrArray<RestPlainEntityValue>>;
+type RestTopLevelArray = Array<NestedObjectOrArray<RestPlainEntityValue>>;
 
 export type RestEntity<EntityName extends RestEntityName = RestEntityName> =
   EntityName extends 'body'

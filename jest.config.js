@@ -7,5 +7,6 @@ module.exports = {
   ...jest,
   preset: 'ts-jest',
   testEnvironment: 'node',
+  collectCoverage: false,
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' })
 };

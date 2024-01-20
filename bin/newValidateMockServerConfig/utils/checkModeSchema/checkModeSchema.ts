@@ -1,29 +1,22 @@
 import { z } from 'zod';
 
-// TODO delete useless schemas after all
+import {
+  CHECK_ACTUAL_VALUE_CHECK_MODES,
+  COMPARE_WITH_DESCRIPTOR_ANY_VALUE_CHECK_MODES,
+  COMPARE_WITH_DESCRIPTOR_STRING_VALUE_CHECK_MODES,
+  COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES
+} from '@/utils/constants';
 
-export const checkActualValueCheckModeSchema = z.enum(['exists', 'notExists']);
+export const checkActualValueCheckModeSchema = z.enum(CHECK_ACTUAL_VALUE_CHECK_MODES);
 
-export const compareWithDescriptorAnyValueCheckModeSchema = z.enum(['equals', 'notEquals']);
+export const compareWithDescriptorAnyValueCheckModeSchema = z.enum(
+  COMPARE_WITH_DESCRIPTOR_ANY_VALUE_CHECK_MODES
+);
 
-export const compareWithDescriptorStringValueCheckModeSchema = z.enum([
-  'includes',
-  'notIncludes',
-  'startsWith',
-  'notStartsWith',
-  'endsWith',
-  'notEndsWith'
-]);
+export const compareWithDescriptorStringValueCheckModeSchema = z.enum(
+  COMPARE_WITH_DESCRIPTOR_STRING_VALUE_CHECK_MODES
+);
 
-export const compareWithDescriptorValueCheckModeSchema = z.enum([
-  ...compareWithDescriptorAnyValueCheckModeSchema.options,
-  ...compareWithDescriptorStringValueCheckModeSchema.options
-]);
-
-export const calculateByDescriptorValueCheckModeSchema = z.enum(['regExp', 'function']);
-
-export const checkModeSchema = z.enum([
-  ...checkActualValueCheckModeSchema.options,
-  ...compareWithDescriptorValueCheckModeSchema.options,
-  ...calculateByDescriptorValueCheckModeSchema.options
-]);
+export const compareWithDescriptorValueCheckModeSchema = z.enum(
+  COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES
+);

@@ -47,11 +47,13 @@ export const createRestRoutes = ({
             const { checkMode, value: descriptorValue } =
               convertToEntityDescriptor(entityDescriptorOrValue);
 
-            // ✅ important: check whole body as plain value strictly if descriptor used for body
+            // ✅ important:
+            // check whole body as plain value strictly if descriptor used for body
             const isEntityBodyByTopLevelDescriptor =
               entityName === 'body' && isEntityDescriptor(entityDescriptorOrValue);
             if (isEntityBodyByTopLevelDescriptor) {
-              // ✅ important: bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
+              // ✅ important:
+              // bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
               return resolveEntityValues(
                 checkMode,
                 Object.keys(request.body).length ? request.body : undefined,
@@ -63,7 +65,8 @@ export const createRestRoutes = ({
               entityName === 'body' && Array.isArray(entityDescriptorOrValue);
             if (isEntityBodyByTopLevelArray) {
               return entityDescriptorOrValue.some((entityDescriptorOrValueElement) =>
-                // ✅ important: bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
+                // ✅ important:
+                // bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
                 resolveEntityValues(
                   checkMode,
                   Object.keys(request.body).length ? request.body : undefined,
