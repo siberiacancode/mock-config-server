@@ -730,6 +730,14 @@ Examples:
   mcs --help
 ```
 
+```
+mcs init
+
+Examples:
+  mcs init
+  mcs init --baseurl /base/url --port 3000
+```
+
 ## ✨ Contributors
 
 <table>
@@ -768,6 +776,15 @@ Examples:
             alt="anv296" />
             <br />
             <sub style="font-size:13px"><b>🎱️ anv296</b></sub>
+        </a>
+    </td>
+        <td align="center" style="word-wrap: break-word; width: 100.0; height: 100.0">
+        <a href="https://github.com/kvelian">
+            <img src="https://avatars.githubusercontent.com/u/81089091?s=400&u=7c4fcc6d120f4b13ccbd03a9a384622b6523c376&v=4"
+            width="100;"  
+            alt="kvelian" />
+            <br />
+            <sub style="font-size:13px"><b>🌵 kvelian</b></sub>
         </a>
     </td>
   </tr>

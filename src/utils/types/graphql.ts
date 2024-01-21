@@ -26,16 +26,16 @@ export type GraphQLTopLevelPlainEntityDescriptor<Check extends CheckMode = Check
         ) => boolean;
       }
     : Check extends CompareWithDescriptorAnyValueCheckMode
-    ? {
-        checkMode: Check;
-        value: NestedObjectOrArray<GraphQLPlainEntityValue>;
-      }
-    : Check extends CheckActualValueCheckMode
-    ? {
-        checkMode: Check;
-        value: never;
-      }
-    : never;
+      ? {
+          checkMode: Check;
+          value: NestedObjectOrArray<GraphQLPlainEntityValue>;
+        }
+      : Check extends CheckActualValueCheckMode
+        ? {
+            checkMode: Check;
+            value: never;
+          }
+        : never;
 
 type GraphQLPropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
   Check extends 'function'
@@ -47,16 +47,16 @@ type GraphQLPropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMo
         ) => boolean;
       }
     : Check extends CompareWithDescriptorAnyValueCheckMode
-    ? {
-        checkMode: Check;
-        value: GraphQLPlainEntityValue | NestedObjectOrArray<GraphQLPlainEntityValue>;
-      }
-    : Check extends CheckActualValueCheckMode
-    ? {
-        checkMode: Check;
-        value: never;
-      }
-    : never;
+      ? {
+          checkMode: Check;
+          value: GraphQLPlainEntityValue | NestedObjectOrArray<GraphQLPlainEntityValue>;
+        }
+      : Check extends CheckActualValueCheckMode
+        ? {
+            checkMode: Check;
+            value: never;
+          }
+        : never;
 
 type GraphQLMappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check extends 'function'
   ? {
@@ -64,21 +64,21 @@ type GraphQLMappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check 
       value: (actualValue: GraphQLMappedEntityValue, checkFunction: CheckFunction) => boolean;
     }
   : Check extends 'regExp'
-  ? {
-      checkMode: Check;
-      value: RegExp | RegExp[];
-    }
-  : Check extends CompareWithDescriptorValueCheckMode
-  ? {
-      checkMode: Check;
-      value: GraphQLMappedEntityValue | GraphQLMappedEntityValue[];
-    }
-  : Check extends CheckActualValueCheckMode
-  ? {
-      checkMode: Check;
-      value: never;
-    }
-  : never;
+    ? {
+        checkMode: Check;
+        value: RegExp | RegExp[];
+      }
+    : Check extends CompareWithDescriptorValueCheckMode
+      ? {
+          checkMode: Check;
+          value: GraphQLMappedEntityValue | GraphQLMappedEntityValue[];
+        }
+      : Check extends CheckActualValueCheckMode
+        ? {
+            checkMode: Check;
+            value: never;
+          }
+        : never;
 
 export type GraphQLEntityDescriptorOrValue<
   EntityName extends GraphQLEntityName = GraphQLEntityName

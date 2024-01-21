@@ -4,9 +4,33 @@ import { hideBin } from 'yargs/helpers';
 import type { MockServerConfigArgv } from '../src';
 
 import { build } from './build';
+import { init } from './init';
 
 export const cli = () => {
-  const argv = yargs(hideBin(process.argv))
+  const processArgv = hideBin(process.argv);
+
+  if (processArgv.includes('init')) {
+    const argv = yargs(processArgv)
+      .usage('mcs init')
+      .epilogue('More info: https://github.com/siberiacancode/mock-config-server#readme')
+      .options({
+        baseUrl: {
+          alias: 'b',
+          description: 'Set base url for mock server',
+          type: 'string'
+        },
+        port: {
+          alias: 'p',
+          description: 'Set port for server',
+          type: 'number'
+        }
+      })
+      .parse() as MockServerConfigArgv;
+
+    return init(argv);
+  }
+
+  const argv = yargs(processArgv)
     .usage('mcs [options]')
     .epilogue('More info: https://github.com/siberiacancode/mock-config-server#readme')
     .options({
