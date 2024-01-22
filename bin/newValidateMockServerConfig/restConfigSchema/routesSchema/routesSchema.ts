@@ -6,14 +6,14 @@ import type { RestMethod } from '@/utils/types';
 import { interceptorsSchema } from '../../interceptorsSchema/interceptorsSchema';
 import { queueSchema } from '../../queueSchema/queueSchema';
 import { settingsSchema } from '../../settingsSchema/settingsSchema';
-import { plainObjectSchema } from '../../utils';
+import { nonRegExpSchema } from '../../utils';
 
 import { entitiesByEntityNameSchema } from './entitiesSchema/entitiesSchema';
 
 const baseRouteConfigSchema = (method: RestMethod) =>
   z.strictObject({
     entities: entitiesByEntityNameSchema(method).optional(),
-    interceptors: plainObjectSchema(interceptorsSchema.pick({ response: true })).optional()
+    interceptors: nonRegExpSchema(interceptorsSchema.pick({ response: true })).optional()
   });
 
 const dataRouteConfigSchema = (method: RestMethod) =>

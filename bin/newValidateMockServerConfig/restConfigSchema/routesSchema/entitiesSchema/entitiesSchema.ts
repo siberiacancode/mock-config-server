@@ -9,14 +9,15 @@ import {
   compareWithDescriptorValueCheckModeSchema,
   jsonLiteralSchema,
   jsonSchema,
-  plainObjectSchema
+  nonRegExpSchema,
+  requiredPropertiesSchema
 } from '../../../utils';
 
 /* ----- Mapped entity schema ----- */
 
 const mappedEntityValueSchema = z.union([z.string(), z.number(), z.boolean()]);
 
-const mappedEntityDescriptorSchema = plainObjectSchema(
+const mappedEntityDescriptorSchema = requiredPropertiesSchema(
   z.discriminatedUnion('checkMode', [
     z.strictObject({
       checkMode: z.literal('function'),
@@ -37,7 +38,7 @@ const mappedEntityDescriptorSchema = plainObjectSchema(
   ['checkMode']
 );
 
-const mappedEntitySchema = plainObjectSchema(
+const mappedEntitySchema = nonRegExpSchema(
   z.record(
     z.union([
       mappedEntityValueSchema,
@@ -49,7 +50,7 @@ const mappedEntitySchema = plainObjectSchema(
 
 /* ----- Plain entity schema ----- */
 
-const topLevelPlainEntityDescriptorSchema = plainObjectSchema(
+const topLevelPlainEntityDescriptorSchema = requiredPropertiesSchema(
   z.discriminatedUnion('checkMode', [
     z.strictObject({
       checkMode: z.literal('function'),
@@ -66,7 +67,7 @@ const topLevelPlainEntityDescriptorSchema = plainObjectSchema(
   ['checkMode']
 );
 
-const propertyLevelPlainEntityDescriptorSchema = plainObjectSchema(
+const propertyLevelPlainEntityDescriptorSchema = requiredPropertiesSchema(
   z.discriminatedUnion('checkMode', [
     z.strictObject({
       checkMode: z.literal('function'),
@@ -88,7 +89,7 @@ const propertyLevelPlainEntityDescriptorSchema = plainObjectSchema(
 );
 
 const nonCheckModeRecordSchema = (recordSchema: ReturnType<typeof z.record>) =>
-  plainObjectSchema(recordSchema.and(z.object({ checkMode: z.never().optional() })));
+  nonRegExpSchema(recordSchema.and(z.object({ checkMode: z.never().optional() })));
 
 // ✅ important:
 // 1st property level record disallow checkMode
@@ -119,7 +120,7 @@ const plainEntitySchema = z.union([
 const METHODS_WITH_BODY = ['post', 'put', 'patch'];
 export const entitiesByEntityNameSchema = (method: RestMethod) => {
   const isMethodWithBody = METHODS_WITH_BODY.includes(method);
-  return plainObjectSchema(
+  return nonRegExpSchema(
     z.strictObject({
       headers: mappedEntitySchema.optional(),
       cookies: mappedEntitySchema.optional(),

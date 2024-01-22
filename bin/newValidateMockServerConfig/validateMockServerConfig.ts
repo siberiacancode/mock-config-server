@@ -10,6 +10,7 @@ import { interceptorsSchema } from './interceptorsSchema/interceptorsSchema';
 import { portSchema } from './portSchema/portSchema';
 import { restConfigSchema } from './restConfigSchema/restConfigSchema';
 import { staticPathSchema } from './staticPathSchema/staticPathSchema';
+import { nonRegExpSchema } from './utils';
 
 export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
   if (
@@ -27,7 +28,7 @@ export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
     baseUrl: baseUrlSchema.optional(),
     port: portSchema.optional(),
     staticPath: staticPathSchema.optional(),
-    interceptors: interceptorsSchema.optional(),
+    interceptors: nonRegExpSchema(interceptorsSchema).optional(),
     cors: corsSchema.optional(),
     rest: restConfigSchema.optional()
   });
