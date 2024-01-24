@@ -1,52 +1,14 @@
 import { z } from 'zod';
 
-import type { RestMethod } from '@/utils/types';
-
 import {
   checkActualValueCheckModeSchema,
   compareWithDescriptorAnyValueCheckModeSchema,
   compareWithDescriptorStringValueCheckModeSchema,
-  compareWithDescriptorValueCheckModeSchema,
-  jsonLiteralSchema,
-  jsonSchema,
-  nonRegExpSchema,
-  requiredPropertiesSchema
-} from '../../../utils';
-
-/* ----- Mapped entity schema ----- */
-
-const mappedEntityValueSchema = z.union([z.string(), z.number(), z.boolean()]);
-
-const mappedEntityDescriptorSchema = requiredPropertiesSchema(
-  z.discriminatedUnion('checkMode', [
-    z.strictObject({
-      checkMode: z.literal('function'),
-      value: z.function()
-    }),
-    z.strictObject({
-      checkMode: z.literal('regExp'),
-      value: z.union([z.instanceof(RegExp), z.array(z.instanceof(RegExp))])
-    }),
-    z.strictObject({
-      checkMode: compareWithDescriptorValueCheckModeSchema,
-      value: z.union([mappedEntityValueSchema, z.array(mappedEntityValueSchema)])
-    }),
-    z.strictObject({
-      checkMode: checkActualValueCheckModeSchema
-    })
-  ]),
-  ['checkMode']
-);
-
-const mappedEntitySchema = nonRegExpSchema(
-  z.record(
-    z.union([
-      mappedEntityValueSchema,
-      z.array(mappedEntityValueSchema),
-      mappedEntityDescriptorSchema
-    ])
-  )
-);
+  compareWithDescriptorValueCheckModeSchema
+} from '../checkModeSchema/checkModeSchema';
+import { jsonLiteralSchema, jsonSchema } from '../jsonSchema/jsonSchema';
+import { nonRegExpSchema } from '../nonRegExpSchema/nonRegExpSchema';
+import { requiredPropertiesSchema } from '../plainObjectSchema/plainObjectSchema';
 
 /* ----- Plain entity schema ----- */
 
@@ -109,24 +71,43 @@ const topLevelArraySchema = z.array(
   jsonSchema.and(z.custom((value) => !jsonLiteralSchema.safeParse(value).success))
 );
 
-const plainEntitySchema = z.union([
+export const plainEntitySchema = z.union([
   topLevelPlainEntityDescriptorSchema,
   topLevelRecordSchema,
   topLevelArraySchema
 ]);
 
-/* ----- Entities by entity name schema ----- */
+/* ----- Mapped entity schema ----- */
 
-const METHODS_WITH_BODY = ['post', 'put', 'patch'];
-export const entitiesByEntityNameSchema = (method: RestMethod) => {
-  const isMethodWithBody = METHODS_WITH_BODY.includes(method);
-  return nonRegExpSchema(
+const mappedEntityValueSchema = z.union([z.string(), z.number(), z.boolean()]);
+
+const mappedEntityDescriptorSchema = requiredPropertiesSchema(
+  z.discriminatedUnion('checkMode', [
     z.strictObject({
-      headers: mappedEntitySchema.optional(),
-      cookies: mappedEntitySchema.optional(),
-      params: mappedEntitySchema.optional(),
-      query: mappedEntitySchema.optional(),
-      ...(isMethodWithBody && { body: plainEntitySchema.optional() })
+      checkMode: z.literal('function'),
+      value: z.function()
+    }),
+    z.strictObject({
+      checkMode: z.literal('regExp'),
+      value: z.union([z.instanceof(RegExp), z.array(z.instanceof(RegExp))])
+    }),
+    z.strictObject({
+      checkMode: compareWithDescriptorValueCheckModeSchema,
+      value: z.union([mappedEntityValueSchema, z.array(mappedEntityValueSchema)])
+    }),
+    z.strictObject({
+      checkMode: checkActualValueCheckModeSchema
     })
-  );
-};
+  ]),
+  ['checkMode']
+);
+
+export const mappedEntitySchema = nonRegExpSchema(
+  z.record(
+    z.union([
+      mappedEntityValueSchema,
+      z.array(mappedEntityValueSchema),
+      mappedEntityDescriptorSchema
+    ])
+  )
+);

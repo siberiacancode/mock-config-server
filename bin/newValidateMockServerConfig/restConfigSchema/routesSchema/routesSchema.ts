@@ -6,9 +6,21 @@ import type { RestMethod } from '@/utils/types';
 import { interceptorsSchema } from '../../interceptorsSchema/interceptorsSchema';
 import { queueSchema } from '../../queueSchema/queueSchema';
 import { settingsSchema } from '../../settingsSchema/settingsSchema';
-import { nonRegExpSchema } from '../../utils';
+import { mappedEntitySchema, nonRegExpSchema, plainEntitySchema } from '../../utils';
 
-import { entitiesByEntityNameSchema } from './entitiesSchema/entitiesSchema';
+const METHODS_WITH_BODY = ['post', 'put', 'patch'];
+const entitiesByEntityNameSchema = (method: RestMethod) => {
+  const isMethodWithBody = METHODS_WITH_BODY.includes(method);
+  return nonRegExpSchema(
+    z.strictObject({
+      headers: mappedEntitySchema.optional(),
+      cookies: mappedEntitySchema.optional(),
+      params: mappedEntitySchema.optional(),
+      query: mappedEntitySchema.optional(),
+      ...(isMethodWithBody && { body: plainEntitySchema.optional() })
+    })
+  );
+};
 
 const baseRouteConfigSchema = (method: RestMethod) =>
   z.strictObject({
