@@ -15,7 +15,8 @@ import type {
   RestConfig,
   RestEntitiesByEntityName,
   RestEntity,
-  RestTopLevelPlainEntityDescriptor
+  TopLevelPlainEntityArray,
+  TopLevelPlainEntityDescriptor
 } from '@/utils/types';
 
 import { prepareRestRequestConfigs } from './helpers';
@@ -76,7 +77,7 @@ export const createRestRoutes = ({
             }
 
             const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
-              Exclude<RestEntity, RestTopLevelPlainEntityDescriptor | Array<any>>
+              Exclude<RestEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
             >;
             return recordOrArrayEntries.every(([entityKey, mappedEntityDescriptor]) => {
               const { checkMode, value: descriptorValue } =
