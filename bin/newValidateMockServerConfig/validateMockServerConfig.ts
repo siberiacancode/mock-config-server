@@ -6,6 +6,8 @@ import type { PlainObject } from '../../src';
 
 import { baseUrlSchema } from './baseUrlSchema/baseUrlSchema';
 import { corsSchema } from './corsSchema/corsSchema';
+import { databaseConfigSchema } from './databaseConfigSchema/databaseConfigSchema';
+import { graphqlConfigSchema } from './graphqlConfigSchema/graphqlConfigSchema';
 import { interceptorsSchema } from './interceptorsSchema/interceptorsSchema';
 import { portSchema } from './portSchema/portSchema';
 import { restConfigSchema } from './restConfigSchema/restConfigSchema';
@@ -30,7 +32,9 @@ export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
     staticPath: staticPathSchema.optional(),
     interceptors: nonRegExpSchema(interceptorsSchema).optional(),
     cors: corsSchema.optional(),
-    rest: restConfigSchema.optional()
+    rest: restConfigSchema.optional(),
+    graphql: graphqlConfigSchema.optional(),
+    database: databaseConfigSchema.optional()
   });
 
   const validationResult = mockServerConfigSchema.safeParse(mockServerConfig);
