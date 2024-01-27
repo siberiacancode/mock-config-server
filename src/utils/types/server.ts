@@ -1,4 +1,5 @@
 import type { Request } from 'express';
+import type { Arguments } from 'yargs';
 
 import type { GraphQLRequestConfig } from './graphql';
 import type { Interceptors } from './interceptors';
@@ -66,7 +67,7 @@ export interface DatabaseMockServerConfig extends BaseMockServerConfig {
   routes?: Record<`/${string}`, `/${string}`> | `${string}.json`;
 }
 
-export interface MockServerConfigArgv {
+export interface MockServerConfigArgv extends Arguments {
   baseUrl?: string;
   port?: number;
   staticPath?: string;

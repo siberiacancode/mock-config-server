@@ -43,7 +43,7 @@ export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
     const validationMessage = getValidationMessageFromPath(path);
 
     throw new Error(
-      `Validation Error: configuration.${validationMessage} does not match the API schema. Click here to see correct type: https://github.com/siberiacancode/mock-config-server`
+      `Validation Error: configuration${validationMessage} does not match the API schema. Click here to see correct type: https://github.com/siberiacancode/mock-config-server`
     );
   }
 };
