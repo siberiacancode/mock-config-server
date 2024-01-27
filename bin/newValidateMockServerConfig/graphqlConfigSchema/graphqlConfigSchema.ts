@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { isPlainObject } from '@/utils/helpers';
+
 import { baseUrlSchema } from '../baseUrlSchema/baseUrlSchema';
 import { interceptorsSchema } from '../interceptorsSchema/interceptorsSchema';
 import { nonRegExpSchema } from '../utils';
@@ -26,7 +28,12 @@ const queryRequestConfigSchema = z
   })
   .merge(baseRequestConfigSchema);
 
-const requestConfigSchema = z.union([operationNameRequestConfigSchema, queryRequestConfigSchema]);
+const requestConfigSchema = z.union([
+  z
+    .custom((value) => isPlainObject(value) && 'operationName' in value)
+    .pipe(operationNameRequestConfigSchema),
+  z.custom((value) => isPlainObject(value) && 'query' in value).pipe(queryRequestConfigSchema)
+]);
 
 export const graphqlConfigSchema = z.strictObject({
   baseUrl: baseUrlSchema.optional(),
