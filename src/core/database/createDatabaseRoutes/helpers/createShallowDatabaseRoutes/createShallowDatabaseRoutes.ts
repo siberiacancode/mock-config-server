@@ -19,6 +19,14 @@ export const createShallowDatabaseRoutes = (
     router.route(path).get((request, response) => {
       let data = storage.read(key);
 
+      if (!Array.isArray(data)) {
+        // ✅ important:
+        // set 'Cache-Control' header for explicit browsers response revalidate
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+        response.set('Cache-control', 'max-age=0, must-revalidate');
+        response.json(data);
+      }
+
       if (request.query && Object.keys(request.query).length) {
         const { _page, _limit, _begin, _end, _sort, _order, ...filters } = request.query;
         data = filter(data, filters as ParsedUrlQuery);

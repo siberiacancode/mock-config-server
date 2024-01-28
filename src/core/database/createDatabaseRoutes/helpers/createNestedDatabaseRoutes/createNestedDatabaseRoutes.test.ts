@@ -206,6 +206,92 @@ describe('CreateNestedDatabaseRoutes', () => {
         }
       ]);
     });
+
+    test('Should return filtered array by neq operator', async () => {
+      const response = await request(server).get('/users?id_neq=1');
+
+      expect(response.body).toStrictEqual([
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+    });
+
+    test('Should return filtered array by gt operator', async () => {
+      const response = await request(server).get('/users?id_gt=1');
+
+      expect(response.body).toStrictEqual([
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+    });
+
+    test('Should return filtered array by gte operator', async () => {
+      const response = await request(server).get('/users?id_gte=1');
+
+      expect(response.body).toStrictEqual(nestedDatabase.users);
+    });
+
+    test('Should return filtered array by lt operator', async () => {
+      const response = await request(server).get('/users?id_lt=2');
+
+      expect(response.body).toStrictEqual([
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' }
+        }
+      ]);
+    });
+
+    test('Should return filtered array by lte operator', async () => {
+      const response = await request(server).get('/users?id_lte=2');
+
+      expect(response.body).toStrictEqual(nestedDatabase.users);
+    });
+
+    test('Should return filtered array by cn operator', async () => {
+      const response = await request(server).get('/users?name_cn=Jane');
+
+      expect(response.body).toStrictEqual([
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+    });
+
+    test('Should return filtered array by ncn operator', async () => {
+      const response = await request(server).get('/users?name_ncn=Jane');
+
+      expect(response.body).toStrictEqual([
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' }
+        }
+      ]);
+    });
+
+    test('Should return filtered array by sw operator', async () => {
+      const response = await request(server).get('/users?name_sw=J');
+
+      expect(response.body).toStrictEqual(nestedDatabase.users);
+    });
+
+    test('Should return filtered array by nsw operator', async () => {
+      const response = await request(server).get('/users?name_nsw=J');
+
+      expect(response.body).toStrictEqual([]);
+    });
+
+    test('Should return filtered array by ew operator', async () => {
+      const response = await request(server).get('/users?name_ew=a');
+
+      expect(response.body).toStrictEqual([]);
+    });
+
+    test('Should return filtered array by new operator', async () => {
+      const response = await request(server).get('/users?name_new=a=J');
+
+      expect(response.body).toStrictEqual(nestedDatabase.users);
+    });
   });
 
   describe('createNestedDatabaseRoutes: pagination function', () => {

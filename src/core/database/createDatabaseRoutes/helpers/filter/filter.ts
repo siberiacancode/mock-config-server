@@ -2,7 +2,7 @@ import { flatten } from 'flat';
 import type { ParsedUrlQuery } from 'node:querystring';
 
 const OPERATORS = {
-  neq: (a: any, b: any) => a !== b,
+  neq: (a: any, b: any) => `${a}` !== `${b}`,
   gt: (a: any, b: any) => +a > +b,
   gte: (a: any, b: any) => +a >= +b,
   lt: (a: any, b: any) => +a < +b,
@@ -28,6 +28,13 @@ const getEntities = (object: any, key: string) => {
 const filtered = (element: any, value: any, operator?: string) => {
   if (!operator || !OPERATORS_KEYS.includes(operator)) return `${element}` === value;
 
+  console.log(
+    '@',
+    element,
+    value,
+    operator,
+    OPERATORS[operator as keyof typeof OPERATORS](element, value)
+  );
   return OPERATORS[operator as keyof typeof OPERATORS](element, value);
 };
 
