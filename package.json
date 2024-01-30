@@ -25,8 +25,7 @@
     }
   ],
   "license": "MIT",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "main": "dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
     "mock-config-server": "dist/bin/bin.js",
