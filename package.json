@@ -35,7 +35,7 @@
     "dist"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "scripts": {
     "prepare": "husky install && yarn build",
