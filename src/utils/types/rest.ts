@@ -34,7 +34,7 @@ export type RestTopLevelPlainEntityDescriptor<Check extends CheckMode = CheckMod
     : Check extends CheckActualValueCheckMode
     ? {
         checkMode: Check;
-        value: never;
+        value?: never;
       }
     : never;
 
@@ -55,7 +55,7 @@ type RestPropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode>
     : Check extends CheckActualValueCheckMode
     ? {
         checkMode: Check;
-        value: never;
+        value?: never;
       }
     : never;
 
@@ -77,7 +77,7 @@ type RestMappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check ext
   : Check extends CheckActualValueCheckMode
   ? {
       checkMode: Check;
-      value: never;
+      value?: never;
     }
   : never;
 
