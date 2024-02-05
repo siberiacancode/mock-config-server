@@ -33,7 +33,7 @@ export type GraphQLTopLevelPlainEntityDescriptor<Check extends CheckMode = Check
     : Check extends CheckActualValueCheckMode
     ? {
         checkMode: Check;
-        value: never;
+        value?: never;
       }
     : never;
 
@@ -54,7 +54,7 @@ type GraphQLPropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMo
     : Check extends CheckActualValueCheckMode
     ? {
         checkMode: Check;
-        value: never;
+        value?: never;
       }
     : never;
 
@@ -76,7 +76,7 @@ type GraphQLMappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check 
   : Check extends CheckActualValueCheckMode
   ? {
       checkMode: Check;
-      value: never;
+      value?: never;
     }
   : never;
 
