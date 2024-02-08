@@ -1,12 +1,14 @@
 import type { IRouter } from 'express';
 import { flatten } from 'flat';
 
+import { APP_PATH } from '@/utils/constants';
 import {
   asyncHandler,
   callRequestInterceptor,
   callResponseInterceptors,
   convertToEntityDescriptor,
   isEntityDescriptor,
+  readFileAsBuffer,
   resolveEntityValues
 } from '@/utils/helpers';
 import type {
@@ -135,6 +137,13 @@ export const createRestRoutes = ({
           matchedRouteConfigData = matchedRouteConfig.data;
         }
 
+        if ('file' in matchedRouteConfig) {
+          matchedRouteConfigData = readFileAsBuffer(matchedRouteConfig.file);
+          // ✅ important:
+          // it means that we cannot read file, so need to return 404 error
+          if (!matchedRouteConfigData) return next();
+        }
+
         const resolvedData =
           typeof matchedRouteConfigData === 'function'
             ? await matchedRouteConfigData(request, matchedRouteConfig.entities ?? {})
@@ -156,6 +165,11 @@ export const createRestRoutes = ({
         // set 'Cache-Control' header for explicit browsers response revalidate
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
         response.set('Cache-control', 'max-age=0, must-revalidate');
+        if ('file' in matchedRouteConfig) {
+          return response.status(response.statusCode).sendFile(matchedRouteConfig.file, {
+            root: APP_PATH
+          });
+        }
         return response.status(response.statusCode).json(data);
       })
     );

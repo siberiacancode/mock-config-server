@@ -118,6 +118,10 @@ export type RestRouteConfig<
       settings?: Settings & { polling: false };
       data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
     }
+  | {
+      settings?: Settings & { polling: false };
+      file: string;
+    }
 ) & { entities?: Entities; interceptors?: Pick<Interceptors, 'response'> };
 
 export type RestPathString = `/${string}`;

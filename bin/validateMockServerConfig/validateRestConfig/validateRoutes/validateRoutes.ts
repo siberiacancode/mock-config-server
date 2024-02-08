@@ -133,14 +133,21 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
     routes.forEach((route, index) => {
       const isRouteObject = isPlainObject(route);
       if (isRouteObject) {
+        const isRouteHasFileProperty = 'file' in route;
         const isRouteHasDataProperty = 'data' in route;
         const isRouteHasQueueProperty = 'queue' in route;
 
-        if (!isRouteHasDataProperty && !isRouteHasQueueProperty) {
+        if (!isRouteHasFileProperty && !isRouteHasDataProperty && !isRouteHasQueueProperty) {
           throw new Error(`routes[${index}]`);
         }
 
-        if (isRouteHasDataProperty && isRouteHasQueueProperty) {
+        if (isRouteHasFileProperty && isRouteHasDataProperty && isRouteHasQueueProperty) {
+          throw new Error(`routes[${index}]`);
+        }
+
+        // ✅ important:
+        // if two of three properties is exist then throw Error
+        if (!((isRouteHasFileProperty !== isRouteHasDataProperty) !== isRouteHasQueueProperty)) {
           throw new Error(`routes[${index}]`);
         }
 
@@ -163,7 +170,17 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
           }
         }
 
-        if (isRouteHasDataProperty && isRouteSettingsObject && settings?.polling) {
+        if (isRouteHasFileProperty) {
+          if (typeof route.file !== 'string') {
+            throw new Error(`routes[${index}].file`);
+          }
+
+          if (isRouteSettingsObject && settings.polling) {
+            throw new Error(`routes[${index}].settings.polling`);
+          }
+        }
+
+        if (isRouteHasDataProperty && isRouteSettingsObject && settings.polling) {
           throw new Error(`routes[${index}].settings.polling`);
         }
 
