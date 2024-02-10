@@ -475,7 +475,7 @@ export default mockServerConfig;
 
 #### File responses
 
-Routes support paths to files. If a route is matched, the mock will send data from the file. If the file is not found, the server will return error 404.
+Routes support paths to files. If a route is matched, the server will send data from the file. If the file is not found, the server will return error 404.
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
@@ -499,7 +499,7 @@ const mockServerConfig = {
 export default mockServerConfig;
 ```
 
-If the file exists, response interceptors will receive a Buffer with the file content as the data argument. You can transform that buffer into any format you desire.
+If the file exists, response interceptors will receive null as the data argument.
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
@@ -514,9 +514,8 @@ const mockServerConfig = {
           {
             file: './settings.json',
             interceptors: {
-              // data is Buffer with file content
               response: (data) => {
-                console.log(`File content: ${data.toString('utf-8')}`);
+                console.log(data); // null
                 return data;
               }
             }
@@ -530,7 +529,7 @@ const mockServerConfig = {
 export default mockServerConfig;
 ```
 
-> Note: Any changes to the data will not affect the file (and the response, respectively); in the above code, data can only be used for reading.
+-> Note: Any changes to the data will not affect the file (and the response, respectively).
 
 #### Static Path
 

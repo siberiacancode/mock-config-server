@@ -1,1 +1,1 @@
-export * from './readFileAsBuffer';
+export * from './isFilePathValid';

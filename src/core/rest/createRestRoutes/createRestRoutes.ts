@@ -8,7 +8,7 @@ import {
   callResponseInterceptors,
   convertToEntityDescriptor,
   isEntityDescriptor,
-  readFileAsBuffer,
+  isFilePathValid,
   resolveEntityValues
 } from '@/utils/helpers';
 import type {
@@ -138,10 +138,7 @@ export const createRestRoutes = ({
         }
 
         if ('file' in matchedRouteConfig) {
-          matchedRouteConfigData = readFileAsBuffer(matchedRouteConfig.file);
-          // ✅ important:
-          // it means that we cannot read file, so need to return 404 error
-          if (!matchedRouteConfigData) return next();
+          if (!isFilePathValid(matchedRouteConfig.file)) return next();
         }
 
         const resolvedData =
@@ -165,6 +162,7 @@ export const createRestRoutes = ({
         // set 'Cache-Control' header for explicit browsers response revalidate
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
         response.set('Cache-control', 'max-age=0, must-revalidate');
+
         if ('file' in matchedRouteConfig) {
           return response.status(response.statusCode).sendFile(matchedRouteConfig.file, {
             root: APP_PATH
