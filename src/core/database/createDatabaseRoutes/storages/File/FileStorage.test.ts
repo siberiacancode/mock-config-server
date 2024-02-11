@@ -20,7 +20,7 @@ describe('FileStorage', () => {
     let fileStorage: FileStorage;
 
     beforeAll(() => {
-      tmpDirPath = fs.mkdtempSync(os.tmpdir());
+      tmpDirPath = fs.mkdtempSync(`${os.tmpdir()}${path.sep}`);
       initialData = createInitialData();
 
       const pathToFileStorage = path.join(tmpDirPath, './database.json');
@@ -52,7 +52,7 @@ describe('FileStorage', () => {
     let fileStorage: FileStorage;
 
     beforeEach(() => {
-      tmpDirPath = fs.mkdtempSync(os.tmpdir());
+      tmpDirPath = fs.mkdtempSync(`${os.tmpdir()}${path.sep}`);
       initialData = createInitialData();
 
       const pathToFileStorage = path.join(tmpDirPath, './database.json');
@@ -105,7 +105,7 @@ describe('FileStorage', () => {
     let fileStorage: FileStorage;
 
     beforeEach(() => {
-      tmpDirPath = fs.mkdtempSync(os.tmpdir());
+      tmpDirPath = fs.mkdtempSync(`${os.tmpdir()}${path.sep}`);
       initialData = createInitialData();
 
       const pathToFileStorage = path.join(tmpDirPath, './database.json');

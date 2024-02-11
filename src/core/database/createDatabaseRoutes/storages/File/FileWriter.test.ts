@@ -8,7 +8,7 @@ describe('FileWriter', () => {
   let tmpDirPath: string;
 
   beforeEach(() => {
-    tmpDirPath = fs.mkdtempSync(os.tmpdir());
+    tmpDirPath = fs.mkdtempSync(`${os.tmpdir()}${path.sep}`);
   });
 
   afterEach(() => {

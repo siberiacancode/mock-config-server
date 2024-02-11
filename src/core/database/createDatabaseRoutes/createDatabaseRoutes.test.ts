@@ -57,7 +57,7 @@ describe('createDatabaseRoutes', () => {
     let server: Express;
 
     beforeAll(() => {
-      tmpDirPath = fs.mkdtempSync(os.tmpdir());
+      tmpDirPath = fs.mkdtempSync(`${os.tmpdir()}${path.sep}`);
 
       const pathToData = path.join(tmpDirPath, './data.json') as `${string}.json`;
       fs.writeFileSync(pathToData, JSON.stringify(data));

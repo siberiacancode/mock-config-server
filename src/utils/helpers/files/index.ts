@@ -1,1 +1,1 @@
-export * from './isFilePathValid';
+export * from './isFilePathValid/isFilePathValid';

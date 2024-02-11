@@ -7,6 +7,7 @@ export const isFilePathValid = (path: string): boolean => {
 
     return true;
   } catch (e) {
+    console.error(e);
     return false;
   }
 };
