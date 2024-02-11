@@ -1,7 +1,7 @@
 import type { IRouter } from 'express';
 import { flatten } from 'flat';
+import path from 'path';
 
-import { APP_PATH } from '@/utils/constants';
 import {
   asyncHandler,
   callRequestInterceptor,
@@ -164,9 +164,9 @@ export const createRestRoutes = ({
         response.set('Cache-control', 'max-age=0, must-revalidate');
 
         if ('file' in matchedRouteConfig) {
-          return response.status(response.statusCode).sendFile(matchedRouteConfig.file, {
-            root: APP_PATH
-          });
+          return response
+            .status(response.statusCode)
+            .sendFile(path.resolve(matchedRouteConfig.file));
         }
         return response.status(response.statusCode).json(data);
       })
