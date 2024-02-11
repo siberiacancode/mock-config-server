@@ -146,6 +146,11 @@ export const createRestRoutes = ({
             ? await matchedRouteConfigData(request, matchedRouteConfig.entities ?? {})
             : matchedRouteConfigData;
 
+        // ✅ important:
+        // set 'Cache-Control' header for explicit browsers response revalidate: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+        // this code should place before response interceptors for giving opportunity to rewrite 'Cache-Control' header
+        response.set('Cache-control', 'no-cache');
+
         const data = await callResponseInterceptors({
           data: resolvedData,
           request,
@@ -158,17 +163,12 @@ export const createRestRoutes = ({
           }
         });
 
-        // ✅ important:
-        // set 'Cache-Control' header for explicit browsers response revalidate
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-        response.set('Cache-control', 'max-age=0, must-revalidate');
+        response.status(response.statusCode);
 
         if ('file' in matchedRouteConfig) {
-          return response
-            .status(response.statusCode)
-            .sendFile(path.resolve(matchedRouteConfig.file));
+          return response.sendFile(path.resolve(matchedRouteConfig.file));
         }
-        return response.status(response.statusCode).json(data);
+        return response.json(data);
       })
     );
   });

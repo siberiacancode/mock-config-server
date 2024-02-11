@@ -107,7 +107,7 @@ describe('createRestRoutes', () => {
     expect(getResponse.statusCode).toBe(404);
   });
 
-  test('Should have response Cache-Control header equals to max-age=0, must-revalidate', async () => {
+  test('Should have response Cache-Control header value equals to no-cache', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -123,12 +123,12 @@ describe('createRestRoutes', () => {
     const postResponse = await request(server)
       .post('/')
       .send({ query: 'query GetUsers { users { name } }' });
-    expect(postResponse.headers['cache-control']).toBe('max-age=0, must-revalidate');
+    expect(postResponse.headers['cache-control']).toBe('no-cache');
 
     const getResponse = await request(server)
       .get('/')
       .query({ query: 'query GetUsers { users { name } }' });
-    expect(getResponse.headers['cache-control']).toBe('max-age=0, must-revalidate');
+    expect(getResponse.headers['cache-control']).toBe('no-cache');
   });
 });
 

@@ -55,7 +55,7 @@ describe('createRestRoutes', () => {
     expect(response.statusCode).toBe(404);
   });
 
-  test('Should have response Cache-Control header equals to max-age=0, must-revalidate', async () => {
+  test('Should have response Cache-Control header value equals to no-cache', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -69,7 +69,7 @@ describe('createRestRoutes', () => {
     });
 
     const response = await request(server).get('/users');
-    expect(response.headers['cache-control']).toBe('max-age=0, must-revalidate');
+    expect(response.headers['cache-control']).toBe('no-cache');
   });
 });
 
