@@ -484,7 +484,7 @@ export default mockServerConfig;
 
 #### File responses
 
-Routes support paths to files. If a route is matched, the server will send data from the file. If the file is not found, the server will return 404.
+Rest routes support paths to files. If a route is matched, the server will send data from the file. If the file is not found, the server will return 404.
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
