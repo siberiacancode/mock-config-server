@@ -2,7 +2,7 @@ import express from 'express';
 import request from 'supertest';
 
 import { urlJoin } from '@/utils/helpers';
-import type { GraphqlConfig, MockServerConfig } from '@/utils/types';
+import type { GraphqlConfig, GraphQLOperationType, MockServerConfig } from '@/utils/types';
 
 import { createGraphQLRoutes } from './createGraphQLRoutes';
 
@@ -130,6 +130,36 @@ describe('createRestRoutes', () => {
       .query({ query: 'query GetUsers { users { name } }' });
     expect(getResponse.headers['cache-control']).toBe('no-cache');
   });
+
+  const operationTypesWithoutCacheControlHeader: Exclude<GraphQLOperationType, 'query'>[] = [
+    'mutation'
+  ];
+  test.each(operationTypesWithoutCacheControlHeader)(
+    'Should do not have Cache-Control header if operation type is %s',
+    async (operationTypeWithoutCacheControlHeader) => {
+      const server = createServer({
+        graphql: {
+          configs: [
+            {
+              operationName: 'GetUsers',
+              operationType: operationTypeWithoutCacheControlHeader,
+              routes: [{ data: { name: 'John', surname: 'Doe' } }]
+            }
+          ]
+        }
+      });
+
+      const postResponse = await request(server)
+        .post('/')
+        .send({ query: 'query GetUsers { users { name } }' });
+      expect(postResponse.headers['cache-control']).toBe(undefined);
+
+      const getResponse = await request(server)
+        .get('/')
+        .query({ query: 'query GetUsers { users { name } }' });
+      expect(getResponse.headers['cache-control']).toBe(undefined);
+    }
+  );
 });
 
 describe('createRestRoutes: content', () => {
