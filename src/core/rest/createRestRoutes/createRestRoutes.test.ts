@@ -2,7 +2,7 @@ import express from 'express';
 import request from 'supertest';
 
 import { urlJoin } from '@/utils/helpers';
-import type { MockServerConfig, RestConfig } from '@/utils/types';
+import type { MockServerConfig, RestConfig, RestMethod } from '@/utils/types';
 
 import { createRestRoutes } from './createRestRoutes';
 
@@ -71,6 +71,33 @@ describe('createRestRoutes', () => {
     const response = await request(server).get('/users');
     expect(response.headers['cache-control']).toBe('no-cache');
   });
+
+  const methodsWithoutCacheControlHeader: Exclude<RestMethod, 'get'>[] = [
+    'post',
+    'put',
+    'patch',
+    'delete',
+    'options'
+  ];
+  test.each(methodsWithoutCacheControlHeader)(
+    'Should do not have response Cache-Control header if method is %s',
+    async (methodWithoutCacheControlHeader) => {
+      const server = createServer({
+        rest: {
+          configs: [
+            {
+              path: '/users',
+              method: methodWithoutCacheControlHeader,
+              routes: [{ data: { name: 'John', surname: 'Doe' } }]
+            }
+          ]
+        }
+      });
+
+      const response = await request(server)[methodWithoutCacheControlHeader]('/users');
+      expect(response.headers['cache-control']).toBe(undefined);
+    }
+  );
 });
 
 describe('createRestRoutes: content', () => {

@@ -149,7 +149,7 @@ export const createRestRoutes = ({
         // ✅ important:
         // set 'Cache-Control' header for explicit browsers response revalidate: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
         // this code should place before response interceptors for giving opportunity to rewrite 'Cache-Control' header
-        response.set('Cache-control', 'no-cache');
+        if (request.method === 'GET') response.set('Cache-control', 'no-cache');
 
         const data = await callResponseInterceptors({
           data: resolvedData,
