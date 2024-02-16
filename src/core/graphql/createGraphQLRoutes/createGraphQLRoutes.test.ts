@@ -134,9 +134,8 @@ describe('createRestRoutes', () => {
   const operationTypesWithoutCacheControlHeader: Exclude<GraphQLOperationType, 'query'>[] = [
     'mutation'
   ];
-  test.each(operationTypesWithoutCacheControlHeader)(
-    'Should do not have Cache-Control header if operation type is %s',
-    async (operationTypeWithoutCacheControlHeader) => {
+  operationTypesWithoutCacheControlHeader.forEach((operationTypeWithoutCacheControlHeader) => {
+    test(`Should do not have Cache-Control header if operation type is ${operationTypeWithoutCacheControlHeader}`, async () => {
       const server = createServer({
         graphql: {
           configs: [
@@ -158,8 +157,8 @@ describe('createRestRoutes', () => {
         .get('/')
         .query({ query: 'query GetUsers { users { name } }' });
       expect(getResponse.headers['cache-control']).toBe(undefined);
-    }
-  );
+    });
+  });
 });
 
 describe('createRestRoutes: content', () => {

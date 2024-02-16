@@ -79,9 +79,8 @@ describe('createRestRoutes', () => {
     'delete',
     'options'
   ];
-  test.each(methodsWithoutCacheControlHeader)(
-    'Should do not have response Cache-Control header if method is %s',
-    async (methodWithoutCacheControlHeader) => {
+  methodsWithoutCacheControlHeader.forEach((methodWithoutCacheControlHeader) => {
+    test(`Should do not have response Cache-Control header if method is ${methodWithoutCacheControlHeader}`, async () => {
       const server = createServer({
         rest: {
           configs: [
@@ -96,8 +95,8 @@ describe('createRestRoutes', () => {
 
       const response = await request(server)[methodWithoutCacheControlHeader]('/users');
       expect(response.headers['cache-control']).toBe(undefined);
-    }
-  );
+    });
+  });
 });
 
 describe('createRestRoutes: content', () => {
