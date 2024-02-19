@@ -1,11 +1,11 @@
 import type { Express } from 'express';
 import express from 'express';
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 import request from 'supertest';
 
 import { createDatabaseRoutes } from '@/core/database';
+import { createTmpDir } from '@/utils/helpers/tests';
 import type { DatabaseConfig, MockServerConfig } from '@/utils/types';
 
 import { findIndexById } from './helpers';
@@ -57,7 +57,7 @@ describe('createDatabaseRoutes', () => {
     let server: Express;
 
     beforeAll(() => {
-      tmpDirPath = fs.mkdtempSync(`${os.tmpdir()}${path.sep}`);
+      tmpDirPath = createTmpDir();
 
       const pathToData = path.join(tmpDirPath, './data.json') as `${string}.json`;
       fs.writeFileSync(pathToData, JSON.stringify(data));

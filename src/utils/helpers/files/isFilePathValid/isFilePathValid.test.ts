@@ -1,6 +1,7 @@
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
+
+import { createTmpDir } from '../../tests';
 
 import { isFilePathValid } from './isFilePathValid';
 
@@ -8,7 +9,7 @@ describe('isFilePathValid', () => {
   let tmpDirPath: string;
 
   beforeEach(() => {
-    tmpDirPath = fs.mkdtempSync(`${os.tmpdir()}${path.sep}`);
+    tmpDirPath = createTmpDir();
   });
 
   afterEach(() => {
