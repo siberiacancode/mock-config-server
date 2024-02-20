@@ -26,7 +26,7 @@ describe('validateSettings', () => {
       );
     });
 
-    const incorrectStatusValues = ['string', true, null, [], () => {}];
+    const incorrectStatusValues = ['string', true, null, [], () => {}, 199, 600];
     incorrectStatusValues.forEach((incorrectStatusValue) => {
       expect(() => validateSettings({ status: incorrectStatusValue })).toThrow(
         new Error('settings.status')

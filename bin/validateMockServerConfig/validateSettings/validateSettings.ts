@@ -11,7 +11,11 @@ const validateSetting = (setting: unknown, settingName: string) => {
     throw new Error('delay');
   }
 
-  if (settingName === 'status' && typeof setting !== 'number') {
+  if (
+    settingName === 'status' &&
+    (typeof setting !== 'number' ||
+      (typeof setting === 'number' && !(setting >= 200 && setting <= 599)))
+  ) {
     throw new Error('status');
   }
 };

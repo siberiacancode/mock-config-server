@@ -196,6 +196,33 @@ describe('createRestRoutes: content', () => {
 });
 
 describe('createRestRoutes: settings', () => {
+  test('Should correctly set delay into response with delay setting', async () => {
+    const delay = 1000;
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { delay },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const startTime = Date.now();
+    const response = await request(server).get('/users');
+    const endTime = Date.now();
+
+    expect(endTime - startTime).toBeGreaterThanOrEqual(delay);
+    expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
+  });
+
   test('Should correctly set statusCode into response with status setting', async () => {
     const server = createServer({
       rest: {

@@ -101,11 +101,11 @@ export type GraphQLEntitiesByEntityName = {
   [EntityName in GraphQLEntityName]?: GraphQLEntityDescriptorOrValue<EntityName>;
 };
 
-type GraphQLSettings = {
+interface GraphQLSettings {
   readonly polling?: boolean;
   readonly status?: number;
   readonly delay?: number;
-};
+}
 
 export type GraphQLRouteConfig<Settings extends GraphQLSettings = GraphQLSettings> = (
   | {
