@@ -137,17 +137,11 @@ export const validateRoutes = (routes: unknown, method: RestMethod) => {
         const isRouteHasDataProperty = 'data' in route;
         const isRouteHasQueueProperty = 'queue' in route;
 
-        if (!isRouteHasFileProperty && !isRouteHasDataProperty && !isRouteHasQueueProperty) {
-          throw new Error(`routes[${index}]`);
-        }
-
-        if (isRouteHasFileProperty && isRouteHasDataProperty && isRouteHasQueueProperty) {
-          throw new Error(`routes[${index}]`);
-        }
-
-        // ✅ important:
-        // if two of three properties is exist then throw Error
-        if (!((isRouteHasFileProperty !== isRouteHasDataProperty) !== isRouteHasQueueProperty)) {
+        const dataResolvingPropertiesCount =
+          Number(isRouteHasFileProperty) +
+          Number(isRouteHasDataProperty) +
+          Number(isRouteHasQueueProperty);
+        if (dataResolvingPropertiesCount !== 1) {
           throw new Error(`routes[${index}]`);
         }
 

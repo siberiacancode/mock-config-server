@@ -190,7 +190,7 @@ export const createGraphQLRoutes = ({
       }
     });
 
-    return response.status(response.statusCode).json(data);
+    return response.json(data);
   };
 
   router.route('/').get(asyncHandler(graphqlMiddleware));

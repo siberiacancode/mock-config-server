@@ -163,8 +163,6 @@ export const createRestRoutes = ({
           }
         });
 
-        response.status(response.statusCode);
-
         if ('file' in matchedRouteConfig) {
           return response.sendFile(path.resolve(matchedRouteConfig.file));
         }
