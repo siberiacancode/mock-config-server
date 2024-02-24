@@ -231,4 +231,42 @@ describe('prepareGraphQLRequestConfigs', () => {
       expectedGraphQLRequestConfigs
     );
   });
+
+  test('Should set descriptor variables without value weight equals to one', () => {
+    const graphQLRequestConfigs: GraphQLRequestConfig[] = [
+      {
+        operationName: 'GetUser',
+        operationType: 'query',
+        routes: [
+          {
+            entities: {
+              variables: {
+                checkMode: 'exists'
+              }
+            },
+            data: { name: 'John', surname: 'Doe' }
+          },
+          {
+            entities: {
+              variables: {
+                checkMode: 'notExists'
+              }
+            },
+            data: { name: 'John', surname: 'Doe' }
+          },
+          {
+            entities: {
+              headers: {
+                header1: 'value'
+              }
+            },
+            data: { name: 'John', surname: 'Doe' }
+          }
+        ]
+      }
+    ];
+    expect(prepareGraphQLRequestConfigs(graphQLRequestConfigs)).toStrictEqual(
+      graphQLRequestConfigs
+    );
+  });
 });

@@ -215,4 +215,40 @@ describe('prepareRestRequestConfigs', () => {
     ];
     expect(prepareRestRequestConfigs(restRequestConfigs)).toStrictEqual(expectedRestRequestConfigs);
   });
+
+  test('Should set descriptor body without value weight equals to one', () => {
+    const restRequestConfigs: RestRequestConfig[] = [
+      {
+        path: '/user',
+        method: 'post',
+        routes: [
+          {
+            entities: {
+              body: {
+                checkMode: 'exists'
+              }
+            },
+            data: { name: 'John', surname: 'Doe' }
+          },
+          {
+            entities: {
+              body: {
+                checkMode: 'notExists'
+              }
+            },
+            data: { name: 'John', surname: 'Doe' }
+          },
+          {
+            entities: {
+              headers: {
+                header1: 'value'
+              }
+            },
+            data: { name: 'John', surname: 'Doe' }
+          }
+        ]
+      }
+    ];
+    expect(prepareRestRequestConfigs(restRequestConfigs)).toStrictEqual(restRequestConfigs);
+  });
 });

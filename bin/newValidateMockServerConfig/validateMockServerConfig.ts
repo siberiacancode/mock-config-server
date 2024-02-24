@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
-import { getMostSpecificPathFromError, getValidationMessageFromPath } from '@/utils/helpers';
-
 import type { PlainObject } from '../../src';
+import { getMostSpecificPathFromError, getValidationMessageFromPath } from '../helpers';
 
 import { baseUrlSchema } from './baseUrlSchema/baseUrlSchema';
 import { corsSchema } from './corsSchema/corsSchema';

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
+    "noEmit": true,
     "target": "esnext",
     "allowJs": true,
     "skipLibCheck": true,
@@ -20,5 +20,6 @@
     "paths": {
       "mock-config-server": ["./dist"]
     }
-  }
+  },
+  "include": ["./**/*.ts"]
 }

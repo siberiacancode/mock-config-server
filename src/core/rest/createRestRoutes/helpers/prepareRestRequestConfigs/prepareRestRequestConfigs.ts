@@ -15,7 +15,7 @@ const calculateRouteConfigWeight = (restRouteConfig: RestRouteConfig<RestMethod>
   if (body) {
     if (isPlainObject(body) && body.checkMode) {
       // ✅ important:
-      // check actual value check modes does not have `value` for compare
+      // check that actual value check modes does not have `value` for compare
       if (body.checkMode === 'exists' || body.checkMode === 'notExists') {
         routeConfigWeight += 1;
         return routeConfigWeight;
