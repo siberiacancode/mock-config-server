@@ -312,9 +312,9 @@ describe('createRestRoutes: settings', () => {
     const query = {
       query: 'query GetUsers { users { name } }'
     };
-    const startTime = Date.now();
+    const startTime = performance.now();
     const response = await request(server).get('/').query(query);
-    const endTime = Date.now();
+    const endTime = performance.now();
 
     expect(endTime - startTime).toBeGreaterThanOrEqual(delay);
     expect(response.body).toEqual({ name: 'John', surname: 'Doe' });

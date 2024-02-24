@@ -12,21 +12,21 @@ describe('validateSettings', () => {
       expect(() => validateSettings(incorrectSettingsValue)).toThrow(new Error('settings'));
     });
 
-    const incorrectPollingValues = ['string', 3000, null, [], () => {}];
+    const incorrectPollingValues = ['string', 3000, null, [], () => {}, {}];
     incorrectPollingValues.forEach((incorrectPollingValue) => {
       expect(() => validateSettings({ polling: incorrectPollingValue })).toThrow(
         new Error('settings.polling')
       );
     });
 
-    const incorrectDelayValues = ['string', true, null, [], () => {}];
+    const incorrectDelayValues = ['string', true, null, [], () => {}, {}];
     incorrectDelayValues.forEach((incorrectDelayValue) => {
       expect(() => validateSettings({ delay: incorrectDelayValue })).toThrow(
         new Error('settings.delay')
       );
     });
 
-    const incorrectStatusValues = ['string', true, null, [], () => {}, 199, 600];
+    const incorrectStatusValues = ['string', true, null, [], () => {}, 199, 600, {}];
     incorrectStatusValues.forEach((incorrectStatusValue) => {
       expect(() => validateSettings({ status: incorrectStatusValue })).toThrow(
         new Error('settings.status')

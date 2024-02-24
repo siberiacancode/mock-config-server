@@ -13,8 +13,7 @@ const validateSetting = (setting: unknown, settingName: string) => {
 
   if (
     settingName === 'status' &&
-    (typeof setting !== 'number' ||
-      (typeof setting === 'number' && !(setting >= 200 && setting <= 599)))
+    (typeof setting !== 'number' || !(setting >= 200 && setting <= 599))
   ) {
     throw new Error('status');
   }
