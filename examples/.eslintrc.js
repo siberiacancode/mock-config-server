@@ -21,7 +21,8 @@ module.exports = {
         '@typescript-eslint/naming-convention': 'off',
         'no-underscore-dangle': 'off',
         'no-restricted-syntax': 'off',
-        'promise/always-return': ['error', { ignoreLastCallback: true }]
+        'promise/always-return': ['error', { ignoreLastCallback: true }],
+        'arrow-body-style': ['error', 'as-needed']
       }
     }
   ]

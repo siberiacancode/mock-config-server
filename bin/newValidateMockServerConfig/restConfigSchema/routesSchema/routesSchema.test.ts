@@ -2,8 +2,8 @@ import { getMostSpecificPathFromError, getValidationMessageFromPath } from '../.
 
 import { routeConfigSchema } from './routesSchema';
 
-describe('routeConfigSchema: data and queue combinations', () => {
-  test('Should return correct error path on handle object without data and queue properties', () => {
+describe('routeConfigSchema: data resolving properties combinations', () => {
+  test('Should return correct error path on handle object without data resolving properties', () => {
     const schema = routeConfigSchema('get');
 
     const incorrectRouteConfig = {
@@ -19,11 +19,12 @@ describe('routeConfigSchema: data and queue combinations', () => {
     }
   });
 
-  test('Should return correct error path on handle object with data and queue properties', () => {
+  test('Should return correct error path on handle object with more than one data resolving properties', () => {
     const schema = routeConfigSchema('get');
 
     const incorrectRouteConfig = {
       data: {},
+      file: 'data.json',
       queue: [],
       settings: { polling: true }
     };
@@ -37,7 +38,7 @@ describe('routeConfigSchema: data and queue combinations', () => {
     }
   });
 
-  test('Should return correct error path on handle object with only data or queue properties', () => {
+  test('Should return correct error path on handle object with only one data resolving property', () => {
     const schema = routeConfigSchema('get');
 
     const dataIncorrectRouteConfig = {
@@ -63,6 +64,19 @@ describe('routeConfigSchema: data and queue combinations', () => {
 
     if (!queueParseResult.success) {
       const path = getMostSpecificPathFromError(queueParseResult.error);
+      const validationMessage = getValidationMessageFromPath(path);
+      expect(validationMessage).toBe('.entities');
+    }
+
+    const fileIncorrectRouteConfig = {
+      entities: null,
+      file: 'data.json'
+    };
+    const fileParseResult = schema.safeParse(fileIncorrectRouteConfig);
+    expect(fileParseResult.success).toBe(false);
+
+    if (!fileParseResult.success) {
+      const path = getMostSpecificPathFromError(fileParseResult.error);
       const validationMessage = getValidationMessageFromPath(path);
       expect(validationMessage).toBe('.entities');
     }

@@ -2,8 +2,8 @@ import { getMostSpecificPathFromError, getValidationMessageFromPath } from '../.
 
 import { routeConfigSchema } from './routesSchema';
 
-describe('routeConfigSchema: data and queue combinations', () => {
-  test('Should return correct error path on handle object without data and queue properties', () => {
+describe('routeConfigSchema: data resolving properties combinations', () => {
+  test('Should return correct error path on handle object without data resolving properties', () => {
     const incorrectRouteConfig = {
       settings: { polling: true }
     };
@@ -17,7 +17,7 @@ describe('routeConfigSchema: data and queue combinations', () => {
     }
   });
 
-  test('Should return correct error path on handle object with data and queue properties', () => {
+  test('Should return correct error path on handle object with more than one data resolving properties', () => {
     const incorrectRouteConfig = {
       data: {},
       queue: [],
@@ -33,7 +33,7 @@ describe('routeConfigSchema: data and queue combinations', () => {
     }
   });
 
-  test('Should return correct error path on handle object with only data or queue properties', () => {
+  test('Should return correct error path on handle object with only one data resolving property', () => {
     const dataIncorrectRouteConfig = {
       entities: null,
       data: {}

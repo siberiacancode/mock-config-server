@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { isPlainObject } from '@/utils/helpers';
 
+import { isOnlyRequestedDataResolvingPropertyExists } from '../../../helpers';
 import { interceptorsSchema } from '../../interceptorsSchema/interceptorsSchema';
 import { queueSchema } from '../../queueSchema/queueSchema';
 import { settingsSchema } from '../../settingsSchema/settingsSchema';
@@ -21,7 +22,9 @@ const baseRouteConfigSchema = z.strictObject({
 
 const dataRouteConfigSchema = z
   .strictObject({
-    settings: settingsSchema.extend({ polling: z.literal(false) }).optional(),
+    settings: nonRegExpSchema(
+      settingsSchema.extend({ polling: z.literal(false).optional() })
+    ).optional(),
     data: z.union([z.function(), z.any()])
   })
   .merge(baseRouteConfigSchema);
@@ -35,9 +38,13 @@ const queueRouteConfigSchema = z
 
 export const routeConfigSchema = z.union([
   z
-    .custom((value) => isPlainObject(value) && 'data' in value && !('queue' in value))
+    .custom(
+      (value) => isPlainObject(value) && isOnlyRequestedDataResolvingPropertyExists(value, 'data')
+    )
     .pipe(dataRouteConfigSchema),
   z
-    .custom((value) => isPlainObject(value) && 'queue' in value && !('data' in value))
+    .custom(
+      (value) => isPlainObject(value) && isOnlyRequestedDataResolvingPropertyExists(value, 'queue')
+    )
     .pipe(queueRouteConfigSchema)
 ]);

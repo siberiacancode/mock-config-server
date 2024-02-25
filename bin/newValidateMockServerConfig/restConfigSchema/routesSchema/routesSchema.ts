@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { isPlainObject } from '@/utils/helpers';
 import type { RestMethod } from '@/utils/types';
 
+import { isOnlyRequestedDataResolvingPropertyExists } from '../../../helpers';
 import { interceptorsSchema } from '../../interceptorsSchema/interceptorsSchema';
 import { queueSchema } from '../../queueSchema/queueSchema';
 import { settingsSchema } from '../../settingsSchema/settingsSchema';
@@ -31,7 +32,19 @@ const baseRouteConfigSchema = (method: RestMethod) =>
 const dataRouteConfigSchema = (method: RestMethod) =>
   z
     .strictObject({
-      settings: settingsSchema.extend({ polling: z.literal(false) }).optional(),
+      settings: nonRegExpSchema(
+        settingsSchema.extend({ polling: z.literal(false).optional() })
+      ).optional(),
+      data: z.union([z.function(), z.any()])
+    })
+    .merge(baseRouteConfigSchema(method));
+
+const fileRouteConfigSchema = (method: RestMethod) =>
+  z
+    .strictObject({
+      settings: nonRegExpSchema(
+        settingsSchema.extend({ polling: z.literal(false).optional() })
+      ).optional(),
       data: z.union([z.function(), z.any()])
     })
     .merge(baseRouteConfigSchema(method));
@@ -47,9 +60,19 @@ const queueRouteConfigSchema = (method: RestMethod) =>
 export const routeConfigSchema = (method: RestMethod) =>
   z.union([
     z
-      .custom((value) => isPlainObject(value) && 'data' in value && !('queue' in value))
+      .custom(
+        (value) => isPlainObject(value) && isOnlyRequestedDataResolvingPropertyExists(value, 'data')
+      )
       .pipe(dataRouteConfigSchema(method)),
     z
-      .custom((value) => isPlainObject(value) && 'queue' in value && !('data' in value))
+      .custom(
+        (value) => isPlainObject(value) && isOnlyRequestedDataResolvingPropertyExists(value, 'file')
+      )
+      .pipe(fileRouteConfigSchema(method)),
+    z
+      .custom(
+        (value) =>
+          isPlainObject(value) && isOnlyRequestedDataResolvingPropertyExists(value, 'queue')
+      )
       .pipe(queueRouteConfigSchema(method))
   ]);
