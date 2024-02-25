@@ -6,7 +6,7 @@ import { baseUrlSchema } from '../baseUrlSchema/baseUrlSchema';
 import { interceptorsSchema } from '../interceptorsSchema/interceptorsSchema';
 import { nonRegExpSchema } from '../utils';
 
-import { routeConfigSchema } from './routesSchema/routesSchema';
+import { routeConfigSchema } from './routeConfigSchema/routeConfigSchema';
 
 const baseRequestConfigSchema = z.strictObject({
   operationType: z.enum(['query', 'mutation']),

@@ -1,6 +1,6 @@
 import { getMostSpecificPathFromError, getValidationMessageFromPath } from '../../../helpers';
 
-import { routeConfigSchema } from './routesSchema';
+import { routeConfigSchema } from './routeConfigSchema';
 
 describe('routeConfigSchema: data resolving properties combinations', () => {
   test('Should return correct error path on handle object without data resolving properties', () => {
