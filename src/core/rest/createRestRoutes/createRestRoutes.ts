@@ -7,7 +7,8 @@ import {
   callResponseInterceptors,
   convertToEntityDescriptor,
   isEntityDescriptor,
-  resolveEntityValues
+  resolveEntityValues,
+  sleep
 } from '@/utils/helpers';
 import type {
   Entries,
@@ -140,6 +141,10 @@ export const createRestRoutes = ({
             ? await matchedRouteConfigData(request, matchedRouteConfig.entities ?? {})
             : matchedRouteConfigData;
 
+        if (matchedRouteConfig.settings?.status) {
+          response.statusCode = matchedRouteConfig.settings.status;
+        }
+
         const data = await callResponseInterceptors({
           data: resolvedData,
           request,
@@ -151,6 +156,10 @@ export const createRestRoutes = ({
             serverInterceptor: serverResponseInterceptor
           }
         });
+
+        if (matchedRouteConfig.settings?.delay) {
+          await sleep(matchedRouteConfig.settings.delay);
+        }
 
         // ✅ important:
         // set 'Cache-Control' header for explicit browsers response revalidate

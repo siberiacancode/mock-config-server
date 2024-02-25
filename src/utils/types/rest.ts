@@ -100,6 +100,8 @@ export type RestEntitiesByEntityName<Method extends RestMethod = RestMethod> = {
 
 interface RestSettings {
   readonly polling?: boolean;
+  readonly status?: number;
+  readonly delay?: number;
 }
 
 export type RestRouteConfig<
@@ -115,7 +117,7 @@ export type RestRouteConfig<
       }>;
     }
   | {
-      settings?: Settings & { polling: false };
+      settings?: Settings & { polling?: false };
       data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
     }
 ) & { entities?: Entities; interceptors?: Pick<Interceptors, 'response'> };

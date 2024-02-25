@@ -193,10 +193,82 @@ describe('createRestRoutes: content', () => {
 
     jest.useRealTimers();
   });
+
+  test('Should correct handle empty queue with polling setting', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { polling: true },
+                queue: []
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+    expect(response.statusCode).toBe(404);
+  });
 });
 
 describe('createRestRoutes: settings', () => {
-  test('Should correctly process the request with polling', async () => {
+  test('Should correctly set delay into response with delay setting', async () => {
+    const delay = 1000;
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { delay },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const startTime = performance.now();
+    const response = await request(server).get('/users');
+    const endTime = performance.now();
+
+    expect(endTime - startTime).toBeGreaterThanOrEqual(delay);
+    expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
+  });
+
+  test('Should correctly set statusCode into response with status setting', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { status: 500 },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+    expect(response.statusCode).toBe(500);
+    expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
+  });
+
+  test('Should correctly process the request with polling setting', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -228,28 +300,6 @@ describe('createRestRoutes: settings', () => {
     const thirdResponse = await request(server).get('/users');
     expect(thirdResponse.statusCode).toBe(200);
     expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Doe' });
-  });
-
-  test('Should correct handle empty queue', async () => {
-    const server = createServer({
-      rest: {
-        configs: [
-          {
-            path: '/users',
-            method: 'get',
-            routes: [
-              {
-                settings: { polling: true },
-                queue: []
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const response = await request(server).get('/users');
-    expect(response.statusCode).toBe(404);
   });
 });
 
