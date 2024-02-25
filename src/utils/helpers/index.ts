@@ -1,6 +1,7 @@
 export * from './asyncHandler';
 export * from './config';
 export * from './entities';
+export * from './files';
 export * from './graphql';
 export * from './interceptors';
 export * from './isPlainObject/isPlainObject';

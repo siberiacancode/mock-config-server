@@ -1,6 +1,7 @@
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
+
+import { createTmpDir } from '@/utils/helpers/tests';
 
 import { FileStorage } from './FileStorage';
 import { FileWriter } from './FileWriter';
@@ -20,7 +21,7 @@ describe('FileStorage', () => {
     let fileStorage: FileStorage;
 
     beforeAll(() => {
-      tmpDirPath = fs.mkdtempSync(os.tmpdir());
+      tmpDirPath = createTmpDir();
       initialData = createInitialData();
 
       const pathToFileStorage = path.join(tmpDirPath, './database.json');
@@ -52,7 +53,7 @@ describe('FileStorage', () => {
     let fileStorage: FileStorage;
 
     beforeEach(() => {
-      tmpDirPath = fs.mkdtempSync(os.tmpdir());
+      tmpDirPath = createTmpDir();
       initialData = createInitialData();
 
       const pathToFileStorage = path.join(tmpDirPath, './database.json');
@@ -105,7 +106,7 @@ describe('FileStorage', () => {
     let fileStorage: FileStorage;
 
     beforeEach(() => {
-      tmpDirPath = fs.mkdtempSync(os.tmpdir());
+      tmpDirPath = createTmpDir();
       initialData = createInitialData();
 
       const pathToFileStorage = path.join(tmpDirPath, './database.json');

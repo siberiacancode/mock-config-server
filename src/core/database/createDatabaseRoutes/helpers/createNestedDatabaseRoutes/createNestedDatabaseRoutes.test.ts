@@ -47,7 +47,7 @@ describe('CreateNestedDatabaseRoutes', () => {
     test('Should return correct Cache-Control header for valid key', async () => {
       const response = await request(server).get('/users');
 
-      expect(response.headers['cache-control']).toBe('max-age=0, must-revalidate');
+      expect(response.headers['cache-control']).toBe('no-cache');
     });
   });
 
@@ -91,7 +91,7 @@ describe('CreateNestedDatabaseRoutes', () => {
     test('Should correct Cache-Control header for valid key and id', async () => {
       const response = await request(server).get('/users/1');
 
-      expect(response.headers['cache-control']).toBe('max-age=0, must-revalidate');
+      expect(response.headers['cache-control']).toBe('no-cache');
     });
 
     test('Should return 404 for non-existent id', async () => {

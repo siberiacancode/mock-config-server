@@ -88,21 +88,30 @@ Configs are the fundamental part of the mock server. These configs are easy to f
 
 ##### Rest request config
 
+Every route must be configured to handle response content in one of three ways: data or [queue](#polling) or [file](#file-responses).
+
 - `path` {string | RegExp} request path
-- `method` {GET | POST | DELETE | PUT | PATCH} rest api method
+- `method` {get | post | delete | put | patch | options} rest api method
 - `routes` {RestRouteConfig[]} request routes
-  - `data` {any} mock data of request
+  - `data?` {any} mock data of request
+  - `queue?` {Array<{ time?: number; data: any}>} queue for polling with opportunity to set time for each response
+  - `file?` {string} path to file for return in response
+  - `settings?` {Settings} settings for route (polling on/off, etc.)
   - `entities?` Object<headers | cookies | query | params | body> object that helps in data retrieval
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 
 ##### GraphQL request config
 
+Every route must be configured to handle response content in one of two ways: data or [queue](#polling).
+
 - `operationType` {query | mutation} graphql operation type
 - `operationName?` {string | RegExp} graphql operation name
 - `query?`: {string} graphql query as string
 - `routes` {GraphQLRouteConfig[]} request routes
-  - `data` {any} mock data of request
+  - `data?` {any} mock data of request
+  - `queue?` {Array<{ time?: number; data: any}>} queue for polling with opportunity to set time for each response
+  - `settings?` {Settings} settings for route (polling on/off, etc.)
   - `entities?` Object<headers | cookies | query | variables> object that helps in data retrieval
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
@@ -472,6 +481,66 @@ const mockServerConfig = {
 
 export default mockServerConfig;
 ```
+
+#### File responses
+
+Rest routes support paths to files. If a route is matched, the server will send data from the file. If the file is not found, the server will return 404.
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/files/settings',
+        method: 'get',
+        routes: [
+          {
+            file: './settings.json'
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export default mockServerConfig;
+```
+
+> If the file path is absolute, then this path will be used as is. If the file path is relative, it will be appended to the current working directory.
+
+If the file exists, response interceptors will receive null as the data argument.
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/files/settings',
+        method: 'get',
+        routes: [
+          {
+            file: './settings.json',
+            interceptors: {
+              response: (data) => {
+                console.log(data); // null
+                return data;
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export default mockServerConfig;
+```
+
+> Any changes to the data will not affect the file (and the response, respectively).
 
 #### Static Path
 
