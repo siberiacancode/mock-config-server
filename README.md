@@ -730,6 +730,10 @@ Examples:
   mcs --help
 ```
 
+# Init Command
+
+The init command is used to initialize a new project or set up the initial configuration for a tool. It helps users get started with a new project by providing a streamlined setup process.
+
 ```
 mcs init
 

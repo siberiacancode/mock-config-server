@@ -5,7 +5,7 @@ import type { MockServerConfigArgv } from '@/utils/types';
 
 import { validateBaseUrl } from './validateMockServerConfig/validateBaseUrl/validateBaseUrl';
 import { validatePort } from './validateMockServerConfig/validatePort/validatePort';
-import { renderTemplate } from './helpers';
+import { createTemplate } from './helpers';
 
 export const init = async (argv: MockServerConfigArgv) => {
   try {
@@ -33,7 +33,7 @@ export const init = async (argv: MockServerConfigArgv) => {
         {
           name: 'baseUrl',
           type: argv.baseUrl ? null : 'text',
-          message: 'Base url:',
+          message: 'Base url (must start with a forward slash):',
           initial: '/',
           validate: (baseUrl) => {
             try {
@@ -66,7 +66,7 @@ export const init = async (argv: MockServerConfigArgv) => {
       }
     );
 
-    await renderTemplate({ ...argv, ...response });
+    await createTemplate({ ...argv, ...response });
     const userAgent = process.env.npm_config_user_agent ?? '';
     // eslint-disable-next-line no-nested-ternary
     const packageManager = /pnpm/.test(userAgent)

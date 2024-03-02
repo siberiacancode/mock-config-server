@@ -164,7 +164,6 @@ Temporary Items
 dist
 mock-server.config.*
 !bin/templates/**/mock-server.config.*
-mock-server-build
 
 
 # Logs

@@ -1,6 +1,6 @@
-import * as fs from 'node:fs';
+import fs from 'node:fs';
 
-import { DEFAULT } from '@/utils/constants';
+import { APP_PATH, DEFAULT } from '@/utils/constants';
 
 interface RenderTemplateOptions {
   withTypescript: boolean;
@@ -9,26 +9,25 @@ interface RenderTemplateOptions {
   apiType: 'rest' | 'graphql' | 'full';
 }
 
-export const renderTemplate = (options: RenderTemplateOptions) => {
+export const createTemplate = (options: RenderTemplateOptions) => {
   const language = options.withTypescript ? 'ts' : 'js';
   const templatePath = `dist/bin/templates/${language}/${options.apiType}`;
-  const appPath = process.cwd();
 
-  fs.cpSync(`${templatePath}/mock-requests`, `${appPath}/mock-requests`, { recursive: true });
+  fs.cpSync(`${templatePath}/mock-requests`, `${APP_PATH}/mock-requests`, { recursive: true });
 
   let mockServerConfig = fs.readFileSync(`${templatePath}/mock-server.config.${language}`, 'utf8');
 
-  if (options.port !== DEFAULT.PORT) {
+  if (options.port) {
     mockServerConfig = mockServerConfig.replace(`${DEFAULT.PORT}`, options.port.toString());
   } else {
     mockServerConfig = mockServerConfig.replace(new RegExp(`\\n\\s*port: ${DEFAULT.PORT},`), '');
   }
 
-  if (options.baseUrl !== '/') {
+  if (options.baseUrl) {
     mockServerConfig = mockServerConfig.replace("'/'", `'${options.baseUrl}'`);
   } else {
     mockServerConfig = mockServerConfig.replace(/\n\s*baseUrl: '\/',/, '');
   }
 
-  fs.writeFileSync(`${appPath}/mock-server.config.${language}`, mockServerConfig);
+  fs.writeFileSync(`${APP_PATH}/mock-server.config.${language}`, mockServerConfig);
 };
