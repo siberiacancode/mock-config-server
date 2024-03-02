@@ -288,7 +288,7 @@ describe('CreateNestedDatabaseRoutes', () => {
     });
 
     test('Should return filtered array by new operator', async () => {
-      const response = await request(server).get('/users?name_new=a=J');
+      const response = await request(server).get('/users?name_new=a');
 
       expect(response.body).toStrictEqual(nestedDatabase.users);
     });

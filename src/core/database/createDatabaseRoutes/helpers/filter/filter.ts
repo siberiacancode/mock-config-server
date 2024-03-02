@@ -18,23 +18,23 @@ const OPERATORS = {
 const OPERATORS_KEYS = Object.keys(OPERATORS);
 
 const getEntities = (object: any, key: string) => {
-  const [element, operator] = key.split('_');
+  const parts = key.match(new RegExp(`^(.+)_(${Object.keys(OPERATORS).join('|')})?$`));
+
+  if (parts) {
+    const [, element, operator] = parts;
+    return {
+      element: object[element],
+      operator
+    };
+  }
 
   return {
-    element: object[element],
-    operator
+    element: object[key]
   };
 };
 const filtered = (element: any, value: any, operator?: string) => {
   if (!operator || !OPERATORS_KEYS.includes(operator)) return `${element}` === value;
 
-  console.log(
-    '@',
-    element,
-    value,
-    operator,
-    OPERATORS[operator as keyof typeof OPERATORS](element, value)
-  );
   return OPERATORS[operator as keyof typeof OPERATORS](element, value);
 };
 

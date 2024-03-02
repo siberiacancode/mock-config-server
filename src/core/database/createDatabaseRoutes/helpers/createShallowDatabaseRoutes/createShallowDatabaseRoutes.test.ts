@@ -154,6 +154,14 @@ describe('createShallowDatabaseRoutes', () => {
       ]);
     });
 
+    test('Should return filtered array by neq operator', async () => {
+      const response = await request(server).get('/users?age_neq=25');
+
+      expect(response.body).toStrictEqual([
+        { name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+    });
+
     test('Should return filtered array by gt operator', async () => {
       const response = await request(server).get('/users?age_gt=25');
 
