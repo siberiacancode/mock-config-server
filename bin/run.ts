@@ -13,18 +13,19 @@ export const run = (mockConfig: MockServerConfig, argv: MockServerConfigArgv) =>
     const mergedMockServerConfig = { ...mockConfig, ...argv } as MockServerConfig;
 
     if (
-      (!mergedMockServerConfig.rest || !mergedMockServerConfig.graphql) &&
+      !mergedMockServerConfig.rest &&
+      !mergedMockServerConfig.graphql &&
       'configs' in mergedMockServerConfig
     ) {
       const mergedApiMockServerConfig = mergedMockServerConfig as
         | RestMockServerConfig
         | GraphQLMockServerConfig;
-      validateApiMockServerConfig(mergedApiMockServerConfig);
 
       if (
         mergedApiMockServerConfig.configs?.at(0) &&
         'path' in mergedApiMockServerConfig.configs[0]
       ) {
+        validateApiMockServerConfig(mergedApiMockServerConfig, 'rest');
         return startRestMockServer(mergedApiMockServerConfig as RestMockServerConfig);
       }
 
@@ -33,9 +34,11 @@ export const run = (mockConfig: MockServerConfig, argv: MockServerConfigArgv) =>
         ('operationName' in mergedApiMockServerConfig.configs[0] ||
           'query' in mergedApiMockServerConfig.configs[0])
       ) {
+        validateApiMockServerConfig(mergedApiMockServerConfig, 'graphql');
         return startGraphQLMockServer(mergedApiMockServerConfig as GraphQLMockServerConfig);
       }
 
+      validateApiMockServerConfig(mergedApiMockServerConfig, 'rest');
       return startRestMockServer(mergedApiMockServerConfig as RestMockServerConfig);
     }
 

@@ -18,13 +18,16 @@ export const createTemplate = (options: RenderTemplateOptions) => {
   let mockServerConfig = fs.readFileSync(`${templatePath}/mock-server.config.${language}`, 'utf8');
 
   if (options.port) {
-    mockServerConfig = mockServerConfig.replace(`${DEFAULT.PORT}`, options.port.toString());
+    mockServerConfig = mockServerConfig.replace(
+      new RegExp(`port: ${DEFAULT.PORT}`),
+      `port: ${options.port.toString()}`
+    );
   } else {
     mockServerConfig = mockServerConfig.replace(new RegExp(`\\n\\s*port: ${DEFAULT.PORT},`), '');
   }
 
   if (options.baseUrl) {
-    mockServerConfig = mockServerConfig.replace("'/'", `'${options.baseUrl}'`);
+    mockServerConfig = mockServerConfig.replace(/baseUrl: '\/'/, `baseUrl: '${options.baseUrl}'`);
   } else {
     mockServerConfig = mockServerConfig.replace(/\n\s*baseUrl: '\/',/, '');
   }
