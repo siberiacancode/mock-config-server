@@ -7,6 +7,7 @@ import type { MemoryStorage } from '../../storages';
 import { createNewId, findIndexById } from '../array';
 import { filter } from '../filter/filter';
 import { pagination } from '../pagination/pagination';
+import { search } from '../search/search';
 import { sort } from '../sort/sort';
 
 export const createNestedDatabaseRoutes = (
@@ -22,8 +23,12 @@ export const createNestedDatabaseRoutes = (
       let data = storage.read(key);
 
       if (request.query && Object.keys(request.query).length) {
-        const { _page, _limit, _begin, _end, _sort, _order, ...filters } = request.query;
+        const { _page, _limit, _begin, _end, _sort, _order, q, ...filters } = request.query;
         data = filter(data, filters as ParsedUrlQuery);
+      }
+
+      if (request.query?.q) {
+        data = search(data, request.query.q as ParsedUrlQuery);
       }
 
       if (request.query?._page) {
