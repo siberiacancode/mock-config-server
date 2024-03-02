@@ -18,13 +18,13 @@ const OPERATORS = {
 const OPERATORS_KEYS = Object.keys(OPERATORS);
 
 const getEntities = (object: any, key: string) => {
-  const parts = key.match(new RegExp(`^(.+)_(${Object.keys(OPERATORS).join('|')})?$`));
+  const parts = key.match(new RegExp(`^(.+)_(${OPERATORS_KEYS.join('|')})$`));
 
   if (parts) {
     const [, element, operator] = parts;
     return {
       element: object[element],
-      operator
+      operator: operator as keyof typeof OPERATORS
     };
   }
 
@@ -32,23 +32,23 @@ const getEntities = (object: any, key: string) => {
     element: object[key]
   };
 };
-const filtered = (element: any, value: any, operator?: string) => {
-  if (!operator || !OPERATORS_KEYS.includes(operator)) return `${element}` === value;
+const filtered = (element: any, value: any, operator?: keyof typeof OPERATORS) => {
+  if (!operator) return `${element}` === value;
 
-  return OPERATORS[operator as keyof typeof OPERATORS](element, value);
+  return OPERATORS[operator](element, value);
 };
 
 export const filter = (array: any[], filters: ParsedUrlQuery) =>
   array.filter((element) => {
     const flattenedElement = flatten<any, any>(element);
 
-    return Object.entries(filters).every(([key, value]) => {
-      if (Array.isArray(value)) {
+    return Object.entries(filters).every(([key, filter]) => {
+      if (Array.isArray(filter)) {
         const { element, operator } = getEntities(flattenedElement, key);
-        return value.some((value) => filtered(element, value, operator));
+        return filter.some((value) => filtered(element, value, operator));
       }
 
       const { element, operator } = getEntities(flattenedElement, key);
-      return filtered(element, value, operator);
+      return filtered(element, filter, operator);
     });
   });
