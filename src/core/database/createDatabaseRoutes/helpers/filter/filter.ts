@@ -16,9 +16,10 @@ const OPERATORS = {
 } as const;
 
 const OPERATORS_KEYS = Object.keys(OPERATORS);
+const OPERATOR_REGEXP = new RegExp(`^(.+)_(${OPERATORS_KEYS.join('|')})$`);
 
 const getEntities = (object: any, key: string) => {
-  const parts = key.match(new RegExp(`^(.+)_(${OPERATORS_KEYS.join('|')})$`));
+  const parts = key.match(OPERATOR_REGEXP);
 
   if (parts) {
     const [, element, operator] = parts;
@@ -39,16 +40,16 @@ const filtered = (element: any, value: any, operator?: keyof typeof OPERATORS) =
 };
 
 export const filter = (array: any[], filters: ParsedUrlQuery) =>
-  array.filter((element) => {
-    const flattenedElement = flatten<any, any>(element);
+  array.filter((arrayElement) => {
+    const flattenedArrayElement = flatten<any, any>(arrayElement);
 
     return Object.entries(filters).every(([key, filter]) => {
       if (Array.isArray(filter)) {
-        const { element, operator } = getEntities(flattenedElement, key);
+        const { element, operator } = getEntities(flattenedArrayElement, key);
         return filter.some((value) => filtered(element, value, operator));
       }
 
-      const { element, operator } = getEntities(flattenedElement, key);
+      const { element, operator } = getEntities(flattenedArrayElement, key);
       return filtered(element, filter, operator);
     });
   });
