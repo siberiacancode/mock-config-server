@@ -178,6 +178,11 @@ export const createGraphQLRoutes = ({
       response.statusCode = matchedRouteConfig.settings.status;
     }
 
+    // ✅ important:
+    // set 'Cache-Control' header for explicit browsers response revalidate: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+    // this code should place before response interceptors for giving opportunity to rewrite 'Cache-Control' header
+    if (matchedRequestConfig.operationType === 'query') response.set('Cache-control', 'no-cache');
+
     const data = await callResponseInterceptors({
       data: resolvedData,
       request,
@@ -194,11 +199,7 @@ export const createGraphQLRoutes = ({
       await sleep(matchedRouteConfig.settings.delay);
     }
 
-    // ✅ important:
-    // set 'Cache-Control' header for explicit browsers response revalidate
-    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-    response.set('Cache-control', 'max-age=0, must-revalidate');
-    return response.status(response.statusCode).json(data);
+    return response.json(data);
   };
 
   router.route('/').get(asyncHandler(graphqlMiddleware));

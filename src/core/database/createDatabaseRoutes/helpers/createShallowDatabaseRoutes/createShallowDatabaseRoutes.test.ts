@@ -46,7 +46,7 @@ describe('createShallowDatabaseRoutes', () => {
     test('Should return correct Cache-Control header for valid key', async () => {
       const response = await request(server).get('/john');
 
-      expect(response.headers['cache-control']).toBe('max-age=0, must-revalidate');
+      expect(response.headers['cache-control']).toBe('no-cache');
     });
   });
 

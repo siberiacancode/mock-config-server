@@ -1,8 +1,11 @@
 import express from 'express';
+import fs from 'fs';
+import path from 'path';
 import request from 'supertest';
 
 import { urlJoin } from '@/utils/helpers';
-import type { MockServerConfig, RestConfig } from '@/utils/types';
+import { createTmpDir } from '@/utils/helpers/tests';
+import type { MockServerConfig, RestConfig, RestMethod } from '@/utils/types';
 
 import { createRestRoutes } from './createRestRoutes';
 
@@ -55,7 +58,7 @@ describe('createRestRoutes', () => {
     expect(response.statusCode).toBe(404);
   });
 
-  test('Should have response Cache-Control header equals to max-age=0, must-revalidate', async () => {
+  test('Should have response Cache-Control header value equals to no-cache', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -69,7 +72,33 @@ describe('createRestRoutes', () => {
     });
 
     const response = await request(server).get('/users');
-    expect(response.headers['cache-control']).toBe('max-age=0, must-revalidate');
+    expect(response.headers['cache-control']).toBe('no-cache');
+  });
+
+  const methodsWithoutCacheControlHeader: Exclude<RestMethod, 'get'>[] = [
+    'post',
+    'put',
+    'patch',
+    'delete',
+    'options'
+  ];
+  methodsWithoutCacheControlHeader.forEach((methodWithoutCacheControlHeader) => {
+    test(`Should do not have response Cache-Control header if method is ${methodWithoutCacheControlHeader}`, async () => {
+      const server = createServer({
+        rest: {
+          configs: [
+            {
+              path: '/users',
+              method: methodWithoutCacheControlHeader,
+              routes: [{ data: { name: 'John', surname: 'Doe' } }]
+            }
+          ]
+        }
+      });
+
+      const response = await request(server)[methodWithoutCacheControlHeader]('/users');
+      expect(response.headers['cache-control']).toBe(undefined);
+    });
   });
 });
 
@@ -214,6 +243,36 @@ describe('createRestRoutes: content', () => {
 
     const response = await request(server).get('/users');
     expect(response.statusCode).toBe(404);
+  });
+
+  test('Should correctly use file property for data resolving', async () => {
+    const tmpDirPath = createTmpDir();
+    const pathToFile = path.join(tmpDirPath, './data.json') as `${string}.json`;
+    fs.writeFileSync(pathToFile, JSON.stringify({ standName: 'The World' }));
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                file: pathToFile
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+
+    expect(response.status).toBe(200);
+    expect(response.headers['content-type']).toBe('application/json; charset=UTF-8');
+    expect(response.body).toStrictEqual({ standName: 'The World' });
+
+    fs.rmSync(tmpDirPath, { recursive: true, force: true });
   });
 });
 
