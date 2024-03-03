@@ -23,6 +23,11 @@ export const cli = () => {
           alias: 'p',
           description: 'Set port for server',
           type: 'number'
+        },
+        staticPath: {
+          alias: 's',
+          description: 'Set static path for mock server',
+          type: 'string'
         }
       })
       .parse() as MockServerConfigArgv;

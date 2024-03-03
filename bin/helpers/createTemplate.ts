@@ -2,18 +2,22 @@ import fs from 'node:fs';
 
 import { APP_PATH, DEFAULT } from '@/utils/constants';
 
-interface RenderTemplateOptions {
+interface CreateTemplateOptions {
   withTypescript: boolean;
   baseUrl: string;
+  staticPath: string;
   port: number;
   apiType: 'rest' | 'graphql' | 'full';
 }
 
-export const createTemplate = (options: RenderTemplateOptions) => {
+export const createTemplate = (options: CreateTemplateOptions) => {
   const language = options.withTypescript ? 'ts' : 'js';
   const templatePath = `dist/bin/templates/${language}/${options.apiType}`;
 
-  fs.cpSync(`${templatePath}/mock-requests`, `${APP_PATH}/mock-requests`, { recursive: true });
+  fs.cpSync(`${templatePath}/mock-requests`, `${APP_PATH}/mock-requests`, {
+    recursive: true,
+    force: true
+  });
 
   let mockServerConfig = fs.readFileSync(`${templatePath}/mock-server.config.${language}`, 'utf8');
 
@@ -24,6 +28,13 @@ export const createTemplate = (options: RenderTemplateOptions) => {
     );
   } else {
     mockServerConfig = mockServerConfig.replace(new RegExp(`\\n\\s*port: ${DEFAULT.PORT},`), '');
+  }
+
+  if (options.staticPath !== '/') {
+    mockServerConfig = mockServerConfig.replace(
+      new RegExp(`port: ${DEFAULT.PORT}`),
+      `port: ${options.port.toString()},\n  staticPath: '${options.staticPath}'`
+    );
   }
 
   if (options.baseUrl) {

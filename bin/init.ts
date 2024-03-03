@@ -5,6 +5,7 @@ import type { MockServerConfigArgv } from '@/utils/types';
 
 import { validateBaseUrl } from './validateMockServerConfig/validateBaseUrl/validateBaseUrl';
 import { validatePort } from './validateMockServerConfig/validatePort/validatePort';
+import { validateStaticPath } from './validateMockServerConfig/validateStaticPath/validateStaticPath';
 import { createTemplate } from './helpers';
 
 export const init = async (argv: MockServerConfigArgv) => {
@@ -55,6 +56,20 @@ export const init = async (argv: MockServerConfigArgv) => {
               return true;
             } catch (error: any) {
               return 'Invalid port value';
+            }
+          }
+        },
+        {
+          name: 'staticPath',
+          type: argv.staticPath ? null : 'text',
+          message: 'Static path (must start with a forward slash):',
+          initial: '/',
+          validate: (staticPath) => {
+            try {
+              validateStaticPath(staticPath);
+              return true;
+            } catch {
+              return 'Invalid static path value';
             }
           }
         }
