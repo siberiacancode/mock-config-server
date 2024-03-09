@@ -11,8 +11,6 @@ export const cli = () => {
 
   if (processArgv.includes('init')) {
     const argv = yargs(processArgv)
-      .usage('mcs init')
-      .epilogue('More info: https://github.com/siberiacancode/mock-config-server#readme')
       .options({
         baseUrl: {
           alias: 'b',

@@ -88,7 +88,7 @@ export const init = async (argv: MockServerConfigArgv) => {
       ? 'pnpm'
       : /yarn/.test(userAgent)
         ? 'yarn'
-        : 'npm';
+        : 'npx';
 
     console.log('\n');
     console.log(`${color.bold('🎉 Thanks for using mock-config-server! 🎉')}`);
