@@ -15,8 +15,8 @@ export const init = async (argv: MockServerConfigArgv) => {
         {
           name: 'withTypescript',
           type: 'toggle',
-          message: 'Would you like to use typeScript?',
-          initial: false,
+          message: 'Would you like to use TypeScript?',
+          initial: true,
           active: 'Yes',
           inactive: 'No'
         },
@@ -76,7 +76,7 @@ export const init = async (argv: MockServerConfigArgv) => {
       ],
       {
         onCancel: () => {
-          throw new Error(`${color.bold(color.red('✖'))} Operation cancelled`);
+          throw new Error('❌ Operation cancelled');
         }
       }
     );
@@ -91,7 +91,7 @@ export const init = async (argv: MockServerConfigArgv) => {
         : 'npx';
 
     console.log('\n');
-    console.log(`${color.bold('🎉 Thanks for using mock-config-server! 🎉')}`);
+    console.log(color.bold('🎉 Thanks for using mock-config-server! 🎉'));
     console.log(`start command: ${color.bold(color.green(`${packageManager} mcs`))}`);
   } catch (cancelled: any) {
     console.log(cancelled?.message);

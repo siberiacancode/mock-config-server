@@ -21,18 +21,19 @@ export const createTemplate = (options: CreateTemplateOptions) => {
 
   let mockServerConfig = fs.readFileSync(`${templatePath}/mock-server.config.${language}`, 'utf8');
 
+  if (options.staticPath !== '/') {
+    mockServerConfig = mockServerConfig.replace(
+      `port: ${DEFAULT.PORT}`,
+      `port: ${DEFAULT.PORT},\n  staticPath: '${options.staticPath}'`
+    );
+  }
+
   mockServerConfig = mockServerConfig.replace(
     `port: ${DEFAULT.PORT}`,
     `port: ${options.port.toString()}`
   );
-  mockServerConfig = mockServerConfig.replace("baseUrl: '/'", `baseUrl: '${options.baseUrl}'`);
 
-  if (options.staticPath !== '/') {
-    mockServerConfig = mockServerConfig.replace(
-      `port: ${DEFAULT.PORT}`,
-      `port: ${options.port.toString()},\n  staticPath: '${options.staticPath}'`
-    );
-  }
+  mockServerConfig = mockServerConfig.replace("baseUrl: '/'", `baseUrl: '${options.baseUrl}'`);
 
   fs.writeFileSync(`${APP_PATH}/mock-server.config.${language}`, mockServerConfig);
 };

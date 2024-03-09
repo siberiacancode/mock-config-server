@@ -17,7 +17,7 @@ export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
     !mockServerConfig.staticPath
   ) {
     throw new Error(
-      'configuration should contain at least one of these configs: rest | graphql | database | staticPath; see our doc (https://www.npmjs.com/package/mock-config-server) for more information'
+      'Configuration should contain at least one of these configs: rest | graphql | database | staticPath; see our doc (https://github.com/siberiacancode/mock-config-server) for more information'
     );
   }
 
