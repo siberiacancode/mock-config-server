@@ -22,7 +22,7 @@ export const createTemplate = (options: CreateTemplateOptions) => {
   let mockServerConfig = fs.readFileSync(`${templatePath}/mock-server.config.${language}`, 'utf8');
 
   mockServerConfig = mockServerConfig.replace(
-    new RegExp(`port: ${DEFAULT.PORT}`),
+    `port: ${DEFAULT.PORT}`,
     `port: ${options.port.toString()}`
   );
   mockServerConfig = mockServerConfig.replace("baseUrl: '/'", `baseUrl: '${options.baseUrl}'`);
