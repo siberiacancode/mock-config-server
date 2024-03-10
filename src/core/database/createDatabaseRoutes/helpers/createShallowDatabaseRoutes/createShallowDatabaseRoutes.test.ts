@@ -286,8 +286,11 @@ describe('createShallowDatabaseRoutes', () => {
       const linkHeaderRegexp = /<([^>]+)>;\s*rel="([^"]+)"/g;
       const firstResponse = await request(server).get('/users?_page=1&_limit=1');
 
-      const firstResponseLinks: string[] = firstResponse.headers.link.match(linkHeaderRegexp);
+      const firstResponseLinks = firstResponse.headers.link.match(linkHeaderRegexp);
       expect(firstResponse.headers.link).toMatch(linkHeaderRegexp);
+
+      if (!firstResponseLinks) throw new Error('Link header not found');
+
       expect(firstResponseLinks.length).toEqual(3);
 
       const [firstNextLink, firstPrevLink, firstLastLink] = firstResponseLinks;
@@ -314,6 +317,9 @@ describe('createShallowDatabaseRoutes', () => {
 
       const secondResponseLinks = firstResponse.headers.link.match(linkHeaderRegexp);
       expect(secondResponse.headers.link).toMatch(linkHeaderRegexp);
+
+      if (!secondResponseLinks) throw new Error('Link header not found');
+
       expect(secondResponseLinks.length).toEqual(3);
 
       const [secondNextLink, secondPrevLink, secondLastLink] = secondResponseLinks;

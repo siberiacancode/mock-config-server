@@ -27,16 +27,16 @@ export type RestTopLevelPlainEntityDescriptor<Check extends CheckMode = CheckMod
         ) => boolean;
       }
     : Check extends CompareWithDescriptorAnyValueCheckMode
-    ? {
-        checkMode: Check;
-        value: NestedObjectOrArray<RestPlainEntityValue>;
-      }
-    : Check extends CheckActualValueCheckMode
-    ? {
-        checkMode: Check;
-        value?: never;
-      }
-    : never;
+      ? {
+          checkMode: Check;
+          value: NestedObjectOrArray<RestPlainEntityValue>;
+        }
+      : Check extends CheckActualValueCheckMode
+        ? {
+            checkMode: Check;
+            value?: never;
+          }
+        : never;
 
 type RestPropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
   Check extends 'function'
@@ -48,16 +48,16 @@ type RestPropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode>
         ) => boolean;
       }
     : Check extends CompareWithDescriptorAnyValueCheckMode
-    ? {
-        checkMode: Check;
-        value: RestPlainEntityValue | NestedObjectOrArray<RestPlainEntityValue>;
-      }
-    : Check extends CheckActualValueCheckMode
-    ? {
-        checkMode: Check;
-        value?: never;
-      }
-    : never;
+      ? {
+          checkMode: Check;
+          value: RestPlainEntityValue | NestedObjectOrArray<RestPlainEntityValue>;
+        }
+      : Check extends CheckActualValueCheckMode
+        ? {
+            checkMode: Check;
+            value?: never;
+          }
+        : never;
 
 type RestMappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check extends 'function'
   ? {
@@ -65,21 +65,21 @@ type RestMappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check ext
       value: (actualValue: RestMappedEntityValue, checkFunction: CheckFunction) => boolean;
     }
   : Check extends 'regExp'
-  ? {
-      checkMode: Check;
-      value: RegExp | RegExp[];
-    }
-  : Check extends CompareWithDescriptorValueCheckMode
-  ? {
-      checkMode: Check;
-      value: RestMappedEntityValue | RestMappedEntityValue[];
-    }
-  : Check extends CheckActualValueCheckMode
-  ? {
-      checkMode: Check;
-      value?: never;
-    }
-  : never;
+    ? {
+        checkMode: Check;
+        value: RegExp | RegExp[];
+      }
+    : Check extends CompareWithDescriptorValueCheckMode
+      ? {
+          checkMode: Check;
+          value: RestMappedEntityValue | RestMappedEntityValue[];
+        }
+      : Check extends CheckActualValueCheckMode
+        ? {
+            checkMode: Check;
+            value?: never;
+          }
+        : never;
 
 export type RestEntityDescriptorOrValue<EntityName extends RestEntityName = RestEntityName> =
   EntityName extends 'body'

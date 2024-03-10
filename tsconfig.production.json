@@ -33,5 +33,5 @@
     }
   },
   "include": ["bin", "src", "./index.ts"],
-  "exclude": ["./**/*.test.ts"]
+  "exclude": ["./**/*.test.ts", "./bin/templates/*"]
 }

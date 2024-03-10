@@ -9,21 +9,29 @@ import { validatePort } from './validatePort/validatePort';
 import { validateRestConfig } from './validateRestConfig/validateRestConfig';
 import { validateStaticPath } from './validateStaticPath/validateStaticPath';
 
-export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
-  if (
-    !mockServerConfig.rest &&
-    !mockServerConfig.graphql &&
-    !mockServerConfig.database &&
-    !mockServerConfig.staticPath
-  ) {
+export const validateApiMockServerConfig = (
+  mockServerConfig: PlainObject,
+  api: 'graphql' | 'rest'
+) => {
+  if (!mockServerConfig.configs && !mockServerConfig.database && !mockServerConfig.staticPath) {
     throw new Error(
-      'Configuration should contain at least one of these configs: rest | graphql | database | staticPath; see our doc (https://github.com/siberiacancode/mock-config-server) for more information'
+      'Configuration should contain at least one of these configs: configs | database | staticPath; see our doc (https://github.com/siberiacancode/mock-config-server) for more information'
     );
   }
 
   try {
-    if (mockServerConfig.rest) validateRestConfig(mockServerConfig.rest);
-    if (mockServerConfig.graphql) validateGraphqlConfig(mockServerConfig.graphql);
+    if (Array.isArray(mockServerConfig.configs) && mockServerConfig.configs?.at(0)) {
+      if (api === 'rest') {
+        validateRestConfig({ configs: mockServerConfig.configs });
+      }
+
+      if (api === 'graphql') {
+        validateGraphqlConfig({
+          configs: mockServerConfig.configs
+        });
+      }
+    }
+
     if (mockServerConfig.database) validateDatabaseConfig(mockServerConfig.database);
 
     validateBaseUrl(mockServerConfig.baseUrl);

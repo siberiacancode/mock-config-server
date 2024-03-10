@@ -1,4 +1,4 @@
-import flatten from 'flat';
+import { flatten } from 'flat';
 import type { ParsedUrlQuery } from 'node:querystring';
 
 type Order = 'asc' | 'desc';
