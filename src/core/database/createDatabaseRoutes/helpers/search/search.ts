@@ -6,9 +6,7 @@ export const searchInNestedObjects = (obj: any, searchText: string) => {
       if (searchInNestedObjects(obj[key], searchText)) {
         return true;
       }
-    } else if (typeof obj[key] === 'string' && obj[key].includes(searchText)) {
-      return true;
-    } else if (typeof obj[key] === 'number' && obj[key].toString().includes(searchText)) {
+    } else if (obj[key].toString().includes(searchText)) {
       return true;
     }
   }

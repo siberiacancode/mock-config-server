@@ -702,13 +702,13 @@ Works exactly as [slice](https://developer.mozilla.org/en-US/docs/Web/JavaScript
 > Add q parameter for search data, search can be done by strings and numbers
 
 ```
-GET /users?q=siberia
+GET /users?_q=siberia
 ```
 
 For multiple search
 
 ```
-GET /users?q=siberia&q=24
+GET /users?_q=siberia&_q=24
 ```
 
 ### File example

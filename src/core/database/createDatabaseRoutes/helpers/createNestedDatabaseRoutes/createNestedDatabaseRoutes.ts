@@ -23,12 +23,12 @@ export const createNestedDatabaseRoutes = (
       let data = storage.read(key);
 
       if (request.query && Object.keys(request.query).length) {
-        const { _page, _limit, _begin, _end, _sort, _order, q, ...filters } = request.query;
+        const { _page, _limit, _begin, _end, _sort, _order, _q, ...filters } = request.query;
         data = filter(data, filters as ParsedUrlQuery);
       }
 
-      if (request.query?.q) {
-        data = search(data, request.query.q as ParsedUrlQuery);
+      if (request.query?._q) {
+        data = search(data, request.query._q as ParsedUrlQuery);
       }
 
       if (request.query?._page) {
