@@ -20,7 +20,9 @@ export type RestEntitiesByEntityName<Method extends RestMethod = RestMethod> = {
 };
 
 interface RestSettings {
-  readonly polling: boolean;
+  readonly polling?: boolean;
+  readonly status?: number;
+  readonly delay?: number;
 }
 
 export type RestRouteConfig<Method extends RestMethod> = (
@@ -34,10 +36,14 @@ export type RestRouteConfig<Method extends RestMethod> = (
       }>;
     }
   | {
-      settings?: RestSettings & { polling: false };
+      settings?: RestSettings & { polling?: false };
       data:
         | ((request: Request, entities: RestEntitiesByEntityName<Method>) => Data | Promise<Data>)
         | Data;
+    }
+  | {
+      settings?: RestSettings & { polling?: false };
+      file: string;
     }
 ) & { entities?: RestEntitiesByEntityName<Method>; interceptors?: Pick<Interceptors, 'response'> };
 

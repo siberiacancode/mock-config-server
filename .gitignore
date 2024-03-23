@@ -162,8 +162,9 @@ Temporary Items
 # Local
 .env
 dist
-mock-server-build
 mock-server.config.*
+!bin/templates/**/mock-server.config.*
+mock-requests
 
 # Logs
 logs

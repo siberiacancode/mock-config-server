@@ -1,3 +1,4 @@
+export * from './createTemplate';
 export * from './getMostSpecificPathFromError';
 export * from './getValidationMessageFromPath';
 export * from './resolveConfigFile';

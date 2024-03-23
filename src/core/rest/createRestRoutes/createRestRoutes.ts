@@ -1,5 +1,6 @@
 import type { IRouter } from 'express';
 import { flatten } from 'flat';
+import path from 'path';
 
 import {
   asyncHandler,
@@ -7,7 +8,9 @@ import {
   callResponseInterceptors,
   convertToEntityDescriptor,
   isEntityDescriptor,
-  resolveEntityValues
+  isFilePathValid,
+  resolveEntityValues,
+  sleep
 } from '@/utils/helpers';
 import type {
   Entries,
@@ -139,10 +142,23 @@ export const createRestRoutes = ({
           matchedRouteConfigData = matchedRouteConfig.data;
         }
 
+        if ('file' in matchedRouteConfig) {
+          if (!isFilePathValid(matchedRouteConfig.file)) return next();
+        }
+
         const resolvedData =
           typeof matchedRouteConfigData === 'function'
             ? await matchedRouteConfigData(request, matchedRouteConfig.entities ?? {})
             : matchedRouteConfigData;
+
+        if (matchedRouteConfig.settings?.status) {
+          response.statusCode = matchedRouteConfig.settings.status;
+        }
+
+        // ✅ important:
+        // set 'Cache-Control' header for explicit browsers response revalidate: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+        // this code should place before response interceptors for giving opportunity to rewrite 'Cache-Control' header
+        if (request.method === 'GET') response.set('Cache-control', 'no-cache');
 
         const data = await callResponseInterceptors({
           data: resolvedData,
@@ -156,11 +172,14 @@ export const createRestRoutes = ({
           }
         });
 
-        // ✅ important:
-        // set 'Cache-Control' header for explicit browsers response revalidate
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-        response.set('Cache-control', 'max-age=0, must-revalidate');
-        return response.status(response.statusCode).json(data);
+        if (matchedRouteConfig.settings?.delay) {
+          await sleep(matchedRouteConfig.settings.delay);
+        }
+
+        if ('file' in matchedRouteConfig) {
+          return response.sendFile(path.resolve(matchedRouteConfig.file));
+        }
+        return response.json(data);
       })
     );
   });

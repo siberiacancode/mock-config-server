@@ -18,13 +18,15 @@ export type GraphQLEntitiesByEntityName = {
   [EntityName in GraphQLEntityName]?: GraphQLEntity<EntityName>;
 };
 
-type GraphQLSettings = {
-  readonly polling: boolean;
-};
+interface GraphQLSettings {
+  readonly polling?: boolean;
+  readonly status?: number;
+  readonly delay?: number;
+}
 
-export type GraphQLRouteConfig<Settings extends GraphQLSettings = GraphQLSettings> = (
+export type GraphQLRouteConfig = (
   | {
-      settings: Settings & { polling: true };
+      settings: GraphQLSettings & { polling: true };
       queue: Array<{
         time?: number;
         data:
@@ -33,7 +35,7 @@ export type GraphQLRouteConfig<Settings extends GraphQLSettings = GraphQLSetting
       }>;
     }
   | {
-      settings?: Settings & { polling: false };
+      settings?: GraphQLSettings & { polling?: false };
       data:
         | ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>)
         | Data;

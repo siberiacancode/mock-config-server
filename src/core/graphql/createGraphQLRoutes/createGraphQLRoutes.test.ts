@@ -2,7 +2,7 @@ import express from 'express';
 import request from 'supertest';
 
 import { urlJoin } from '@/utils/helpers';
-import type { GraphqlConfig, MockServerConfig } from '@/utils/types';
+import type { GraphqlConfig, GraphQLOperationType, MockServerConfig } from '@/utils/types';
 
 import { createGraphQLRoutes } from './createGraphQLRoutes';
 
@@ -27,7 +27,7 @@ const createServer = (
   return server;
 };
 
-describe('createRestRoutes', () => {
+describe('createGraphQLRoutes', () => {
   test('Should return 400 and description text for invalid query', async () => {
     const server = createServer({
       graphql: {
@@ -107,7 +107,7 @@ describe('createRestRoutes', () => {
     expect(getResponse.statusCode).toBe(404);
   });
 
-  test('Should have response Cache-Control header equals to max-age=0, must-revalidate', async () => {
+  test('Should have response Cache-Control header value equals to no-cache', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -123,12 +123,41 @@ describe('createRestRoutes', () => {
     const postResponse = await request(server)
       .post('/')
       .send({ query: 'query GetUsers { users { name } }' });
-    expect(postResponse.headers['cache-control']).toBe('max-age=0, must-revalidate');
+    expect(postResponse.headers['cache-control']).toBe('no-cache');
 
     const getResponse = await request(server)
       .get('/')
       .query({ query: 'query GetUsers { users { name } }' });
-    expect(getResponse.headers['cache-control']).toBe('max-age=0, must-revalidate');
+    expect(getResponse.headers['cache-control']).toBe('no-cache');
+  });
+
+  const operationTypesWithoutCacheControlHeader: Exclude<GraphQLOperationType, 'query'>[] = [
+    'mutation'
+  ];
+  operationTypesWithoutCacheControlHeader.forEach((operationTypeWithoutCacheControlHeader) => {
+    test(`Should do not have Cache-Control header if operation type is ${operationTypeWithoutCacheControlHeader}`, async () => {
+      const server = createServer({
+        graphql: {
+          configs: [
+            {
+              operationName: 'GetUsers',
+              operationType: operationTypeWithoutCacheControlHeader,
+              routes: [{ data: { name: 'John', surname: 'Doe' } }]
+            }
+          ]
+        }
+      });
+
+      const postResponse = await request(server)
+        .post('/')
+        .send({ query: 'query GetUsers { users { name } }' });
+      expect(postResponse.headers['cache-control']).toBe(undefined);
+
+      const getResponse = await request(server)
+        .get('/')
+        .query({ query: 'query GetUsers { users { name } }' });
+      expect(getResponse.headers['cache-control']).toBe(undefined);
+    });
   });
 });
 
@@ -290,6 +319,63 @@ describe('createRestRoutes: content', () => {
 });
 
 describe('createRestRoutes: settings', () => {
+  test('Should correctly set delay into response with delay setting', async () => {
+    const delay = 1000;
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            operationName: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                settings: { delay },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const query = {
+      query: 'query GetUsers { users { name } }'
+    };
+    const startTime = performance.now();
+    const response = await request(server).get('/').query(query);
+    const endTime = performance.now();
+
+    expect(endTime - startTime).toBeGreaterThanOrEqual(delay);
+    expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
+  });
+
+  test('Should correctly set statusCode into response with status setting', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            operationName: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                settings: { status: 500 },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const query = {
+      query: 'query GetUsers { users { name } }'
+    };
+
+    const response = await request(server).get('/').query(query);
+    expect(response.statusCode).toBe(500);
+    expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
+  });
+
   test('Should correctly process the request with polling', async () => {
     const server = createServer({
       graphql: {

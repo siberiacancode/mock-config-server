@@ -46,6 +46,7 @@ export interface BaseMockServerConfig {
   interceptors?: Interceptors;
   cors?: Cors;
 }
+
 export interface MockServerConfig extends BaseMockServerConfig {
   rest?: RestConfig;
   graphql?: GraphqlConfig;
@@ -53,12 +54,12 @@ export interface MockServerConfig extends BaseMockServerConfig {
 }
 
 export interface RestMockServerConfig extends BaseMockServerConfig {
-  configs: RestRequestConfig[];
+  configs?: RestRequestConfig[];
   database?: DatabaseConfig;
 }
 
 export interface GraphQLMockServerConfig extends BaseMockServerConfig {
-  configs: GraphQLRequestConfig[];
+  configs?: GraphQLRequestConfig[];
   database?: DatabaseConfig;
 }
 
