@@ -1,27 +1,13 @@
-const { eslint } = require('@siberiacancode/eslint');
+import eslint from '../../.eslintrc';
 
 module.exports = {
-  ...eslint.node,
+  ...eslint,
   overrides: [
-    ...eslint.node.overrides,
+    ...eslint.overrides,
     {
       files: ['*.ts'],
       parserOptions: {
         project: './bin/templates/tsconfig.json'
-      },
-      rules: {
-        '@typescript-eslint/no-floating-promises': 'off',
-        '@typescript-eslint/await-thenable': 'off',
-        '@typescript-eslint/no-unsafe-assignment': 'off',
-        '@typescript-eslint/no-unsafe-member-access': 'off',
-        '@typescript-eslint/no-unsafe-argument': 'off',
-        '@typescript-eslint/no-unsafe-call': 'off',
-        '@typescript-eslint/no-unsafe-enum-comparison': 'off',
-        '@typescript-eslint/no-var-requires': 'off',
-        '@typescript-eslint/naming-convention': 'off',
-        'no-underscore-dangle': 'off',
-        'no-restricted-syntax': 'off',
-        'promise/always-return': ['error', { ignoreLastCallback: true }]
       }
     }
   ]
