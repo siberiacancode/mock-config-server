@@ -68,10 +68,10 @@ export interface DatabaseMockServerConfig extends BaseMockServerConfig {
   routes?: Record<`/${string}`, `/${string}`> | `${string}.json`;
 }
 
-export interface MockServerConfigArgv extends Arguments {
+export type MockServerConfigArgv = Arguments<{
   baseUrl?: string;
   port?: number;
   staticPath?: string;
   config?: string;
   watch?: boolean;
-}
+}>;
