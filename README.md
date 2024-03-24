@@ -699,7 +699,7 @@ Works exactly as [slice](https://developer.mozilla.org/en-US/docs/Web/JavaScript
 
 ### Full text search
 
-> Add q parameter for search data, search can be done by strings and numbers
+> Add \_q parameter for search data, search can be done by strings and numbers
 
 ```
 GET /users?_q=siberia
