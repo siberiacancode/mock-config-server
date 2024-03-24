@@ -4,7 +4,7 @@ import type { RestMethod } from '@/utils/types';
 
 import { baseUrlSchema } from '../baseUrlSchema/baseUrlSchema';
 import { interceptorsSchema } from '../interceptorsSchema/interceptorsSchema';
-import { nonRegExpSchema, stringForwardSlashSchema } from '../utils';
+import { plainObjectSchema, stringForwardSlashSchema } from '../utils';
 
 import { routeConfigSchema } from './routeConfigSchema/routeConfigSchema';
 
@@ -13,7 +13,7 @@ const baseRequestConfigSchema = (method: RestMethod) =>
     path: z.union([stringForwardSlashSchema, z.instanceof(RegExp)]),
     method: z.literal(method),
     routes: z.array(routeConfigSchema(method)),
-    interceptors: nonRegExpSchema(interceptorsSchema).optional()
+    interceptors: plainObjectSchema(interceptorsSchema).optional()
   });
 
 const requestConfigSchema = z.union([
@@ -28,5 +28,5 @@ const requestConfigSchema = z.union([
 export const restConfigSchema = z.strictObject({
   baseUrl: baseUrlSchema.optional(),
   configs: z.array(requestConfigSchema),
-  interceptors: nonRegExpSchema(interceptorsSchema).optional()
+  interceptors: plainObjectSchema(interceptorsSchema).optional()
 });

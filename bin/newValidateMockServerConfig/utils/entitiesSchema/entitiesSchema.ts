@@ -7,8 +7,8 @@ import {
   compareWithDescriptorValueCheckModeSchema
 } from '../checkModeSchema/checkModeSchema';
 import { jsonLiteralSchema, jsonSchema } from '../jsonSchema/jsonSchema';
-import { nonRegExpSchema } from '../nonRegExpSchema/nonRegExpSchema';
-import { requiredPropertiesSchema } from '../plainObjectSchema/plainObjectSchema';
+import { plainObjectSchema } from '../plainObjectSchema/plainObjectSchema';
+import { requiredPropertiesSchema } from '../requiredPropertiesSchema/requiredPropertiesSchema';
 
 /* ----- Plain entity schema ----- */
 
@@ -55,7 +55,7 @@ const propertyLevelPlainEntityDescriptorSchema = requiredPropertiesSchema(
 );
 
 const nonCheckModeRecordSchema = (recordSchema: ReturnType<typeof z.record>) =>
-  nonRegExpSchema(recordSchema.and(z.object({ checkMode: z.never().optional() })));
+  plainObjectSchema(recordSchema.and(z.object({ checkMode: z.never().optional() })));
 
 // ✅ important:
 // 1st property level record disallow checkMode
@@ -106,7 +106,7 @@ const mappedEntityDescriptorSchema = requiredPropertiesSchema(
   ['checkMode']
 );
 
-export const mappedEntitySchema = nonRegExpSchema(
+export const mappedEntitySchema = plainObjectSchema(
   z.record(
     z.union([
       mappedEntityValueSchema,

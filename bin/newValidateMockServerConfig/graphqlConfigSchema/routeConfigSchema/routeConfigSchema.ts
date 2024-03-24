@@ -6,10 +6,10 @@ import { isOnlyRequestedDataResolvingPropertyExists } from '../../../helpers';
 import { interceptorsSchema } from '../../interceptorsSchema/interceptorsSchema';
 import { queueSchema } from '../../queueSchema/queueSchema';
 import { settingsSchema } from '../../settingsSchema/settingsSchema';
-import { mappedEntitySchema, nonRegExpSchema, plainEntitySchema } from '../../utils';
+import { mappedEntitySchema, plainEntitySchema, plainObjectSchema } from '../../utils';
 
 const baseRouteConfigSchema = z.strictObject({
-  entities: nonRegExpSchema(
+  entities: plainObjectSchema(
     z.strictObject({
       headers: mappedEntitySchema.optional(),
       cookies: mappedEntitySchema.optional(),
@@ -17,12 +17,12 @@ const baseRouteConfigSchema = z.strictObject({
       variables: plainEntitySchema.optional()
     })
   ).optional(),
-  interceptors: nonRegExpSchema(interceptorsSchema.pick({ response: true })).optional()
+  interceptors: plainObjectSchema(interceptorsSchema.pick({ response: true })).optional()
 });
 
 const dataRouteConfigSchema = z
   .strictObject({
-    settings: nonRegExpSchema(
+    settings: plainObjectSchema(
       settingsSchema.extend({ polling: z.literal(false).optional() })
     ).optional(),
     data: z.union([z.function(), z.any()])

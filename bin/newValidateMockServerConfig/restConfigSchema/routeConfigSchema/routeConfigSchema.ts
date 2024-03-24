@@ -7,12 +7,12 @@ import { isOnlyRequestedDataResolvingPropertyExists } from '../../../helpers';
 import { interceptorsSchema } from '../../interceptorsSchema/interceptorsSchema';
 import { queueSchema } from '../../queueSchema/queueSchema';
 import { settingsSchema } from '../../settingsSchema/settingsSchema';
-import { mappedEntitySchema, nonRegExpSchema, plainEntitySchema } from '../../utils';
+import { mappedEntitySchema, plainEntitySchema, plainObjectSchema } from '../../utils';
 
 const METHODS_WITH_BODY = ['post', 'put', 'patch'];
 const entitiesByEntityNameSchema = (method: RestMethod) => {
   const isMethodWithBody = METHODS_WITH_BODY.includes(method);
-  return nonRegExpSchema(
+  return plainObjectSchema(
     z.strictObject({
       headers: mappedEntitySchema.optional(),
       cookies: mappedEntitySchema.optional(),
@@ -26,13 +26,13 @@ const entitiesByEntityNameSchema = (method: RestMethod) => {
 const baseRouteConfigSchema = (method: RestMethod) =>
   z.strictObject({
     entities: entitiesByEntityNameSchema(method).optional(),
-    interceptors: nonRegExpSchema(interceptorsSchema.pick({ response: true })).optional()
+    interceptors: plainObjectSchema(interceptorsSchema.pick({ response: true })).optional()
   });
 
 const dataRouteConfigSchema = (method: RestMethod) =>
   z
     .strictObject({
-      settings: nonRegExpSchema(
+      settings: plainObjectSchema(
         settingsSchema.extend({ polling: z.literal(false).optional() })
       ).optional(),
       data: z.union([z.function(), z.any()])
@@ -42,7 +42,7 @@ const dataRouteConfigSchema = (method: RestMethod) =>
 const fileRouteConfigSchema = (method: RestMethod) =>
   z
     .strictObject({
-      settings: nonRegExpSchema(
+      settings: plainObjectSchema(
         settingsSchema.extend({ polling: z.literal(false).optional() })
       ).optional(),
       file: z.string()

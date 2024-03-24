@@ -4,14 +4,14 @@ import { isPlainObject } from '@/utils/helpers';
 
 import { baseUrlSchema } from '../baseUrlSchema/baseUrlSchema';
 import { interceptorsSchema } from '../interceptorsSchema/interceptorsSchema';
-import { nonRegExpSchema } from '../utils';
+import { plainObjectSchema } from '../utils';
 
 import { routeConfigSchema } from './routeConfigSchema/routeConfigSchema';
 
 const baseRequestConfigSchema = z.strictObject({
   operationType: z.enum(['query', 'mutation']),
   routes: z.array(routeConfigSchema),
-  interceptors: nonRegExpSchema(interceptorsSchema).optional()
+  interceptors: plainObjectSchema(interceptorsSchema).optional()
 });
 
 const operationNameRequestConfigSchema = z
@@ -38,5 +38,5 @@ const requestConfigSchema = z.union([
 export const graphqlConfigSchema = z.strictObject({
   baseUrl: baseUrlSchema.optional(),
   configs: z.array(requestConfigSchema),
-  interceptors: nonRegExpSchema(interceptorsSchema).optional()
+  interceptors: plainObjectSchema(interceptorsSchema).optional()
 });

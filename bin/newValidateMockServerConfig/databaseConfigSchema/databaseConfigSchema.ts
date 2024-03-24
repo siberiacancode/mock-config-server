@@ -1,12 +1,12 @@
 import { z } from 'zod';
 
-import { nonRegExpSchema, stringForwardSlashSchema, stringJsonFilenameSchema } from '../utils';
+import { plainObjectSchema, stringForwardSlashSchema, stringJsonFilenameSchema } from '../utils';
 
 export const databaseConfigSchema = z.strictObject({
-  data: z.union([nonRegExpSchema(z.record(z.unknown())), stringJsonFilenameSchema]),
+  data: z.union([plainObjectSchema(z.record(z.unknown())), stringJsonFilenameSchema]),
   routes: z
     .union([
-      nonRegExpSchema(z.record(stringForwardSlashSchema, stringForwardSlashSchema)),
+      plainObjectSchema(z.record(stringForwardSlashSchema, stringForwardSlashSchema)),
       stringJsonFilenameSchema
     ])
     .optional()

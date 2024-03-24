@@ -12,7 +12,7 @@ export const jsonSchema: z.ZodType<Json> = z.lazy(() =>
     jsonLiteralSchema,
     z.array(jsonSchema),
     // ✅ important:
-    // using 'and' checking instead of 'nonRegExpSchema' because of zod types peculiarities
+    // using 'and' checking instead of 'plainObjectSchema' because of zod types peculiarities
     z.record(jsonSchema).and(z.custom((value) => isPlainObject(value)))
   ])
 );

@@ -1,19 +1,6 @@
 import { z } from 'zod';
 
-import { isPlainObject } from '@/utils/helpers';
-import type { PlainObject } from '@/utils/types';
-
-export const requiredPropertiesSchema = <T extends PlainObject>(
-  schema: z.ZodType<T>,
-  requiredProperties: (keyof T)[]
-) => {
-  return z
-    .custom(
-      (value) =>
-        isPlainObject(value) &&
-        requiredProperties.every((property) =>
-          Object.prototype.hasOwnProperty.call(value, property)
-        )
-    )
-    .pipe(schema);
-};
+// ✅ important:
+// this schema is needed because zod handle RegExps as plain object
+export const plainObjectSchema = (schema: z.ZodTypeAny) =>
+  z.custom((value) => !(value instanceof RegExp)).pipe(schema);
