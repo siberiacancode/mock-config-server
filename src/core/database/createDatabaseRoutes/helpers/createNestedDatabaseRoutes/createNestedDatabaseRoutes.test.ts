@@ -395,30 +395,19 @@ describe('CreateNestedDatabaseRoutes', () => {
     const nestedDatabase = createNestedDatabase();
     const server = createServer(nestedDatabase);
 
-    test('Should filter data by string query', async () => {
-      const firstResponse = await request(server).get('/users?_q=o');
+    const correctSearchValues = ['string', true, 3000, null];
 
-      expect(firstResponse.body).toStrictEqual([
-        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
-      ]);
+    correctSearchValues.forEach((correctSearchValue) => {
+      test(`Should search data by ${correctSearchValue} query with type ${typeof correctSearchValue}`, async () => {
+        const server = createServer({ users: [{ id: 1, data: correctSearchValue }] });
 
-      const secondResponse = await request(server).get('/users?_q=Doe');
+        const response = await request(server).get(`/users?_q=${correctSearchValue}`);
 
-      expect(secondResponse.body).toStrictEqual([
-        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
-      ]);
+        expect(response.body).toStrictEqual([{ id: 1, data: correctSearchValue }]);
+      });
     });
 
-    test('Should filter data by digital query', async () => {
-      const thirdResponse = await request(server).get('/users?_q=30');
-
-      expect(thirdResponse.body).toStrictEqual([
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
-      ]);
-    });
-
-    test('Should filter data by query when nested text', async () => {
+    test('Should search data by query when nested text', async () => {
       const response = await request(server).get('/users?_q=Tomsk');
 
       expect(response.body).toStrictEqual([
@@ -426,7 +415,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should filter data by multiple query', async () => {
+    test('Should search data by multiple query', async () => {
       const response = await request(server).get('/users?_q=Tomsk&_q=Novosibirsk');
 
       expect(response.body).toStrictEqual([

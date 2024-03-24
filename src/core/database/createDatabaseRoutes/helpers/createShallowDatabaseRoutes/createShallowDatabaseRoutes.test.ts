@@ -354,31 +354,20 @@ describe('createShallowDatabaseRoutes', () => {
     });
   });
 
-  describe('createShallowDatabaseRoutes: search function', () => {
+  describe('createNestedDatabaseRoutes: search function', () => {
     const shallowDatabase = createShallowDatabase();
     const server = createServer(shallowDatabase);
 
-    test('Should filter data by string query', async () => {
-      const firstResponse = await request(server).get('/users?_q=o');
+    const correctSearchValues = ['string', true, 3000, null];
 
-      expect(firstResponse.body).toStrictEqual([
-        { name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
-        { name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
-      ]);
+    correctSearchValues.forEach((correctSearchValue) => {
+      test(`Should search data by ${correctSearchValue} query with type ${typeof correctSearchValue}`, async () => {
+        const server = createServer({ users: [{ data: correctSearchValue }] });
 
-      const secondResponse = await request(server).get('/users?_q=Doe');
+        const response = await request(server).get(`/users?_q=${correctSearchValue}`);
 
-      expect(secondResponse.body).toStrictEqual([
-        { name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
-      ]);
-    });
-
-    test('Should filter data by digital query', async () => {
-      const thirdResponse = await request(server).get('/users?_q=30');
-
-      expect(thirdResponse.body).toStrictEqual([
-        { name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
-      ]);
+        expect(response.body).toStrictEqual([{ data: correctSearchValue }]);
+      });
     });
 
     test('Should filter data by query when nested text', async () => {
