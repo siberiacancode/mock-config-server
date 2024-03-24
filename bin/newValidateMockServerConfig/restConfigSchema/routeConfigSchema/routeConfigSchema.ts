@@ -45,7 +45,7 @@ const fileRouteConfigSchema = (method: RestMethod) =>
       settings: nonRegExpSchema(
         settingsSchema.extend({ polling: z.literal(false).optional() })
       ).optional(),
-      data: z.union([z.function(), z.any()])
+      file: z.string()
     })
     .merge(baseRouteConfigSchema(method));
 
