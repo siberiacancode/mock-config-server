@@ -22,15 +22,15 @@ export type TopLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
         ) => boolean;
       }
     : Check extends CompareWithDescriptorAnyValueCheckMode
-    ? {
-        checkMode: Check;
-        value: NestedObjectOrArray<PlainEntityValue>;
-      }
-    : Check extends CheckActualValueCheckMode
-    ? {
-        checkMode: Check;
-      }
-    : never;
+      ? {
+          checkMode: Check;
+          value: NestedObjectOrArray<PlainEntityValue>;
+        }
+      : Check extends CheckActualValueCheckMode
+        ? {
+            checkMode: Check;
+          }
+        : never;
 
 type PropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
   Check extends 'function'
@@ -42,20 +42,25 @@ type PropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
         ) => boolean;
       }
     : Check extends CompareWithDescriptorAnyValueCheckMode
-    ? {
-        checkMode: Check;
-        value: PlainEntityValue | NestedObjectOrArray<PlainEntityValue>;
-      }
-    : Check extends CompareWithDescriptorStringValueCheckMode
-    ? {
-        checkMode: Check;
-        value: PlainEntityValue | PlainEntityValue[];
-      }
-    : Check extends CheckActualValueCheckMode
-    ? {
-        checkMode: Check;
-      }
-    : never;
+      ? {
+          checkMode: Check;
+          value: PlainEntityValue | NestedObjectOrArray<PlainEntityValue>;
+        }
+      : Check extends 'regExp'
+        ? {
+            checkMode: Check;
+            value: RegExp | RegExp[];
+          }
+        : Check extends CompareWithDescriptorStringValueCheckMode
+          ? {
+              checkMode: Check;
+              value: PlainEntityValue | PlainEntityValue[];
+            }
+          : Check extends CheckActualValueCheckMode
+            ? {
+                checkMode: Check;
+              }
+            : never;
 
 type NonCheckMode<T extends object> = T & { checkMode?: never };
 
@@ -85,20 +90,20 @@ type MappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check extends
       value: (actualValue: MappedEntityValue, checkFunction: CheckFunction) => boolean;
     }
   : Check extends 'regExp'
-  ? {
-      checkMode: Check;
-      value: RegExp | RegExp[];
-    }
-  : Check extends CompareWithDescriptorValueCheckMode
-  ? {
-      checkMode: Check;
-      value: MappedEntityValue | MappedEntityValue[];
-    }
-  : Check extends CheckActualValueCheckMode
-  ? {
-      checkMode: Check;
-    }
-  : never;
+    ? {
+        checkMode: Check;
+        value: RegExp | RegExp[];
+      }
+    : Check extends CompareWithDescriptorValueCheckMode
+      ? {
+          checkMode: Check;
+          value: MappedEntityValue | MappedEntityValue[];
+        }
+      : Check extends CheckActualValueCheckMode
+        ? {
+            checkMode: Check;
+          }
+        : never;
 
 export type MappedEntity = Record<
   string,

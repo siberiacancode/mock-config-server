@@ -40,6 +40,10 @@ const propertyLevelPlainEntityDescriptorSchema = requiredPropertiesSchema(
       value: jsonSchema
     }),
     z.strictObject({
+      checkMode: z.literal('regExp'),
+      value: z.union([z.instanceof(RegExp), z.array(z.instanceof(RegExp))])
+    }),
+    z.strictObject({
       checkMode: compareWithDescriptorStringValueCheckModeSchema,
       value: z.union([jsonLiteralSchema, z.array(jsonLiteralSchema)])
     }),
