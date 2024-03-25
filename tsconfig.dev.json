@@ -18,7 +18,6 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "./",
     "paths": {
-      "mock-config-server": ["./dist"],
       "@/server": ["./src/server"],
       "@/core/database": ["./src/core/database"],
       "@/core/rest": ["./src/core/rest"],
@@ -30,5 +29,5 @@
       "@/utils/constants": ["./src/utils/constants"]
     }
   },
-  "exclude": ["dist", "node_modules", "jest.config.js"]
+  "exclude": ["examples", "bin/templates", "dist", "node_modules", "jest.config.js"]
 }

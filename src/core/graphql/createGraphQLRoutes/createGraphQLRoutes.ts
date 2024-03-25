@@ -16,9 +16,10 @@ import type {
   Entries,
   GraphqlConfig,
   GraphQLEntitiesByEntityName,
-  GraphQLEntityDescriptorOrValue,
-  GraphQLTopLevelPlainEntityDescriptor,
-  Interceptors
+  GraphQLEntity,
+  Interceptors,
+  TopLevelPlainEntityArray,
+  TopLevelPlainEntityDescriptor
 } from '@/utils/types';
 
 import { prepareGraphQLRequestConfigs } from './helpers';
@@ -105,7 +106,7 @@ export const createGraphQLRoutes = ({
         }
 
         const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
-          Exclude<GraphQLEntityDescriptorOrValue, GraphQLTopLevelPlainEntityDescriptor | Array<any>>
+          Exclude<GraphQLEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
         >;
         return recordOrArrayEntries.every(([entityKey, entityValue]) => {
           const { checkMode, value: descriptorValue } = convertToEntityDescriptor(entityValue);

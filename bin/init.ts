@@ -3,9 +3,9 @@ import prompts from 'prompts';
 
 import type { MockServerConfigArgv } from '@/utils/types';
 
-import { validateBaseUrl } from './validateMockServerConfig/validateBaseUrl/validateBaseUrl';
-import { validatePort } from './validateMockServerConfig/validatePort/validatePort';
-import { validateStaticPath } from './validateMockServerConfig/validateStaticPath/validateStaticPath';
+import { baseUrlSchema } from './validateMockServerConfig/baseUrlSchema/baseUrlSchema';
+import { portSchema } from './validateMockServerConfig/portSchema/portSchema';
+import { staticPathSchema } from './validateMockServerConfig/staticPathSchema/staticPathSchema';
 import { createTemplate } from './helpers';
 
 export const init = async (argv: MockServerConfigArgv) => {
@@ -38,7 +38,7 @@ export const init = async (argv: MockServerConfigArgv) => {
           initial: '/',
           validate: (baseUrl) => {
             try {
-              validateBaseUrl(baseUrl);
+              baseUrlSchema.parse(baseUrl);
               return true;
             } catch {
               return 'Invalid base url value';
@@ -52,7 +52,7 @@ export const init = async (argv: MockServerConfigArgv) => {
           initial: 31299,
           validate: (port) => {
             try {
-              validatePort(+port);
+              portSchema.parse(+port);
               return true;
             } catch (error: any) {
               return 'Invalid port value';
@@ -66,7 +66,7 @@ export const init = async (argv: MockServerConfigArgv) => {
           initial: '/',
           validate: (staticPath) => {
             try {
-              validateStaticPath(staticPath);
+              staticPathSchema.parse(staticPath);
               return true;
             } catch {
               return 'Invalid static path value';

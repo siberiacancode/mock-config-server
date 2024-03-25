@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { startGraphQLMockServer, startMockServer, startRestMockServer } from '@/server';
+import { isPlainObject } from '@/utils/helpers';
 import type { GraphQLMockServerConfig, RestMockServerConfig } from '@/utils/types';
 
 import type { MockServerConfig, MockServerConfigArgv } from '../src';
@@ -8,9 +9,12 @@ import type { MockServerConfig, MockServerConfigArgv } from '../src';
 import { validateApiMockServerConfig } from './validateMockServerConfig/validateApiMockServerConfig';
 import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
 
-export const run = (mockConfig: MockServerConfig, argv: MockServerConfigArgv) => {
+export const run = (
+  mockConfig: MockServerConfig,
+  { baseUrl, port, staticPath }: MockServerConfigArgv
+) => {
   try {
-    const mergedMockServerConfig = { ...mockConfig, ...argv } as MockServerConfig;
+    const mergedMockServerConfig = { ...mockConfig, baseUrl, port, staticPath } as MockServerConfig;
 
     if (
       !mergedMockServerConfig.rest &&
@@ -22,7 +26,8 @@ export const run = (mockConfig: MockServerConfig, argv: MockServerConfigArgv) =>
         | GraphQLMockServerConfig;
 
       if (
-        mergedApiMockServerConfig.configs?.at(0) &&
+        Array.isArray(mergedApiMockServerConfig.configs) &&
+        isPlainObject(mergedApiMockServerConfig.configs[0]) &&
         'path' in mergedApiMockServerConfig.configs[0]
       ) {
         validateApiMockServerConfig(mergedApiMockServerConfig, 'rest');
@@ -30,9 +35,10 @@ export const run = (mockConfig: MockServerConfig, argv: MockServerConfigArgv) =>
       }
 
       if (
-        mergedApiMockServerConfig.configs?.at(0) &&
-        ('operationName' in mergedApiMockServerConfig.configs[0] ||
-          'query' in mergedApiMockServerConfig.configs[0])
+        Array.isArray(mergedApiMockServerConfig.configs) &&
+        isPlainObject(mergedApiMockServerConfig.configs[0]) &&
+        ('query' in mergedApiMockServerConfig.configs[0] ||
+          'operationName' in mergedApiMockServerConfig.configs[0])
       ) {
         validateApiMockServerConfig(mergedApiMockServerConfig, 'graphql');
         return startGraphQLMockServer(mergedApiMockServerConfig as GraphQLMockServerConfig);
@@ -43,7 +49,6 @@ export const run = (mockConfig: MockServerConfig, argv: MockServerConfigArgv) =>
     }
 
     validateMockServerConfig(mergedMockServerConfig);
-
     return startMockServer(mergedMockServerConfig);
   } catch (error: any) {
     console.error(error.message);

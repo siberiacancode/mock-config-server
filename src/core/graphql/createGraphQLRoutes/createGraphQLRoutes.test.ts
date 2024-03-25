@@ -27,7 +27,7 @@ const createServer = (
   return server;
 };
 
-describe('createRestRoutes', () => {
+describe('createGraphQLRoutes', () => {
   test('Should return 400 and description text for invalid query', async () => {
     const server = createServer({
       graphql: {

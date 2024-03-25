@@ -1,13 +1,17 @@
-import type { PlainObject } from '../../src';
+import { z } from 'zod';
 
-import { validateBaseUrl } from './validateBaseUrl/validateBaseUrl';
-import { validateCors } from './validateCors/validateCors';
-import { validateDatabaseConfig } from './validateDatabaseConfig/validateDatabaseConfig';
-import { validateGraphqlConfig } from './validateGraphqlConfig/validateGraphqlConfig';
-import { validateInterceptors } from './validateInterceptors/validateInterceptors';
-import { validatePort } from './validatePort/validatePort';
-import { validateRestConfig } from './validateRestConfig/validateRestConfig';
-import { validateStaticPath } from './validateStaticPath/validateStaticPath';
+import type { PlainObject } from '../../src';
+import { getMostSpecificPathFromError, getValidationMessageFromPath } from '../helpers';
+
+import { baseUrlSchema } from './baseUrlSchema/baseUrlSchema';
+import { corsSchema } from './corsSchema/corsSchema';
+import { databaseConfigSchema } from './databaseConfigSchema/databaseConfigSchema';
+import { graphqlConfigSchema } from './graphqlConfigSchema/graphqlConfigSchema';
+import { interceptorsSchema } from './interceptorsSchema/interceptorsSchema';
+import { portSchema } from './portSchema/portSchema';
+import { restConfigSchema } from './restConfigSchema/restConfigSchema';
+import { staticPathSchema } from './staticPathSchema/staticPathSchema';
+import { plainObjectSchema } from './utils';
 
 export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
   if (
@@ -21,19 +25,24 @@ export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
     );
   }
 
-  try {
-    if (mockServerConfig.rest) validateRestConfig(mockServerConfig.rest);
-    if (mockServerConfig.graphql) validateGraphqlConfig(mockServerConfig.graphql);
-    if (mockServerConfig.database) validateDatabaseConfig(mockServerConfig.database);
+  const mockServerConfigSchema = z.strictObject({
+    baseUrl: baseUrlSchema.optional(),
+    port: portSchema.optional(),
+    staticPath: staticPathSchema.optional(),
+    interceptors: plainObjectSchema(interceptorsSchema).optional(),
+    cors: corsSchema.optional(),
+    rest: restConfigSchema.optional(),
+    graphql: graphqlConfigSchema.optional(),
+    database: databaseConfigSchema.optional()
+  });
 
-    validateBaseUrl(mockServerConfig.baseUrl);
-    validatePort(mockServerConfig.port);
-    validateStaticPath(mockServerConfig.staticPath);
-    validateInterceptors(mockServerConfig.interceptors);
-    validateCors(mockServerConfig.cors);
-  } catch (error: any) {
+  const validationResult = mockServerConfigSchema.safeParse(mockServerConfig);
+  if (!validationResult.success) {
+    const path = getMostSpecificPathFromError(validationResult.error);
+    const validationMessage = getValidationMessageFromPath(path);
+
     throw new Error(
-      `Validation Error: configuration.${error.message} does not match the API schema. Click here to see correct type: https://github.com/siberiacancode/mock-config-server`
+      `Validation Error: configuration${validationMessage} does not match the API schema. Click here to see correct type: https://github.com/siberiacancode/mock-config-server`
     );
   }
 };
