@@ -6,8 +6,8 @@ import type { GraphQLMockServerConfig, RestMockServerConfig } from '@/utils/type
 
 import type { MockServerConfig, MockServerConfigArgv } from '../src';
 
-import { validateApiMockServerConfig } from './newValidateMockServerConfig/validateApiMockServerConfig';
-import { validateMockServerConfig } from './newValidateMockServerConfig/validateMockServerConfig';
+import { validateApiMockServerConfig } from './validateMockServerConfig/validateApiMockServerConfig';
+import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
 
 export const run = (
   mockConfig: MockServerConfig,

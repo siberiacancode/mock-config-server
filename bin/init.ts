@@ -3,9 +3,9 @@ import prompts from 'prompts';
 
 import type { MockServerConfigArgv } from '@/utils/types';
 
-import { baseUrlSchema } from './newValidateMockServerConfig/baseUrlSchema/baseUrlSchema';
-import { portSchema } from './newValidateMockServerConfig/portSchema/portSchema';
-import { staticPathSchema } from './newValidateMockServerConfig/staticPathSchema/staticPathSchema';
+import { baseUrlSchema } from './validateMockServerConfig/baseUrlSchema/baseUrlSchema';
+import { portSchema } from './validateMockServerConfig/portSchema/portSchema';
+import { staticPathSchema } from './validateMockServerConfig/staticPathSchema/staticPathSchema';
 import { createTemplate } from './helpers';
 
 export const init = async (argv: MockServerConfigArgv) => {
