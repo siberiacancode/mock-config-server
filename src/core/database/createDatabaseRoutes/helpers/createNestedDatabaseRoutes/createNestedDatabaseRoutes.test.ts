@@ -398,7 +398,9 @@ describe('CreateNestedDatabaseRoutes', () => {
     const correctSearchValues = ['string', true, 3000, null];
 
     correctSearchValues.forEach((correctSearchValue) => {
-      test(`Should search data by ${correctSearchValue} query with type ${typeof correctSearchValue}`, async () => {
+      test(`Should search data by "${correctSearchValue}" query with type ${
+        correctSearchValue !== null ? typeof correctSearchValue : 'null'
+      }`, async () => {
         const server = createServer({ users: [{ id: 1, data: correctSearchValue }] });
 
         const response = await request(server).get(`/users?_q=${correctSearchValue}`);
