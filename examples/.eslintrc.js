@@ -1,4 +1,4 @@
-import eslint from '../.eslintrc';
+const eslint = require('../.eslintrc.js');
 
 module.exports = {
   ...eslint,
