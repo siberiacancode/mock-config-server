@@ -482,4 +482,40 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
   });
+
+  describe('createNestedDatabaseRoutes: search function', () => {
+    const nestedDatabase = createNestedDatabase();
+    const server = createServer(nestedDatabase);
+
+    const correctSearchValues = ['string', true, 3000, null];
+
+    correctSearchValues.forEach((correctSearchValue) => {
+      test(`Should search data by "${correctSearchValue}" query with type ${
+        correctSearchValue !== null ? typeof correctSearchValue : 'null'
+      }`, async () => {
+        const server = createServer({ users: [{ id: 1, data: correctSearchValue }] });
+
+        const response = await request(server).get(`/users?_q=${correctSearchValue}`);
+
+        expect(response.body).toStrictEqual([{ id: 1, data: correctSearchValue }]);
+      });
+    });
+
+    test('Should search data by query when nested text', async () => {
+      const response = await request(server).get('/users?_q=Tomsk');
+
+      expect(response.body).toStrictEqual([
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+    });
+
+    test('Should search data by multiple query', async () => {
+      const response = await request(server).get('/users?_q=Tomsk&_q=Novosibirsk');
+
+      expect(response.body).toStrictEqual([
+        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
+        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+    });
+  });
 });

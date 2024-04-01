@@ -120,6 +120,22 @@ describe('createShallowDatabaseRoutes', () => {
     });
   });
 
+  describe('createShallowDatabaseRoutes: database functions', () => {
+    const notArrayShallowDatabaseValues = ['string', true, 3000, null, {}];
+
+    notArrayShallowDatabaseValues.forEach((notArrayShallowDatabaseValue) => {
+      test(`Should return unchanged result when data type is ${typeof notArrayShallowDatabaseValue}`, async () => {
+        const server = createServer({ users: notArrayShallowDatabaseValue });
+
+        const response = await request(server).get(
+          '/users?name=users_page=1&_limit=1_begin=1&_end=1?_sort=users_q=users'
+        );
+
+        expect(response.body).toStrictEqual(notArrayShallowDatabaseValue);
+      });
+    });
+  });
+
   describe('createShallowDatabaseRoutes: filter function', () => {
     const shallowDatabase = createShallowDatabase();
     const server = createServer(shallowDatabase);
@@ -424,6 +440,42 @@ describe('createShallowDatabaseRoutes', () => {
         { name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } },
         { name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
         { name: 'Will Smith', age: 27, address: { city: 'Moscow' } }
+      ]);
+    });
+  });
+
+  describe('createNestedDatabaseRoutes: search function', () => {
+    const shallowDatabase = createShallowDatabase();
+    const server = createServer(shallowDatabase);
+
+    const correctSearchValues = ['string', true, 3000, null];
+
+    correctSearchValues.forEach((correctSearchValue) => {
+      test(`Should search data by "${correctSearchValue}" query with type ${
+        correctSearchValue !== null ? typeof correctSearchValue : 'null'
+      }`, async () => {
+        const server = createServer({ users: [{ data: correctSearchValue }] });
+
+        const response = await request(server).get(`/users?_q=${correctSearchValue}`);
+
+        expect(response.body).toStrictEqual([{ data: correctSearchValue }]);
+      });
+    });
+
+    test('Should filter data by query when nested text', async () => {
+      const response = await request(server).get('/users?_q=Tomsk');
+
+      expect(response.body).toStrictEqual([
+        { name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      ]);
+    });
+
+    test('Should filter data by multiple query', async () => {
+      const response = await request(server).get('/users?_q=Tomsk&_q=Novosibirsk');
+
+      expect(response.body).toStrictEqual([
+        { name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
+        { name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
       ]);
     });
   });
