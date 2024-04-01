@@ -28,8 +28,6 @@ export const createShallowDatabaseRoutes = (
         return response.json(data);
       }
 
-      data = data.filter((element) => typeof element === 'object' && element !== null);
-
       if (!request.query) {
         // ✅ important:
         // set 'Cache-Control' header for explicit browsers response revalidate
@@ -37,6 +35,8 @@ export const createShallowDatabaseRoutes = (
         response.set('Cache-control', 'max-age=0, must-revalidate');
         response.json(data);
       }
+
+      data = data.filter((element) => typeof element === 'object' && element !== null);
 
       const { _page, _limit, _begin, _end, _sort, _order, _q, ...filters } = request.query;
 

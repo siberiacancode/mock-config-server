@@ -30,8 +30,6 @@ export const createNestedDatabaseRoutes = (
         return response.json(data);
       }
 
-      data = data.filter((element) => typeof element === 'object' && element !== null);
-
       if (!request.query) {
         // ✅ important:
         // set 'Cache-Control' header for explicit browsers response revalidate
