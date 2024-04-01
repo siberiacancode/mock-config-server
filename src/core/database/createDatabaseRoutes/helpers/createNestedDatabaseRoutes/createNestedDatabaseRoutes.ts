@@ -22,20 +22,12 @@ export const createNestedDatabaseRoutes = (
     router.route(collectionPath).get((request, response) => {
       let data = storage.read(key);
 
-      if (!Array.isArray(data)) {
+      if (!Array.isArray(data) || !request.query) {
         // ✅ important:
         // set 'Cache-Control' header for explicit browsers response revalidate
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
         response.set('Cache-control', 'max-age=0, must-revalidate');
         return response.json(data);
-      }
-
-      if (!request.query) {
-        // ✅ important:
-        // set 'Cache-Control' header for explicit browsers response revalidate
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-        response.set('Cache-control', 'max-age=0, must-revalidate');
-        response.json(data);
       }
 
       const { _page, _limit, _begin, _end, _sort, _order, _q, ...filters } = request.query;
