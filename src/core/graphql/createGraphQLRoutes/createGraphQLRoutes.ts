@@ -9,15 +9,17 @@ import {
   getGraphQLInput,
   isEntityDescriptor,
   parseQuery,
-  resolveEntityValues
+  resolveEntityValues,
+  sleep
 } from '@/utils/helpers';
 import type {
   Entries,
   GraphqlConfig,
   GraphQLEntitiesByEntityName,
-  GraphQLEntityDescriptorOrValue,
-  GraphQLTopLevelPlainEntityDescriptor,
-  Interceptors
+  GraphQLEntity,
+  Interceptors,
+  TopLevelPlainEntityArray,
+  TopLevelPlainEntityDescriptor
 } from '@/utils/types';
 
 import { prepareGraphQLRequestConfigs } from './helpers';
@@ -104,7 +106,7 @@ export const createGraphQLRoutes = ({
         }
 
         const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
-          Exclude<GraphQLEntityDescriptorOrValue, GraphQLTopLevelPlainEntityDescriptor | Array<any>>
+          Exclude<GraphQLEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
         >;
         return recordOrArrayEntries.every(([entityKey, entityValue]) => {
           const { checkMode, value: descriptorValue } = convertToEntityDescriptor(entityValue);
@@ -173,6 +175,15 @@ export const createGraphQLRoutes = ({
         ? await matchedRouteConfigData(request, matchedRouteConfig.entities ?? {})
         : matchedRouteConfigData;
 
+    if (matchedRouteConfig.settings?.status) {
+      response.statusCode = matchedRouteConfig.settings.status;
+    }
+
+    // ✅ important:
+    // set 'Cache-Control' header for explicit browsers response revalidate: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+    // this code should place before response interceptors for giving opportunity to rewrite 'Cache-Control' header
+    if (matchedRequestConfig.operationType === 'query') response.set('Cache-control', 'no-cache');
+
     const data = await callResponseInterceptors({
       data: resolvedData,
       request,
@@ -185,11 +196,11 @@ export const createGraphQLRoutes = ({
       }
     });
 
-    // ✅ important:
-    // set 'Cache-Control' header for explicit browsers response revalidate
-    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-    response.set('Cache-control', 'max-age=0, must-revalidate');
-    return response.status(response.statusCode).json(data);
+    if (matchedRouteConfig.settings?.delay) {
+      await sleep(matchedRouteConfig.settings.delay);
+    }
+
+    return response.json(data);
   };
 
   router.route('/').get(asyncHandler(graphqlMiddleware));

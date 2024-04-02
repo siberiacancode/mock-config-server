@@ -88,21 +88,30 @@ Configs are the fundamental part of the mock server. These configs are easy to f
 
 ##### Rest request config
 
+Every route must be configured to handle response content in one of three ways: data or [queue](#polling) or [file](#file-responses).
+
 - `path` {string | RegExp} request path
-- `method` {GET | POST | DELETE | PUT | PATCH} rest api method
+- `method` {get | post | delete | put | patch | options} rest api method
 - `routes` {RestRouteConfig[]} request routes
-  - `data` {any} mock data of request
+  - `data?` {any} mock data of request
+  - `queue?` {Array<{ time?: number; data: any}>} queue for polling with opportunity to set time for each response
+  - `file?` {string} path to file for return in response
+  - `settings?` {Settings} settings for route (polling on/off, etc.)
   - `entities?` Object<headers | cookies | query | params | body> object that helps in data retrieval
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 
 ##### GraphQL request config
 
+Every route must be configured to handle response content in one of two ways: data or [queue](#polling).
+
 - `operationType` {query | mutation} graphql operation type
 - `operationName?` {string | RegExp} graphql operation name
 - `query?`: {string} graphql query as string
 - `routes` {GraphQLRouteConfig[]} request routes
-  - `data` {any} mock data of request
+  - `data?` {any} mock data of request
+  - `queue?` {Array<{ time?: number; data: any}>} queue for polling with opportunity to set time for each response
+  - `settings?` {Settings} settings for route (polling on/off, etc.)
   - `entities?` Object<headers | cookies | query | variables> object that helps in data retrieval
   - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
@@ -473,6 +482,66 @@ const mockServerConfig = {
 export default mockServerConfig;
 ```
 
+#### File responses
+
+Rest routes support paths to files. If a route is matched, the server will send data from the file. If the file is not found, the server will return 404.
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/files/settings',
+        method: 'get',
+        routes: [
+          {
+            file: './settings.json'
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export default mockServerConfig;
+```
+
+> If the file path is absolute, then this path will be used as is. If the file path is relative, it will be appended to the current working directory.
+
+If the file exists, response interceptors will receive null as the data argument.
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/files/settings',
+        method: 'get',
+        routes: [
+          {
+            file: './settings.json',
+            interceptors: {
+              response: (data) => {
+                console.log(data); // null
+                return data;
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export default mockServerConfig;
+```
+
+> Any changes to the data will not affect the file (and the response, respectively).
+
 #### Static Path
 
 Entity for connecting statics to the server, like HTML, JSON, PNG, etc.
@@ -697,6 +766,20 @@ GET /users?_begin=20&_end=30
 
 Works exactly as [slice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice), \_begin and \_end are optional
 
+### Full text search
+
+> Add \_q parameter for search data, search can be done by strings and numbers
+
+```
+GET /users?_q=siberia
+```
+
+For multiple search
+
+```
+GET /users?_q=siberia&_q=24
+```
+
 ### File example
 
 ```javascript
@@ -728,6 +811,18 @@ Options:
 Examples:
   mcs --baseurl /base/url --port 3000 --config ./path/to/config.ts -w
   mcs --help
+```
+
+# Init Command
+
+The init command is used to initialize a new project or set up the initial configuration for a tool. It helps users get started with a new project by providing a streamlined setup process.
+
+```
+mcs init
+
+Examples:
+  mcs init
+  mcs init --baseurl /base/url --port 3000
 ```
 
 ## ✨ Contributors
@@ -768,6 +863,15 @@ Examples:
             alt="anv296" />
             <br />
             <sub style="font-size:13px"><b>🎱️ anv296</b></sub>
+        </a>
+    </td>
+        <td align="center" style="word-wrap: break-word; width: 100.0; height: 100.0">
+        <a href="https://github.com/kvelian">
+            <img src="https://avatars.githubusercontent.com/u/81089091?s=400&u=7c4fcc6d120f4b13ccbd03a9a384622b6523c376&v=4"
+            width="100;"  
+            alt="kvelian" />
+            <br />
+            <sub style="font-size:13px"><b>🌵 kvelian</b></sub>
         </a>
     </td>
   </tr>

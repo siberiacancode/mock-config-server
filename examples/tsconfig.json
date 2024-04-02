@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.dev.json",
+  "compilerOptions": {
+    "baseUrl": "./../",
+    "paths": {
+      "mock-config-server": ["./dist"]
+    }
+  },
+  "include": ["./**/*.ts"],
+  "exclude": []
+}
