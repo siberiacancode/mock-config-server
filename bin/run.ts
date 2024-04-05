@@ -14,7 +14,12 @@ export const run = (
   { baseUrl, port, staticPath }: MockServerConfigArgv
 ) => {
   try {
-    const mergedMockServerConfig = { ...mockConfig, baseUrl, port, staticPath } as MockServerConfig;
+    const mergedMockServerConfig = {
+      ...mockConfig,
+      ...(baseUrl && { baseUrl }),
+      ...(port && { port }),
+      ...(staticPath && { staticPath })
+    } as MockServerConfig;
 
     if (
       !mergedMockServerConfig.rest &&
