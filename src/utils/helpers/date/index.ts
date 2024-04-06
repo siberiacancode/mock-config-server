@@ -1,1 +1,1 @@
-export * from './formatUnixTimestamp/formatUnixTimestamp';
+export * from './getTimestamp/getTimestamp';

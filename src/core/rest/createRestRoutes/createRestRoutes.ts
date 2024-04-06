@@ -39,9 +39,9 @@ export const createRestRoutes = ({
   prepareRestRequestConfigs(restConfig.configs).forEach((requestConfig) => {
     router.route(requestConfig.path)[requestConfig.method](
       asyncHandler(async (request, response, next) => {
-        const requestRequestInterceptor = requestConfig.interceptors?.request;
-        if (requestRequestInterceptor) {
-          await callRequestInterceptor({ request, interceptor: requestRequestInterceptor });
+        const requestInterceptor = requestConfig.interceptors?.request;
+        if (requestInterceptor) {
+          await callRequestInterceptor({ request, interceptor: requestInterceptor });
         }
 
         const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {

@@ -3,7 +3,6 @@ import type { IncomingHttpHeaders } from 'http';
 import type { ParsedQs } from 'qs';
 
 export type PlainObject = Record<string, any>;
-export type PlainFunction = (...args: any[]) => any;
 
 export type Primitive = boolean | number | bigint | string | null | undefined | symbol;
 

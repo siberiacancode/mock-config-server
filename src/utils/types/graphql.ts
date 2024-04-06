@@ -69,37 +69,37 @@ type GraphQLEntityDescriptor<
         value: (actualValue: any, checkFunction: CheckFunction) => boolean;
       }
     : Check extends CompareWithDescriptorAnyValueCheckMode
-    ? {
-        checkMode: Check;
-        value: GraphQLEntityValueOrValues<EntityName>;
-      }
-    : Check extends CheckActualValueCheckMode
-    ? {
-        checkMode: Check;
-        value?: undefined;
-      }
-    : never
+      ? {
+          checkMode: Check;
+          value: GraphQLEntityValueOrValues<EntityName>;
+        }
+      : Check extends CheckActualValueCheckMode
+        ? {
+            checkMode: Check;
+            value?: undefined;
+          }
+        : never
   : Check extends Extract<CalculateByDescriptorValueCheckMode, 'function'>
-  ? {
-      checkMode: Check;
-      value: (actualValue: any, checkFunction: CheckFunction) => boolean;
-    }
-  : Check extends Extract<CalculateByDescriptorValueCheckMode, 'regExp'>
-  ? {
-      checkMode: Check;
-      value: RegExp | RegExp[];
-    }
-  : Check extends CompareWithDescriptorValueCheckMode
-  ? {
-      checkMode: Check;
-      value: GraphQLEntityValueOrValues<EntityName>;
-    }
-  : Check extends CheckActualValueCheckMode
-  ? {
-      checkMode: Check;
-      value?: undefined;
-    }
-  : never;
+    ? {
+        checkMode: Check;
+        value: (actualValue: any, checkFunction: CheckFunction) => boolean;
+      }
+    : Check extends Extract<CalculateByDescriptorValueCheckMode, 'regExp'>
+      ? {
+          checkMode: Check;
+          value: RegExp | RegExp[];
+        }
+      : Check extends CompareWithDescriptorValueCheckMode
+        ? {
+            checkMode: Check;
+            value: GraphQLEntityValueOrValues<EntityName>;
+          }
+        : Check extends CheckActualValueCheckMode
+          ? {
+              checkMode: Check;
+              value?: undefined;
+            }
+          : never;
 
 export type GraphQLEntityDescriptorOrValue<
   EntityName extends GraphQLEntityName = GraphQLEntityName

@@ -1,82 +1,66 @@
-import c from 'ansi-colors';
 import type { Request } from 'express';
 
-import type {
-  RequestLogFunction,
-  RequestLogFunctionParams,
-  RequestLogger,
-  RestMethod
-} from '@/utils/types';
+import type { GetTokens, Logger, LoggerParams, RestMethod } from '@/utils/types';
 
-import { formatUnixTimestamp } from '../../date';
-import { getRestMethodColoredString } from '../helpers';
+import { getTimestamp } from '../../date';
 
-const requestLogFunction: RequestLogFunction = ({ logger, tokenValues }) => {
+const getTokens: GetTokens<'request'> = ({ logger, tokenValues }) => {
   const {
-    meta: { url, method, graphQLOperationType, graphQLOperationName, id, unixTimestamp },
+    meta: { unixTimestamp, id, url, method, graphQLOperationType, graphQLOperationName },
     entities: { headers, cookies, query, params, variables, body }
   } = tokenValues;
 
-  const prefix = `[${id}][REQ]`;
-  const metaPrefix = `${prefix}[meta]`;
-  const entitiesPrefix = `${prefix}[entities]`;
-
-  if (logger.tokens?.meta?.url) {
-    console.info(`${metaPrefix}[${c.yellow('url')}] ${url}`);
-  }
-  if (logger.tokens?.meta?.method) {
-    console.info(`${metaPrefix}[${c.red('method')}] ${getRestMethodColoredString(method)}`);
-  }
-  if (logger.tokens?.meta?.graphQLOperationType) {
-    console.info(`${metaPrefix}[${c.blue('graphQLOperationType')}] ${graphQLOperationType}`);
-  }
-  if (logger.tokens?.meta?.graphQLOperationName) {
-    console.info(`${metaPrefix}[${c.green('graphQLOperationName')}] ${graphQLOperationName}`);
-  }
-  if (logger.tokens?.meta?.id) {
-    console.info(`${metaPrefix}[${c.greenBright('id')}] ${id}`);
-  }
-  if (logger.tokens?.meta?.unixTimestamp) {
-    console.info(`${metaPrefix}[${c.blue('timestamp')}] ${formatUnixTimestamp(unixTimestamp)}`);
+  if (!logger.tokens || !Object.keys(logger.tokens).length) {
+    return {
+      type: 'request',
+      meta: {
+        timestamp: getTimestamp(unixTimestamp),
+        id,
+        method,
+        url
+      }
+    };
   }
 
-  if (logger.tokens?.entities?.headers) {
-    console.info(`${entitiesPrefix}[${c.cyan('headers')}]\n${JSON.stringify(headers, null, 2)}`);
-  }
-  if (logger.tokens?.entities?.cookies) {
-    console.info(`${entitiesPrefix}[${c.magenta('cookies')}]\n${JSON.stringify(cookies, null, 2)}`);
-  }
-  if (logger.tokens?.entities?.query) {
-    console.info(`${entitiesPrefix}[${c.cyanBright('query')}]\n${JSON.stringify(query, null, 2)}`);
-  }
-  if (logger.tokens?.entities?.params) {
-    console.info(`${entitiesPrefix}[${c.red('params')}]\n${JSON.stringify(params, null, 2)}`);
-  }
-  if (logger.tokens?.entities?.variables) {
-    console.info(
-      `${entitiesPrefix}[${c.yellow('variables')}]\n${JSON.stringify(variables, null, 2)}`
-    );
-  }
-  if (logger.tokens?.entities?.body) {
-    console.info(`${entitiesPrefix}[${c.green('body')}]\n${JSON.stringify(body, null, 2)}`);
-  }
-
-  console.info('\n\n');
+  return {
+    type: 'request',
+    ...(logger.tokens.meta && {
+      meta: {
+        ...(logger.tokens.meta.unixTimestamp && { timestamp: getTimestamp(unixTimestamp) }),
+        ...(logger.tokens.meta.id && { id }),
+        ...(logger.tokens.meta.method && { method }),
+        ...(logger.tokens.meta.graphQLOperationType && { graphQLOperationType }),
+        ...(logger.tokens.meta.graphQLOperationName && { graphQLOperationName }),
+        ...(logger.tokens.meta.url && { url })
+      }
+    }),
+    ...(logger.tokens.entities && {
+      entities: {
+        ...(logger.tokens.entities.headers && { headers }),
+        ...(logger.tokens.entities.cookies && { cookies }),
+        ...(logger.tokens.entities.query && { query }),
+        ...(logger.tokens.entities.params && { params }),
+        ...(logger.tokens.entities.variables && { variables }),
+        ...(logger.tokens.entities.body && { body })
+      }
+    })
+  };
 };
 
 interface CallRequestLoggerParams {
-  logger: RequestLogger;
+  logger: Logger<'request'>;
   request: Request;
 }
 
 export const callRequestLogger = async ({ logger, request }: CallRequestLoggerParams) => {
   if (!logger.enabled) return;
 
-  const logFunctionParams: RequestLogFunctionParams = {
+  const loggerParams: LoggerParams<'request'> = {
     logger,
     tokenValues: {
+      type: 'request',
       meta: {
-        url: `${request.protocol}://${request.get('host')}${request.originalUrl}`,
+        url: decodeURI(`${request.protocol}://${request.get('host')}${request.originalUrl}`),
         method: request.method.toLowerCase() as RestMethod,
         graphQLOperationType: request.graphQL?.operationType,
         graphQLOperationName: request.graphQL?.operationName,
@@ -93,12 +77,13 @@ export const callRequestLogger = async ({ logger, request }: CallRequestLoggerPa
       }
     },
     request,
-    defaultLogFunction: requestLogFunction
+    getTokens
   };
 
   if (logger.logFunction) {
-    await logger.logFunction(logFunctionParams);
+    await logger.logFunction(loggerParams);
     return;
   }
-  await requestLogFunction(logFunctionParams);
+  const tokens = await getTokens(loggerParams);
+  console.dir(tokens, { depth: null });
 };

@@ -80,9 +80,9 @@ export const createGraphQLRoutes = ({
       return next();
     }
 
-    const requestRequestInterceptor = matchedRequestConfig.interceptors?.request;
-    if (requestRequestInterceptor) {
-      await callRequestInterceptor({ request, interceptor: requestRequestInterceptor });
+    const requestInterceptor = matchedRequestConfig.interceptors?.request;
+    if (requestInterceptor) {
+      await callRequestInterceptor({ request, interceptor: requestInterceptor });
     }
 
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {

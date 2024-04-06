@@ -16,9 +16,9 @@ module.exports = {
         '@typescript-eslint/no-unsafe-enum-comparison': 'off',
         '@typescript-eslint/no-var-requires': 'off',
         'no-restricted-syntax': 'off',
-        'promise/always-return': 'off',
+        'promise/always-return': ['error', { ignoreLastCallback: true }],
         '@typescript-eslint/no-namespace': 'off',
-        'no-console': ['warn', { allow: ['info', 'table'] }]
+        'no-console': ['warn', { allow: ['info', 'dir', 'error'] }]
       }
     }
   ]
