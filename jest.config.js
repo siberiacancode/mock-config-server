@@ -1,11 +1,14 @@
 const { jest } = require('@siberiacancode/jest');
-const { pathsToModuleNameMapper } = require('ts-jest');
-const { compilerOptions } = require('./tsconfig.dev.json');
+const fs = require('fs');
 
-/** @type {import('ts-jest').JestConfigWithTsJest} */
+const config = JSON.parse(fs.readFileSync(`${__dirname}/.swcrc`, 'utf-8'));
+
 module.exports = {
   ...jest,
-  preset: 'ts-jest',
   testEnvironment: 'node',
-  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' })
+  transform: {
+    // ✅ important:
+    // 'swcrc: false' disable reading .swcrc config and override 'exclude' property https://github.com/swc-project/jest/issues/62
+    '^.+\\.ts$': ['@swc/jest', { ...config, exclude: [], swcrc: false }]
+  }
 };

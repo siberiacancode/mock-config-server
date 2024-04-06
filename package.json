@@ -96,6 +96,7 @@
     "@siberiacancode/stylelint": "^1.0.2",
     "@swc/cli": "^0.3.12",
     "@swc/core": "^1.4.12",
+    "@swc/jest": "^0.2.36",
     "@types/jest": "^29.5.11",
     "@types/supertest": "^6.0.2",
     "husky": "^8.0.3",
@@ -104,7 +105,6 @@
     "shx": "^0.3.4",
     "style-loader": "^3.3.4",
     "supertest": "^6.3.4",
-    "ts-jest": "^29.1.1",
     "tsc-alias": "^1.8.8",
     "typescript": "^5.3.3"
   },
