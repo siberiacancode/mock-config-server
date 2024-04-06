@@ -57,7 +57,9 @@ export const resolveEntityValues = (
 
   // ✅ actual: primitive, descriptor: array
   const isDescriptorValueArray = Array.isArray(descriptorValue);
-  const isNegativeCheckMode = NEGATION_CHECK_MODES.includes(checkMode);
+  const isNegativeCheckMode = NEGATION_CHECK_MODES.includes(
+    checkMode as (typeof NEGATION_CHECK_MODES)[number]
+  );
   if (isActualValuePrimitive && isDescriptorValueArray) {
     if (isNegativeCheckMode) {
       return descriptorValue.every((descriptorValueElement) =>

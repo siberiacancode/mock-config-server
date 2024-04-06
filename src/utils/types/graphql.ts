@@ -1,140 +1,59 @@
 import type { Request } from 'express';
 
-import type {
-  CalculateByDescriptorValueCheckMode,
-  CheckActualValueCheckMode,
-  CheckFunction,
-  CheckMode,
-  CompareWithDescriptorAnyValueCheckMode,
-  CompareWithDescriptorValueCheckMode
-} from './checkModes';
+import type { MappedEntity, PlainEntity } from './entities';
 import type { Interceptors } from './interceptors';
-import type { Data, Primitive } from './values';
+import type { Data } from './values';
 
 export type GraphQLEntityName = 'headers' | 'cookies' | 'query' | 'variables';
 
-export type GraphQLMappedEntityName = string;
-type GraphQLMappedEntityValue = string | number | boolean;
-
-type GraphQLPlainEntityInnerValue = {
-  checkMode?: undefined;
-  call?: undefined;
-  dotAll?: undefined;
-  [key: string]: Primitive | GraphQLPlainEntityInnerValue;
-};
-
-type GraphQLPlainEntityValue =
-  // ✅ important:
-  // Omit `checkMode` key for fix types,
-  // Omit `call` key for exclude functions,
-  // Omit `forEach` for exclude arrays,
-  // Omit `dotAll` for exclude RegExp.
-  {
-    checkMode?: undefined;
-    call?: undefined;
-    forEach?: undefined;
-    dotAll?: undefined;
-    [key: string]: GraphQLPlainEntityInnerValue | Primitive | GraphQLEntityDescriptor;
-  };
+export type GraphQLEntity<EntityName extends GraphQLEntityName = GraphQLEntityName> =
+  EntityName extends 'variables' ? PlainEntity : MappedEntity;
 
 export type GraphQLOperationType = 'query' | 'mutation';
 export type GraphQLOperationName = string | RegExp;
-
-interface GraphQLQuery {
-  operationType: GraphQLOperationType;
-  operationName: GraphQLOperationName;
-}
-
-export type GraphQLVariables = Record<string, any>;
-export interface GraphQLInput {
-  query?: string;
-  variables: GraphQLVariables;
-}
-
-export type GraphQLEntityValue<EntityName = GraphQLEntityName> = EntityName extends 'variables'
-  ? GraphQLPlainEntityValue
-  : GraphQLMappedEntityValue;
-
-type GraphQLEntityValueOrValues<EntityName = GraphQLEntityName> =
-  | GraphQLEntityValue<EntityName>
-  | GraphQLEntityValue<EntityName>[];
-
-type GraphQLEntityDescriptor<
-  EntityName extends GraphQLEntityName = GraphQLEntityName,
-  Check extends CheckMode = CheckMode
-> = EntityName extends 'variables'
-  ? Check extends Extract<CalculateByDescriptorValueCheckMode, 'function'>
-    ? {
-        checkMode: Check;
-        value: (actualValue: any, checkFunction: CheckFunction) => boolean;
-      }
-    : Check extends CompareWithDescriptorAnyValueCheckMode
-      ? {
-          checkMode: Check;
-          value: GraphQLEntityValueOrValues<EntityName>;
-        }
-      : Check extends CheckActualValueCheckMode
-        ? {
-            checkMode: Check;
-            value?: undefined;
-          }
-        : never
-  : Check extends Extract<CalculateByDescriptorValueCheckMode, 'function'>
-    ? {
-        checkMode: Check;
-        value: (actualValue: any, checkFunction: CheckFunction) => boolean;
-      }
-    : Check extends Extract<CalculateByDescriptorValueCheckMode, 'regExp'>
-      ? {
-          checkMode: Check;
-          value: RegExp | RegExp[];
-        }
-      : Check extends CompareWithDescriptorValueCheckMode
-        ? {
-            checkMode: Check;
-            value: GraphQLEntityValueOrValues<EntityName>;
-          }
-        : Check extends CheckActualValueCheckMode
-          ? {
-              checkMode: Check;
-              value?: undefined;
-            }
-          : never;
-
-export type GraphQLEntityDescriptorOrValue<
-  EntityName extends GraphQLEntityName = GraphQLEntityName
-> = EntityName extends 'variables'
-  ? GraphQLEntityDescriptor<EntityName> | GraphQLEntityValue<EntityName>
-  : Record<
-      GraphQLMappedEntityName,
-      GraphQLEntityDescriptor<EntityName> | GraphQLEntityValueOrValues<EntityName>
-    >;
-
-export type GraphQLEntityDescriptorOnly<EntityName extends GraphQLEntityName = GraphQLEntityName> =
-  EntityName extends 'variables'
-    ? GraphQLEntityDescriptor<EntityName>
-    : Record<GraphQLMappedEntityName, GraphQLEntityDescriptor<EntityName>>;
-
-export interface GraphQLEntityNamesByOperationType {
-  query: GraphQLEntityName;
-  mutation: GraphQLEntityName;
-}
-
-type GraphQLEntityByEntityName<OperationType extends GraphQLOperationType> = {
-  [EntityName in GraphQLEntityNamesByOperationType[OperationType]]?: GraphQLEntityDescriptorOrValue<EntityName>;
+export type GraphQLEntityNamesByOperationType = {
+  [operationType in GraphQLOperationType]: GraphQLEntityName;
+};
+export type GraphQLEntitiesByEntityName = {
+  [EntityName in GraphQLEntityName]?: GraphQLEntity<EntityName>;
 };
 
-export interface GraphQLRouteConfig<
-  OperationType extends GraphQLOperationType = GraphQLOperationType,
-  Entities extends
-    GraphQLEntityByEntityName<OperationType> = GraphQLEntityByEntityName<OperationType>
-> {
-  entities?: Entities;
-  data: ((request: Request, entities: Entities) => Data | Promise<Data>) | Data;
-  interceptors?: Pick<Interceptors, 'response'>;
+interface GraphQLSettings {
+  readonly polling?: boolean;
+  readonly status?: number;
+  readonly delay?: number;
 }
 
-export interface GraphQLRequestConfig extends GraphQLQuery {
+export type GraphQLRouteConfig = (
+  | {
+      settings: GraphQLSettings & { polling: true };
+      queue: Array<{
+        time?: number;
+        data:
+          | ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>)
+          | Data;
+      }>;
+    }
+  | {
+      settings?: GraphQLSettings & { polling?: false };
+      data:
+        | ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>)
+        | Data;
+    }
+) & { entities?: GraphQLEntitiesByEntityName; interceptors?: Pick<Interceptors, 'response'> };
+
+interface BaseGraphQLRequestConfig {
+  operationType: GraphQLOperationType;
   routes: GraphQLRouteConfig[];
   interceptors?: Interceptors;
 }
+
+export interface OperationNameGraphQLRequestConfig extends BaseGraphQLRequestConfig {
+  operationName: GraphQLOperationName;
+}
+
+interface QueryGraphQLRequestConfig extends BaseGraphQLRequestConfig {
+  query: string;
+}
+
+export type GraphQLRequestConfig = OperationNameGraphQLRequestConfig | QueryGraphQLRequestConfig;

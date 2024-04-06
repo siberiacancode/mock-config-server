@@ -1,7 +1,7 @@
 import type { Express } from 'express';
 
 import { getGraphQLInput, parseQuery } from '@/utils/helpers';
-import type { GraphQLOperationName, GraphQLOperationType, GraphQLVariables } from '@/utils/types';
+import type { GraphQLEntity, GraphQLOperationName, GraphQLOperationType } from '@/utils/types';
 
 declare global {
   namespace Express {
@@ -11,7 +11,7 @@ declare global {
       graphQL: {
         operationType: GraphQLOperationType;
         operationName: GraphQLOperationName;
-        variables: GraphQLVariables;
+        variables?: GraphQLEntity<'variables'>;
       } | null;
     }
   }
@@ -36,7 +36,7 @@ export const requestInfoMiddleware = (server: Express) => {
     request.graphQL = isValidGraphQLRequest
       ? {
           operationType: graphQLQuery.operationType as GraphQLOperationType,
-          operationName: graphQLQuery.operationName,
+          operationName: graphQLQuery.operationName as GraphQLOperationName,
           variables: graphQLInput.variables
         }
       : null;

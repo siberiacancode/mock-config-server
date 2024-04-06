@@ -1,4 +1,5 @@
 import type { Request } from 'express';
+import type { Arguments } from 'yargs';
 
 import type { GraphQLRequestConfig } from './graphql';
 import type { Interceptors } from './interceptors';
@@ -46,6 +47,7 @@ export interface BaseMockServerConfig {
   interceptors?: Interceptors;
   cors?: Cors;
 }
+
 export interface MockServerConfig extends BaseMockServerConfig {
   rest?: RestConfig;
   graphql?: GraphqlConfig;
@@ -54,13 +56,13 @@ export interface MockServerConfig extends BaseMockServerConfig {
 }
 
 export interface RestMockServerConfig extends BaseMockServerConfig {
-  configs: RestRequestConfig[];
+  configs?: RestRequestConfig[];
   database?: DatabaseConfig;
   loggers?: Loggers<'rest'>;
 }
 
 export interface GraphQLMockServerConfig extends BaseMockServerConfig {
-  configs: GraphQLRequestConfig[];
+  configs?: GraphQLRequestConfig[];
   database?: DatabaseConfig;
   loggers?: Loggers<'graphql'>;
 }
@@ -70,10 +72,10 @@ export interface DatabaseMockServerConfig extends BaseMockServerConfig {
   routes?: Record<`/${string}`, `/${string}`> | `${string}.json`;
 }
 
-export interface MockServerConfigArgv {
+export type MockServerConfigArgv = Arguments<{
   baseUrl?: string;
   port?: number;
   staticPath?: string;
   config?: string;
   watch?: boolean;
-}
+}>;

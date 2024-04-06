@@ -40,7 +40,7 @@ export const createGraphQLMockServer = (
 
   const serverRequestInterceptor = graphqlMockServerConfig.interceptors?.request;
   if (serverRequestInterceptor) {
-    requestInterceptorMiddleware(server, serverRequestInterceptor);
+    requestInterceptorMiddleware({ server, interceptor: serverRequestInterceptor });
   }
 
   const baseUrl = graphqlMockServerConfig.baseUrl ?? '/';
@@ -57,7 +57,7 @@ export const createGraphQLMockServer = (
 
   const routerWithGraphqlRoutes = createGraphQLRoutes({
     router: express.Router(),
-    graphqlConfig: { configs },
+    graphqlConfig: { configs: configs ?? [] },
     serverResponseInterceptor: interceptors?.response,
     loggers
   });

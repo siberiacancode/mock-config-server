@@ -15,9 +15,12 @@ module.exports = {
         '@typescript-eslint/no-unsafe-call': 'off',
         '@typescript-eslint/no-unsafe-enum-comparison': 'off',
         '@typescript-eslint/no-var-requires': 'off',
+        '@typescript-eslint/naming-convention': 'off',
+        '@typescript-eslint/no-namespace': 'off',
+        'no-underscore-dangle': 'off',
         'no-restricted-syntax': 'off',
         'promise/always-return': ['error', { ignoreLastCallback: true }],
-        '@typescript-eslint/no-namespace': 'off',
+        'arrow-body-style': ['error', 'as-needed'],
         'no-console': ['warn', { allow: ['info', 'dir', 'error'] }]
       }
     }

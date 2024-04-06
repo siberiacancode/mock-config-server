@@ -3,7 +3,7 @@ import { parse } from 'graphql';
 
 interface ParseDocumentNodeResult {
   operationType: OperationTypeNode;
-  operationName: string;
+  operationName: string | undefined;
 }
 
 const parseDocumentNode = (node: DocumentNode): ParseDocumentNodeResult => {
@@ -13,7 +13,7 @@ const parseDocumentNode = (node: DocumentNode): ParseDocumentNodeResult => {
 
   return {
     operationType: operationDefinition.operation,
-    operationName: operationDefinition.name?.value ?? ''
+    operationName: operationDefinition.name?.value ?? undefined
   };
 };
 

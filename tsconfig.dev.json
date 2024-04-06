@@ -18,17 +18,16 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "./",
     "paths": {
-      "mock-config-server": ["./dist"],
-      "mock-config-server/*": ["./dist"],
       "@/server": ["./src/server"],
       "@/core/database": ["./src/core/database"],
       "@/core/rest": ["./src/core/rest"],
       "@/core/graphql": ["./src/core/graphql"],
       "@/core/middlewares": ["./src/core/middlewares"],
       "@/utils/helpers": ["./src/utils/helpers"],
+      "@/utils/helpers/tests": ["./src/utils/helpers/tests"],
       "@/utils/types": ["./src/utils/types"],
       "@/utils/constants": ["./src/utils/constants"]
     }
   },
-  "exclude": ["dist", "node_modules", "jest.config.js"]
+  "exclude": ["examples", "bin/templates", "dist", "node_modules", "jest.config.js"]
 }

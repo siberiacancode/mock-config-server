@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 
-import type { GraphQLOperationName, GraphQLOperationType, GraphQLVariables } from './graphql';
+import type { GraphQLOperationName, GraphQLOperationType } from './graphql';
 import type { RestMethod } from './rest';
 import type { DeepPartial } from './utils';
 import type { Cookies, Headers, Params, PlainObject, Query } from './values';
@@ -52,7 +52,7 @@ export interface LoggerTokenValues<
     cookies: Cookies;
     query: Query;
     params: Params;
-    variables: API extends 'graphql' ? GraphQLVariables | undefined : never;
+    variables: API extends 'graphql' ? PlainObject | undefined : never;
     body: any;
   };
   data?: Type extends 'response' ? any : never;

@@ -1,12 +1,12 @@
 {
-  "ignore": ["./**/*.test.ts"],
+  "ignore": ["./**/*.test.ts", "./bin/templates/*"],
   "presets": [
     "@babel/preset-typescript",
     [
       "@babel/preset-env",
       {
         "targets": {
-          "node": "10.0"
+          "node": "12.0"
         }
       }
     ]

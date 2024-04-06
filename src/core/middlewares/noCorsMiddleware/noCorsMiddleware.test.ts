@@ -27,7 +27,7 @@ describe('noCorsMiddleware', () => {
     expect(response.statusCode).toBe(204);
   });
 
-  test(`Should set no cors settings for request`, async () => {
+  test('Should set no cors settings for request', async () => {
     const server = express();
 
     noCorsMiddleware(server);
