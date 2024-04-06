@@ -86,10 +86,6 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@babel/cli": "^7.23.4",
-    "@babel/core": "^7.23.7",
-    "@babel/preset-env": "^7.23.8",
-    "@babel/preset-typescript": "^7.23.3",
     "@siberiacancode/eslint": "^1.0.3",
     "@siberiacancode/jest": "^1.0.2",
     "@siberiacancode/prettier": "^1.0.1",
