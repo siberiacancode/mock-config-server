@@ -24,6 +24,5 @@
       "@/utils/types": ["./src/utils/types"],
       "@/utils/constants": ["./src/utils/constants"]
     }
-  },
-  "exclude": [".*\\.test\\.ts$", "^bin/templates/.*"]
+  }
 }
