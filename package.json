@@ -42,6 +42,7 @@
     "node": ">=12"
   },
   "scripts": {
+    "prepublishOnly": "git diff --exit-code",
     "prepare": "husky install && yarn build",
     "build:types": "tsc -p tsconfig.production.json && tsc-alias -p tsconfig.production.json",
     "build:swc": "swc bin src index.ts -d dist --extensions .ts --copy-files --ignore **/*.test.ts --ignore bin/templates",
