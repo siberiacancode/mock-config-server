@@ -10,6 +10,7 @@ import {
   errorMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
+  requestInfoMiddleware,
   requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
@@ -21,7 +22,7 @@ export const createMockServer = (
   mockServerConfig: Omit<MockServerConfig, 'port'>,
   server: Express = express()
 ) => {
-  const { cors, staticPath, rest, graphql, database, interceptors } = mockServerConfig;
+  const { cors, staticPath, rest, graphql, database, interceptors, loggers } = mockServerConfig;
 
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../static/views'));
@@ -33,6 +34,8 @@ export const createMockServer = (
   server.set('json spaces', 2);
 
   server.use(bodyParser.text());
+
+  requestInfoMiddleware(server);
 
   cookieParseMiddleware(server);
 
@@ -57,7 +60,8 @@ export const createMockServer = (
     const routerWithRestRoutes = createRestRoutes({
       router: express.Router(),
       restConfig: rest,
-      serverResponseInterceptor: interceptors?.response
+      serverResponseInterceptor: interceptors?.response,
+      loggers
     });
 
     const restBaseUrl = urlJoin(baseUrl, rest.baseUrl ?? '/');
@@ -78,7 +82,8 @@ export const createMockServer = (
     const routerWithGraphQLRoutes = createGraphQLRoutes({
       router: express.Router(),
       graphqlConfig: graphql,
-      serverResponseInterceptor: interceptors?.response
+      serverResponseInterceptor: interceptors?.response,
+      loggers
     });
 
     const graphqlBaseUrl = urlJoin(baseUrl, graphql.baseUrl ?? '/');

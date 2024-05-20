@@ -1,4 +1,4 @@
-type Cookies = Record<string, string>;
+import type { Cookies } from '@/utils/types';
 
 export const parseCookie = (cookieHeader: string) => {
   if (!cookieHeader) return {};

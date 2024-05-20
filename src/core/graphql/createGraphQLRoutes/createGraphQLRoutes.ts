@@ -4,7 +4,9 @@ import { flatten } from 'flat';
 import {
   asyncHandler,
   callRequestInterceptor,
+  callRequestLogger,
   callResponseInterceptors,
+  callResponseLogger,
   convertToEntityDescriptor,
   getGraphQLInput,
   isEntityDescriptor,
@@ -18,6 +20,7 @@ import type {
   GraphQLEntitiesByEntityName,
   GraphQLEntity,
   Interceptors,
+  Loggers,
   TopLevelPlainEntityArray,
   TopLevelPlainEntityDescriptor
 } from '@/utils/types';
@@ -28,12 +31,14 @@ interface CreateGraphQLRoutesParams {
   router: IRouter;
   graphqlConfig: GraphqlConfig;
   serverResponseInterceptor?: Interceptors['response'];
+  loggers?: Loggers;
 }
 
 export const createGraphQLRoutes = ({
   router,
   graphqlConfig,
-  serverResponseInterceptor
+  serverResponseInterceptor,
+  loggers
 }: CreateGraphQLRoutesParams) => {
   const preparedGraphQLRequestConfig = prepareGraphQLRequestConfigs(graphqlConfig.configs);
 
@@ -124,8 +129,11 @@ export const createGraphQLRoutes = ({
       });
     });
 
-    if (!matchedRouteConfig) {
-      return next();
+    if (!matchedRouteConfig) return next();
+
+    const requestLogger = loggers?.request;
+    if (requestLogger) {
+      await callRequestLogger({ request, logger: requestLogger });
     }
 
     let matchedRouteConfigData = null;
@@ -198,6 +206,16 @@ export const createGraphQLRoutes = ({
 
     if (matchedRouteConfig.settings?.delay) {
       await sleep(matchedRouteConfig.settings.delay);
+    }
+
+    const responseLogger = loggers?.response;
+    if (responseLogger) {
+      await callResponseLogger({
+        request,
+        response,
+        logger: responseLogger,
+        data
+      });
     }
 
     return response.json(data);

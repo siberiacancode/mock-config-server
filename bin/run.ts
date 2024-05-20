@@ -7,7 +7,8 @@ import type { GraphQLMockServerConfig, RestMockServerConfig } from '@/utils/type
 import type { MockServerConfig, MockServerConfigArgv } from '../src';
 
 import { validateApiMockServerConfig } from './validateMockServerConfig/validateApiMockServerConfig';
-import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
+// TODO: add loggers validation
+// import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
 
 export const run = (
   mockConfig: MockServerConfig,
@@ -53,7 +54,7 @@ export const run = (
       return startRestMockServer(mergedApiMockServerConfig as RestMockServerConfig);
     }
 
-    validateMockServerConfig(mergedMockServerConfig);
+    // validateMockServerConfig(mergedMockServerConfig);
     return startMockServer(mergedMockServerConfig);
   } catch (error: any) {
     console.error(error.message);

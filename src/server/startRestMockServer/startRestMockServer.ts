@@ -11,7 +11,7 @@ export const startRestMockServer = (restMockServerConfig: RestMockServerConfig) 
   const port = restMockServerConfig.port ?? DEFAULT.PORT;
 
   const server = mockServer.listen(port, () => {
-    console.log(color.green(`🎉 Rest Mock Server is running at http://localhost:${port}`));
+    console.info(color.green(`🎉 Rest Mock Server is running at http://localhost:${port}`));
   });
 
   // ✅ important: add destroy method for closing keep-alive connections after server shutdown

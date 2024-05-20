@@ -4,7 +4,7 @@ import type { RequestInterceptor } from '@/utils/types';
 
 import { callRequestInterceptor } from './callRequestInterceptor';
 
-describe('callRequestInterceptors: order of calls', () => {
+describe('callRequestInterceptor: order of calls', () => {
   test('Should call passed request interceptor', () => {
     const request = {} as Request;
     const interceptor = jest.fn();

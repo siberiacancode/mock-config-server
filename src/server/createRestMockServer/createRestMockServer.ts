@@ -9,6 +9,7 @@ import {
   errorMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
+  requestInfoMiddleware,
   requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
@@ -20,7 +21,7 @@ export const createRestMockServer = (
   restMockServerConfig: Omit<RestMockServerConfig, 'port'>,
   server: Express = express()
 ) => {
-  const { cors, staticPath, configs, database, interceptors } = restMockServerConfig;
+  const { cors, staticPath, configs, database, interceptors, loggers } = restMockServerConfig;
 
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../static/views'));
@@ -32,6 +33,8 @@ export const createRestMockServer = (
   server.set('json spaces', 2);
 
   server.use(bodyParser.text());
+
+  requestInfoMiddleware(server);
 
   cookieParseMiddleware(server);
 
@@ -55,7 +58,8 @@ export const createRestMockServer = (
   const routerWithRestRoutes = createRestRoutes({
     router: express.Router(),
     restConfig: { configs: configs ?? [] },
-    serverResponseInterceptor: interceptors?.response
+    serverResponseInterceptor: interceptors?.response,
+    loggers
   });
 
   server.use(baseUrl, routerWithRestRoutes);
