@@ -96,8 +96,24 @@ export const createMockServer = (
   }
 
   if (database) {
-    const routerWithDatabaseRoutes = createDatabaseRoutes(express.Router(), database);
-    server.use(baseUrl, routerWithDatabaseRoutes);
+    const routerWithDatabaseRoutes = createDatabaseRoutes({
+      router: express.Router(),
+      databaseConfig: database,
+      serverResponseInterceptor: interceptors?.response
+    });
+
+    const databaseBaseUrl = urlJoin(baseUrl, database.baseUrl ?? '/');
+
+    const apiRequestInterceptor = database.interceptors?.request;
+    if (apiRequestInterceptor) {
+      requestInterceptorMiddleware({
+        server,
+        path: databaseBaseUrl,
+        interceptor: apiRequestInterceptor
+      });
+    }
+
+    server.use(databaseBaseUrl, routerWithDatabaseRoutes);
   }
 
   notFoundMiddleware(server, mockServerConfig);

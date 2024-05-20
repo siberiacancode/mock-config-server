@@ -23,11 +23,11 @@ describe('createShallowDatabaseRoutes', () => {
     const routerBase = express.Router();
     const storage = new MemoryStorage(shallowDatabase);
 
-    const routerWithRoutesForShallowDatabase = createShallowDatabaseRoutes(
-      routerBase,
-      shallowDatabase,
+    const routerWithRoutesForShallowDatabase = createShallowDatabaseRoutes({
+      router: routerBase,
+      database: shallowDatabase,
       storage
-    );
+    });
 
     server.use(express.json());
     server.use(express.text());
