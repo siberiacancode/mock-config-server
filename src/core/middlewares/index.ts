@@ -1,3 +1,4 @@
+export * from './contextMiddleware/contextMiddleware';
 export * from './cookieParseMiddleware/cookieParseMiddleware';
 export * from './corsMiddleware/corsMiddleware';
 export * from './destroyerMiddleware/destroyerMiddleware';

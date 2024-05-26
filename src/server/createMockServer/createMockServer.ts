@@ -5,6 +5,7 @@ import express from 'express';
 import { createDatabaseRoutes } from '@/core/database';
 import { createGraphQLRoutes } from '@/core/graphql';
 import {
+  contextMiddleware,
   cookieParseMiddleware,
   corsMiddleware,
   errorMiddleware,
@@ -16,8 +17,6 @@ import {
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
 import type { MockServerConfig } from '@/utils/types';
-import { createStorage } from 'src/core/database/createStorage/createStorage';
-import { createOrm } from 'src/core/database/createOrm/createOrm';
 
 export const createMockServer = (
   mockServerConfig: Omit<MockServerConfig, 'port'>,
@@ -36,6 +35,7 @@ export const createMockServer = (
 
   server.use(bodyParser.text());
 
+  contextMiddleware(server, mockServerConfig);
   cookieParseMiddleware(server);
 
   const serverRequestInterceptor = mockServerConfig.interceptors?.request;
@@ -98,10 +98,6 @@ export const createMockServer = (
   }
 
   if (database) {
-    const storage = createStorage(database?.data);
-    const orm = createOrm(storage);
-    console.log(orm.users.get());
-
     const routerWithDatabaseRoutes = createDatabaseRoutes(express.Router(), database);
     server.use(baseUrl, routerWithDatabaseRoutes);
   }

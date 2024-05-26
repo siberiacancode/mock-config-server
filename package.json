@@ -44,7 +44,7 @@
     "build": "yarn build:babel && yarn build:types",
     "start": "yarn build && node ./dist/bin/bin.js",
     "dev": "nodemon --watch src --watch bin --watch mock-server.config.* -e js,ts,ejs --exec \"yarn start\"",
-    "test": "jest",
+    "unit-test": "jest",
     "type": "tsc --noEmit",
     "lint": "eslint . --ext .ts --no-error-on-unmatched-pattern --fix",
     "stylelint": "stylelint \"src/static/**/*.css\" --fix",

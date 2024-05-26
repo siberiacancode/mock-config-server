@@ -1,4 +1,4 @@
-import type { NestedOrm, ShallowOrm, Storage } from '@/utils/types';
+import type { Database, NestedOrm, Orm, ShallowOrm, Storage } from '@/utils/types';
 
 import { createNewId, splitDatabaseByNesting } from '../createDatabaseRoutes/helpers';
 
@@ -61,5 +61,5 @@ export const createOrm = (storage: Storage) => {
   return {
     ...nestedOrm,
     ...shallowOrm
-  };
+  } as Orm<Database>;
 };

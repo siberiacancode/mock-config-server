@@ -5,6 +5,7 @@ import express from 'express';
 import { createDatabaseRoutes } from '@/core/database';
 import { createGraphQLRoutes } from '@/core/graphql';
 import {
+  contextMiddleware,
   cookieParseMiddleware,
   corsMiddleware,
   errorMiddleware,
@@ -33,6 +34,7 @@ export const createGraphQLMockServer = (
 
   server.use(bodyParser.text());
 
+  contextMiddleware(server, graphqlMockServerConfig);
   cookieParseMiddleware(server);
 
   const serverRequestInterceptor = graphqlMockServerConfig.interceptors?.request;

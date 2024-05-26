@@ -4,6 +4,7 @@ import express from 'express';
 
 import { createDatabaseRoutes } from '@/core/database';
 import {
+  contextMiddleware,
   cookieParseMiddleware,
   corsMiddleware,
   errorMiddleware,
@@ -32,6 +33,7 @@ export const createDatabaseMockServer = (
 
   server.use(bodyParser.text());
 
+  contextMiddleware(server, { database: { data, routes } });
   cookieParseMiddleware(server);
 
   const serverRequestInterceptor = databaseMockServerConfig.interceptors?.request;

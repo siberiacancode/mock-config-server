@@ -3,4 +3,4 @@
 
 yarn build
 yarn lint-staged --no-stash
-yarn test
+yarn unit-test

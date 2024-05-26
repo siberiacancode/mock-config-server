@@ -1,6 +1,6 @@
 import type { CookieOptions, Request, Response } from 'express';
 
-import type { Orm } from './database';
+import type { Database, Orm } from './database';
 
 type RequestInterceptorCookieValue = string | undefined;
 type RequestInterceptorHeaderValue = string | number | string[] | undefined;
@@ -10,13 +10,12 @@ export interface RequestInterceptorParams {
   getCookie: (name: string) => RequestInterceptorCookieValue;
   getHeader: (field: string) => RequestInterceptorHeaderValue;
   getHeaders: () => Record<string, RequestInterceptorHeaderValue>;
+  orm: Orm<Database>;
 }
 
 export type RequestInterceptor = (params: RequestInterceptorParams) => void | Promise<void>;
 
-export interface ResponseInterceptorParams<
-  Database extends Record<string, any> = Record<string, any>
-> {
+export interface ResponseInterceptorParams {
   request: Request;
   response: Response;
   setDelay: (delay: number) => Promise<void>;
@@ -29,7 +28,7 @@ export interface ResponseInterceptorParams<
   getCookie: (name: string) => RequestInterceptorCookieValue;
   clearCookie: (name: string, options?: CookieOptions) => void;
   attachment: (filename: string) => void;
-  database: Orm<Database>;
+  orm: Orm<Database>;
 }
 
 export type ResponseInterceptor<Data = any> = (

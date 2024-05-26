@@ -1,5 +1,6 @@
 import type { Request } from 'express';
 
+import type { Database, Orm } from './database';
 import type { GraphQLRequestConfig } from './graphql';
 import type { Interceptors } from './interceptors';
 import type { RestMethod, RestRequestConfig } from './rest';
@@ -72,4 +73,14 @@ export interface MockServerConfigArgv {
   staticPath?: string;
   config?: string;
   watch?: boolean;
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      context: {
+        orm: Orm<Database>;
+      };
+    }
+  }
 }

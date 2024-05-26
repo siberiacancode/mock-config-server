@@ -1,3 +1,4 @@
+export type Database = Record<string, unknown>;
 export type ShallowDatabase = Record<string, unknown>;
 
 export type NestedDatabaseId = number | string;
@@ -29,10 +30,10 @@ export interface NestedOrm<Item = Record<string, unknown>> {
   count: () => number;
 }
 
-export type Orm<Data extends Record<string, unknown>> = {
-  [Key in keyof Data]: Data[Key] extends Array<infer Item>
+export type Orm<Database extends Record<string, unknown>> = {
+  [Key in keyof Database]: Database[Key] extends Array<infer Item>
     ? Item extends { id: string | number }
       ? NestedOrm<Item>
       : ShallowOrm<Item>
-    : ShallowOrm<Data[Key]>;
+    : ShallowOrm<Database[Key]>;
 };
