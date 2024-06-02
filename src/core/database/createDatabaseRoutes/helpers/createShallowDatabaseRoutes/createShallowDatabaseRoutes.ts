@@ -49,6 +49,8 @@ export const createShallowDatabaseRoutes = (
         response.set('X-Total-Count', data.length);
       }
 
+      // ✅ important:
+      // The pagination should be last because it changes the form of the response
       if (_page) {
         data = pagination(data, request.query as ParsedUrlQuery);
         if (data._link) {
