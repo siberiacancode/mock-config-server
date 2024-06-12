@@ -16,7 +16,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["vitest/globals"],
+    "types": ["node", "vitest/globals"],
     "baseUrl": "./",
     "paths": {
       "@/server": ["./src/server"],

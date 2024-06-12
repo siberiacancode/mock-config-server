@@ -43,7 +43,6 @@ export class FileStorage<T extends Record<Index, any> = Record<Index, any>> {
     }
     writable[keys[index]] = value;
 
-    console.log('@this.fileWriter', this.fileWriter);
     this.fileWriter.write(JSON.stringify(this.data));
   }
 
