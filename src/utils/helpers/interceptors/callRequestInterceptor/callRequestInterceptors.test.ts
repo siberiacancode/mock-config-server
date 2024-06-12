@@ -7,7 +7,7 @@ import { callRequestInterceptor } from './callRequestInterceptor';
 describe('callRequestInterceptors: order of calls', () => {
   test('Should call passed request interceptor', () => {
     const request = {} as Request;
-    const interceptor = jest.fn();
+    const interceptor = vi.fn();
 
     callRequestInterceptor({ request, interceptor });
     expect(interceptor.mock.calls.length).toBe(1);

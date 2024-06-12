@@ -181,7 +181,7 @@ describe('createRestRoutes: content', () => {
   });
 
   test('Should return same polling data with time param', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const server = createServer({
       rest: {
         configs: [
@@ -208,19 +208,19 @@ describe('createRestRoutes: content', () => {
     expect(firstResponse.statusCode).toBe(200);
     expect(firstResponse.body).toEqual({ name: 'John', surname: 'Doe' });
 
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
 
     const secondResponse = await request(server).get('/users').query(query);
     expect(secondResponse.statusCode).toBe(200);
     expect(secondResponse.body).toEqual({ name: 'John', surname: 'Doe' });
 
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
 
     const thirdResponse = await request(server).get('/users').query(query);
     expect(thirdResponse.statusCode).toBe(200);
     expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Smith' });
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('Should correct handle empty queue with polling setting', async () => {
@@ -628,8 +628,8 @@ describe('createRestRoutes: entities', () => {
 
 describe('createRestRoutes: interceptors', () => {
   test('Should call request interceptors in order: request -> route', async () => {
-    const routeInterceptor = jest.fn();
-    const requestInterceptor = jest.fn();
+    const routeInterceptor = vi.fn();
+    const requestInterceptor = vi.fn();
 
     const server = createServer({
       rest: {
@@ -698,10 +698,10 @@ describe('createRestRoutes: interceptors', () => {
   });
 
   test('Should call response interceptors in order: route -> request -> api -> server', async () => {
-    const routeInterceptor = jest.fn();
-    const requestInterceptor = jest.fn();
-    const apiInterceptor = jest.fn();
-    const serverInterceptor = jest.fn();
+    const routeInterceptor = vi.fn();
+    const requestInterceptor = vi.fn();
+    const apiInterceptor = vi.fn();
+    const serverInterceptor = vi.fn();
 
     const server = createServer({
       rest: {
