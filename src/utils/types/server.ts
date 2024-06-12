@@ -35,8 +35,10 @@ export interface GraphqlConfig {
 }
 
 export type DatabaseConfig = {
+  baseUrl?: BaseUrl;
   data: Record<string, unknown> | `${string}.json`;
   routes?: Record<`/${string}`, `/${string}`> | `${string}.json`;
+  interceptors?: Interceptors;
 };
 
 export interface BaseMockServerConfig {

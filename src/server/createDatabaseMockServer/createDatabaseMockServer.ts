@@ -19,7 +19,7 @@ export const createDatabaseMockServer = (
   databaseMockServerConfig: Omit<DatabaseMockServerConfig, 'port'>,
   server: Express = express()
 ) => {
-  const { cors, staticPath, data, routes } = databaseMockServerConfig;
+  const { cors, staticPath, data, routes, interceptors } = databaseMockServerConfig;
 
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../static/views'));
@@ -51,7 +51,11 @@ export const createDatabaseMockServer = (
     staticMiddleware(server, baseUrl, staticPath);
   }
 
-  const routerWithDatabaseRoutes = createDatabaseRoutes(express.Router(), { data, routes });
+  const routerWithDatabaseRoutes = createDatabaseRoutes({
+    router: express.Router(),
+    databaseConfig: { data, routes },
+    serverResponseInterceptor: interceptors?.response
+  });
   server.use(baseUrl, routerWithDatabaseRoutes);
 
   notFoundMiddleware(server, databaseMockServerConfig);

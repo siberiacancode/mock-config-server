@@ -21,11 +21,11 @@ describe('CreateNestedDatabaseRoutes', () => {
     const routerBase = express.Router();
     const storage = new MemoryStorage(nestedDatabase);
 
-    const routerWithNestedDatabaseRoutes = createNestedDatabaseRoutes(
-      routerBase,
-      nestedDatabase,
+    const routerWithNestedDatabaseRoutes = createNestedDatabaseRoutes({
+      router: routerBase,
+      database: nestedDatabase,
       storage
-    );
+    });
 
     server.use(express.json());
     server.use(express.text());

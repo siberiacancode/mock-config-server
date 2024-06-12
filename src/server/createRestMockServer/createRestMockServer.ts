@@ -61,7 +61,11 @@ export const createRestMockServer = (
   server.use(baseUrl, routerWithRestRoutes);
 
   if (database) {
-    const routerWithDatabaseRoutes = createDatabaseRoutes(express.Router(), database);
+    const routerWithDatabaseRoutes = createDatabaseRoutes({
+      router: express.Router(),
+      databaseConfig: database,
+      serverResponseInterceptor: interceptors?.response
+    });
     server.use(baseUrl, routerWithDatabaseRoutes);
   }
 
