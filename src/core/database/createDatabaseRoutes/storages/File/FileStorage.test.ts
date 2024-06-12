@@ -4,9 +4,10 @@ import path from 'path';
 import { createTmpDir } from '@/utils/helpers/tests';
 
 import { FileStorage } from './FileStorage';
-// import { FileWriter } from './FileWriter';
+import { FileWriter } from './FileWriter';
 
 vi.mock('./FileWriter');
+const fileWriterWriteMethodMock = vi.spyOn(FileWriter.prototype, 'write');
 
 describe('FileStorage', () => {
   const createInitialData = () => ({
@@ -90,14 +91,12 @@ describe('FileStorage', () => {
       expect(fileStorage.read(['john', 'stand'])).toBe(stand);
     });
 
-    // test('Should write in file updated data', () => {
-    //   const fileWriterWriteMethodMock = vi.spyOn(FileWriter.prototype, 'write');
+    test('Should write in file updated data', () => {
+      fileStorage.write(['john', 'stand'], 'The World');
 
-    //   fileStorage.write(['john', 'stand'], 'The World');
-
-    //   expect(fileWriterWriteMethodMock).toHaveBeenCalledTimes(1);
-    //   expect(fileWriterWriteMethodMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read()));
-    // });
+      expect(fileWriterWriteMethodMock).toHaveBeenCalledTimes(1);
+      expect(fileWriterWriteMethodMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read()));
+    });
   });
 
   describe('FileStorage: delete', () => {
@@ -145,12 +144,11 @@ describe('FileStorage', () => {
       expect(updatedUsers.length).toBe(1);
     });
 
-    // test('Should write in file updated data', () => {
-    //   const fileWriterWriteMethodMock = vi.spyOn(FileWriter.prototype, 'write');
-    //   fileStorage.delete(['users', 0]);
+    test('Should write in file updated data', () => {
+      fileStorage.delete(['users', 0]);
 
-    //   expect(fileWriterWriteMethodMock.mock.calls.length).toHaveBeenCalledTimes(1);
-    //   expect(fileWriterWriteMethodMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read()));
-    // });
+      expect(fileWriterWriteMethodMock).toHaveBeenCalledTimes(1);
+      expect(fileWriterWriteMethodMock).toHaveBeenCalledWith(JSON.stringify(fileStorage.read()));
+    });
   });
 });
