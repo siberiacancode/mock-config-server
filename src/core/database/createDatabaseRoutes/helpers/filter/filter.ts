@@ -14,7 +14,7 @@ const OPERATORS = {
   nsw: (a: any, b: any) => !a.startsWith(b),
   ew: (a: any, b: any) => a.endsWith(b),
   new: (a: any, b: any) => !a.endsWith(b),
-  some: (a: any[], b: any) => a.some((element: any) => `${element}`.includes(`${b}`))
+  some: (a: any[], b: any) => a.some((element: any) => `${element}` === `${b}`)
 } as const;
 
 const OPERATORS_KEYS = Object.keys(OPERATORS);
@@ -33,7 +33,9 @@ const getEntities = (object: any, key: string) => {
   const [, element, operator] = parts;
 
   if (operator === 'some') {
-    const array = Object.entries(object).filter(([key]) => key.includes(element));
+    const array = Object.entries(object).filter(([objectKey]) =>
+      new RegExp(`${element}.\\d`).test(objectKey)
+    );
 
     return {
       operator,
@@ -58,7 +60,6 @@ export const filter = (array: any[], filters: ParsedUrlQuery) =>
       }
 
       const { element, operator } = getEntities(flattenedArrayElement, key);
-      console.log('@', element, operator, filter, OPERATORS[operator](element, filter));
       return OPERATORS[operator](element, filter);
     });
   });
