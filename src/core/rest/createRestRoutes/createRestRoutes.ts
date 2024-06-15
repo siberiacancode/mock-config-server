@@ -84,14 +84,15 @@ export const createRestRoutes = ({
             const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
               Exclude<RestEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
             >;
-            return recordOrArrayEntries.every(([entityKey, mappedEntityDescriptor]) => {
-              const { checkMode, value: descriptorValue } =
-                convertToEntityDescriptor(mappedEntityDescriptor);
-              const flattenEntity = flatten<any, any>(request[entityName]);
+            return recordOrArrayEntries.every(([entityKey, mappedEntityDescriptorOrValue]) => {
+              const { checkMode, value: descriptorValue } = convertToEntityDescriptor(
+                mappedEntityDescriptorOrValue
+              );
+              const actualEntity = flatten<any, any>(request[entityName]);
               // ✅ important: transform header keys to lower case because browsers send headers in lowercase
               return resolveEntityValues(
                 checkMode,
-                flattenEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey],
+                actualEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey],
                 descriptorValue
               );
             });

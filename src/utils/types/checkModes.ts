@@ -29,6 +29,7 @@ export type PlainEntityCheckMode = Exclude<
 export interface EntityDescriptor {
   checkMode: CheckMode;
   value?: any;
+  oneOf?: boolean;
 }
 
 export type CheckFunction = <ActualValue = any, DescriptorValue = any>(
