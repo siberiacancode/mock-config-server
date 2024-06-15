@@ -16,6 +16,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "types": ["node", "vitest/globals"],
     "baseUrl": "./",
     "paths": {
       "@/server": ["./src/server"],
@@ -29,5 +30,5 @@
       "@/utils/constants": ["./src/utils/constants"]
     }
   },
-  "exclude": ["examples", "bin/templates", "dist", "node_modules", "jest.config.js"]
+  "exclude": ["examples", "bin/templates", "dist", "node_modules", "vi.config.js"]
 }

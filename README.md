@@ -570,6 +570,8 @@ Functions to change request or response parameters
 - `request?` (params) => void
 - `response?` (data, params) => any
 
+> request interceptors (except interceptor for route) are called regardless of whether the server found a route match or not. So changes in request interceptors can affect whether the server finds the route or not
+
 ##### Request
 
 - `params`

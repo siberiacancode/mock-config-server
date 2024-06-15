@@ -6,7 +6,8 @@ import { createTmpDir } from '@/utils/helpers/tests';
 import { FileStorage } from './FileStorage';
 import { FileWriter } from './FileWriter';
 
-jest.mock('./FileWriter');
+vi.mock('./FileWriter');
+const fileWriterWriteMethodMock = vi.spyOn(FileWriter.prototype, 'write');
 
 describe('FileStorage', () => {
   const createInitialData = () => ({
@@ -31,7 +32,7 @@ describe('FileStorage', () => {
 
     afterAll(() => {
       fs.rmSync(tmpDirPath, { recursive: true, force: true });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('Should return correct full data for read without keys', () => {
@@ -63,7 +64,7 @@ describe('FileStorage', () => {
 
     afterEach(() => {
       fs.rmSync(tmpDirPath, { recursive: true, force: true });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('Should update value with valid single key', () => {
@@ -91,8 +92,6 @@ describe('FileStorage', () => {
     });
 
     test('Should write in file updated data', () => {
-      const fileWriterWriteMethodMock = jest.spyOn(FileWriter.prototype, 'write');
-
       fileStorage.write(['john', 'stand'], 'The World');
 
       expect(fileWriterWriteMethodMock).toHaveBeenCalledTimes(1);
@@ -116,7 +115,7 @@ describe('FileStorage', () => {
 
     afterEach(() => {
       fs.rmSync(tmpDirPath, { recursive: true, force: true });
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     test('Should correctly delete object property with valid single key', () => {
@@ -146,8 +145,6 @@ describe('FileStorage', () => {
     });
 
     test('Should write in file updated data', () => {
-      const fileWriterWriteMethodMock = jest.spyOn(FileWriter.prototype, 'write');
-
       fileStorage.delete(['users', 0]);
 
       expect(fileWriterWriteMethodMock).toHaveBeenCalledTimes(1);
