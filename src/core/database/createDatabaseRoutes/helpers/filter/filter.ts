@@ -34,9 +34,8 @@ const getEntities = (object: any, key: string) => {
 
   if (operator === 'some') {
     const array = Object.entries(object).filter(([objectKey]) =>
-      new RegExp(`${element}.\\d`).test(objectKey)
+      new RegExp(`^${element}.\\d$`).test(objectKey)
     );
-
     return {
       operator,
       element: array.map(([, value]) => value)
