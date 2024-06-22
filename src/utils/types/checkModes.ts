@@ -26,11 +26,14 @@ export type PlainEntityCheckMode = Exclude<
   CompareWithDescriptorStringValueCheckMode | Extract<CalculateByDescriptorValueCheckMode, 'regExp'>
 >;
 
-export interface EntityDescriptor {
-  checkMode: CheckMode;
-  value?: any;
-  oneOf?: boolean;
-}
+export type EntityDescriptor<
+  Check extends CheckMode = CheckMode,
+  Value = any
+> = Value extends undefined
+  ? { checkMode: Check }
+  :
+      | { checkMode: Check; value: Value[]; oneOf: true }
+      | { checkMode: Check; value: Value; oneOf?: false };
 
 export type CheckFunction = <ActualValue = any, DescriptorValue = any>(
   checkMode: CheckMode,

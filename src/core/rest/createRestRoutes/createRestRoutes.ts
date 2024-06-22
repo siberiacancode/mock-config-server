@@ -50,8 +50,7 @@ export const createRestRoutes = ({
 
           const entries = Object.entries(entities) as Entries<Required<RestEntitiesByEntityName>>;
           return entries.every(([entityName, entityDescriptorOrValue]) => {
-            const { checkMode, value: descriptorValue } =
-              convertToEntityDescriptor(entityDescriptorOrValue);
+            const topLevelConvertedDescriptor = convertToEntityDescriptor(entityDescriptorOrValue);
 
             // ✅ important:
             // check whole body as plain value strictly if descriptor used for body
@@ -61,9 +60,11 @@ export const createRestRoutes = ({
               // ✅ important:
               // bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
               return resolveEntityValues(
-                checkMode,
+                topLevelConvertedDescriptor.checkMode,
                 Object.keys(request.body).length ? request.body : undefined,
-                descriptorValue
+                'value' in topLevelConvertedDescriptor
+                  ? topLevelConvertedDescriptor.value
+                  : undefined
               );
             }
 
@@ -74,7 +75,7 @@ export const createRestRoutes = ({
                 // ✅ important:
                 // bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
                 resolveEntityValues(
-                  checkMode,
+                  topLevelConvertedDescriptor.checkMode,
                   Object.keys(request.body).length ? request.body : undefined,
                   entityDescriptorOrValueElement
                 )
@@ -85,15 +86,17 @@ export const createRestRoutes = ({
               Exclude<RestEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
             >;
             return recordOrArrayEntries.every(([entityKey, mappedEntityDescriptorOrValue]) => {
-              const { checkMode, value: descriptorValue } = convertToEntityDescriptor(
+              const propertyLevelConvertedDescriptor = convertToEntityDescriptor(
                 mappedEntityDescriptorOrValue
               );
               const actualEntity = flatten<any, any>(request[entityName]);
               // ✅ important: transform header keys to lower case because browsers send headers in lowercase
               return resolveEntityValues(
-                checkMode,
+                propertyLevelConvertedDescriptor.checkMode,
                 actualEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey],
-                descriptorValue
+                'value' in propertyLevelConvertedDescriptor
+                  ? propertyLevelConvertedDescriptor.value
+                  : undefined
               );
             });
           });

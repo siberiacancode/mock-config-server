@@ -89,21 +89,28 @@ export const createGraphQLRoutes = ({
 
       const entries = Object.entries(entities) as Entries<Required<GraphQLEntitiesByEntityName>>;
       return entries.every(([entityName, entityDescriptorOrValue]) => {
-        const { checkMode, value: entityDescriptorValue } =
-          convertToEntityDescriptor(entityDescriptorOrValue);
+        const topLevelConvertedDescriptor = convertToEntityDescriptor(entityDescriptorOrValue);
 
         // ✅ important: check whole variables as plain value strictly if descriptor used for variables
         const isEntityVariablesByTopLevelDescriptor =
           entityName === 'variables' && isEntityDescriptor(entityDescriptorOrValue);
         if (isEntityVariablesByTopLevelDescriptor) {
-          return resolveEntityValues(checkMode, graphQLInput.variables, entityDescriptorValue);
+          return resolveEntityValues(
+            topLevelConvertedDescriptor.checkMode,
+            graphQLInput.variables,
+            'value' in topLevelConvertedDescriptor ? topLevelConvertedDescriptor.value : undefined
+          );
         }
 
         const isEntityVariablesByTopLevelArray =
           entityName === 'variables' && Array.isArray(entityDescriptorOrValue);
         if (isEntityVariablesByTopLevelArray) {
           return entityDescriptorOrValue.some((entityDescriptorOrValueElement) =>
-            resolveEntityValues(checkMode, graphQLInput.variables, entityDescriptorOrValueElement)
+            resolveEntityValues(
+              topLevelConvertedDescriptor.checkMode,
+              graphQLInput.variables,
+              entityDescriptorOrValueElement
+            )
           );
         }
 
@@ -111,16 +118,18 @@ export const createGraphQLRoutes = ({
           Exclude<GraphQLEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
         >;
         return recordOrArrayEntries.every(([entityKey, entityValue]) => {
-          const { checkMode, value: descriptorValue } = convertToEntityDescriptor(entityValue);
+          const propertyLevelConvertedDescriptor = convertToEntityDescriptor(entityValue);
           const flattenEntity = flatten<any, any>(
             entityName === 'variables' ? graphQLInput.variables : request[entityName]
           );
 
           // ✅ important: transform header keys to lower case because browsers send headers in lowercase
           return resolveEntityValues(
-            checkMode,
+            propertyLevelConvertedDescriptor.checkMode,
             flattenEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey],
-            descriptorValue
+            'value' in propertyLevelConvertedDescriptor
+              ? propertyLevelConvertedDescriptor.value
+              : undefined
           );
         });
       });

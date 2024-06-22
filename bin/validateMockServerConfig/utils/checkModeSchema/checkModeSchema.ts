@@ -20,3 +20,30 @@ export const compareWithDescriptorStringValueCheckModeSchema = z.enum(
 export const compareWithDescriptorValueCheckModeSchema = z.enum(
   COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES
 );
+
+export const entityDescriptorSchema = (
+  checkModeSchema:
+    | typeof checkActualValueCheckModeSchema
+    | typeof compareWithDescriptorAnyValueCheckModeSchema
+    | typeof compareWithDescriptorStringValueCheckModeSchema
+    | typeof compareWithDescriptorValueCheckModeSchema
+    | z.ZodLiteral<'function'>
+    | z.ZodLiteral<'regExp'>,
+  valueSchema?: z.ZodTypeAny
+) =>
+  valueSchema
+    ? z.union([
+        z.strictObject({
+          checkMode: checkModeSchema,
+          value: z.array(valueSchema),
+          oneOf: z.literal(true)
+        }),
+        z.strictObject({
+          checkMode: checkModeSchema,
+          value: valueSchema,
+          oneOf: z.literal(false).optional()
+        })
+      ])
+    : z.strictObject({
+        checkMode: checkModeSchema
+      });
