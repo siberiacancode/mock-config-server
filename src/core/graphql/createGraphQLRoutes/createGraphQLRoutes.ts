@@ -95,23 +95,32 @@ export const createGraphQLRoutes = ({
         const isEntityVariablesByTopLevelDescriptor =
           entityName === 'variables' && isEntityDescriptor(entityDescriptorOrValue);
         if (isEntityVariablesByTopLevelDescriptor) {
-          return resolveEntityValues(
-            topLevelConvertedDescriptor.checkMode,
-            graphQLInput.variables,
-            'value' in topLevelConvertedDescriptor ? topLevelConvertedDescriptor.value : undefined
-          );
+          if (
+            topLevelConvertedDescriptor.checkMode === 'exists' ||
+            topLevelConvertedDescriptor.checkMode === 'notExists'
+          ) {
+            return resolveEntityValues({
+              checkMode: topLevelConvertedDescriptor.checkMode,
+              actualValue: graphQLInput.variables
+            });
+          }
+
+          return resolveEntityValues({
+            checkMode: topLevelConvertedDescriptor.checkMode,
+            actualValue: graphQLInput.variables,
+            descriptorValue: topLevelConvertedDescriptor.value,
+            oneOf: topLevelConvertedDescriptor.oneOf as true | false
+          });
         }
 
         const isEntityVariablesByTopLevelArray =
           entityName === 'variables' && Array.isArray(entityDescriptorOrValue);
         if (isEntityVariablesByTopLevelArray) {
-          return entityDescriptorOrValue.some((entityDescriptorOrValueElement) =>
-            resolveEntityValues(
-              topLevelConvertedDescriptor.checkMode,
-              graphQLInput.variables,
-              entityDescriptorOrValueElement
-            )
-          );
+          return resolveEntityValues({
+            checkMode: 'equals',
+            actualValue: graphQLInput.variables,
+            descriptorValue: entityDescriptorOrValue
+          });
         }
 
         const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
@@ -119,18 +128,30 @@ export const createGraphQLRoutes = ({
         >;
         return recordOrArrayEntries.every(([entityKey, entityValue]) => {
           const propertyLevelConvertedDescriptor = convertToEntityDescriptor(entityValue);
-          const flattenEntity = flatten<any, any>(
+          const actualEntity = flatten<any, any>(
             entityName === 'variables' ? graphQLInput.variables : request[entityName]
           );
 
           // ✅ important: transform header keys to lower case because browsers send headers in lowercase
-          return resolveEntityValues(
-            propertyLevelConvertedDescriptor.checkMode,
-            flattenEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey],
-            'value' in propertyLevelConvertedDescriptor
-              ? propertyLevelConvertedDescriptor.value
-              : undefined
-          );
+          const actualValue =
+            actualEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey];
+
+          if (
+            propertyLevelConvertedDescriptor.checkMode === 'exists' ||
+            propertyLevelConvertedDescriptor.checkMode === 'notExists'
+          ) {
+            return resolveEntityValues({
+              checkMode: propertyLevelConvertedDescriptor.checkMode,
+              actualValue
+            });
+          }
+
+          return resolveEntityValues({
+            checkMode: propertyLevelConvertedDescriptor.checkMode,
+            actualValue,
+            descriptorValue: propertyLevelConvertedDescriptor.value,
+            oneOf: propertyLevelConvertedDescriptor.oneOf as true | false
+          });
         });
       });
     });

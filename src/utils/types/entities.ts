@@ -23,7 +23,7 @@ export type TopLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
     : Check extends CompareWithDescriptorAnyValueCheckMode
       ? EntityDescriptor<Check, PlainEntityObjectiveValue>
       : Check extends CheckActualValueCheckMode
-        ? EntityDescriptor<Check, undefined>
+        ? EntityDescriptor<Check>
         : never;
 
 type PropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
@@ -42,7 +42,7 @@ type PropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
         : Check extends CompareWithDescriptorStringValueCheckMode
           ? EntityDescriptor<Check, PlainEntityPrimitiveValue>
           : Check extends CheckActualValueCheckMode
-            ? EntityDescriptor<Check, undefined>
+            ? EntityDescriptor<Check>
             : never;
 
 type NonCheckMode<T extends object> = T & { checkMode?: never };
@@ -77,7 +77,7 @@ type MappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check extends
     : Check extends CompareWithDescriptorValueCheckMode
       ? EntityDescriptor<Check, MappedEntityValue>
       : Check extends CheckActualValueCheckMode
-        ? EntityDescriptor<Check, undefined>
+        ? EntityDescriptor<Check>
         : never;
 
 export type MappedEntity = Record<string, MappedEntityDescriptor | MappedEntityValue>;
