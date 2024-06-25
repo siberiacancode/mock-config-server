@@ -11,15 +11,18 @@ const checkFunction: CheckFunction = (checkMode, actualValue, descriptorValue?) 
   if (checkMode === 'exists') return !isActualValueUndefined;
   if (checkMode === 'notExists') return isActualValueUndefined;
 
-  if (checkMode === 'function' && typeof descriptorValue === 'function')
+  if (checkMode === 'function' && typeof descriptorValue === 'function') {
     return !!descriptorValue(actualValue, checkFunction);
+  }
 
   const actualValueString = String(actualValue);
 
   // ✅ important:
   // recreate RegExp because 'g' flag can be cause of unexpected result
-  if (checkMode === 'regExp' && descriptorValue instanceof RegExp)
+  // this is about https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastIndex#avoiding_side_effects
+  if (checkMode === 'regExp' && descriptorValue instanceof RegExp) {
     return new RegExp(descriptorValue).test(actualValueString);
+  }
 
   // ✅ important:
   // cast values to string for ignore types of values
