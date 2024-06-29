@@ -8,6 +8,6 @@ export const queueSchema = z.array(
       time: z.number().int().nonnegative().optional(),
       data: z.union([z.function(), z.any()])
     }),
-    ['data']
+    'data'
   )
 );

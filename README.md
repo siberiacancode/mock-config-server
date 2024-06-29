@@ -236,8 +236,6 @@ Allowed `checkModes`
 - regExp - checks actual value with descriptor regExp.
 - function - checks actual value with descriptor function.
 
-Value for `checkMode` except `function` | `exists` | `notExists` can be array, so you can write even more complex logic. For example "does not contain these values" or "must be match to one of these regExp".
-
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
 const mockServerConfig = {
@@ -251,10 +249,10 @@ const mockServerConfig = {
           {
             entities: {
               headers: {
-                // 'name-header' is 'Dmitriy' or 'Nursultan'
+                // 'name-header' is 'Dmitriy'
                 'name-header': {
                   checkMode: 'equals',
-                  value: ['Dmitriy', 'Nursultan']
+                  value: 'Dmitriy'
                 },
                 // check for 'equals' if descriptor not provided
                 role: 'developer'
@@ -264,14 +262,14 @@ const mockServerConfig = {
                 token: {
                   checkMode: 'exists'
                 },
-                // 'someSecretToken' cookie can be '123-abc' or 'abc-999' for example
+                // 'someSecretToken' cookie can be '123-abc' or '456-abc' for example
                 someSecretToken: {
                   checkMode: 'regExp',
-                  value: [/^\d\d\d-abc$/, /^abc-\d\d\d$/]
+                  value: /^\d\d\d-abc$/
                 }
               }
             },
-            data: 'Some user data for Dmitriy and Nursultan'
+            data: 'Some user data for Dmitriy'
           }
         ]
       }
@@ -282,8 +280,9 @@ const mockServerConfig = {
 module.exports = mockServerConfig;
 ```
 
-Also you can use array as value for REST body and GraphQL variables entities: in this case mock-config-server will iterate
-over array until `checkMode=equals` finds a match or return 404
+For `checkMode` with the `value` property (all `checkMode` options except `exists` and `notExists`) you can use an array value.
+Mock server will find matches by iterating through the array until **some** match is found.
+To be able to use this functionality you need to explicitly set `oneOf: true` property. If `oneOf` doesn`t set then arrays are processed _entirely_.
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
@@ -297,8 +296,17 @@ const mockServerConfig = {
         routes: [
           {
             entities: {
-              // if body equals to { key1: 'value1' } or ['value1'] then mock-config-server return data
-              body: [{ key1: 'value1' }, ['value1']]
+              // if body equals to { key1: 'value1' } OR { key2: 'value2' } then mock-config-server return data
+              body: [{ key1: 'value1' }, { key2: 'value2' }],
+              oneOf: true
+            },
+            data: 'Some user data'
+          },
+          {
+            entities: {
+              // if body equals to [{ key1: 'value1' }, { key2: 'value2' }] then mock-config-server return data
+              // NO `oneOf`! => array processed entirely
+              body: [{ key1: 'value1' }, { key2: 'value2' }]
             },
             data: 'Some user data'
           }
@@ -322,7 +330,6 @@ You can use the `checkFunction` from second argument if you want to describe you
 ##### Using descriptors for part of REST body or GraphQL variables
 
 If you want to check a certain field of your body or variables, you can use descriptors in flatten object style. In this case server will check every field in entity with corresponding actual field.
-You can use descriptors for array body elements as well.
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
@@ -358,24 +365,6 @@ const mockServerConfig = {
               }
             },
             data: 'title in body starts with "A"'
-          }
-        ]
-      },
-      {
-        path: '/posts',
-        method: 'post',
-        routes: [
-          {
-            entities: {
-              body: [
-                {
-                  checkMode: 'startsWith',
-                  value: 1
-                },
-                2
-              ]
-            },
-            data: 'array[0] starts with "1" and array[1] equals "2"'
           }
         ]
       }
