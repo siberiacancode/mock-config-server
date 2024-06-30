@@ -1,12 +1,12 @@
 :root {
   color-scheme: dark;
 
-  --accent: #6972ff;
+  --accent: rgb(105 114 255);
   --accent-glass: rgb(105 114 255 / 50%);
-  --primary: #fff;
-  --primary-glass: rgba(255 255 255 / 70%);
+  --primary: rgba(230 230 230);
+  --primary-glass: rgba(230 230 230 / 70%);
   --shadow: 0px 4px 10px rgba(0 0 0 / 25%);
-  --background-body: #363942;
+  --background-body: #2f3239;
   --background-container: rgba(0 0 0 / 15%);
   --background-card: rgba(255 255 255 / 5%);
   --image-scheme: url('/assets/icons/scheme-dark.svg');
