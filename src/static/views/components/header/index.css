@@ -20,6 +20,7 @@
 .header_menu {
   display: flex;
   flex-direction: row;
+  align-items: center;
   gap: 25px;
 }
 
@@ -29,11 +30,16 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  color: var(--primary-glass);
   cursor: pointer;
   font-size: 14px;
   font-weight: 400;
   gap: 10px;
   line-height: 17px;
+}
+
+.header_menu_item:hover {
+  color: var(--primary);
 }
 
 .logo img {
@@ -52,4 +58,26 @@ li {
   background-position: center;
   background-repeat: no-repeat;
   cursor: pointer;
+}
+
+.scheme_switcher_radio_group_item {
+  display: flex;
+  width: 80px;
+  height: 30px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  cursor: pointer;
+  gap: 10px;
+  padding-inline: 15px;
+}
+
+.scheme_switcher_radio_group_item.active,
+.scheme_switcher_radio_group_item.active:hover {
+  background-color: var(--accent);
+}
+
+.scheme_switcher_radio_group_item:hover {
+  background-color: var(--accent-glass);
 }

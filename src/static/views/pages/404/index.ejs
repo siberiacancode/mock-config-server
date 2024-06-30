@@ -15,6 +15,7 @@
   <% const rootPath = (path) => `../../${path}` %>
   <%- include(rootPath('features/scheme/index')) -%>
   <%- include(rootPath('features/tab/index')) -%>
+  <%- include(rootPath('components/dropdown/index')) -%>
 </head>
 
 <body class="tab_item-<%= graphqlRequestSuggestions.length ? api.graphql : api.rest %>">
