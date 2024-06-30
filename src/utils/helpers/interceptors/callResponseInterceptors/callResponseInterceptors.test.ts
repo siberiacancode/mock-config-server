@@ -57,13 +57,13 @@ describe('callResponseInterceptors: order of calls', () => {
 });
 
 describe('callResponseInterceptors: params functions', () => {
-  test('Should correctly call response getHeader method when use getHeader param', async () => {
+  test('Should correctly call response getHeader method when use getResponseHeader param', async () => {
     const data = null;
     const request = {};
     const response = { getHeader: vi.fn() };
 
-    const getHeaderRouteInterceptor: ResponseInterceptor = (data, { getHeader }) => {
-      getHeader('header');
+    const getHeaderRouteInterceptor: ResponseInterceptor = (data, { getResponseHeader }) => {
+      getResponseHeader('header');
       return data;
     };
     await callResponseInterceptors({
@@ -78,13 +78,13 @@ describe('callResponseInterceptors: params functions', () => {
     expect(response.getHeader).toHaveBeenCalledTimes(1);
   });
 
-  test('Should correctly call response getHeaders method when use getHeaders param', async () => {
+  test('Should correctly call response getHeaders method when use getResponseHeaders param', async () => {
     const data = null;
     const request = {};
     const response = { getHeaders: vi.fn() };
 
-    const getHeadersRouteInterceptor: ResponseInterceptor = (data, { getHeaders }) => {
-      getHeaders();
+    const getHeadersRouteInterceptor: ResponseInterceptor = (data, { getResponseHeaders }) => {
+      getResponseHeaders();
       return data;
     };
     await callResponseInterceptors({
