@@ -57,6 +57,44 @@ describe('callResponseInterceptors: order of calls', () => {
 });
 
 describe('callResponseInterceptors: params functions', () => {
+  test('Should correctly get header from request.headers when use getRequestHeader param', async () => {
+    const data = null;
+    const request = { headers: { name: 'value' } };
+    const response = {};
+
+    const getCookieRouteInterceptor: ResponseInterceptor = (data, { getRequestHeader }) => {
+      expect(getRequestHeader('name')).toBe('value');
+      return data;
+    };
+    await callResponseInterceptors({
+      data,
+      request: request as unknown as Request,
+      response: response as Response,
+      interceptors: {
+        routeInterceptor: getCookieRouteInterceptor
+      }
+    });
+  });
+
+  test('Should correctly get headers property from request when use getRequestHeaders param', async () => {
+    const data = null;
+    const request = { headers: { name: 'value' } };
+    const response = {};
+
+    const getCookieRouteInterceptor: ResponseInterceptor = (data, { getRequestHeaders }) => {
+      expect(getRequestHeaders()).toBe(request.headers);
+      return data;
+    };
+    await callResponseInterceptors({
+      data,
+      request: request as unknown as Request,
+      response: response as Response,
+      interceptors: {
+        routeInterceptor: getCookieRouteInterceptor
+      }
+    });
+  });
+
   test('Should correctly call response getHeader method when use getResponseHeader param', async () => {
     const data = null;
     const request = {};
