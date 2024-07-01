@@ -19,8 +19,12 @@ interface CallResponseInterceptorsParams {
 export const callResponseInterceptors = async (params: CallResponseInterceptorsParams) => {
   const { data, request, response, interceptors } = params;
 
-  const getHeader = (field: string) => response.getHeader(field);
-  const getHeaders = () => response.getHeaders();
+  const getRequestHeader = (field: string) => request.headers[field];
+  const getRequestHeaders = () => request.headers;
+
+  const getResponseHeader = (field: string) => response.getHeader(field);
+  const getResponseHeaders = () => response.getHeaders();
+
   const setHeader = (field: string, value?: string | string[]) => {
     response.set(field, value);
   };
@@ -55,8 +59,10 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
     setStatusCode,
     setHeader,
     appendHeader,
-    getHeader,
-    getHeaders,
+    getRequestHeader,
+    getRequestHeaders,
+    getResponseHeader,
+    getResponseHeaders,
     setCookie,
     getCookie,
     clearCookie,

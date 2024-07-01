@@ -1,13 +1,13 @@
 import type { CookieOptions, Request, Response } from 'express';
 
-type RequestInterceptorCookieValue = string | undefined;
-type RequestInterceptorHeaderValue = string | number | string[] | undefined;
+type InterceptorCookieValue = string | undefined;
+type InterceptorHeaderValue = string | number | string[] | undefined;
 export interface RequestInterceptorParams {
   request: Request;
   setDelay: (delay: number) => Promise<void>;
-  getCookie: (name: string) => RequestInterceptorCookieValue;
-  getHeader: (field: string) => RequestInterceptorHeaderValue;
-  getHeaders: () => Record<string, RequestInterceptorHeaderValue>;
+  getCookie: (name: string) => InterceptorCookieValue;
+  getHeader: (field: string) => InterceptorHeaderValue;
+  getHeaders: () => Record<string, InterceptorHeaderValue>;
 }
 
 export type RequestInterceptor = (params: RequestInterceptorParams) => void | Promise<void>;
@@ -19,10 +19,12 @@ export interface ResponseInterceptorParams {
   setStatusCode: (statusCode: number) => void;
   setHeader: (field: string, value?: string | string[]) => void;
   appendHeader: (field: string, value?: string[] | string) => void;
-  getHeader: (field: string) => RequestInterceptorHeaderValue;
-  getHeaders: () => Record<string, RequestInterceptorHeaderValue>;
+  getRequestHeader: (field: string) => InterceptorHeaderValue;
+  getRequestHeaders: () => Record<string, InterceptorHeaderValue>;
+  getResponseHeader: (field: string) => InterceptorHeaderValue;
+  getResponseHeaders: () => Record<string, InterceptorHeaderValue>;
   setCookie: (name: string, value: string, options?: CookieOptions) => void;
-  getCookie: (name: string) => RequestInterceptorCookieValue;
+  getCookie: (name: string) => InterceptorCookieValue;
   clearCookie: (name: string, options?: CookieOptions) => void;
   attachment: (filename: string) => void;
 }
