@@ -10,6 +10,9 @@ describe('isEntityDescriptor', () => {
     expect(isEntityDescriptor([])).toEqual(false);
     expect(isEntityDescriptor({ key: 'value' })).toEqual(false);
     expect(isEntityDescriptor({ checkMode: 'exists' })).toEqual(true);
+    expect(isEntityDescriptor({ checkMode: 'exists', value: 'string' })).toEqual(false);
+    expect(isEntityDescriptor({ checkMode: 'notExists', value: 'string' })).toEqual(false);
     expect(isEntityDescriptor({ checkMode: 'equals', value: 'string' })).toEqual(true);
+    expect(isEntityDescriptor({ checkMode: 'equals' })).toEqual(false);
   });
 });
