@@ -50,13 +50,13 @@ describe('CreateNestedDatabaseRoutes', () => {
     const nestedDatabase = createNestedDatabase();
     const server = createServer(nestedDatabase);
 
-    test('Should return correct data for valid key', async () => {
+    it('Should return correct data for valid key', async () => {
       const response = await request(server).get('/users');
 
       expect(response.body).toStrictEqual(nestedDatabase.users);
     });
 
-    test('Should return correct Cache-Control header for valid key', async () => {
+    it('Should return correct Cache-Control header for valid key', async () => {
       const response = await request(server).get('/users');
 
       expect(response.headers['cache-control']).toBe('no-cache');
@@ -71,7 +71,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       server = createServer(nestedDatabase);
     });
 
-    test('Should return correct data (ignored id) for valid key and successfully update database', async () => {
+    it('Should return correct data (ignored id) for valid key and successfully update database', async () => {
       const jim = { id: 4, name: 'jim', age: 35 };
       const postResponse = await request(server).post('/users').send(jim);
 
@@ -82,7 +82,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       expect(getResponse.body).toContainEqual({ ...jim, id: 3 });
     });
 
-    test('Should return correct Location header for valid key', async () => {
+    it('Should return correct Location header for valid key', async () => {
       const jim = { id: 4, name: 'jim', age: 35 };
       const postResponse = await request(server).post('/users').send(jim);
 
@@ -94,19 +94,19 @@ describe('CreateNestedDatabaseRoutes', () => {
     const nestedDatabase = createNestedDatabase();
     const server = createServer(nestedDatabase);
 
-    test('Should return correct data for valid key and id', async () => {
+    it('Should return correct data for valid key and id', async () => {
       const response = await request(server).get('/users/1');
 
       expect(response.body).toStrictEqual(nestedDatabase.users.find((item) => item.id === 1));
     });
 
-    test('Should correct Cache-Control header for valid key and id', async () => {
+    it('Should correct Cache-Control header for valid key and id', async () => {
       const response = await request(server).get('/users/1');
 
       expect(response.headers['cache-control']).toBe('no-cache');
     });
 
-    test('Should return 404 for non-existent id', async () => {
+    it('Should return 404 for non-existent id', async () => {
       const response = await request(server).get('/users/3');
 
       expect(response.status).toBe(404);
@@ -121,13 +121,13 @@ describe('CreateNestedDatabaseRoutes', () => {
       server = createServer(nestedDatabase);
     });
 
-    test('Should correctly replace resource (ignoring id) for valid key and id', async () => {
+    it('Should correctly replace resource (ignoring id) for valid key and id', async () => {
       const response = await request(server).put('/users/1').send({ id: 3, name: 'John Smith' });
 
       expect(response.body).toStrictEqual({ id: 1, name: 'John Smith' });
     });
 
-    test('Should return 404 for non-existent id', async () => {
+    it('Should return 404 for non-existent id', async () => {
       const response = await request(server).put('/users/3');
 
       expect(response.status).toBe(404);
@@ -142,7 +142,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       server = createServer(nestedDatabase);
     });
 
-    test('Should correctly update resource (ignoring id) for valid key and id', async () => {
+    it('Should correctly update resource (ignoring id) for valid key and id', async () => {
       const response = await request(server).patch('/users/1').send({ id: 3, name: 'John Smith' });
 
       expect(response.body).toStrictEqual({
@@ -154,7 +154,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       });
     });
 
-    test('Should return 404 for non-existent id', async () => {
+    it('Should return 404 for non-existent id', async () => {
       const response = await request(server).patch('/users/3');
 
       expect(response.status).toBe(404);
@@ -169,7 +169,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       server = createServer(nestedDatabase);
     });
 
-    test('Should correctly delete item from collection for valid key and id', async () => {
+    it('Should correctly delete item from collection for valid key and id', async () => {
       const deleteResponse = await request(server).delete('/users/1');
       expect(deleteResponse.status).toBe(204);
 
@@ -177,7 +177,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       expect(getResponse.status).toBe(404);
     });
 
-    test('Should return 404 for non-existent id', async () => {
+    it('Should return 404 for non-existent id', async () => {
       const response = await request(server).delete('/users/3');
 
       expect(response.status).toBe(404);
@@ -188,7 +188,7 @@ describe('CreateNestedDatabaseRoutes', () => {
     const nestedDatabase = createNestedDatabase();
     const server = createServer(nestedDatabase);
 
-    test('Should return filtered array by query', async () => {
+    it('Should return filtered array by query', async () => {
       const response = await request(server).get('/users?name=John Doe');
 
       expect(response.body).toStrictEqual([
@@ -202,13 +202,13 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by identical queries names', async () => {
+    it('Should return filtered array by identical queries names', async () => {
       const response = await request(server).get('/users?id=1&id=2');
 
       expect(response.body).toStrictEqual(nestedDatabase.users);
     });
 
-    test('Should return filtered array by nested query', async () => {
+    it('Should return filtered array by nested query', async () => {
       const response = await request(server).get('/users?address.city=Novosibirsk');
 
       expect(response.body).toStrictEqual([
@@ -222,7 +222,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by neq operator', async () => {
+    it('Should return filtered array by neq operator', async () => {
       const response = await request(server).get('/users?id_neq=1');
 
       expect(response.body).toStrictEqual([
@@ -236,7 +236,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by gt operator', async () => {
+    it('Should return filtered array by gt operator', async () => {
       const response = await request(server).get('/users?id_gt=1');
 
       expect(response.body).toStrictEqual([
@@ -250,13 +250,13 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by gte operator', async () => {
+    it('Should return filtered array by gte operator', async () => {
       const response = await request(server).get('/users?id_gte=1');
 
       expect(response.body).toStrictEqual(nestedDatabase.users);
     });
 
-    test('Should return filtered array by lt operator', async () => {
+    it('Should return filtered array by lt operator', async () => {
       const response = await request(server).get('/users?id_lt=2');
 
       expect(response.body).toStrictEqual([
@@ -270,13 +270,13 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by lte operator', async () => {
+    it('Should return filtered array by lte operator', async () => {
       const response = await request(server).get('/users?id_lte=2');
 
       expect(response.body).toStrictEqual(nestedDatabase.users);
     });
 
-    test('Should return filtered array by cn operator', async () => {
+    it('Should return filtered array by cn operator', async () => {
       const response = await request(server).get('/users?name_cn=Jane');
 
       expect(response.body).toStrictEqual([
@@ -290,7 +290,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by ncn operator', async () => {
+    it('Should return filtered array by ncn operator', async () => {
       const response = await request(server).get('/users?name_ncn=Jane');
 
       expect(response.body).toStrictEqual([
@@ -304,31 +304,31 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by sw operator', async () => {
+    it('Should return filtered array by sw operator', async () => {
       const response = await request(server).get('/users?name_sw=J');
 
       expect(response.body).toStrictEqual(nestedDatabase.users);
     });
 
-    test('Should return filtered array by nsw operator', async () => {
+    it('Should return filtered array by nsw operator', async () => {
       const response = await request(server).get('/users?name_nsw=J');
 
       expect(response.body).toStrictEqual([]);
     });
 
-    test('Should return filtered array by ew operator', async () => {
+    it('Should return filtered array by ew operator', async () => {
       const response = await request(server).get('/users?name_ew=a');
 
       expect(response.body).toStrictEqual([]);
     });
 
-    test('Should return filtered array by new operator', async () => {
+    it('Should return filtered array by new operator', async () => {
       const response = await request(server).get('/users?name_new=a');
 
       expect(response.body).toStrictEqual(nestedDatabase.users);
     });
 
-    test('Should return filtered array by some operator', async () => {
+    it('Should return filtered array by some operator', async () => {
       const response = await request(server).get('/users?hobbies_some=games');
 
       expect(response.body).toStrictEqual([
@@ -347,7 +347,7 @@ describe('CreateNestedDatabaseRoutes', () => {
     const nestedDatabase = createNestedDatabase();
     const server = createServer(nestedDatabase);
 
-    test('Should return paginationed data by query', async () => {
+    it('Should return paginationed data by query', async () => {
       const response = await request(server).get('/users?_page=1');
 
       expect(response.body.results).toStrictEqual([
@@ -379,7 +379,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       expect(response.body._link.last).toContain('/users?_page=1');
     });
 
-    test('Should return paginationed data by query with limit', async () => {
+    it('Should return paginationed data by query with limit', async () => {
       const response = await request(server).get('/users?_page=1&_limit=1');
 
       expect(response.body.results).toStrictEqual([
@@ -404,7 +404,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       expect(response.body._link.next).toContain('/users?_page=2&_limit=1');
     });
 
-    test('Should return valid _link for paginationed data', async () => {
+    it('Should return valid _link for paginationed data', async () => {
       const linkHeaderRegexp = /<([^>]+)>;\s*rel="([^"]+)"/g;
       const firstResponse = await request(server).get('/users?_page=1&_limit=1');
 
@@ -477,7 +477,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       expect(secondResponse.body._link.prev).toContain('/users?_page=1&_limit=1');
     });
 
-    test('Should return valid data by invalid pagination data', async () => {
+    it('Should return valid data by invalid pagination data', async () => {
       const response = await request(server).get('/users?_page=2');
 
       expect(response.body).toStrictEqual([
@@ -503,19 +503,19 @@ describe('CreateNestedDatabaseRoutes', () => {
     const nestedDatabase = createNestedDatabase();
     const server = createServer(nestedDatabase);
 
-    test('Should return sliced array by _begin query', async () => {
+    it('Should return sliced array by _begin query', async () => {
       const response = await request(server).get('/users?_begin=1');
 
       expect(response.body).toStrictEqual(nestedDatabase.users.slice(1));
     });
 
-    test('Should return sliced array by _end query', async () => {
+    it('Should return sliced array by _end query', async () => {
       const response = await request(server).get('/users?_end=1');
 
       expect(response.body).toStrictEqual(nestedDatabase.users.slice(0, 1));
     });
 
-    test('Should return sliced array by _begin and _end query', async () => {
+    it('Should return sliced array by _begin and _end query', async () => {
       const response = await request(server).get('/users?_begin=0&_end=2');
 
       expect(response.body).toStrictEqual(nestedDatabase.users.slice(0, 2));
@@ -531,7 +531,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]
     });
 
-    test('Should return sorted data by query', async () => {
+    it('Should return sorted data by query', async () => {
       const response = await request(server).get('/users?_sort=age');
 
       expect(response.body).toStrictEqual([
@@ -553,7 +553,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return sorted data by query with order', async () => {
+    it('Should return sorted data by query with order', async () => {
       const response = await request(server).get('/users?_sort=age&_order=desc');
 
       expect(response.body).toStrictEqual([
@@ -575,7 +575,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return sorted data by multiple query', async () => {
+    it('Should return sorted data by multiple query', async () => {
       const response = await request(server).get(
         '/users?_sort=name&_order=asc&_sort=id&_order=desc'
       );
@@ -599,7 +599,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by nested query', async () => {
+    it('Should return filtered array by nested query', async () => {
       const response = await request(server).get('/users?_sort=address.city&_order=desc');
 
       expect(response.body).toStrictEqual([
@@ -629,7 +629,7 @@ describe('CreateNestedDatabaseRoutes', () => {
     const correctSearchValues = ['string', true, 3000, null];
 
     correctSearchValues.forEach((correctSearchValue) => {
-      test(`Should search data by "${correctSearchValue}" query with type ${
+      it(`Should search data by "${correctSearchValue}" query with type ${
         correctSearchValue !== null ? typeof correctSearchValue : 'null'
       }`, async () => {
         const server = createServer({ users: [{ id: 1, data: correctSearchValue }] });
@@ -640,7 +640,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       });
     });
 
-    test('Should search data by query when nested text', async () => {
+    it('Should search data by query when nested text', async () => {
       const response = await request(server).get('/users?_q=Tomsk');
 
       expect(response.body).toStrictEqual([
@@ -654,7 +654,7 @@ describe('CreateNestedDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should search data by multiple query', async () => {
+    it('Should search data by multiple query', async () => {
       const response = await request(server).get('/users?_q=Tomsk&_q=Novosibirsk');
 
       expect(response.body).toStrictEqual([

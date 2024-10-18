@@ -1,7 +1,7 @@
 import { getLevenshteinDistance } from './getLevenshteinDistance';
 
 describe('getLevenshteinDistance', () => {
-  test('Should correct return Levenshtein distance', () => {
+  it('Should correct return Levenshtein distance', () => {
     expect(getLevenshteinDistance('users', 'users')).toEqual(0);
     expect(getLevenshteinDistance('psts', 'posts')).toEqual(1);
     expect(getLevenshteinDistance('postss', 'posts')).toEqual(1);

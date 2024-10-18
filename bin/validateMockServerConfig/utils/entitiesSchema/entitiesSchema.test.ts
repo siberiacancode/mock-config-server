@@ -3,7 +3,7 @@ import { getMostSpecificPathFromError, getValidationMessageFromPath } from '../.
 import { plainEntitySchema } from './entitiesSchema';
 
 describe('plainEntitySchema: checkMode exclude', () => {
-  test('Should return correct error path for descriptor (top and property level) without required value', () => {
+  it('Should return correct error path for descriptor (top and property level) without required value', () => {
     const incorrectTopLevelDescriptorBodyEntities = {
       checkMode: 'equals'
     };
@@ -35,7 +35,7 @@ describe('plainEntitySchema: checkMode exclude', () => {
     }
   });
 
-  test('Should return correct path for object (top and property level) with checkMode property', () => {
+  it('Should return correct path for object (top and property level) with checkMode property', () => {
     const incorrectTopLevelObjectBodyEntities = {
       checkMode: 'some random string'
     };

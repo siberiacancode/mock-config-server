@@ -2,7 +2,7 @@ import type { GraphqlRequestSuggestionConfigs } from './getGraphqlUrlSuggestions
 import { getGraphqlUrlSuggestions } from './getGraphqlUrlSuggestions';
 
 describe('getGraphqlUrlSuggestions', () => {
-  test('Should correctly return suggestions', () => {
+  it('Should correctly return suggestions', () => {
     const requestConfigs: GraphqlRequestSuggestionConfigs = [
       { operationType: 'query', operationName: '/GetDevelopers' },
       { operationType: 'mutation', operationName: '/CreateDeveloper' }

@@ -2,7 +2,7 @@ import type { RestRequestSuggestionConfigs } from './getRestUrlSuggestions';
 import { getRestUrlSuggestions } from './getRestUrlSuggestions';
 
 describe('getRestUrlSuggestions', () => {
-  test('Should correctly return suggestions', () => {
+  it('Should correctly return suggestions', () => {
     const requestConfigs: RestRequestSuggestionConfigs = [
       { method: 'get', path: '/posts/:postId' },
       { method: 'post', path: '/posts/:postId/comments/:commentId' }
@@ -33,7 +33,7 @@ describe('getRestUrlSuggestions', () => {
     ).toEqual([]);
   });
 
-  test('Should return requests with same query params as provided', () => {
+  it('Should return requests with same query params as provided', () => {
     const requestConfigs: RestRequestSuggestionConfigs = [
       { method: 'get', path: '/users' },
       { method: 'get', path: '/users/:userId' },

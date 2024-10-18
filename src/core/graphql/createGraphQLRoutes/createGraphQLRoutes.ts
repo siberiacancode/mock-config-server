@@ -57,7 +57,7 @@ export const createGraphQLRoutes = ({
 
       if (
         'query' in requestConfig &&
-        requestConfig.query.replace(/\s+/gi, ' ') !== graphQLInput.query?.replace(/\s+/gi, ' ')
+        requestConfig.query.replace(/\s+/g, ' ') !== graphQLInput.query?.replace(/\s+/g, ' ')
       )
         return false;
 

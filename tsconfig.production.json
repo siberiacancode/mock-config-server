@@ -1,25 +1,10 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
-    "declaration": true,
-    "emitDeclarationOnly": true,
     "target": "esnext",
     "lib": ["dom", "esnext"],
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "isolatedModules": true,
-    "resolveJsonModule": true,
-    "sourceMap": false,
-    "newLine": "lf",
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
     "baseUrl": "./",
+    "module": "esnext",
+    "moduleResolution": "node",
     "paths": {
       "@/server": ["./src/server"],
       "@/core/database": ["./src/core/database"],
@@ -30,8 +15,23 @@
       "@/utils/helpers/tests": ["./src/utils/helpers/tests"],
       "@/utils/types": ["./src/utils/types"],
       "@/utils/constants": ["./src/utils/constants"]
-    }
+    },
+    "resolveJsonModule": true,
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "newLine": "lf",
+    "outDir": "dist",
+    "sourceMap": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "skipLibCheck": true
   },
-  "include": ["bin", "src", "./index.ts"],
+  "include": ["bin", "src", "./index.ts", "./declaration.d.ts"],
   "exclude": ["./**/*.test.ts", "./bin/templates/*"]
 }

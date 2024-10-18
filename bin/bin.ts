@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-const pleaseUpgradeNode = require('please-upgrade-node');
+import pleaseUpgradeNode from 'please-upgrade-node';
 
-const packageJson = require('../../package.json');
+import packageJson from '../../package.json' assert { type: 'json' };
+
+import { cli } from './cli';
 
 pleaseUpgradeNode(packageJson);
-
-const { cli } = require('./cli');
 
 cli();
 
