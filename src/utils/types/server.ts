@@ -76,12 +76,13 @@ export type MockServerConfigArgv = Arguments<{
   watch?: boolean;
 }>;
 
-export type FlatMockServerConfig = Array<{
-  configs?: Array<RestRequestConfig | GraphQLRequestConfig>;
+export type FlatMockServerComponent = {
+  name?: string;
+  configs: Array<RestRequestConfig | GraphQLRequestConfig>;
   baseUrl?: BaseUrl;
   interceptors?: Interceptors;
   database?: DatabaseConfig;
-}>;
+};
 
 export type FlatMockServerSettings = {
   baseUrl?: BaseUrl;
@@ -90,3 +91,8 @@ export type FlatMockServerSettings = {
   interceptors?: Interceptors;
   cors?: Cors;
 };
+
+export type FlatMockServerConfig = [
+  option: FlatMockServerSettings | FlatMockServerComponent,
+  ...flatMockServerConfigs: FlatMockServerComponent[]
+];

@@ -9,25 +9,30 @@ import {
   corsMiddleware,
   errorMiddleware,
   noCorsMiddleware,
-  // notFoundMiddleware,
+  notFoundMiddleware,
   requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
 import type {
-  FlatMockServerConfig,
+  FlatMockServerComponent,
   FlatMockServerSettings,
   GraphQLRequestConfig,
   RestRequestConfig
 } from '@/utils/types';
 
 export const createFlatMockServer = (
-  flatMockServerConfig: FlatMockServerConfig,
+  flatMockServerComponents: FlatMockServerComponent[],
   flatMockServerSettings?: FlatMockServerSettings,
   server: Express = express()
 ) => {
-  const { cors, staticPath, interceptors, baseUrl = '/' } = flatMockServerSettings ?? {};
+  const {
+    cors,
+    staticPath,
+    interceptors,
+    baseUrl: serverBaseUrl = '/'
+  } = flatMockServerSettings ?? {};
 
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../static/views'));
@@ -54,10 +59,10 @@ export const createFlatMockServer = (
   }
 
   if (staticPath) {
-    staticMiddleware(server, baseUrl, staticPath);
+    staticMiddleware(server, serverBaseUrl, staticPath);
   }
 
-  flatMockServerConfig.forEach(({ configs = [], interceptors, baseUrl = '/', database }) => {
+  flatMockServerComponents.forEach(({ configs = [], interceptors, baseUrl = '/', database }) => {
     const configRequestInterceptor = interceptors?.request;
     if (configRequestInterceptor) {
       requestInterceptorMiddleware({ server, interceptor: configRequestInterceptor });
@@ -76,7 +81,7 @@ export const createFlatMockServer = (
       { rest: [] as RestRequestConfig[], graphql: [] as GraphQLRequestConfig[] }
     );
 
-    if (rest) {
+    if (rest.length) {
       const routerWithRestRoutes = createRestRoutes({
         router: express.Router(),
         restConfig: {
@@ -89,7 +94,7 @@ export const createFlatMockServer = (
       server.use(baseUrl, routerWithRestRoutes);
     }
 
-    if (graphql) {
+    if (graphql.length) {
       const routerWithGraphQLRoutes = createGraphQLRoutes({
         router: express.Router(),
         graphqlConfig: {
@@ -106,9 +111,19 @@ export const createFlatMockServer = (
       const routerWithDatabaseRoutes = createDatabaseRoutes(express.Router(), database);
       server.use(baseUrl, routerWithDatabaseRoutes);
     }
-  });
 
-  // notFoundMiddleware(server, mockServerConfig);
+    notFoundMiddleware(server, {
+      baseUrl: serverBaseUrl,
+      rest: {
+        baseUrl,
+        configs: rest
+      },
+      graphql: {
+        baseUrl,
+        configs: graphql
+      }
+    });
+  });
 
   errorMiddleware(server);
 

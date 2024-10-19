@@ -13,6 +13,10 @@ export const run = (
   mockConfig: MockServerConfig,
   { baseUrl, port, staticPath }: MockServerConfigArgv
 ) => {
+  console.warn(
+    `**DEPRECATION WARNING**\nThe old mock config format is deprecated and will be removed in the next major version. Please use new format of config (flat config)`
+  );
+
   try {
     const mergedMockServerConfig = {
       ...mockConfig,
