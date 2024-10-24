@@ -8,17 +8,17 @@ import { createFlatMockServer } from '../createFlatMockServer/createFlatMockServ
 
 export const startFlatMockServer = (
   option: FlatMockServerSettings | FlatMockServerComponent,
-  ...FlatMockServerComponents: FlatMockServerComponent[]
+  ...flatMockServerComponents: FlatMockServerComponent[]
 ) => {
   const isFlatMockServerComponent = 'configs' in option;
 
   if (isFlatMockServerComponent) {
-    FlatMockServerComponents.unshift(option);
+    flatMockServerComponents.unshift(option);
   }
 
   const flatMockServerSettings = isFlatMockServerComponent ? undefined : option;
 
-  const mockServer = createFlatMockServer(FlatMockServerComponents, flatMockServerSettings);
+  const mockServer = createFlatMockServer(flatMockServerSettings, flatMockServerComponents);
   const port = flatMockServerSettings?.port ?? DEFAULT.PORT;
 
   const server = mockServer.listen(port, () => {

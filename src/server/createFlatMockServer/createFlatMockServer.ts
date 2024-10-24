@@ -23,16 +23,11 @@ import type {
 } from '@/utils/types';
 
 export const createFlatMockServer = (
-  flatMockServerComponents: FlatMockServerComponent[],
-  flatMockServerSettings?: FlatMockServerSettings,
+  flatMockServerSettings: FlatMockServerSettings = {},
+  flatMockServerComponents: FlatMockServerComponent[] = [],
   server: Express = express()
 ) => {
-  const {
-    cors,
-    staticPath,
-    interceptors,
-    baseUrl: serverBaseUrl = '/'
-  } = flatMockServerSettings ?? {};
+  const { cors, staticPath, interceptors, baseUrl: serverBaseUrl = '/' } = flatMockServerSettings;
 
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../static/views'));
