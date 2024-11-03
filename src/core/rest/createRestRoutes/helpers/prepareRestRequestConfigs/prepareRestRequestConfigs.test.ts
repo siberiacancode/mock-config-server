@@ -3,6 +3,64 @@ import type { RestRequestConfig } from '@/utils/types';
 import { prepareRestRequestConfigs } from './prepareRestRequestConfigs';
 
 describe('prepareRestRequestConfigs', () => {
+  test('Should sort request configs only when same route segments is parameterized and not parameterized (not parameterized should be ahead)', () => {
+    const restRequestConfigs: RestRequestConfig[] = [
+      {
+        path: '/user',
+        method: 'get',
+        routes: []
+      },
+      {
+        path: /\/user/,
+        method: 'get',
+        routes: []
+      },
+      {
+        path: '/settings/:id2/:id3/:id4/:id5/',
+        method: 'get',
+        routes: []
+      },
+      {
+        path: '/users/:id2/:id3/4/:id5/',
+        method: 'get',
+        routes: []
+      },
+      {
+        path: '/users/:id2/3/:id4/:id5',
+        method: 'get',
+        routes: []
+      }
+    ];
+    const expectedRestRequestConfigs: RestRequestConfig[] = [
+      {
+        path: '/user',
+        method: 'get',
+        routes: []
+      },
+      {
+        path: /\/user/,
+        method: 'get',
+        routes: []
+      },
+      {
+        path: '/settings/:id2/:id3/:id4/:id5/',
+        method: 'get',
+        routes: []
+      },
+      {
+        path: '/users/:id2/3/:id4/:id5',
+        method: 'get',
+        routes: []
+      },
+      {
+        path: '/users/:id2/:id3/4/:id5/',
+        method: 'get',
+        routes: []
+      }
+    ];
+    expect(prepareRestRequestConfigs(restRequestConfigs)).toStrictEqual(expectedRestRequestConfigs);
+  });
+
   test('Should not sort routes if they do not contain entities', () => {
     const restRequestConfigs: RestRequestConfig[] = [
       {

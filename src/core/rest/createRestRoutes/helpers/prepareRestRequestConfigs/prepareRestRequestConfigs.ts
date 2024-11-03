@@ -30,7 +30,46 @@ const calculateRouteConfigWeight = (restRouteConfig: RestRouteConfig<RestMethod>
 };
 
 export const prepareRestRequestConfigs = (requestConfigs: RestRequestConfig[]) => {
-  requestConfigs.forEach((requestConfig) => {
+  const sortedByPathRequestConfigs = requestConfigs.sort(({ path: first }, { path: second }) => {
+    // ✅ important:
+    // do not affect RegExp paths and paths without parameters
+    if (first instanceof RegExp || second instanceof RegExp) return 0;
+    if (!first.includes('/:') && !second.includes('/:')) return 0;
+
+    // ✅ important:
+    // remove trailing slashes because they can affect 'split' method result
+    const firstRouteSegments = first.replace(/\/$/, '').split('/');
+    const secondRouteSegments = second.replace(/\/$/, '').split('/');
+
+    for (let i = 0; i < Math.min(firstRouteSegments.length, secondRouteSegments.length); i += 1) {
+      const firstRouteSegment = firstRouteSegments[i];
+      const secondRouteSegment = secondRouteSegments[i];
+
+      const isFirstRouteSegmentParameterized = firstRouteSegment.startsWith(':');
+      const isSecondRouteSegmentParameterized = secondRouteSegment.startsWith(':');
+
+      if (!isFirstRouteSegmentParameterized && !isSecondRouteSegmentParameterized) {
+        // ✅ important:
+        // urls are different in the constant parts => no need to sort them
+        // eslint-disable-next-line no-continue
+        if (firstRouteSegment === secondRouteSegment) continue;
+        return 0;
+      }
+
+      // ✅ important:
+      // urls are both parameterized => continue to search parameterized and not parameterized pair
+      // eslint-disable-next-line no-continue
+      if (isFirstRouteSegmentParameterized && isSecondRouteSegmentParameterized) continue;
+
+      // ✅ important:
+      // some route segment is parameterized and another one is not
+      // not parameterized one should be first in array of request configs
+      return +isFirstRouteSegmentParameterized - +isSecondRouteSegmentParameterized;
+    }
+    return 0;
+  });
+
+  sortedByPathRequestConfigs.forEach((requestConfig) => {
     requestConfig.routes.sort(
       (first, second) =>
         // ✅ important:
