@@ -36,10 +36,8 @@ export const prepareRestRequestConfigs = (requestConfigs: RestRequestConfig[]) =
     if (first instanceof RegExp || second instanceof RegExp) return 0;
     if (!first.includes('/:') && !second.includes('/:')) return 0;
 
-    // ✅ important:
-    // remove trailing slashes because they can affect 'split' method result
-    const firstRouteSegments = first.replace(/\/$/, '').split('/');
-    const secondRouteSegments = second.replace(/\/$/, '').split('/');
+    const firstRouteSegments = first.split('/');
+    const secondRouteSegments = second.split('/');
 
     for (let i = 0; i < Math.min(firstRouteSegments.length, secondRouteSegments.length); i += 1) {
       const firstRouteSegment = firstRouteSegments[i];
