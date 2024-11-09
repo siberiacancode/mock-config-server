@@ -33,7 +33,7 @@ export const prepareRestRequestConfigs = (requestConfigs: RestRequestConfig[]) =
   const sortedByPathRequestConfigs = requestConfigs.sort(
     ({ path: firstPath }, { path: secondPath }) => {
       // ✅ important:
-      // do not compare RegExp paths and paths without parameters
+      // do not compare RegExp paths and non-parameterized paths
       if (firstPath instanceof RegExp || secondPath instanceof RegExp) return 0;
       if (!firstPath.includes('/:') && !secondPath.includes('/:')) return 0;
 
@@ -42,7 +42,7 @@ export const prepareRestRequestConfigs = (requestConfigs: RestRequestConfig[]) =
       const minimalPathPartsLength = Math.min(firstPathParts.length, secondPathParts.length);
 
       // ✅ important:
-      // need to find the leftmost parameterized/not-parameterized pair and give priority to not-parameterized one
+      // need to find the leftmost parameter/non-parameter pair and give priority to not-parameter one
       for (let i = 0; i < minimalPathPartsLength; i += 1) {
         const firstPathPart = firstPathParts[i];
         const secondPathPart = secondPathParts[i];

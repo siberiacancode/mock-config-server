@@ -3,7 +3,7 @@ import type { RestRequestConfig } from '@/utils/types';
 import { prepareRestRequestConfigs } from './prepareRestRequestConfigs';
 
 describe('prepareRestRequestConfigs', () => {
-  test('Should sort request configs only when same route segments is parameterized and not parameterized (not parameterized should be ahead)', () => {
+  test('Should sort request configs only when equal position path parts is parameter and non-parameter (non-parameter should be ahead)', () => {
     const restRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',
