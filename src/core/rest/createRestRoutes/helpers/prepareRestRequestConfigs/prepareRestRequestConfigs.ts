@@ -42,7 +42,7 @@ export const prepareRestRequestConfigs = (requestConfigs: RestRequestConfig[]) =
       const minimalPathPartsLength = Math.min(firstPathParts.length, secondPathParts.length);
 
       // ✅ important:
-      // need to find the leftmost parameter/non-parameter pair and give priority to not-parameter one
+      // need to find the leftmost parameter/non-parameter pair and give priority to non-parameter one
       for (let i = 0; i < minimalPathPartsLength; i += 1) {
         const firstPathPart = firstPathParts[i];
         const secondPathPart = secondPathParts[i];
