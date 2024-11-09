@@ -30,42 +30,38 @@ const calculateRouteConfigWeight = (restRouteConfig: RestRouteConfig<RestMethod>
 };
 
 export const prepareRestRequestConfigs = (requestConfigs: RestRequestConfig[]) => {
-  const sortedByPathRequestConfigs = requestConfigs.sort(({ path: first }, { path: second }) => {
-    // ✅ important:
-    // do not affect RegExp paths and paths without parameters
-    if (first instanceof RegExp || second instanceof RegExp) return 0;
-    if (!first.includes('/:') && !second.includes('/:')) return 0;
+  const sortedByPathRequestConfigs = requestConfigs.sort(
+    ({ path: firstPath }, { path: secondPath }) => {
+      // ✅ important:
+      // do not compare RegExp paths and paths without parameters
+      if (firstPath instanceof RegExp || secondPath instanceof RegExp) return 0;
+      if (!firstPath.includes('/:') && !secondPath.includes('/:')) return 0;
 
-    const firstRouteSegments = first.split('/');
-    const secondRouteSegments = second.split('/');
+      const firstPathParts = firstPath.split('/');
+      const secondPathParts = secondPath.split('/');
+      const minimalPathPartsLength = Math.min(firstPathParts.length, secondPathParts.length);
 
-    for (let i = 0; i < Math.min(firstRouteSegments.length, secondRouteSegments.length); i += 1) {
-      const firstRouteSegment = firstRouteSegments[i];
-      const secondRouteSegment = secondRouteSegments[i];
+      // ✅ important:
+      // need to find the leftmost parameterized/not-parameterized pair and give priority to not-parameterized one
+      for (let i = 0; i < minimalPathPartsLength; i += 1) {
+        const firstPathPart = firstPathParts[i];
+        const secondPathPart = secondPathParts[i];
 
-      const isFirstRouteSegmentParameterized = firstRouteSegment.startsWith(':');
-      const isSecondRouteSegmentParameterized = secondRouteSegment.startsWith(':');
+        const isFirstPathPartParameter = firstPathPart.startsWith(':');
+        const isSecondPathPartParameter = secondPathPart.startsWith(':');
 
-      if (!isFirstRouteSegmentParameterized && !isSecondRouteSegmentParameterized) {
-        // ✅ important:
-        // urls are different in the constant parts => no need to sort them
-        // eslint-disable-next-line no-continue
-        if (firstRouteSegment === secondRouteSegment) continue;
-        return 0;
+        if (!isFirstPathPartParameter && !isSecondPathPartParameter) {
+          if (firstPathPart === secondPathPart) continue;
+          return 0;
+        }
+
+        if (isFirstPathPartParameter && isSecondPathPartParameter) continue;
+
+        return +isFirstPathPartParameter - +isSecondPathPartParameter;
       }
-
-      // ✅ important:
-      // urls are both parameterized => continue to search parameterized and not parameterized pair
-      // eslint-disable-next-line no-continue
-      if (isFirstRouteSegmentParameterized && isSecondRouteSegmentParameterized) continue;
-
-      // ✅ important:
-      // some route segment is parameterized and another one is not
-      // not parameterized one should be first in array of request configs
-      return +isFirstRouteSegmentParameterized - +isSecondRouteSegmentParameterized;
+      return 0;
     }
-    return 0;
-  });
+  );
 
   sortedByPathRequestConfigs.forEach((requestConfig) => {
     requestConfig.routes.sort(
