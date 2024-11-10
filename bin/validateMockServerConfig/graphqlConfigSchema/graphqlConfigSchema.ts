@@ -28,7 +28,7 @@ const queryRequestConfigSchema = z
   })
   .merge(baseRequestConfigSchema);
 
-const requestConfigSchema = z.union([
+export const requestConfigSchema = z.union([
   z
     .custom((value) => isPlainObject(value) && 'operationName' in value)
     .pipe(operationNameRequestConfigSchema),

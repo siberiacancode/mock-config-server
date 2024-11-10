@@ -56,11 +56,10 @@ export const notFoundMiddleware = (
     const isRequestSupportHtml =
       request.headers.accept?.includes('text/html') || request.headers.accept?.includes('*/*');
     if (isRequestSupportHtml) {
-      response.status(404).render('pages/404', {
+      return response.status(404).render('pages/404', {
         restRequestSuggestions,
         graphqlRequestSuggestions
       });
-      return;
     }
 
     response.status(404).json({
