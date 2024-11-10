@@ -37,10 +37,10 @@
   "keywords": [
     "server",
     "fake",
-    "REST",
     "rest",
-    "API",
     "api",
+    "graphql",
+    "database",
     "mock",
     "mocking",
     "config",
