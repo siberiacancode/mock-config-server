@@ -5,19 +5,22 @@ import type { GraphQLRequestConfig } from './graphql';
 import type { Interceptors } from './interceptors';
 import type { RestMethod, RestRequestConfig } from './rest';
 
-type StaticPathObject = { prefix: `/${string}`; path: `/${string}` };
+interface StaticPathObject {
+  prefix: `/${string}`;
+  path: `/${string}`;
+}
 export type StaticPath = `/${string}` | StaticPathObject | (StaticPathObject | `/${string}`)[];
 
 type CorsHeader = string;
 export type CorsOrigin = string | RegExp | (RegExp | string)[];
-export type Cors = {
+export interface Cors {
   origin: CorsOrigin | ((request: Request) => Promise<CorsOrigin> | CorsOrigin);
   methods?: Uppercase<RestMethod>[];
   allowedHeaders?: CorsHeader[];
   exposedHeaders?: CorsHeader[];
   credentials?: boolean;
   maxAge?: number;
-};
+}
 
 type Port = number;
 export type BaseUrl = `/${string}`;
@@ -34,10 +37,10 @@ export interface GraphqlConfig {
   interceptors?: Interceptors;
 }
 
-export type DatabaseConfig = {
+export interface DatabaseConfig {
   data: Record<string, unknown> | `${string}.json`;
   routes?: Record<`/${string}`, `/${string}`> | `${string}.json`;
-};
+}
 
 export interface BaseMockServerConfig {
   baseUrl?: BaseUrl;

@@ -1,6 +1,6 @@
 import type { IRouter } from 'express';
 import { flatten } from 'flat';
-import path from 'path';
+import path from 'node:path';
 
 import {
   asyncHandler,

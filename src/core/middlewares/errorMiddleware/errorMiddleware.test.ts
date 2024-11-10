@@ -4,7 +4,7 @@ import request from 'supertest';
 import { errorMiddleware } from './errorMiddleware';
 
 describe('errorMiddleware', () => {
-  test('Should handle error from server handler', async () => {
+  it('Should handle error from server handler', async () => {
     const server = express();
 
     server.get('/error', () => {

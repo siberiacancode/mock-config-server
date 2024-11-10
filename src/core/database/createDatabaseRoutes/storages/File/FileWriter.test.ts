@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 import { createTmpDir } from '@/utils/helpers/tests';
 
@@ -17,7 +17,7 @@ describe('FileWriter', () => {
     vi.clearAllMocks();
   });
 
-  test('Write asynchronously in file only last data (before Promise become fulfilled)', async () => {
+  it('Write asynchronously in file only last data (before Promise become fulfilled)', async () => {
     const fileName = './database.json';
     const filePath = path.join(tmpDirPath, fileName);
     const fileWriter = new FileWriter(filePath);
@@ -33,7 +33,7 @@ describe('FileWriter', () => {
     expect(fileData).toStrictEqual({ index: writeOperationCount });
   });
 
-  test('Write in file only if writing is unlocked (first write and last write)', async () => {
+  it('Write in file only if writing is unlocked (first write and last write)', async () => {
     const fileWriter = new FileWriter(path.join(tmpDirPath, './database.json'));
     const fsPromisesWriteFileMock = vi.spyOn(fs.promises, 'writeFile');
 

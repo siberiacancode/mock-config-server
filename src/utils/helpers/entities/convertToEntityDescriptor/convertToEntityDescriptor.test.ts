@@ -1,7 +1,7 @@
 import { convertToEntityDescriptor } from './convertToEntityDescriptor';
 
 describe('convertToEntityDescriptor', () => {
-  test('Should correctly convert value to descriptor', () => {
+  it('Should correctly convert value to descriptor', () => {
     expect(convertToEntityDescriptor(null)).toEqual({ checkMode: 'equals', value: null });
     expect(convertToEntityDescriptor(undefined)).toEqual({ checkMode: 'equals', value: undefined });
     expect(convertToEntityDescriptor(true)).toEqual({ checkMode: 'equals', value: true });
@@ -17,7 +17,7 @@ describe('convertToEntityDescriptor', () => {
     });
   });
 
-  test('Should return same value if descriptor provided', () => {
+  it('Should return same value if descriptor provided', () => {
     expect(convertToEntityDescriptor({ checkMode: 'exists' })).toEqual({ checkMode: 'exists' });
     expect(convertToEntityDescriptor({ checkMode: 'equals', value: 'string' })).toEqual({
       checkMode: 'equals',

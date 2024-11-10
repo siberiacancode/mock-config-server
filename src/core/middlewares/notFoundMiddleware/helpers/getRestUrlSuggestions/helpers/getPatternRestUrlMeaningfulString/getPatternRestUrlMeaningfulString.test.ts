@@ -1,7 +1,7 @@
 import { getPatternRestUrlMeaningfulString } from './getPatternRestUrlMeaningfulString';
 
 describe('getPatternRestUrlMeaningfulString', () => {
-  test('Should correct return rest url pattern meaningful string', () => {
+  it('Should correct return rest url pattern meaningful string', () => {
     expect(
       getPatternRestUrlMeaningfulString(['rest', 'posts', ':postId', 'comments', ':commentId'])
     ).toEqual('restpostscomments');

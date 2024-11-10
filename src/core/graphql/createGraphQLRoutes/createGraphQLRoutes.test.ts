@@ -28,7 +28,7 @@ const createServer = (
 };
 
 describe('createGraphQLRoutes', () => {
-  test('Should return 400 and description text for invalid query', async () => {
+  it('Should return 400 and description text for invalid query', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -71,7 +71,7 @@ describe('createGraphQLRoutes', () => {
     });
   });
 
-  test('Should return 404 and description text for no matched request configs', async () => {
+  it('Should return 404 and description text for no matched request configs', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -107,7 +107,7 @@ describe('createGraphQLRoutes', () => {
     expect(getResponse.statusCode).toBe(404);
   });
 
-  test('Should have response Cache-Control header value equals to no-cache', async () => {
+  it('Should have response Cache-Control header value equals to no-cache', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -135,7 +135,7 @@ describe('createGraphQLRoutes', () => {
     'mutation'
   ];
   operationTypesWithoutCacheControlHeader.forEach((operationTypeWithoutCacheControlHeader) => {
-    test(`Should do not have Cache-Control header if operation type is ${operationTypeWithoutCacheControlHeader}`, async () => {
+    it(`Should do not have Cache-Control header if operation type is ${operationTypeWithoutCacheControlHeader}`, async () => {
       const server = createServer({
         graphql: {
           configs: [
@@ -162,7 +162,7 @@ describe('createGraphQLRoutes', () => {
 });
 
 describe('createRestRoutes: content', () => {
-  test('Should correctly use data function', async () => {
+  it('Should correctly use data function', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -201,7 +201,7 @@ describe('createRestRoutes: content', () => {
     });
   });
 
-  test('Should correctly use data function with polling setting', async () => {
+  it('Should correctly use data function with polling setting', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -245,7 +245,7 @@ describe('createRestRoutes: content', () => {
     });
   });
 
-  test('Should return same polling data with time param', async () => {
+  it('Should return same polling data with time param', async () => {
     vi.useFakeTimers();
     const server = createServer({
       graphql: {
@@ -291,7 +291,7 @@ describe('createRestRoutes: content', () => {
     vi.useRealTimers();
   });
 
-  test('Should correct handle empty queue', async () => {
+  it('Should correct handle empty queue', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -319,7 +319,7 @@ describe('createRestRoutes: content', () => {
 });
 
 describe('createRestRoutes: settings', () => {
-  test('Should correctly set delay into response with delay setting', async () => {
+  it('Should correctly set delay into response with delay setting', async () => {
     const delay = 1000;
     const server = createServer({
       graphql: {
@@ -349,7 +349,7 @@ describe('createRestRoutes: settings', () => {
     expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should correctly set statusCode into response with status setting', async () => {
+  it('Should correctly set statusCode into response with status setting', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -376,7 +376,7 @@ describe('createRestRoutes: settings', () => {
     expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should correctly process the request with polling', async () => {
+  it('Should correctly process the request with polling', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -416,7 +416,7 @@ describe('createRestRoutes: settings', () => {
 });
 
 describe('createRestRoutes: entities', () => {
-  test('Should match config by entities "includes" behavior', async () => {
+  it('Should match config by entities "includes" behavior', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -464,7 +464,7 @@ describe('createRestRoutes: entities', () => {
     expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should match config by entities "includes" behavior with operationName regexp', async () => {
+  it('Should match config by entities "includes" behavior with operationName regexp', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -512,7 +512,7 @@ describe('createRestRoutes: entities', () => {
     expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should give priority to more specific route config', async () => {
+  it('Should give priority to more specific route config', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -573,7 +573,7 @@ describe('createRestRoutes: entities', () => {
     expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Smith' });
   });
 
-  test('Should strictly compare plain array body if top level descriptor used', async () => {
+  it('Should strictly compare plain array body if top level descriptor used', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -651,7 +651,7 @@ describe('createRestRoutes: entities', () => {
     expect(failedGetResponse.statusCode).toBe(404);
   });
 
-  test('Should strictly compare plain object variables if top level descriptor used', async () => {
+  it('Should strictly compare plain object variables if top level descriptor used', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -703,7 +703,7 @@ describe('createRestRoutes: entities', () => {
     expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should correctly resolve flat object variables with descriptors', async () => {
+  it('Should correctly resolve flat object variables with descriptors', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -756,7 +756,7 @@ describe('createRestRoutes: entities', () => {
     expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should be case-insensitive for header keys', async () => {
+  it('Should be case-insensitive for header keys', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -798,7 +798,7 @@ describe('createRestRoutes: entities', () => {
 });
 
 describe('createRestRoutes: interceptors', () => {
-  test('Should call request interceptors in order: request -> route', async () => {
+  it('Should call request interceptors in order: request -> route', async () => {
     const routeInterceptor = vi.fn();
     const requestInterceptor = vi.fn();
 
@@ -871,7 +871,7 @@ describe('createRestRoutes: interceptors', () => {
     expect(routeInterceptor.mock.calls.length).toBe(1);
   });
 
-  test('Should call response interceptors in order: route -> request -> server', async () => {
+  it('Should call response interceptors in order: route -> request -> server', async () => {
     const routeInterceptor = vi.fn();
     const requestInterceptor = vi.fn();
     const apiInterceptor = vi.fn();

@@ -1,11 +1,11 @@
 import { isPlainObject } from './isPlainObject';
 
 describe('isPlainObject', () => {
-  test('Object value should return true', () => {
+  it('Object value should return true', () => {
     expect(isPlainObject(Object({}))).toBe(true);
   });
 
-  test('All Primitive, array, function values should return false', () => {
+  it('All Primitive, array, function values should return false', () => {
     expect(isPlainObject(Number(1))).toBe(false);
     expect(isPlainObject(BigInt(9007199254740991n))).toBe(false);
     expect(isPlainObject(String('test'))).toBe(false);

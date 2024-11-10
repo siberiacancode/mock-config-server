@@ -1,7 +1,7 @@
 import { isEntityDescriptor } from './isEntityDescriptor';
 
 describe('isEntityDescriptor', () => {
-  test('Should correctly define descriptor', () => {
+  it('Should correctly define descriptor', () => {
     expect(isEntityDescriptor(null)).toEqual(false);
     expect(isEntityDescriptor(undefined)).toEqual(false);
     expect(isEntityDescriptor(true)).toEqual(false);

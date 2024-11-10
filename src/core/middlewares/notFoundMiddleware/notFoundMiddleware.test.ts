@@ -67,7 +67,7 @@ describe('notFoundMiddleware: HTML response', () => {
     }
   });
 
-  test('Should send correct HTML REST response', async () => {
+  it('Should send correct HTML REST response', async () => {
     const response = await request(server).get('/pstss').set('accept', 'text/html');
 
     expect(response.statusCode).toBe(404);
@@ -75,7 +75,7 @@ describe('notFoundMiddleware: HTML response', () => {
     expect(response.text).toContain('GET /posts');
   });
 
-  test('Should send correct HTML GraphQL response', async () => {
+  it('Should send correct HTML GraphQL response', async () => {
     const response = await request(server)
       .get('/?query=query getPost { posts }')
       .set('accept', 'text/html');
@@ -131,7 +131,7 @@ describe('notFoundMiddleware: REST', () => {
     ]
   };
 
-  test('Should send correct REST suggestions', async () => {
+  it('Should send correct REST suggestions', async () => {
     const server = createServer({
       rest
     });
@@ -144,7 +144,7 @@ describe('notFoundMiddleware: REST', () => {
     );
   });
 
-  test('Should send correct REST suggestions with serverBaseUrl', async () => {
+  it('Should send correct REST suggestions with serverBaseUrl', async () => {
     const server = createServer({
       baseUrl: serverBaseUrl,
       rest
@@ -158,7 +158,7 @@ describe('notFoundMiddleware: REST', () => {
     );
   });
 
-  test('Should send correct REST suggestions with restBaseUrl', async () => {
+  it('Should send correct REST suggestions with restBaseUrl', async () => {
     const server = createServer({
       rest: {
         ...rest,
@@ -174,7 +174,7 @@ describe('notFoundMiddleware: REST', () => {
     );
   });
 
-  test('Should send correct REST suggestions with serverBaseUrl and restBaseUrl', async () => {
+  it('Should send correct REST suggestions with serverBaseUrl and restBaseUrl', async () => {
     const server = createServer({
       baseUrl: serverBaseUrl,
       rest: {
@@ -211,7 +211,7 @@ describe('notFoundMiddleware: GraphQL', () => {
     ]
   };
 
-  test('Should send correct GraphQL suggestions', async () => {
+  it('Should send correct GraphQL suggestions', async () => {
     const server = createServer({
       graphql
     });
@@ -226,7 +226,7 @@ describe('notFoundMiddleware: GraphQL', () => {
     );
   });
 
-  test('Should send correct GraphQL suggestions with serverBaseUrl', async () => {
+  it('Should send correct GraphQL suggestions with serverBaseUrl', async () => {
     const server = createServer({
       baseUrl: serverBaseUrl,
       graphql
@@ -244,7 +244,7 @@ describe('notFoundMiddleware: GraphQL', () => {
     );
   });
 
-  test('Should send correct GraphQL suggestions with graphqlBaseUrl', async () => {
+  it('Should send correct GraphQL suggestions with graphqlBaseUrl', async () => {
     const server = createServer({
       graphql: {
         ...graphql,
@@ -262,7 +262,7 @@ describe('notFoundMiddleware: GraphQL', () => {
     );
   });
 
-  test('Should send correct GraphQL suggestions with serverBaseUrl and graphqlBaseUrl', async () => {
+  it('Should send correct GraphQL suggestions with serverBaseUrl and graphqlBaseUrl', async () => {
     const server = createServer({
       baseUrl: serverBaseUrl,
       graphql: {

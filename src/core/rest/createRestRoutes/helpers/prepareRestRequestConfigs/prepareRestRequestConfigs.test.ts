@@ -3,7 +3,7 @@ import type { RestRequestConfig } from '@/utils/types';
 import { prepareRestRequestConfigs } from './prepareRestRequestConfigs';
 
 describe('prepareRestRequestConfigs', () => {
-  test('Should not sort routes if they do not contain entities', () => {
+  it('Should not sort routes if they do not contain entities', () => {
     const restRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',
@@ -24,7 +24,7 @@ describe('prepareRestRequestConfigs', () => {
     expect(prepareRestRequestConfigs(restRequestConfigs)).toStrictEqual(restRequestConfigs);
   });
 
-  test('Should sort routes by their specificity of entities', () => {
+  it('Should sort routes by their specificity of entities', () => {
     const restRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',
@@ -102,7 +102,7 @@ describe('prepareRestRequestConfigs', () => {
     expect(prepareRestRequestConfigs(restRequestConfigs)).toStrictEqual(expectedRestRequestConfigs);
   });
 
-  test('Should set not object body weight equals to one', () => {
+  it('Should set not object body weight equals to one', () => {
     const restRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',
@@ -152,7 +152,7 @@ describe('prepareRestRequestConfigs', () => {
     expect(prepareRestRequestConfigs(restRequestConfigs)).toStrictEqual(expectedRestRequestConfigs);
   });
 
-  test('Should set descriptor body with value weight equals to body.value weight', () => {
+  it('Should set descriptor body with value weight equals to body.value weight', () => {
     const restRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',
@@ -216,7 +216,7 @@ describe('prepareRestRequestConfigs', () => {
     expect(prepareRestRequestConfigs(restRequestConfigs)).toStrictEqual(expectedRestRequestConfigs);
   });
 
-  test('Should set descriptor body without value weight equals to one', () => {
+  it('Should set descriptor body without value weight equals to one', () => {
     const restRequestConfigs: RestRequestConfig[] = [
       {
         path: '/user',

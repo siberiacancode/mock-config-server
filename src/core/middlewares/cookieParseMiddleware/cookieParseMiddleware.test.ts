@@ -4,7 +4,7 @@ import request from 'supertest';
 import { cookieParseMiddleware } from './cookieParseMiddleware';
 
 describe('cookieParseMiddleware', () => {
-  test('Should correctly parse cookies', async () => {
+  it('Should correctly parse cookies', async () => {
     const server = express();
     cookieParseMiddleware(server);
 
