@@ -3,6 +3,7 @@ import type { Arguments } from 'yargs';
 
 import type { GraphQLRequestConfig } from './graphql';
 import type { Interceptors } from './interceptors';
+import type { Loggers } from './logger';
 import type { RestMethod, RestRequestConfig } from './rest';
 
 type StaticPathObject = { prefix: `/${string}`; path: `/${string}` };
@@ -51,16 +52,19 @@ export interface MockServerConfig extends BaseMockServerConfig {
   rest?: RestConfig;
   graphql?: GraphqlConfig;
   database?: DatabaseConfig;
+  loggers?: Loggers;
 }
 
 export interface RestMockServerConfig extends BaseMockServerConfig {
   configs?: RestRequestConfig[];
   database?: DatabaseConfig;
+  loggers?: Loggers<'rest'>;
 }
 
 export interface GraphQLMockServerConfig extends BaseMockServerConfig {
   configs?: GraphQLRequestConfig[];
   database?: DatabaseConfig;
+  loggers?: Loggers<'graphql'>;
 }
 
 export interface DatabaseMockServerConfig extends BaseMockServerConfig {

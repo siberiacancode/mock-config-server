@@ -1,6 +1,12 @@
 import type { Express } from 'express';
 
-import { parseGraphQLRequest } from '@/utils/helpers';
+import {
+  callGraphQLRequestLogger,
+  callGraphQLResponseLogger,
+  callRestRequestLogger,
+  callRestResponseLogger,
+  parseGraphQLRequest
+} from '@/utils/helpers';
 import type {
   MockServerConfig,
   OperationNameGraphQLRequestConfig,
@@ -12,7 +18,7 @@ import { getGraphqlUrlSuggestions, getRestUrlSuggestions } from './helpers';
 
 export const notFoundMiddleware = (
   server: Express,
-  mockServerConfig: Pick<MockServerConfig, 'baseUrl' | 'rest' | 'graphql'>
+  mockServerConfig: Pick<MockServerConfig, 'baseUrl' | 'rest' | 'graphql' | 'loggers'>
 ) => {
   const { baseUrl: serverBaseUrl, rest, graphql } = mockServerConfig;
 
@@ -35,6 +41,15 @@ export const notFoundMiddleware = (
       })) ?? [];
 
   server.use((request, response) => {
+    const requestLogger = mockServerConfig.loggers?.request;
+    if (requestLogger) {
+      if (request.graphQL) {
+        callGraphQLRequestLogger({ request, logger: requestLogger });
+      } else {
+        callRestRequestLogger({ request, logger: requestLogger });
+      }
+    }
+
     const url = new URL(`${request.protocol}://${request.get('host')}${request.originalUrl}`);
 
     let restRequestSuggestions: RestRequestSuggestionConfigs = [];
@@ -53,17 +68,27 @@ export const notFoundMiddleware = (
       });
     }
 
+    response.status(404);
+    const responseLogger = mockServerConfig.loggers?.response;
+    if (responseLogger) {
+      if (request.graphQL) {
+        callGraphQLResponseLogger({ request, response, logger: responseLogger, data: undefined });
+      } else {
+        callRestResponseLogger({ request, response, logger: responseLogger, data: undefined });
+      }
+    }
+
     const isRequestSupportHtml =
       request.headers.accept?.includes('text/html') || request.headers.accept?.includes('*/*');
     if (isRequestSupportHtml) {
-      response.status(404).render('pages/404', {
+      response.render('pages/404', {
         restRequestSuggestions,
         graphqlRequestSuggestions
       });
       return;
     }
 
-    response.status(404).json({
+    response.json({
       message: 'Request or page not found. Similar requests in data',
       data: {
         restRequestSuggestions,

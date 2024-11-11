@@ -48,6 +48,7 @@ export type RestRouteConfig<Method extends RestMethod> = (
 ) & { entities?: RestEntitiesByEntityName<Method>; interceptors?: Interceptors };
 
 export type RestPathString = `/${string}`;
+
 interface BaseRestRequestConfig<Method extends RestMethod> {
   path: RestPathString | RegExp;
   method: Method;

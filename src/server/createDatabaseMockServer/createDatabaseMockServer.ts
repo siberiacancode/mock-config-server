@@ -9,6 +9,7 @@ import {
   errorMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
+  requestInfoMiddleware,
   requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
@@ -31,6 +32,8 @@ export const createDatabaseMockServer = (
   server.set('json spaces', 2);
 
   server.use(bodyParser.text());
+
+  requestInfoMiddleware(server);
 
   cookieParseMiddleware(server);
 

@@ -6,6 +6,9 @@ import {
   asyncHandler,
   callRequestInterceptor,
   callResponseInterceptors,
+  callRestRequestLogger,
+  callRestResponseLogger,
+  // callResponseLogger,
   convertToEntityDescriptor,
   isEntityDescriptor,
   isFilePathValid,
@@ -15,6 +18,7 @@ import {
 import type {
   Entries,
   Interceptors,
+  Loggers,
   RestConfig,
   RestEntitiesByEntityName,
   RestEntity,
@@ -28,12 +32,14 @@ interface CreateRestRoutesParams {
   router: IRouter;
   restConfig: RestConfig;
   serverResponseInterceptor?: Interceptors['response'];
+  loggers?: Loggers;
 }
 
 export const createRestRoutes = ({
   router,
   restConfig,
-  serverResponseInterceptor
+  serverResponseInterceptor,
+  loggers
 }: CreateRestRoutesParams) => {
   prepareRestRequestConfigs(restConfig.configs).forEach((requestConfig) => {
     router.route(requestConfig.path)[requestConfig.method](
@@ -98,8 +104,11 @@ export const createRestRoutes = ({
           });
         });
 
-        if (!matchedRouteConfig) {
-          return next();
+        if (!matchedRouteConfig) return next();
+
+        const requestLogger = loggers?.request;
+        if (requestLogger) {
+          callRestRequestLogger({ request, logger: requestLogger });
         }
 
         if (matchedRouteConfig.interceptors?.request) {
@@ -183,6 +192,16 @@ export const createRestRoutes = ({
 
         if (matchedRouteConfig.settings?.delay) {
           await sleep(matchedRouteConfig.settings.delay);
+        }
+
+        const responseLogger = loggers?.response;
+        if (responseLogger) {
+          callRestResponseLogger({
+            request,
+            response,
+            logger: responseLogger,
+            data
+          });
         }
 
         if ('file' in matchedRouteConfig) {

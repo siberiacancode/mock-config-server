@@ -21,11 +21,6 @@ export type CheckMode =
   | CompareWithDescriptorValueCheckMode
   | CalculateByDescriptorValueCheckMode;
 
-export type PlainEntityCheckMode = Exclude<
-  CheckMode,
-  CompareWithDescriptorStringValueCheckMode | Extract<CalculateByDescriptorValueCheckMode, 'regExp'>
->;
-
 export interface EntityDescriptor {
   checkMode: CheckMode;
   value?: any;
