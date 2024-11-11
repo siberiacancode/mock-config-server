@@ -17,7 +17,7 @@ const baseRouteConfigSchema = z.strictObject({
       variables: plainEntitySchema.optional()
     })
   ).optional(),
-  interceptors: plainObjectSchema(interceptorsSchema.pick({ response: true })).optional()
+  interceptors: plainObjectSchema(interceptorsSchema).optional()
 });
 
 const dataRouteConfigSchema = z

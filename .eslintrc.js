@@ -19,6 +19,7 @@ module.exports = {
         '@typescript-eslint/no-namespace': 'off',
         'no-underscore-dangle': 'off',
         'no-restricted-syntax': 'off',
+        'no-continue': 'off',
         'promise/always-return': ['error', { ignoreLastCallback: true }],
         'arrow-body-style': ['error', 'as-needed'],
         'no-console': ['warn', { allow: ['info', 'dir', 'error'] }]

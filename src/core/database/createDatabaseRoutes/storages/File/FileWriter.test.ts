@@ -14,7 +14,7 @@ describe('FileWriter', () => {
 
   afterEach(() => {
     fs.rmSync(tmpDirPath, { recursive: true, force: true });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Write asynchronously in file only last data (before Promise become fulfilled)', async () => {
@@ -35,7 +35,7 @@ describe('FileWriter', () => {
 
   test('Write in file only if writing is unlocked (first write and last write)', async () => {
     const fileWriter = new FileWriter(path.join(tmpDirPath, './database.json'));
-    const fsPromisesWriteFileMock = jest.spyOn(fs.promises, 'writeFile');
+    const fsPromisesWriteFileMock = vi.spyOn(fs.promises, 'writeFile');
 
     const writePromises: Promise<void>[] = [];
     const writeOperationCount = 100;
