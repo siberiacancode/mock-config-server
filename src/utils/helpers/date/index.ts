@@ -1,1 +1,1 @@
-export * from './getTimestamp/getTimestamp';
+export * from './formatTimestamp/formatTimestamp';

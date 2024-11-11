@@ -1,9 +1,10 @@
 import type { Express } from 'express';
 
 import {
-  asyncHandler,
-  callRequestLogger,
-  callResponseLogger,
+  callGraphQLRequestLogger,
+  callGraphQLResponseLogger,
+  callRestRequestLogger,
+  callRestResponseLogger,
   parseGraphQLRequest
 } from '@/utils/helpers';
 import type {
@@ -39,54 +40,60 @@ export const notFoundMiddleware = (
         }`
       })) ?? [];
 
-  server.use(
-    asyncHandler(async (request, response) => {
-      const requestLogger = mockServerConfig.loggers?.request;
-      if (requestLogger) {
-        await callRequestLogger({ request, logger: requestLogger });
+  server.use((request, response) => {
+    const requestLogger = mockServerConfig.loggers?.request;
+    if (requestLogger) {
+      if (request.graphQL) {
+        callGraphQLRequestLogger({ request, logger: requestLogger });
+      } else {
+        callRestRequestLogger({ request, logger: requestLogger });
       }
+    }
 
-      const url = new URL(`${request.protocol}://${request.get('host')}${request.originalUrl}`);
+    const url = new URL(`${request.protocol}://${request.get('host')}${request.originalUrl}`);
 
-      let restRequestSuggestions: RestRequestSuggestionConfigs = [];
-      if (rest) {
-        restRequestSuggestions = getRestUrlSuggestions({
-          url,
-          requestConfigs: restRequestConfigs
-        });
-      }
-
-      let graphqlRequestSuggestions: GraphqlRequestSuggestionConfigs = [];
-      if (graphql && parseGraphQLRequest(request)) {
-        graphqlRequestSuggestions = getGraphqlUrlSuggestions({
-          url,
-          requestConfigs: graphqlRequestConfigs
-        });
-      }
-
-      response.status(404);
-      const responseLogger = mockServerConfig.loggers?.response;
-      if (responseLogger) {
-        await callResponseLogger({ request, response, logger: responseLogger, data: undefined });
-      }
-
-      const isRequestSupportHtml =
-        request.headers.accept?.includes('text/html') || request.headers.accept?.includes('*/*');
-      if (isRequestSupportHtml) {
-        response.render('pages/404', {
-          restRequestSuggestions,
-          graphqlRequestSuggestions
-        });
-        return;
-      }
-
-      response.json({
-        message: 'Request or page not found. Similar requests in data',
-        data: {
-          restRequestSuggestions,
-          graphqlRequestSuggestions
-        }
+    let restRequestSuggestions: RestRequestSuggestionConfigs = [];
+    if (rest) {
+      restRequestSuggestions = getRestUrlSuggestions({
+        url,
+        requestConfigs: restRequestConfigs
       });
-    })
-  );
+    }
+
+    let graphqlRequestSuggestions: GraphqlRequestSuggestionConfigs = [];
+    if (graphql && parseGraphQLRequest(request)) {
+      graphqlRequestSuggestions = getGraphqlUrlSuggestions({
+        url,
+        requestConfigs: graphqlRequestConfigs
+      });
+    }
+
+    response.status(404);
+    const responseLogger = mockServerConfig.loggers?.response;
+    if (responseLogger) {
+      if (request.graphQL) {
+        callGraphQLResponseLogger({ request, response, logger: responseLogger, data: undefined });
+      } else {
+        callRestResponseLogger({ request, response, logger: responseLogger, data: undefined });
+      }
+    }
+
+    const isRequestSupportHtml =
+      request.headers.accept?.includes('text/html') || request.headers.accept?.includes('*/*');
+    if (isRequestSupportHtml) {
+      response.render('pages/404', {
+        restRequestSuggestions,
+        graphqlRequestSuggestions
+      });
+      return;
+    }
+
+    response.json({
+      message: 'Request or page not found. Similar requests in data',
+      data: {
+        restRequestSuggestions,
+        graphqlRequestSuggestions
+      }
+    });
+  });
 };

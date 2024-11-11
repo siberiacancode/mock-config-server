@@ -1,5 +1,5 @@
-export const getTimestamp = (unixTimestamp?: number) =>
-  new Date(unixTimestamp ?? Date.now()).toLocaleString('ru-RU', {
+export const formatTimestamp = (timestamp: number) =>
+  new Date(timestamp).toLocaleString('ru-RU', {
     day: 'numeric',
     month: 'numeric',
     year: 'numeric',

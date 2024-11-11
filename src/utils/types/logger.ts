@@ -1,86 +1,90 @@
-import type { Request, Response } from 'express';
-
-import type { GraphQLOperationName, GraphQLOperationType } from './graphql';
-import type { RestMethod } from './rest';
-import type { DeepPartial } from './utils';
+import type { GraphQLEntityName, GraphQLOperationName, GraphQLOperationType } from './graphql';
+import type { RestEntityName, RestMethod } from './rest';
 import type { Cookies, Headers, Params, PlainObject, Query } from './values';
+
+export type MappedEntityName = Exclude<RestEntityName | GraphQLEntityName, 'body' | 'variables'>;
+
+type LoggerValuesToFlags<Type> = {
+  [Key in keyof Type]?: Key extends MappedEntityName ? Record<string, boolean> | boolean : boolean;
+};
 
 type LoggerType = 'request' | 'response';
 
 type LoggerAPI = 'rest' | 'graphql';
 
-export interface LoggerTokenFlags<
-  Type extends LoggerType = LoggerType,
-  API extends LoggerAPI = LoggerAPI
-> {
-  meta?: {
-    unixTimestamp?: boolean;
-    id?: boolean;
-    method?: boolean;
-    graphQLOperationType?: API extends 'graphql' ? boolean : never;
-    graphQLOperationName?: API extends 'graphql' ? boolean : never;
-    url?: boolean;
-    statusCode?: Type extends 'response' ? boolean : never;
-  };
-  entities?: {
-    headers?: boolean;
-    cookies?: any;
-    query?: boolean;
-    params?: boolean;
-    variables?: API extends 'graphql' ? boolean : never;
-    body?: boolean;
-  };
-  data?: Type extends 'response' ? boolean : never;
+export interface LoggerBaseTokenValues {
+  type: string;
+  timestamp: number;
+  id: number | undefined;
+  method: RestMethod;
+  url: string;
+  headers: Headers;
+  cookies: Cookies;
+  query: Query;
+  params: Params;
+  body: any;
 }
 
-export interface LoggerTokenValues<
-  Type extends LoggerType = LoggerType,
-  API extends LoggerAPI = LoggerAPI
-> {
-  type: Type;
-  meta: {
-    unixTimestamp: number;
-    id: number | undefined;
-    method: RestMethod;
-    graphQLOperationType: API extends 'graphql' ? GraphQLOperationType | undefined : never;
-    graphQLOperationName: API extends 'graphql' ? GraphQLOperationName | undefined : never;
-    url: string;
-    statusCode?: Type extends 'response' ? number : never;
-  };
-  entities: {
-    headers: Headers;
-    cookies: Cookies;
-    query: Query;
-    params: Params;
-    variables: API extends 'graphql' ? PlainObject | undefined : never;
-    body: any;
-  };
-  data?: Type extends 'response' ? any : never;
+interface LoggerRestRequestTokenValues extends LoggerBaseTokenValues {}
+
+interface LoggerRestResponseTokenValues extends LoggerRestRequestTokenValues {
+  statusCode: number;
+  data: any;
 }
 
-export interface LoggerParams<
-  Type extends LoggerType = LoggerType,
-  API extends LoggerAPI = LoggerAPI
-> {
-  logger: Logger<Type, API>;
-  tokenValues: LoggerTokenValues<Type, API>;
-  request: Request;
-  response?: Type extends 'response' ? Response : never;
-  getTokens: GetTokens<Type, API>;
+interface LoggerGraphQLRequestTokenValues extends LoggerBaseTokenValues {
+  graphQLOperationType?: GraphQLOperationType;
+  graphQLOperationName?: GraphQLOperationName;
+  variables?: PlainObject | undefined;
 }
 
-export type GetTokens<Type extends LoggerType = LoggerType, API extends LoggerAPI = LoggerAPI> = (
-  params: LoggerParams<Type, API>
-) => DeepPartial<LoggerTokenValues<Type, API>> & PlainObject;
+interface LoggerGraphQLResponseTokenValues extends LoggerGraphQLRequestTokenValues {
+  statusCode: number;
+  data: any;
+}
 
-export type LogFunction<Type extends LoggerType = LoggerType, API extends LoggerAPI = LoggerAPI> = (
-  params: LoggerParams<Type, API>
-) => void | Promise<void>;
+export type LoggerTokenValues<
+  Type extends LoggerType = LoggerType,
+  API extends LoggerAPI = LoggerAPI
+> = Type extends 'request'
+  ? API extends 'rest'
+    ? LoggerRestRequestTokenValues
+    : API extends 'graphql'
+      ? LoggerGraphQLRequestTokenValues
+      : never
+  : Type extends 'response'
+    ? API extends 'rest'
+      ? LoggerRestResponseTokenValues
+      : API extends 'graphql'
+        ? LoggerGraphQLResponseTokenValues
+        : never
+    : never;
+
+type LoggerRestRequestTokenFlags = LoggerValuesToFlags<LoggerRestRequestTokenValues>;
+type LoggerRestResponseTokenFlags = LoggerValuesToFlags<LoggerRestResponseTokenValues>;
+type LoggerGraphQLRequestTokenFlags = LoggerValuesToFlags<LoggerGraphQLRequestTokenValues>;
+type LoggerGraphQLResponseTokenFlags = LoggerValuesToFlags<LoggerGraphQLResponseTokenValues>;
+
+export type LoggerTokenFlags<
+  Type extends LoggerType = LoggerType,
+  API extends LoggerAPI = LoggerAPI
+> = Type extends 'request'
+  ? API extends 'rest'
+    ? LoggerRestRequestTokenFlags
+    : API extends 'graphql'
+      ? LoggerGraphQLRequestTokenFlags
+      : never
+  : Type extends 'response'
+    ? API extends 'rest'
+      ? LoggerRestResponseTokenFlags
+      : API extends 'graphql'
+        ? LoggerGraphQLResponseTokenFlags
+        : never
+    : never;
 
 export interface Logger<Type extends LoggerType = LoggerType, API extends LoggerAPI = LoggerAPI> {
   enabled: boolean;
-  logFunction?: LogFunction<Type, API>;
-  tokens?: LoggerTokenFlags<Type, API>;
+  tokenFlags?: LoggerTokenFlags<Type, API>;
 }
 
 export interface Loggers<API extends LoggerAPI = LoggerAPI> {
