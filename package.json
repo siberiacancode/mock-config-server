@@ -56,7 +56,7 @@
     "dist"
   ],
   "engines": {
-    "node": ">=12"
+    "node": ">=14"
   },
   "scripts": {
     "prepublishOnly": "git diff --exit-code",
@@ -94,7 +94,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@siberiacancode/eslint": "^2.2.0",
+    "@siberiacancode/eslint": "^2.3.0",
     "@siberiacancode/prettier": "^1.1.1",
     "@siberiacancode/stylelint": "^1.1.1",
     "@siberiacancode/vitest": "^1.2.4",

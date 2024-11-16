@@ -32,6 +32,6 @@
     "isolatedModules": true,
     "skipLibCheck": true
   },
-  "include": ["bin", "src", "./index.ts", "./declaration.d.ts"],
+  "include": ["bin", "src", "./index.ts"],
   "exclude": ["./**/*.test.ts", "./bin/templates/*"]
 }

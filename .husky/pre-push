@@ -1,0 +1,2 @@
+yarn unit-test --run
+yarn build

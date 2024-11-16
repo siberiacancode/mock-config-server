@@ -5,21 +5,20 @@ export default eslint(
     typescript: true
   },
   {
-    name: 'siberiacancode/md',
+    name: 'mock-config-server/md',
     files: ['**/*.md'],
     rules: {
       'style/max-len': 'off'
     }
   },
   {
-    name: 'siberiacancode/typescript',
+    name: 'mock-config-server/typescript',
     rules: {
-      'node/prefer-global/process': 'off',
-      'ts/consistent-type-imports': 'off'
+      'node/prefer-global/process': 'off'
     }
   },
   {
-    name: 'siberiacancode/views',
+    name: 'mock-config-server/views',
     files: ['**/static/views/**/*.js'],
     rules: {
       'no-unused-vars': 'off',
