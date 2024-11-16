@@ -1,13 +1,13 @@
 #!/usr/bin/env node
+/* eslint-disable ts/no-require-imports */
 
-import pleaseUpgradeNode from 'please-upgrade-node';
+const pleaseUpgradeNode = require('please-upgrade-node');
 
-import packageJson from '../package.json';
+const packageJson = require('../package.json');
 
 pleaseUpgradeNode(packageJson);
 
-// eslint-disable-next-line import/first
-import { cli } from './cli';
+const { cli } = require('./cli');
 
 cli();
 
