@@ -56,7 +56,7 @@
     "dist"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=12.22.0"
   },
   "scripts": {
     "prepublishOnly": "git diff --exit-code",
