@@ -2,26 +2,18 @@ import color from 'ansi-colors';
 
 import { destroyerMiddleware } from '@/core/middlewares';
 import { DEFAULT } from '@/utils/constants';
-import type { FlatMockServerComponent, FlatMockServerSettings } from '@/utils/types';
+import type { FlatMockServerConfig } from '@/utils/types';
 
 import { createFlatMockServer } from '../createFlatMockServer/createFlatMockServer';
 
-export const startFlatMockServer = (
-  option: FlatMockServerSettings | FlatMockServerComponent,
-  ...flatMockServerComponents: FlatMockServerComponent[]
-) => {
-  const isFlatMockServerComponent = 'configs' in option;
+export const startFlatMockServer = (flatMockServerConfig: FlatMockServerConfig) => {
+  const { port = DEFAULT.PORT } = !('configs' in flatMockServerConfig[0])
+    ? flatMockServerConfig[0]
+    : {};
 
-  if (isFlatMockServerComponent) {
-    flatMockServerComponents.unshift(option);
-  }
+  const flatMockServer = createFlatMockServer(flatMockServerConfig);
 
-  const flatMockServerSettings = isFlatMockServerComponent ? undefined : option;
-
-  const mockServer = createFlatMockServer(flatMockServerSettings, flatMockServerComponents);
-  const port = flatMockServerSettings?.port ?? DEFAULT.PORT;
-
-  const server = mockServer.listen(port, () => {
+  const server = flatMockServer.listen(port, () => {
     console.log(color.green(`🎉 Flat Mock Server is running at http://localhost:${port}`));
   });
 

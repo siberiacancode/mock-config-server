@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
-import { startFlatMockServer } from 'src/server/startFlatMockServer/startFlatMockServer';
+import { startFlatMockServer } from '@/server';
 
 import type { FlatMockServerConfig, MockServerConfigArgv } from '../src';
 
-import { validateFlatMockServerComponents } from './validateMockServerConfig/validateFlatMockServerComponents';
-import { validateFlatMockServerSettings } from './validateMockServerConfig/validateFlatMockServerSettings';
+import { validateFlatMockServerConfig } from './validateMockServerConfig/validateFlatMockServerConfig';
 
 export const runFlatConfig = (
   flatMockServerConfig: FlatMockServerConfig,
@@ -13,28 +12,21 @@ export const runFlatConfig = (
 ) => {
   try {
     const [option, ...flatMockServerComponents] = flatMockServerConfig;
-    const isFlatMockServerSettingsExist = !('configs' in option);
+    const flatMockServerSettings = !('configs' in option) ? option : undefined;
 
     const mergedFlatMockServerConfig = [
       {
+        ...(flatMockServerSettings && flatMockServerSettings),
         ...(baseUrl && { baseUrl }),
         ...(port && { port }),
-        ...(staticPath && { staticPath }),
-        ...(isFlatMockServerSettingsExist && option)
+        ...(staticPath && { staticPath })
       },
-      ...(isFlatMockServerSettingsExist
-        ? [option, ...flatMockServerComponents]
-        : flatMockServerComponents)
+      ...(flatMockServerSettings ? flatMockServerComponents : flatMockServerConfig)
     ] as FlatMockServerConfig;
 
-    if (isFlatMockServerSettingsExist) {
-      validateFlatMockServerSettings(option);
-      validateFlatMockServerComponents(flatMockServerComponents);
-    } else {
-      validateFlatMockServerComponents([option, ...flatMockServerComponents]);
-    }
+    validateFlatMockServerConfig(mergedFlatMockServerConfig);
 
-    return startFlatMockServer(...mergedFlatMockServerConfig);
+    return startFlatMockServer(mergedFlatMockServerConfig);
   } catch (error: any) {
     console.error(error.message);
   }

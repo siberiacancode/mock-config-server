@@ -81,7 +81,6 @@ export type FlatMockServerComponent = {
   configs: Array<RestRequestConfig | GraphQLRequestConfig>;
   baseUrl?: BaseUrl;
   interceptors?: Interceptors;
-  database?: DatabaseConfig;
 };
 
 export type FlatMockServerSettings = {
@@ -89,10 +88,11 @@ export type FlatMockServerSettings = {
   port?: Port;
   staticPath?: StaticPath;
   interceptors?: Interceptors;
+  database?: DatabaseConfig;
   cors?: Cors;
 };
 
 export type FlatMockServerConfig = [
   option: FlatMockServerSettings | FlatMockServerComponent,
-  ...flatMockServerConfigs: FlatMockServerComponent[]
+  ...flatMockServerComponents: FlatMockServerComponent[]
 ];

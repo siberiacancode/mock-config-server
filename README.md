@@ -74,15 +74,15 @@ $ npx mock-config-server
 - `cors?` {Cors} CORS settings object (default: `CORS is turn off`), [read](#cors)
 - `port?` {number} server port (default: `31299`)
 - `baseUrl?` {string} part of the url that will be substituted at the beginning of the request url (default: `'/'`)
-
-### Components 
-
-- `baseUrl?` {string} part of the url that will be substituted at the beginning of rest request url (default: `'/'`)
-- `configs` {Array<RestRequestConfig> | Array<GraphQLRequestConfig>} configs for mock requests, [read](#configs)
-  - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 - `database?` Database config for mock requests [read](#database)
   - `data` {Object | string} initial data for database
   - `routes?` {Object | string} map of custom routes for database
+
+### Components 
+- `name` {string} name of component
+- `baseUrl?` {string} part of the url that will be substituted at the beginning of rest request url (default: `'/'`)
+- `configs` {Array<RestRequestConfig | GraphQLRequestConfig>} configs for mock requests, [read](#configs)
+  - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 
 ### Configs
 
@@ -285,7 +285,7 @@ const flatMockServerConfig = [
       }
     ]
   }
-];s
+];
 
 export default flatMockServerConfig;
 ```

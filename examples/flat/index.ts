@@ -29,7 +29,5 @@ export const flatMockServerConfig: FlatMockServerConfig = [
   }
 ];
 
-const [flatMockServerSettings, ...flatMockServerComponents] = flatMockServerConfig;
-
-createFlatMockServer(flatMockServerSettings, flatMockServerComponents);
-startFlatMockServer(...flatMockServerConfig);
+createFlatMockServer(flatMockServerConfig);
+startFlatMockServer(flatMockServerConfig);

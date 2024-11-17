@@ -16,18 +16,30 @@ import {
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
 import type {
-  FlatMockServerComponent,
+  FlatMockServerConfig,
   FlatMockServerSettings,
   GraphQLRequestConfig,
+  RequestInterceptor,
+  ResponseInterceptor,
   RestRequestConfig
 } from '@/utils/types';
 
 export const createFlatMockServer = (
-  flatMockServerSettings: FlatMockServerSettings = {},
-  flatMockServerComponents: FlatMockServerComponent[] = [],
+  flatMockServerConfig: FlatMockServerConfig = [{}],
   server: Express = express()
 ) => {
-  const { cors, staticPath, interceptors, baseUrl: serverBaseUrl = '/' } = flatMockServerSettings;
+  const [option, ...flatMockServerComponents] = flatMockServerConfig;
+
+  const flatMockServerSettings = !('config' in option)
+    ? (option as FlatMockServerSettings)
+    : undefined;
+  const {
+    cors,
+    staticPath,
+    interceptors,
+    baseUrl: serverBaseUrl = '/',
+    database
+  } = flatMockServerSettings ?? {};
 
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../static/views'));
@@ -57,67 +69,102 @@ export const createFlatMockServer = (
     staticMiddleware(server, serverBaseUrl, staticPath);
   }
 
-  flatMockServerComponents.forEach(({ configs = [], interceptors, baseUrl = '/', database }) => {
-    const configRequestInterceptor = interceptors?.request;
-    if (configRequestInterceptor) {
-      requestInterceptorMiddleware({ server, interceptor: configRequestInterceptor });
-    }
+  if (database) {
+    const routerWithDatabaseRoutes = createDatabaseRoutes(express.Router(), database);
+    server.use(serverBaseUrl, routerWithDatabaseRoutes);
+  }
 
-    const { rest, graphql } = configs.reduce(
-      (acc, config) => {
+  const { restRequestConfigs, graphQLRequestConfigs } = flatMockServerComponents.reduce(
+    (acc, component) => {
+      const { baseUrl = '' } = component;
+
+      component.configs.forEach((config) => {
+        const interceptors = {
+          ...((component.interceptors?.request || config.interceptors?.request) && {
+            interceptors: {
+              ...(component.interceptors?.request && {
+                request: ((...params) => {
+                  if (component.interceptors?.request) {
+                    component.interceptors.request(...params);
+                  }
+                  if (config.interceptors?.request) {
+                    config.interceptors.request(...params);
+                  }
+                }) as RequestInterceptor
+              }),
+              ...(component.interceptors?.response && {
+                response: ((...params) => {
+                  if (component.interceptors?.response) {
+                    component.interceptors.response(...params);
+                  }
+                  if (config.interceptors?.response) {
+                    config.interceptors.response(...params);
+                  }
+                }) as ResponseInterceptor
+              })
+            }
+          })
+        };
+
         const isRest = 'method' in config;
-        if (isRest) acc.rest.push(config);
+        if (isRest)
+          acc.restRequestConfigs.push({
+            ...config,
+            ...interceptors,
+            path:
+              config.path instanceof RegExp
+                ? new RegExp(`${baseUrl}${config.path}`)
+                : `${baseUrl}${config.path}`
+          });
 
         const isGraphql = 'operationType' in config;
-        if (isGraphql) acc.graphql.push(config);
-
-        return acc;
-      },
-      { rest: [] as RestRequestConfig[], graphql: [] as GraphQLRequestConfig[] }
-    );
-
-    if (rest.length) {
-      const routerWithRestRoutes = createRestRoutes({
-        router: express.Router(),
-        restConfig: {
-          baseUrl,
-          configs: rest
-        },
-        serverResponseInterceptor: interceptors?.response
+        if (isGraphql)
+          acc.graphQLRequestConfigs.push({
+            ...config,
+            ...interceptors
+          });
       });
 
-      server.use(baseUrl, routerWithRestRoutes);
+      return acc;
+    },
+    {
+      restRequestConfigs: [] as RestRequestConfig[],
+      graphQLRequestConfigs: [] as GraphQLRequestConfig[]
     }
+  );
 
-    if (graphql.length) {
-      const routerWithGraphQLRoutes = createGraphQLRoutes({
-        router: express.Router(),
-        graphqlConfig: {
-          baseUrl,
-          configs: graphql
-        },
-        serverResponseInterceptor: interceptors?.response
-      });
-
-      server.use(baseUrl, routerWithGraphQLRoutes);
-    }
-
-    if (database) {
-      const routerWithDatabaseRoutes = createDatabaseRoutes(express.Router(), database);
-      server.use(baseUrl, routerWithDatabaseRoutes);
-    }
-
-    notFoundMiddleware(server, {
-      baseUrl: serverBaseUrl,
-      rest: {
-        baseUrl,
-        configs: rest
+  if (restRequestConfigs.length) {
+    const routerWithRestRoutes = createRestRoutes({
+      router: express.Router(),
+      restConfig: {
+        configs: restRequestConfigs
       },
-      graphql: {
-        baseUrl,
-        configs: graphql
-      }
+      serverResponseInterceptor: interceptors?.response
     });
+
+    server.use(serverBaseUrl, routerWithRestRoutes);
+  }
+
+  if (graphQLRequestConfigs.length) {
+    const routerWithGraphQLRoutes = createGraphQLRoutes({
+      router: express.Router(),
+      graphqlConfig: {
+        configs: graphQLRequestConfigs
+      },
+      serverResponseInterceptor: interceptors?.response
+    });
+
+    server.use(serverBaseUrl, routerWithGraphQLRoutes);
+  }
+
+  notFoundMiddleware(server, {
+    baseUrl: flatMockServerSettings?.baseUrl,
+    rest: {
+      configs: restRequestConfigs
+    },
+    graphql: {
+      configs: graphQLRequestConfigs
+    }
   });
 
   errorMiddleware(server);

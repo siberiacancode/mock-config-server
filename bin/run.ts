@@ -14,7 +14,7 @@ export const run = (
   { baseUrl, port, staticPath }: MockServerConfigArgv
 ) => {
   console.warn(
-    `**DEPRECATION WARNING**\nThe old mock config format is deprecated and will be removed in the next major version. Please use new format of config (flat config)`
+    `**DEPRECATION WARNING**\nThe old mock config format is deprecated and will be removed in the next major version. Please use new format of config (flat config); see our doc (https://github.com/siberiacancode/mock-config-server) for more information`
   );
 
   try {
