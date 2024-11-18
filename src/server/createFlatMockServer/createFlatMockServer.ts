@@ -83,12 +83,12 @@ export const createFlatMockServer = (
           ...((component.interceptors?.request || config.interceptors?.request) && {
             interceptors: {
               ...(component.interceptors?.request && {
-                request: ((...params) => {
+                request: ((params) => {
                   if (component.interceptors?.request) {
-                    component.interceptors.request(...params);
+                    component.interceptors.request(params);
                   }
                   if (config.interceptors?.request) {
-                    config.interceptors.request(...params);
+                    config.interceptors.request(params);
                   }
                 }) as RequestInterceptor
               }),
