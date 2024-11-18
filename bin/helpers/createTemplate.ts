@@ -25,7 +25,7 @@ export const createTemplate = (options: CreateTemplateOptions) => {
   if (options.staticPath !== '/') {
     mockServerConfig = mockServerConfig.replace(
       `port: ${DEFAULT.PORT}`,
-      `port: ${DEFAULT.PORT},\n  staticPath: '${options.staticPath}'`
+      `port: ${DEFAULT.PORT},\n    staticPath: '${options.staticPath}'`
     );
   }
 

@@ -93,13 +93,15 @@ export const createFlatMockServer = (
                 }) as RequestInterceptor
               }),
               ...(component.interceptors?.response && {
-                response: ((...params) => {
+                response: ((data, params) => {
                   if (component.interceptors?.response) {
-                    component.interceptors.response(...params);
+                    data = component.interceptors.response(data, params);
                   }
                   if (config.interceptors?.response) {
-                    config.interceptors.response(...params);
+                    data = config.interceptors.response(data, params);
                   }
+
+                  return data;
                 }) as ResponseInterceptor
               })
             }
