@@ -6,6 +6,7 @@ const mockServerConfig = [
     baseUrl: '/graphql'
   },
   {
+    name: 'graphql',
     configs: [getUserQuery, getUsersQuery, createUserMutation]
   }
 ];

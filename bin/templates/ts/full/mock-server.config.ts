@@ -9,10 +9,11 @@ const mockServerConfig: FlatMockServerConfig = [
     baseUrl: '/'
   },
   {
+    name: 'rest',
     configs: [getUserRequest, getUsersRequest, postUserRequest]
   },
   {
-    baseUrl: '/graphql',
+    name: 'graphql',
     configs: [getUserQuery, getUsersQuery, createUserMutation]
   }
 ];

@@ -3,17 +3,11 @@ import { createFlatMockServer, startFlatMockServer } from 'mock-config-server';
 
 export const mockServerConfig: FlatMockServerConfig = [
   {
-    interceptors: {
-      request: async (params) => {
-        await params.setDelay(1000);
-      }
-    }
-  },
-  {
+    baseUrl: '/api',
     configs: [
       {
-        operationType: 'query',
-        operationName: 'GetUsers',
+        method: 'get',
+        path: '/users',
         routes: [
           {
             data: [{ id: 1, emoji: '🎉' }]

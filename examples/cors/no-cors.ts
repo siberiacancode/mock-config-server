@@ -10,31 +10,37 @@ export const mockServerConfig: FlatMockServerConfig = [
         routes: [
           {
             data: [{ id: 1, emoji: '🎉' }]
-          },
-          {
-            data: [{ id: 2, emoji: '🔥' }],
-            entities: {
-              query: {
-                emoji: '🔥'
-              }
-            }
           }
         ]
       },
       {
-        method: 'get',
+        method: 'delete',
         path: '/users/:id',
         routes: [
           {
-            data: { id: 1, emoji: '🎉' }
-          },
+            data: { succes: true }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    configs: [
+      {
+        operationType: 'query',
+        operationName: 'GetUsers',
+        routes: [
           {
-            data: { id: 2, emoji: '🔥' },
-            entities: {
-              params: {
-                id: 2
-              }
-            }
+            data: [{ id: 1, emoji: '🎉' }]
+          }
+        ]
+      },
+      {
+        operationType: 'mutation',
+        operationName: 'CreateUser',
+        routes: [
+          {
+            data: { id: 1, emoji: '🎉' }
           }
         ]
       }

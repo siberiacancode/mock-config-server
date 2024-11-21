@@ -4,12 +4,10 @@ import { createFlatMockServer, startFlatMockServer } from 'mock-config-server';
 export const mockServerConfig: FlatMockServerConfig = [
   {
     interceptors: {
-      request: async (params) => {
-        await params.setDelay(1000);
+      request: (params) => {
+        console.log(params.getHeaders());
       }
-    }
-  },
-  {
+    },
     configs: [
       {
         operationType: 'query',

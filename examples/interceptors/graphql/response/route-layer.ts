@@ -1,12 +1,12 @@
-import type { MockServerConfig } from 'mock-config-server';
-import { createMockServer, startMockServer } from 'mock-config-server';
+import type { FlatMockServerConfig } from 'mock-config-server';
+import { createFlatMockServer, startFlatMockServer } from 'mock-config-server';
 
-export const mockServerConfig: MockServerConfig = {
-  rest: {
+export const mockServerConfig: FlatMockServerConfig = [
+  {
     configs: [
       {
-        method: 'get',
-        path: '/users',
+        operationType: 'query',
+        operationName: 'GetUsers',
         routes: [
           {
             data: [{ id: 1, emoji: '🎉' }],
@@ -22,7 +22,7 @@ export const mockServerConfig: MockServerConfig = {
       }
     ]
   }
-};
+];
 
-createMockServer(mockServerConfig);
-startMockServer(mockServerConfig);
+createFlatMockServer(mockServerConfig);
+startFlatMockServer(mockServerConfig);

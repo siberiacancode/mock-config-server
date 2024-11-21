@@ -8,6 +8,7 @@ const mockServerConfig: FlatMockServerConfig = [
     baseUrl: '/'
   },
   {
+    name: 'rest',
     configs: [getUserRequest, getUsersRequest, postUserRequest]
   }
 ];

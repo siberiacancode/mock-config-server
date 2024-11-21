@@ -6,6 +6,7 @@ const mockServerConfig = [
     baseUrl: '/'
   },
   {
+    name: 'rest',
     configs: [getUserRequest, getUsersRequest, postUserRequest]
   }
 ];

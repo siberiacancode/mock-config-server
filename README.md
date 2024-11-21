@@ -67,7 +67,7 @@ $ npx mock-config-server
 
 ## 🎭 Parameters for mock-server.config.(js|ts)
 
-### Settings 
+### Settings
 
 - `staticPath?` {StaticPath} entity for working with static files, [read](#static-path)
 - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
@@ -78,7 +78,8 @@ $ npx mock-config-server
   - `data` {Object | string} initial data for database
   - `routes?` {Object | string} map of custom routes for database
 
-### Components 
+### Components
+
 - `name` {string} name of component
 - `baseUrl?` {string} part of the url that will be substituted at the beginning of rest request url (default: `'/'`)
 - `configs` {Array<RestRequestConfig | GraphQLRequestConfig>} configs for mock requests, [read](#configs)
@@ -338,7 +339,7 @@ You can use descriptors for array body elements as well.
 /** @type {import('mock-config-server').FlatMockServerConfig} */
 const flatMockServerConfig = [
   {
-    baseUrl: '/api',
+    baseUrl: '/api'
   },
   {
     configs: [

@@ -17,7 +17,6 @@ import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
 import type {
   FlatMockServerConfig,
-  FlatMockServerSettings,
   GraphQLRequestConfig,
   RequestInterceptor,
   ResponseInterceptor,
@@ -25,14 +24,12 @@ import type {
 } from '@/utils/types';
 
 export const createFlatMockServer = (
-  flatMockServerConfig: FlatMockServerConfig = [{}],
+  flatMockServerConfig: FlatMockServerConfig,
   server: Express = express()
 ) => {
   const [option, ...flatMockServerComponents] = flatMockServerConfig;
 
-  const flatMockServerSettings = !('config' in option)
-    ? (option as FlatMockServerSettings)
-    : undefined;
+  const flatMockServerSettings = !('configs' in option) ? option : undefined;
   const {
     cors,
     staticPath,
@@ -81,30 +78,27 @@ export const createFlatMockServer = (
       component.configs.forEach((config) => {
         const interceptors = {
           ...((component.interceptors?.request || config.interceptors?.request) && {
-            interceptors: {
-              ...(component.interceptors?.request && {
-                request: ((params) => {
-                  if (component.interceptors?.request) {
-                    component.interceptors.request(params);
-                  }
-                  if (config.interceptors?.request) {
-                    config.interceptors.request(params);
-                  }
-                }) as RequestInterceptor
-              }),
-              ...(component.interceptors?.response && {
-                response: ((data, params) => {
-                  if (component.interceptors?.response) {
-                    data = component.interceptors.response(data, params);
-                  }
-                  if (config.interceptors?.response) {
-                    data = config.interceptors.response(data, params);
-                  }
+            request: ((params) => {
+              if (component.interceptors?.request) {
+                component.interceptors.request(params);
+              }
+              if (config.interceptors?.request) {
+                config.interceptors.request(params);
+              }
+            }) as RequestInterceptor
+          }),
+          ...((component.interceptors?.response || config.interceptors?.response) && {
+            response: ((data, params) => {
+              if (config.interceptors?.response) {
+                data = config.interceptors.response(data, params);
+              }
 
-                  return data;
-                }) as ResponseInterceptor
-              })
-            }
+              if (component.interceptors?.response) {
+                data = component.interceptors.response(data, params);
+              }
+
+              return data;
+            }) as ResponseInterceptor
           })
         };
 
@@ -112,10 +106,10 @@ export const createFlatMockServer = (
         if (isRest)
           acc.restRequestConfigs.push({
             ...config,
-            ...interceptors,
+            interceptors,
             path:
               config.path instanceof RegExp
-                ? new RegExp(`${baseUrl}${config.path}`)
+                ? new RegExp(`${baseUrl}${config.path.source}`, config.path.flags)
                 : `${baseUrl}${config.path}`
           });
 
@@ -123,7 +117,7 @@ export const createFlatMockServer = (
         if (isGraphql)
           acc.graphQLRequestConfigs.push({
             ...config,
-            ...interceptors
+            interceptors
           });
       });
 

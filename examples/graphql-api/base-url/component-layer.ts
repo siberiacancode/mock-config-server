@@ -3,13 +3,7 @@ import { createFlatMockServer, startFlatMockServer } from 'mock-config-server';
 
 export const mockServerConfig: FlatMockServerConfig = [
   {
-    interceptors: {
-      request: async (params) => {
-        await params.setDelay(1000);
-      }
-    }
-  },
-  {
+    baseUrl: '/graphql',
     configs: [
       {
         operationType: 'query',

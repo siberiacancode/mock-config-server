@@ -16,7 +16,7 @@ export const runFlatConfig = (
 
     const mergedFlatMockServerConfig = [
       {
-        ...(flatMockServerSettings && flatMockServerSettings),
+        ...flatMockServerSettings,
         ...(baseUrl && { baseUrl }),
         ...(port && { port }),
         ...(staticPath && { staticPath })
