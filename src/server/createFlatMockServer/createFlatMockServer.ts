@@ -22,11 +22,13 @@ import type {
   ResponseInterceptor,
   RestRequestConfig
 } from '@/utils/types';
+import { validateFlatMockServerConfig } from '@/utils/validate';
 
 export const createFlatMockServer = (
   flatMockServerConfig: FlatMockServerConfig,
   server: Express = express()
 ) => {
+  validateFlatMockServerConfig(flatMockServerConfig);
   const [option, ...flatMockServerComponents] = flatMockServerConfig;
 
   const flatMockServerSettings = !('configs' in option) ? option : undefined;

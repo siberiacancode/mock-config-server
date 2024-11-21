@@ -16,7 +16,7 @@ const baseRequestConfigSchema = (method: RestMethod) =>
     interceptors: plainObjectSchema(interceptorsSchema).optional()
   });
 
-export const requestConfigSchema = z.union([
+export const restRequestConfigSchema = z.union([
   baseRequestConfigSchema('get'),
   baseRequestConfigSchema('post'),
   baseRequestConfigSchema('put'),
@@ -27,6 +27,6 @@ export const requestConfigSchema = z.union([
 
 export const restConfigSchema = z.strictObject({
   baseUrl: baseUrlSchema.optional(),
-  configs: z.array(requestConfigSchema),
+  configs: z.array(restRequestConfigSchema),
   interceptors: plainObjectSchema(interceptorsSchema).optional()
 });

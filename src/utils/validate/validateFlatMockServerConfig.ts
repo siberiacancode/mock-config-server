@@ -1,19 +1,20 @@
 import { z } from 'zod';
 
-import type { FlatMockServerConfig } from '../../src';
-import { getMostSpecificPathFromError, getValidationMessageFromPath } from '../helpers';
+import type { PlainObject } from '@/utils/types';
 
 import { baseUrlSchema } from './baseUrlSchema/baseUrlSchema';
 import { corsSchema } from './corsSchema/corsSchema';
 import { databaseConfigSchema } from './databaseConfigSchema/databaseConfigSchema';
-import { requestConfigSchema as graphqlRequestConfigSchema } from './graphqlConfigSchema/graphqlConfigSchema';
+import { graphqlRequestConfigSchema } from './graphqlConfigSchema/graphqlConfigSchema';
 import { interceptorsSchema } from './interceptorsSchema/interceptorsSchema';
 import { portSchema } from './portSchema/portSchema';
-import { requestConfigSchema as restRequestConfigSchema } from './restConfigSchema/restConfigSchema';
+import { restRequestConfigSchema } from './restConfigSchema/restConfigSchema';
 import { staticPathSchema } from './staticPathSchema/staticPathSchema';
+import { getMostSpecificPathFromError } from './getMostSpecificPathFromError';
+import { getValidationMessageFromPath } from './getValidationMessageFromPath';
 import { plainObjectSchema } from './utils';
 
-export const validateFlatMockServerConfig = (flatMockServerConfig: FlatMockServerConfig) => {
+export const validateFlatMockServerConfig = (flatMockServerConfig: PlainObject) => {
   if (!flatMockServerConfig.length) {
     throw new Error(
       'Flat config should contain at least one element; see our doc (https://github.com/siberiacancode/mock-config-server) for more information'

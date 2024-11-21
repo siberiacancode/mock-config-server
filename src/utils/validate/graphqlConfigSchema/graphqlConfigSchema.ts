@@ -28,7 +28,7 @@ const queryRequestConfigSchema = z
   })
   .merge(baseRequestConfigSchema);
 
-export const requestConfigSchema = z.union([
+export const graphqlRequestConfigSchema = z.union([
   z
     .custom((value) => isPlainObject(value) && 'operationName' in value)
     .pipe(operationNameRequestConfigSchema),
@@ -37,6 +37,6 @@ export const requestConfigSchema = z.union([
 
 export const graphqlConfigSchema = z.strictObject({
   baseUrl: baseUrlSchema.optional(),
-  configs: z.array(requestConfigSchema),
+  configs: z.array(graphqlRequestConfigSchema),
   interceptors: plainObjectSchema(interceptorsSchema).optional()
 });

@@ -3,8 +3,8 @@ import { z } from 'zod';
 import { isPlainObject } from '@/utils/helpers';
 import type { RestMethod } from '@/utils/types';
 
-import { isOnlyRequestedDataResolvingPropertyExists } from '../../../helpers';
 import { interceptorsSchema } from '../../interceptorsSchema/interceptorsSchema';
+import { isOnlyRequestedDataResolvingPropertyExists } from '../../isOnlyRequestedDataResolvingPropertyExists';
 import { queueSchema } from '../../queueSchema/queueSchema';
 import { settingsSchema } from '../../settingsSchema/settingsSchema';
 import { mappedEntitySchema, plainEntitySchema, plainObjectSchema } from '../../utils';

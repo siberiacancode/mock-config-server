@@ -15,11 +15,13 @@ import {
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
 import type { RestMockServerConfig } from '@/utils/types';
+import { validateApiMockServerConfig } from '@/utils/validate';
 
 export const createRestMockServer = (
   restMockServerConfig: Omit<RestMockServerConfig, 'port'>,
   server: Express = express()
 ) => {
+  validateApiMockServerConfig(restMockServerConfig, 'rest');
   const { cors, staticPath, configs, database, interceptors } = restMockServerConfig;
 
   server.set('view engine', 'ejs');

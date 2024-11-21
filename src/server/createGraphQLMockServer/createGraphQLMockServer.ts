@@ -15,11 +15,13 @@ import {
 } from '@/core/middlewares';
 import { urlJoin } from '@/utils/helpers';
 import type { GraphQLMockServerConfig } from '@/utils/types';
+import { validateApiMockServerConfig } from '@/utils/validate';
 
 export const createGraphQLMockServer = (
   graphqlMockServerConfig: Omit<GraphQLMockServerConfig, 'port'>,
   server: Express = express()
 ) => {
+  validateApiMockServerConfig(graphqlMockServerConfig, 'graphql');
   const { cors, staticPath, configs, database, interceptors } = graphqlMockServerConfig;
 
   server.set('view engine', 'ejs');
