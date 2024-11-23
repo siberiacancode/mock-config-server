@@ -10,7 +10,6 @@
   display: flex;
   width: 800px;
   height: 60px;
-  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 25px;
@@ -19,7 +18,6 @@
 
 .header_menu {
   display: flex;
-  flex-direction: row;
   align-items: center;
   gap: 25px;
 }
@@ -27,7 +25,6 @@
 .header_menu_item {
   display: flex;
   height: 25px;
-  flex-direction: row;
   align-items: center;
   justify-content: center;
   color: var(--primary-glass);
@@ -64,7 +61,6 @@ li {
   display: flex;
   width: 80px;
   height: 30px;
-  flex-direction: row;
   align-items: center;
   justify-content: center;
   border-radius: 20px;

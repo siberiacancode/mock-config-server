@@ -1,13 +1,10 @@
 .dropdown {
-  position: relative;
   display: flex;
   justify-content: center;
 }
 
-.dropdown_content,
-.dropdown_content_active {
+.dropdown_content {
   position: absolute;
-  z-index: 1;
   display: none;
   flex-direction: column;
   align-items: center;
@@ -21,6 +18,6 @@
   transform: translateY(25%);
 }
 
-.dropdown_content_active {
+.dropdown_content.active {
   display: flex;
 }

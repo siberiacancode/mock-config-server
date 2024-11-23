@@ -8,17 +8,19 @@
   <title>404 - 🎉 Mock Config Server</title>
 
   <link rel="stylesheet" href="/assets/styles/global.css" />
-  <link rel="stylesheet" href="/pages/404/index.css" />
 
   <% const api = { rest: "REST", graphql: "GraphQL" } %>
+  <% const apiView = graphqlRequestSuggestions.length ? api.graphql : api.rest %>
 
   <% const rootPath = (path) => `../../${path}` %>
   <%- include(rootPath('features/scheme/index')) -%>
   <%- include(rootPath('features/tab/index')) -%>
-  <%- include(rootPath('components/dropdown/index')) -%>
+  <%- include(rootPath('features/dropdown/index')) -%>
+  <%- include(rootPath('utils/helpers/index')) -%>
+  <script defer src="/pages/404/index.js"></script>
 </head>
 
-<body class="tab_item-<%= graphqlRequestSuggestions.length ? api.graphql : api.rest %>">
+<body>
   <%- include(rootPath('components/header/index')) -%>
   <div class="margin_container">
     <div class="hero">
@@ -37,15 +39,15 @@
   <div class="margin_container">
     <div class="content">
       <div class="content_head">
-        <div class="tab_items">
+        <div class="tab_triggers">
           <% Object.values(api).forEach((variant)=> { %>
-          <div id="tab_item-<%=variant%>" class="tab_item">
+          <div id="tab_api_<%=variant%>_trigger" class="tab_api tab_trigger <%= apiView === variant ? 'active': '' %>">
             <%=variant%>
           </div>
           <% }) %>
         </div>
       </div>
-      <div id="tab_content-<%=api.rest%>" class="tab_content">
+      <div id="tab_api_<%=api.rest%>_content" class="tab_api tab_content <%= apiView === api.rest ? 'active' : '' %>">
         <div class="description">
           <% if (restRequestSuggestions.length) { %>
           <span>We searched a bit, maybe this will help you:</span>
@@ -62,7 +64,7 @@
         </div>
       </div>
 
-      <div id="tab_content-<%=api.graphql%>" class="tab_content">
+      <div id="tab_api_<%=api.graphql%>_content" class="tab_api tab_content <%= apiView === api.graphql ? 'active' : '' %>">
         <div class="description">
           <% if (graphqlRequestSuggestions.length) { %>
           <span>We searched a bit, maybe this will help you:</span>

@@ -12,7 +12,6 @@ body {
   margin: 0;
   background-color: var(--background-body);
   color: var(--primary);
-  font-weight: 400;
 }
 
 a {
@@ -31,7 +30,6 @@ a {
 .title {
   display: flex;
   height: 50px;
-  flex-direction: row;
   align-items: center;
   font-size: 20px;
   font-weight: 500;
@@ -83,7 +81,7 @@ a {
   gap: 10px;
 }
 
-.vl {
+.vertical_line {
   height: 30px;
   border-left: 0.5px solid var(--primary-glass);
 }

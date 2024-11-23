@@ -1,6 +1,5 @@
-.tab_items {
+.tab_triggers {
   display: flex;
-  flex-direction: row;
   align-items: center;
   padding: 3px;
   border-radius: 20px;
@@ -10,7 +9,7 @@
   line-height: 17px;
 }
 
-.tab_item {
+.tab_trigger {
   display: flex;
   width: 120px;
   height: 30px;
@@ -20,10 +19,18 @@
   cursor: pointer;
 }
 
-.tab_item:not(.tab_item_active):hover {
+.tab_trigger:not(.tab_trigger.active):hover {
   background-color: var(--accent-glass);
+}
+
+.tab_trigger.active {
+  background: var(--accent);
 }
 
 .tab_content {
   display: none;
+}
+
+.tab_content.active {
+  display: unset;
 }

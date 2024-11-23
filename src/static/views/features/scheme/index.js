@@ -1,44 +1,45 @@
-const lightStyles = document.querySelector(
-  'link[rel=stylesheet][media*=prefers-color-scheme][media*=light]'
-);
-const darkStyles = document.querySelector(
-  'link[rel=stylesheet][media*=prefers-color-scheme][media*=dark]'
-);
 const mediaDark = window.matchMedia('(prefers-color-scheme: dark)');
 
-function getSavedScheme() {
+const getSavedScheme = () => {
   return localStorage.getItem('color-scheme');
-}
+};
 
-function getSystemScheme() {
+const getSystemScheme = () => {
   const isDark = mediaDark.matches;
   const systemScheme = isDark ? 'dark' : 'light';
   return systemScheme;
-}
+};
 
-function setSchemeMedia(scheme) {
-  const lightMedia = scheme === 'light' ? 'all' : 'not all';
-  const darkMedia = scheme === 'dark' ? 'all' : 'not all';
+const getCurrentScheme = () => getSavedScheme() ?? 'system';
 
-  lightStyles.media = lightMedia;
-  darkStyles.media = darkMedia;
-}
+const setSchemeStyles = (scheme) => {
+  const isDark = scheme === 'dark';
+  if (isDark) {
+    document.documentElement.classList.remove('light_scheme');
+  } else {
+    document.documentElement.classList.add('light_scheme');
+  }
+};
 
-function setScheme(newScheme) {
+const setScheme = (newScheme) => {
   let scheme = newScheme;
+
+  const setSystemScheme = () => setScheme('system');
 
   if (newScheme === 'system') {
     scheme = getSystemScheme();
-    mediaDark.addEventListener('change', () => setScheme('system'));
-  } else mediaDark.removeEventListener('change', () => setScheme('system'));
+    mediaDark.addEventListener('change', setSystemScheme);
+  } else {
+    mediaDark.removeEventListener('change', setSystemScheme);
+  }
 
   localStorage.setItem('color-scheme', newScheme);
-  setSchemeMedia(scheme);
-}
+  setSchemeStyles(scheme);
+};
 
 // eslint-disable-next-line no-unused-vars
-function initScheme() {
-  const scheme = getSavedScheme() ?? 'system';
+const initScheme = () => {
+  const scheme = getCurrentScheme();
   setScheme(scheme);
   return { scheme, setScheme };
-}
+};

@@ -1,12 +1,11 @@
-function switchTab(activeTabId) {
-  document.querySelector('body').className = activeTabId;
-}
+const initTabGroup = (tabGroupClassName, tabIds) => {
+  for (let tabId of tabIds) {
+    const tabTrigger = document.getElementById(`${tabId}_trigger`);
+    const tabContent = document.getElementById(`${tabId}_content`);
 
-function initTab() {
-  const tabItems = document.getElementsByClassName('tab_item');
-  for (let i = 0; i < tabItems.length; i += 1) {
-    tabItems[i].addEventListener('click', () => switchTab(tabItems[i].id));
+    tabTrigger.addEventListener('click', () => {
+      switchActiveItem(`${tabGroupClassName} tab_trigger`, tabTrigger);
+      switchActiveItem(`${tabGroupClassName} tab_content`, tabContent);
+    });
   }
-}
-
-initTab();
+};
