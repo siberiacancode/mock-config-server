@@ -1,12 +1,6 @@
 import type { Express } from 'express';
 
-import {
-  callGraphQLRequestLogger,
-  callGraphQLResponseLogger,
-  callRestRequestLogger,
-  callRestResponseLogger,
-  parseGraphQLRequest
-} from '@/utils/helpers';
+import { callRequestLogger, callResponseLogger, parseGraphQLRequest } from '@/utils/helpers';
 import type {
   MockServerConfig,
   OperationNameGraphQLRequestConfig,
@@ -43,11 +37,7 @@ export const notFoundMiddleware = (
   server.use((request, response) => {
     const requestLogger = mockServerConfig.loggers?.request;
     if (requestLogger) {
-      if (request.graphQL) {
-        callGraphQLRequestLogger({ request, logger: requestLogger });
-      } else {
-        callRestRequestLogger({ request, logger: requestLogger });
-      }
+      callRequestLogger({ request, logger: requestLogger });
     }
 
     const url = new URL(`${request.protocol}://${request.get('host')}${request.originalUrl}`);
@@ -71,11 +61,7 @@ export const notFoundMiddleware = (
     response.status(404);
     const responseLogger = mockServerConfig.loggers?.response;
     if (responseLogger) {
-      if (request.graphQL) {
-        callGraphQLResponseLogger({ request, response, logger: responseLogger, data: undefined });
-      } else {
-        callRestResponseLogger({ request, response, logger: responseLogger, data: undefined });
-      }
+      callResponseLogger({ request, response, logger: responseLogger, data: undefined });
     }
 
     const isRequestSupportHtml =

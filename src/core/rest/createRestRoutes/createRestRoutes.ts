@@ -5,10 +5,9 @@ import path from 'path';
 import {
   asyncHandler,
   callRequestInterceptor,
+  callRequestLogger,
   callResponseInterceptors,
-  callRestRequestLogger,
-  callRestResponseLogger,
-  // callResponseLogger,
+  callResponseLogger,
   convertToEntityDescriptor,
   isEntityDescriptor,
   isFilePathValid,
@@ -108,7 +107,7 @@ export const createRestRoutes = ({
 
         const requestLogger = loggers?.request;
         if (requestLogger) {
-          callRestRequestLogger({ request, logger: requestLogger });
+          callRequestLogger({ request, logger: requestLogger });
         }
 
         if (matchedRouteConfig.interceptors?.request) {
@@ -196,7 +195,7 @@ export const createRestRoutes = ({
 
         const responseLogger = loggers?.response;
         if (responseLogger) {
-          callRestResponseLogger({
+          callResponseLogger({
             request,
             response,
             logger: responseLogger,

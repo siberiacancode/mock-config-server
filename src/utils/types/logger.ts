@@ -8,14 +8,14 @@ type LoggerValuesToFlags<Type> = {
   [Key in keyof Type]?: Key extends MappedEntityName ? Record<string, boolean> | boolean : boolean;
 };
 
-type LoggerType = 'request' | 'response';
+export type LoggerType = 'request' | 'response';
 
-type LoggerAPI = 'rest' | 'graphql';
+export type LoggerAPI = 'rest' | 'graphql';
 
 export interface LoggerBaseTokenValues {
   type: string;
+  id: number;
   timestamp: number;
-  id: number | undefined;
   method: RestMethod;
   url: string;
   headers: Headers;
@@ -83,8 +83,9 @@ export type LoggerTokenFlags<
     : never;
 
 export interface Logger<Type extends LoggerType = LoggerType, API extends LoggerAPI = LoggerAPI> {
-  enabled: boolean;
+  enabled?: boolean;
   tokenFlags?: LoggerTokenFlags<Type, API>;
+  rewrite?: (tokenValues: Partial<LoggerTokenValues<Type, API>>) => void;
 }
 
 export interface Loggers<API extends LoggerAPI = LoggerAPI> {

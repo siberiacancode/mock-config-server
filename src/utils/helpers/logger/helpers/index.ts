@@ -1,1 +1,1 @@
-export * from './isTokenNameMappedEntity/isTokenNameMappedEntity';
+export * from './filterTokenValues/filterTokenValues';

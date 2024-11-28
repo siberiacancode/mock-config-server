@@ -1,5 +1,7 @@
 import type { CookieOptions, Request, Response } from 'express';
 
+import type { Logger } from './logger';
+
 type RequestInterceptorCookieValue = string | undefined;
 type RequestInterceptorHeaderValue = string | number | string[] | undefined;
 export interface RequestInterceptorParams {
@@ -8,6 +10,7 @@ export interface RequestInterceptorParams {
   getCookie: (name: string) => RequestInterceptorCookieValue;
   getHeader: (field: string) => RequestInterceptorHeaderValue;
   getHeaders: () => Record<string, RequestInterceptorHeaderValue>;
+  log: (logger?: Logger<'request'>) => void;
 }
 
 export type RequestInterceptor = (params: RequestInterceptorParams) => void | Promise<void>;
@@ -25,6 +28,7 @@ export interface ResponseInterceptorParams {
   getCookie: (name: string) => RequestInterceptorCookieValue;
   clearCookie: (name: string, options?: CookieOptions) => void;
   attachment: (filename: string) => void;
+  log: (logger?: Logger<'response'>) => void;
 }
 
 export type ResponseInterceptor<Data = any> = (

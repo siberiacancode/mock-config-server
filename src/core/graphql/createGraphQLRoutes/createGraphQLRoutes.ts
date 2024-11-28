@@ -3,10 +3,10 @@ import { flatten } from 'flat';
 
 import {
   asyncHandler,
-  callGraphQLRequestLogger,
-  callGraphQLResponseLogger,
   callRequestInterceptor,
+  callRequestLogger,
   callResponseInterceptors,
+  callResponseLogger,
   convertToEntityDescriptor,
   getGraphQLInput,
   isEntityDescriptor,
@@ -135,7 +135,7 @@ export const createGraphQLRoutes = ({
 
     const requestLogger = loggers?.request;
     if (requestLogger) {
-      callGraphQLRequestLogger({ request, logger: requestLogger });
+      callRequestLogger({ request, logger: requestLogger });
     }
 
     if (matchedRouteConfig.interceptors?.request) {
@@ -219,7 +219,7 @@ export const createGraphQLRoutes = ({
 
     const responseLogger = loggers?.response;
     if (responseLogger) {
-      callGraphQLResponseLogger({
+      callResponseLogger({
         request,
         response,
         logger: responseLogger,
