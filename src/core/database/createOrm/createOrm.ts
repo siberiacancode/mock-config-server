@@ -11,27 +11,28 @@ import {
 export const createOrm = (storage: Storage) => {
   const { shallowDatabase, nestedDatabase } = splitDatabaseByNesting(storage.read());
 
-  const nestedOrm = Object.entries(nestedDatabase).reduce(
-    (orm, [key, value]) => {
+  const nestedOrm = Object.keys(nestedDatabase).reduce(
+    (orm, key) => {
       orm[key] = {
-        get: () => value,
+        get: () => storage.read(key),
 
         create: (item) => {
           const collection = storage.read(key);
           if (!collection) throw new Error('Collection not found');
           const newResourceId = createNewId(collection);
           const newResource = { ...item, id: newResourceId };
-          storage.write([key, value.length], newResource);
+          storage.write([key, collection.length], newResource);
 
           return newResource;
         },
         delete: (id) => storage.delete([key, id]),
         update: (id, item) => {
           const collection = storage.read(key);
-          if (!collection) throw new Error('Collection not found');
-
-          const updatedRecord = { ...item, id };
           const currentResourceIndex = findIndexById(collection, id);
+
+          const currentResource = storage.read([key, currentResourceIndex]);
+          const updatedRecord = { ...currentResource, ...item, id };
+
           storage.write([key, currentResourceIndex], updatedRecord);
 
           return updatedRecord;
@@ -42,17 +43,21 @@ export const createOrm = (storage: Storage) => {
             const collection = storage.read(key);
             const newResourceId = createNewId(collection);
             const newResource = { ...element, id: newResourceId };
-            storage.write([key, value.length], newResource);
+            storage.write([key, collection.length], newResource);
           }),
-        deleteMany: (ids) =>
+        deleteMany: (ids) => {
+          const collection = storage.read(key);
           ids.forEach((id) => {
-            storage.delete([key, id]);
-          }),
+            const index = findIndexById(collection, id);
+            storage.delete([key, index]);
+          });
+        },
         updateMany: (ids, item) => {
           ids.forEach((id) => {
             const collection = storage.read(key);
-            const updatedRecord = { ...item, id };
             const currentResourceIndex = findIndexById(collection, id);
+            const currentResource = storage.read([key, currentResourceIndex]);
+            const updatedRecord = { ...currentResource, ...item, id };
             storage.write([key, currentResourceIndex], updatedRecord);
           });
 
@@ -61,14 +66,11 @@ export const createOrm = (storage: Storage) => {
 
         findById: (id) => {
           const collection = storage.read(key);
-          if (!collection) throw new Error('Collection not found');
-
           const currentResourceIndex = findIndexById(collection, id);
           return storage.read([key, currentResourceIndex]);
         },
         findMany: (filters) => {
           const collection = storage.read(key);
-          if (!collection) throw new Error('Collection not found');
 
           const flattendFiltters = flatten<any, any>(filters);
           return collection.filter((resource: any) => {
@@ -80,7 +82,6 @@ export const createOrm = (storage: Storage) => {
         },
         findFirst: (filters) => {
           const collection = storage.read(key);
-          if (!collection) throw new Error('Collection not found');
 
           const flattendFiltters = flatten<any, any>(filters);
           return collection.find((resource: any) => {
@@ -92,7 +93,6 @@ export const createOrm = (storage: Storage) => {
         },
         exists: (filters) => {
           const collection = storage.read(key);
-          if (!collection) throw new Error('Collection not found');
 
           const flattendFiltters = flatten<any, any>(filters);
           return collection.some((resource: any) => {
@@ -103,7 +103,7 @@ export const createOrm = (storage: Storage) => {
           });
         },
 
-        count: () => value.length
+        count: () => storage.read(key).length
       };
 
       return orm;
@@ -111,11 +111,14 @@ export const createOrm = (storage: Storage) => {
     {} as { [key: string]: NestedOrm }
   );
 
-  const shallowOrm = Object.entries(shallowDatabase).reduce(
-    (orm, [key, value]) => {
+  const shallowOrm = Object.keys(shallowDatabase).reduce(
+    (orm, key) => {
       orm[key] = {
-        get: () => value,
-        update: (data) => storage.write(key, data)
+        get: () => storage.read(key),
+        update: (data) => {
+          storage.write(key, data);
+          console.log('@key', key, data);
+        }
       };
 
       return orm;
