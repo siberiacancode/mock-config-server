@@ -8,12 +8,12 @@ import { isIndex } from '../../helpers';
 
 import { FileWriter } from './FileWriter';
 
-export class FileStorage<T extends Record<StorageIndex, any> = Record<StorageIndex, any>>
+export class FileStorage<Data extends Record<StorageIndex, any> = Record<StorageIndex, any>>
   implements Storage
 {
   private readonly fileWriter: FileWriter;
 
-  private readonly data: T;
+  private readonly data: Data;
 
   public constructor(fileName: string) {
     const filePath = path.resolve(APP_PATH, fileName);

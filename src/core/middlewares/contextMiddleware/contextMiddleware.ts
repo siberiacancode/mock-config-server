@@ -8,6 +8,7 @@ export const contextMiddleware = (
   { database }: Pick<MockServerConfig, 'database'>
 ) => {
   const context: Express['request']['context'] = { orm: {} };
+
   if (database) {
     const storage = createStorage(database.data);
     const orm = createOrm(storage);

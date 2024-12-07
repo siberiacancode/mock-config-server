@@ -1,4 +1,4 @@
-export type Database = Record<string, unknown>;
+export interface Database extends Record<string, unknown> {}
 export type ShallowDatabase = Record<string, unknown>;
 
 export type NestedDatabaseId = number | string;
@@ -19,21 +19,26 @@ export interface ShallowOrm<Item = unknown> {
 export interface NestedOrm<Item = Record<string, unknown>> {
   get: () => Item[];
 
-  create: (data: Omit<Item, 'id'>) => void;
-  update: (id: StorageIndex, data: Partial<Omit<Item, 'id'>>) => void;
-  delete: (id: string) => void;
+  create: (item: Omit<Item, 'id'>) => void;
+  update: (id: StorageIndex, item: Partial<Omit<Item, 'id'>>) => void;
+  delete: (id: StorageIndex) => void;
 
-  createMany: (data: Item[]) => void;
-  updateMany: (ids: StorageIndex[], data: Partial<Omit<Item, 'id'>>[]) => void;
+  createMany: (items: Item[]) => void;
+  updateMany: (ids: StorageIndex[], item: Partial<Omit<Item, 'id'>>) => void;
   deleteMany: (ids: StorageIndex[]) => void;
+
+  findById: (id: StorageIndex) => Item | undefined;
+  findMany: (filters: Partial<Item>) => Item[];
+  findFirst: (filters: Partial<Item>) => Item | undefined;
+  exists: (filters: Partial<Item>) => boolean;
 
   count: () => number;
 }
 
 export type Orm<Database extends Record<string, unknown>> = {
   [Key in keyof Database]: Database[Key] extends Array<infer Item>
-    ? Item extends { id: string | number }
+    ? Item extends { id: StorageIndex }
       ? NestedOrm<Item>
-      : ShallowOrm<Item>
+      : ShallowOrm<Database[Key]>
     : ShallowOrm<Database[Key]>;
 };
