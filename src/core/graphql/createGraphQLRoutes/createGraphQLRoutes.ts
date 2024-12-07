@@ -13,11 +13,13 @@ import {
   sleep
 } from '@/utils/helpers';
 import type {
+  EntityDescriptor,
   Entries,
   GraphqlConfig,
   GraphQLEntitiesByEntityName,
   GraphQLEntity,
   Interceptors,
+  PlainObject,
   TopLevelPlainEntityArray,
   TopLevelPlainEntityDescriptor
 } from '@/utils/types';
@@ -89,27 +91,27 @@ export const createGraphQLRoutes = ({
 
       const entries = Object.entries(entities) as Entries<Required<GraphQLEntitiesByEntityName>>;
       return entries.every(([entityName, entityDescriptorOrValue]) => {
-        const topLevelConvertedDescriptor = convertToEntityDescriptor(entityDescriptorOrValue);
-
-        // ✅ important: check whole variables as plain value strictly if descriptor used for variables
+        // ✅ important:
+        // check whole variables as plain value strictly if descriptor used for variables
         const isEntityVariablesByTopLevelDescriptor =
           entityName === 'variables' && isEntityDescriptor(entityDescriptorOrValue);
         if (isEntityVariablesByTopLevelDescriptor) {
+          const variablesDescriptor = entityDescriptorOrValue as EntityDescriptor;
           if (
-            topLevelConvertedDescriptor.checkMode === 'exists' ||
-            topLevelConvertedDescriptor.checkMode === 'notExists'
+            variablesDescriptor.checkMode === 'exists' ||
+            variablesDescriptor.checkMode === 'notExists'
           ) {
             return resolveEntityValues({
-              checkMode: topLevelConvertedDescriptor.checkMode,
-              actualValue: graphQLInput.variables
+              actualValue: graphQLInput.variables,
+              checkMode: variablesDescriptor.checkMode
             });
           }
 
           return resolveEntityValues({
-            checkMode: topLevelConvertedDescriptor.checkMode,
             actualValue: graphQLInput.variables,
-            descriptorValue: topLevelConvertedDescriptor.value,
-            oneOf: topLevelConvertedDescriptor.oneOf as true | false
+            descriptorValue: variablesDescriptor.value,
+            checkMode: variablesDescriptor.checkMode,
+            oneOf: variablesDescriptor.oneOf ?? false
           });
         }
 
@@ -117,9 +119,9 @@ export const createGraphQLRoutes = ({
           entityName === 'variables' && Array.isArray(entityDescriptorOrValue);
         if (isEntityVariablesByTopLevelArray) {
           return resolveEntityValues({
-            checkMode: 'equals',
             actualValue: graphQLInput.variables,
-            descriptorValue: entityDescriptorOrValue
+            descriptorValue: entityDescriptorOrValue,
+            checkMode: 'equals'
           });
         }
 
@@ -127,30 +129,30 @@ export const createGraphQLRoutes = ({
           Exclude<GraphQLEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
         >;
         return recordOrArrayEntries.every(([entityKey, entityValue]) => {
-          const propertyLevelConvertedDescriptor = convertToEntityDescriptor(entityValue);
-          const actualEntity = flatten<any, any>(
+          const entityDescriptor = convertToEntityDescriptor(entityValue);
+          const actualEntity = flatten<PlainObject, PlainObject>(
             entityName === 'variables' ? graphQLInput.variables : request[entityName]
           );
 
           // ✅ important: transform header keys to lower case because browsers send headers in lowercase
-          const actualValue =
-            actualEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey];
+          const actualKey = entityName === 'headers' ? entityKey.toLowerCase() : entityKey;
+          const actualValue = actualEntity[actualKey];
 
           if (
-            propertyLevelConvertedDescriptor.checkMode === 'exists' ||
-            propertyLevelConvertedDescriptor.checkMode === 'notExists'
+            entityDescriptor.checkMode === 'exists' ||
+            entityDescriptor.checkMode === 'notExists'
           ) {
             return resolveEntityValues({
-              checkMode: propertyLevelConvertedDescriptor.checkMode,
-              actualValue
+              actualValue,
+              checkMode: entityDescriptor.checkMode
             });
           }
 
           return resolveEntityValues({
-            checkMode: propertyLevelConvertedDescriptor.checkMode,
             actualValue,
-            descriptorValue: propertyLevelConvertedDescriptor.value,
-            oneOf: propertyLevelConvertedDescriptor.oneOf as true | false
+            descriptorValue: entityDescriptor.value,
+            checkMode: entityDescriptor.checkMode,
+            oneOf: entityDescriptor.oneOf ?? false
           });
         });
       });

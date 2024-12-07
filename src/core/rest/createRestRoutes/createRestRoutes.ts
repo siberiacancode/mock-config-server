@@ -13,8 +13,10 @@ import {
   sleep
 } from '@/utils/helpers';
 import type {
+  EntityDescriptor,
   Entries,
   Interceptors,
+  PlainObject,
   RestConfig,
   RestEntitiesByEntityName,
   RestEntity,
@@ -50,8 +52,6 @@ export const createRestRoutes = ({
 
           const entries = Object.entries(entities) as Entries<Required<RestEntitiesByEntityName>>;
           return entries.every(([entityName, entityDescriptorOrValue]) => {
-            const topLevelConvertedDescriptor = convertToEntityDescriptor(entityDescriptorOrValue);
-
             // ✅ important:
             // check whole body as plain value strictly if descriptor used for body
             const isEntityBodyByTopLevelDescriptor =
@@ -61,21 +61,22 @@ export const createRestRoutes = ({
               // bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
               const actualValue = Object.keys(request.body).length ? request.body : undefined;
 
+              const bodyDescriptor: EntityDescriptor = entityDescriptorOrValue;
               if (
-                topLevelConvertedDescriptor.checkMode === 'exists' ||
-                topLevelConvertedDescriptor.checkMode === 'notExists'
+                bodyDescriptor.checkMode === 'exists' ||
+                bodyDescriptor.checkMode === 'notExists'
               ) {
                 return resolveEntityValues({
-                  checkMode: topLevelConvertedDescriptor.checkMode,
-                  actualValue
+                  actualValue,
+                  checkMode: bodyDescriptor.checkMode
                 });
               }
 
               return resolveEntityValues({
-                checkMode: topLevelConvertedDescriptor.checkMode,
                 actualValue,
-                descriptorValue: topLevelConvertedDescriptor.value,
-                oneOf: topLevelConvertedDescriptor.oneOf as true | false
+                descriptorValue: bodyDescriptor.value,
+                checkMode: bodyDescriptor.checkMode,
+                oneOf: bodyDescriptor.oneOf ?? false
               });
             }
 
@@ -86,9 +87,9 @@ export const createRestRoutes = ({
               // bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
               const actualValue = Object.keys(request.body).length ? request.body : undefined;
               return resolveEntityValues({
-                checkMode: 'equals',
                 actualValue,
-                descriptorValue: entityDescriptorOrValue
+                descriptorValue: entityDescriptorOrValue,
+                checkMode: 'equals'
               });
             }
 
@@ -96,30 +97,28 @@ export const createRestRoutes = ({
               Exclude<RestEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
             >;
             return recordOrArrayEntries.every(([entityKey, mappedEntityDescriptorOrValue]) => {
-              const propertyLevelConvertedDescriptor = convertToEntityDescriptor(
-                mappedEntityDescriptorOrValue
-              );
-              const actualEntity = flatten<any, any>(request[entityName]);
+              const entityDescriptor = convertToEntityDescriptor(mappedEntityDescriptorOrValue);
+              const actualEntity = flatten<PlainObject, PlainObject>(request[entityName]);
 
               // ✅ important: transform header keys to lower case because browsers send headers in lowercase
-              const actualValue =
-                actualEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey];
+              const actualKey = entityName === 'headers' ? entityKey.toLowerCase() : entityKey;
+              const actualValue = actualEntity[actualKey];
 
               if (
-                propertyLevelConvertedDescriptor.checkMode === 'exists' ||
-                propertyLevelConvertedDescriptor.checkMode === 'notExists'
+                entityDescriptor.checkMode === 'exists' ||
+                entityDescriptor.checkMode === 'notExists'
               ) {
                 return resolveEntityValues({
-                  checkMode: propertyLevelConvertedDescriptor.checkMode,
-                  actualValue
+                  actualValue,
+                  checkMode: entityDescriptor.checkMode
                 });
               }
 
               return resolveEntityValues({
-                checkMode: propertyLevelConvertedDescriptor.checkMode,
                 actualValue,
-                descriptorValue: propertyLevelConvertedDescriptor.value,
-                oneOf: propertyLevelConvertedDescriptor.oneOf as true | false
+                descriptorValue: entityDescriptor.value,
+                checkMode: entityDescriptor.checkMode,
+                oneOf: entityDescriptor.oneOf ?? false
               });
             });
           });

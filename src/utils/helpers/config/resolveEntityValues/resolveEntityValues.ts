@@ -40,7 +40,7 @@ const checkFunction: CheckFunction = (checkMode, actualValue, descriptorValue?) 
   if (checkMode === 'endsWith') return actualValueString.endsWith(descriptorValueString);
   if (checkMode === 'notEndsWith') return !actualValueString.endsWith(descriptorValueString);
 
-  throw new Error('Wrong checkMode');
+  throw new Error(`Wrong checkMode ${checkMode}`);
 };
 
 const compareEntityValues = (checkMode: CheckMode, actualValue: any, descriptorValue?: any) => {
@@ -88,39 +88,39 @@ const compareEntityValues = (checkMode: CheckMode, actualValue: any, descriptorV
   return isNegationCheckMode;
 };
 
-interface ResolveEntityParamsWithCheckActualValueCheckMode {
+interface ResolveEntityValuesParamsWithCheckActualValueCheckMode {
   checkMode: CheckActualValueCheckMode;
-  actualValue: any;
+  actualValue: unknown;
 }
 
-interface ResolveEntityParamsWithEnabledOneOf {
+interface ResolveEntityValuesParamsWithEnabledOneOf {
   checkMode: Exclude<CheckMode, CheckActualValueCheckMode>;
-  actualValue: any;
-  descriptorValue: any[];
+  actualValue: unknown;
+  descriptorValue: unknown[];
   oneOf: true;
 }
 
-interface ResolveEntityParamsWithDisabledOneOf {
+interface ResolveEntityValuesParamsWithDisabledOneOf {
   checkMode: Exclude<CheckMode, CheckActualValueCheckMode>;
-  actualValue: any;
-  descriptorValue: any;
+  actualValue: unknown;
+  descriptorValue: unknown;
   oneOf?: false;
 }
 
-type ResolveEntityParams =
-  | ResolveEntityParamsWithCheckActualValueCheckMode
-  | ResolveEntityParamsWithEnabledOneOf
-  | ResolveEntityParamsWithDisabledOneOf;
+type ResolveEntityValuesParams =
+  | ResolveEntityValuesParamsWithCheckActualValueCheckMode
+  | ResolveEntityValuesParamsWithEnabledOneOf
+  | ResolveEntityValuesParamsWithDisabledOneOf;
 
-export const resolveEntityValues = (params: ResolveEntityParams) => {
+export const resolveEntityValues = (params: ResolveEntityValuesParams) => {
   const { checkMode, actualValue } = params;
   if (checkMode === 'exists' || checkMode === 'notExists') {
     return compareEntityValues(checkMode, actualValue);
   }
 
   const { oneOf, descriptorValue } = params as Exclude<
-    ResolveEntityParams,
-    ResolveEntityParamsWithCheckActualValueCheckMode
+    ResolveEntityValuesParams,
+    ResolveEntityValuesParamsWithCheckActualValueCheckMode
   >;
 
   if (!oneOf) {
