@@ -7,6 +7,7 @@ import type { MemoryStorage } from '../../storages';
 import { createNewId, findIndexById } from '../array';
 import { filter } from '../filter/filter';
 import { pagination } from '../pagination/pagination';
+import { search } from '../search/search';
 import { sort } from '../sort/sort';
 
 export const createNestedDatabaseRoutes = (
@@ -21,12 +22,36 @@ export const createNestedDatabaseRoutes = (
     router.route(collectionPath).get((request, response) => {
       let data = storage.read(key);
 
-      if (request.query && Object.keys(request.query).length) {
-        const { _page, _limit, _begin, _end, _sort, _order, ...filters } = request.query;
+      if (!Array.isArray(data) || !request.query) {
+        // ✅ important:
+        // set 'Cache-Control' header for explicit browsers response revalidate
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+        response.set('Cache-control', 'max-age=0, must-revalidate');
+        return response.json(data);
+      }
+
+      const { _page, _limit, _begin, _end, _sort, _order, _q, ...filters } = request.query;
+
+      if (Object.keys(filters).length) {
         data = filter(data, filters as ParsedUrlQuery);
       }
 
-      if (request.query?._page) {
+      if (_q) {
+        data = search(data, request.query._q as ParsedUrlQuery);
+      }
+
+      if (_sort) {
+        data = sort(data, request.query as ParsedUrlQuery);
+      }
+
+      if (_begin || _end) {
+        data = data.slice(request.query._begin ?? 0, request.query._end);
+        response.set('X-Total-Count', data.length);
+      }
+
+      // ✅ important:
+      // The pagination should be last because it changes the form of the response
+      if (_page) {
         data = pagination(data, request.query as ParsedUrlQuery);
         if (data._link) {
           const links = {} as any;
@@ -50,18 +75,10 @@ export const createNestedDatabaseRoutes = (
         }
       }
 
-      if (request.query && request.query._sort) {
-        data = sort(data, request.query as ParsedUrlQuery);
-      }
-
-      if (request.query._begin || request.query._end) {
-        data = data.slice(request.query._begin ?? 0, request.query._end);
-        response.set('X-Total-Count', data.length);
-      }
       // ✅ important:
       // set 'Cache-Control' header for explicit browsers response revalidate
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-      response.set('Cache-control', 'max-age=0, must-revalidate');
+      response.set('Cache-control', 'no-cache');
       response.json(data);
     });
 
@@ -85,7 +102,7 @@ export const createNestedDatabaseRoutes = (
       // ✅ important:
       // set 'Cache-Control' header for explicit browsers response revalidate
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-      response.set('Cache-control', 'max-age=0, must-revalidate');
+      response.set('Cache-control', 'no-cache');
       response.json(storage.read([key, currentResourceIndex]));
     });
 

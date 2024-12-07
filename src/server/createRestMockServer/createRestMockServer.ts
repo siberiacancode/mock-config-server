@@ -56,7 +56,7 @@ export const createRestMockServer = (
 
   const routerWithRestRoutes = createRestRoutes({
     router: express.Router(),
-    restConfig: { configs },
+    restConfig: { configs: configs ?? [] },
     serverResponseInterceptor: interceptors?.response
   });
 

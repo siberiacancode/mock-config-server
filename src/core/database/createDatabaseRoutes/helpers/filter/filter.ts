@@ -1,15 +1,64 @@
 import { flatten } from 'flat';
 import type { ParsedUrlQuery } from 'node:querystring';
 
-export const filter = (array: any[], filters: ParsedUrlQuery) =>
-  array.filter((element) => {
-    const flattenedElement = flatten<any, any>(element);
+const OPERATORS = {
+  eq: (a: any, b: any) => `${a}` === `${b}`,
+  neq: (a: any, b: any) => `${a}` !== `${b}`,
+  gt: (a: any, b: any) => +a > +b,
+  gte: (a: any, b: any) => +a >= +b,
+  lt: (a: any, b: any) => +a < +b,
+  lte: (a: any, b: any) => +a <= +b,
+  cn: (a: any, b: any) => a.includes(b),
+  ncn: (a: any, b: any) => !a.includes(b),
+  sw: (a: any, b: any) => a.startsWith(b),
+  nsw: (a: any, b: any) => !a.startsWith(b),
+  ew: (a: any, b: any) => a.endsWith(b),
+  new: (a: any, b: any) => !a.endsWith(b),
+  some: (a: any[], b: any) => a.some((element: any) => `${element}` === `${b}`)
+} as const;
 
-    return Object.entries(filters).every(([key, value]) => {
-      if (Array.isArray(value)) {
-        return value.includes(`${flattenedElement[key]}`);
+const OPERATORS_KEYS = Object.keys(OPERATORS);
+const OPERATOR_REGEXP = new RegExp(`^(.+)_(${OPERATORS_KEYS.join('|')})$`);
+
+const getEntities = (object: any, key: string) => {
+  const parts = key.match(OPERATOR_REGEXP);
+
+  if (!parts) {
+    return {
+      operator: 'eq',
+      element: object[key]
+    } as const;
+  }
+
+  const [, element, operator] = parts;
+
+  if (operator === 'some') {
+    const array = Object.entries(object).filter(([objectKey]) =>
+      new RegExp(`^${element}.\\d$`).test(objectKey)
+    );
+    return {
+      operator,
+      element: array.map(([, value]) => value)
+    } as const;
+  }
+
+  return {
+    element: object[element],
+    operator: operator as keyof typeof OPERATORS
+  };
+};
+
+export const filter = (array: any[], filters: ParsedUrlQuery) =>
+  array.filter((arrayElement) => {
+    const flattenedArrayElement = flatten<any, any>(arrayElement);
+
+    return Object.entries(filters).every(([key, filter]) => {
+      if (Array.isArray(filter)) {
+        const { element, operator } = getEntities(flattenedArrayElement, key);
+        return filter.some((value) => OPERATORS[operator](element, value));
       }
 
-      return `${flattenedElement[key]}` === value;
+      const { element, operator } = getEntities(flattenedArrayElement, key);
+      return OPERATORS[operator](element, filter);
     });
   });

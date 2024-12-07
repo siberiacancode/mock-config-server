@@ -1,8 +1,11 @@
 import express from 'express';
+import fs from 'fs';
+import path from 'path';
 import request from 'supertest';
 
 import { urlJoin } from '@/utils/helpers';
-import type { MockServerConfig, RestConfig } from '@/utils/types';
+import { createTmpDir } from '@/utils/helpers/tests';
+import type { MockServerConfig, RestConfig, RestMethod } from '@/utils/types';
 
 import { createRestRoutes } from './createRestRoutes';
 
@@ -55,7 +58,7 @@ describe('createRestRoutes', () => {
     expect(response.statusCode).toBe(404);
   });
 
-  test('Should have response Cache-Control header equals to max-age=0, must-revalidate', async () => {
+  test('Should have response Cache-Control header value equals to no-cache', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -69,7 +72,33 @@ describe('createRestRoutes', () => {
     });
 
     const response = await request(server).get('/users');
-    expect(response.headers['cache-control']).toBe('max-age=0, must-revalidate');
+    expect(response.headers['cache-control']).toBe('no-cache');
+  });
+
+  const methodsWithoutCacheControlHeader: Exclude<RestMethod, 'get'>[] = [
+    'post',
+    'put',
+    'patch',
+    'delete',
+    'options'
+  ];
+  methodsWithoutCacheControlHeader.forEach((methodWithoutCacheControlHeader) => {
+    test(`Should do not have response Cache-Control header if method is ${methodWithoutCacheControlHeader}`, async () => {
+      const server = createServer({
+        rest: {
+          configs: [
+            {
+              path: '/users',
+              method: methodWithoutCacheControlHeader,
+              routes: [{ data: { name: 'John', surname: 'Doe' } }]
+            }
+          ]
+        }
+      });
+
+      const response = await request(server)[methodWithoutCacheControlHeader]('/users');
+      expect(response.headers['cache-control']).toBe(undefined);
+    });
   });
 });
 
@@ -152,7 +181,7 @@ describe('createRestRoutes: content', () => {
   });
 
   test('Should return same polling data with time param', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const server = createServer({
       rest: {
         configs: [
@@ -179,24 +208,126 @@ describe('createRestRoutes: content', () => {
     expect(firstResponse.statusCode).toBe(200);
     expect(firstResponse.body).toEqual({ name: 'John', surname: 'Doe' });
 
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
 
     const secondResponse = await request(server).get('/users').query(query);
     expect(secondResponse.statusCode).toBe(200);
     expect(secondResponse.body).toEqual({ name: 'John', surname: 'Doe' });
 
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
 
     const thirdResponse = await request(server).get('/users').query(query);
     expect(thirdResponse.statusCode).toBe(200);
     expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Smith' });
 
-    jest.useRealTimers();
+    vi.useRealTimers();
+  });
+
+  test('Should correct handle empty queue with polling setting', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { polling: true },
+                queue: []
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+    expect(response.statusCode).toBe(404);
+  });
+
+  test('Should correctly use file property for data resolving', async () => {
+    const tmpDirPath = createTmpDir();
+    const pathToFile = path.join(tmpDirPath, './data.json') as `${string}.json`;
+    fs.writeFileSync(pathToFile, JSON.stringify({ standName: 'The World' }));
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                file: pathToFile
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+
+    expect(response.status).toBe(200);
+    expect(response.headers['content-type']).toBe('application/json; charset=UTF-8');
+    expect(response.body).toStrictEqual({ standName: 'The World' });
+
+    fs.rmSync(tmpDirPath, { recursive: true, force: true });
   });
 });
 
 describe('createRestRoutes: settings', () => {
-  test('Should correctly process the request with polling', async () => {
+  test('Should correctly set delay into response with delay setting', async () => {
+    const delay = 1000;
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { delay },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const startTime = performance.now();
+    const response = await request(server).get('/users');
+    const endTime = performance.now();
+
+    expect(endTime - startTime).toBeGreaterThanOrEqual(delay);
+    expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
+  });
+
+  test('Should correctly set statusCode into response with status setting', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { status: 500 },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+    expect(response.statusCode).toBe(500);
+    expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
+  });
+
+  test('Should correctly process the request with polling setting', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -228,28 +359,6 @@ describe('createRestRoutes: settings', () => {
     const thirdResponse = await request(server).get('/users');
     expect(thirdResponse.statusCode).toBe(200);
     expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Doe' });
-  });
-
-  test('Should correct handle empty queue', async () => {
-    const server = createServer({
-      rest: {
-        configs: [
-          {
-            path: '/users',
-            method: 'get',
-            routes: [
-              {
-                settings: { polling: true },
-                queue: []
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const response = await request(server).get('/users');
-    expect(response.statusCode).toBe(404);
   });
 });
 
@@ -518,8 +627,10 @@ describe('createRestRoutes: entities', () => {
 });
 
 describe('createRestRoutes: interceptors', () => {
-  test('Should call request interceptor', async () => {
-    const requestInterceptor = jest.fn();
+  test('Should call request interceptors in order: request -> route', async () => {
+    const routeInterceptor = vi.fn();
+    const requestInterceptor = vi.fn();
+
     const server = createServer({
       rest: {
         configs: [
@@ -534,7 +645,8 @@ describe('createRestRoutes: interceptors', () => {
                     key2: 'value2'
                   }
                 },
-                data: { name: 'John', surname: 'Doe' }
+                data: { name: 'John', surname: 'Doe' },
+                interceptors: { request: routeInterceptor }
               }
             ],
             interceptors: { request: requestInterceptor }
@@ -563,18 +675,34 @@ describe('createRestRoutes: interceptors', () => {
       .set('Content-Type', 'application/json')
       .send({ key1: 'value1', key2: 'value2' });
     expect(requestInterceptor.mock.calls.length).toBe(1);
+    expect(routeInterceptor.mock.calls.length).toBe(1);
+    expect(requestInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
+      routeInterceptor.mock.invocationCallOrder[0]
+    );
+
+    // ✅ important:
+    // request interceptor called when path and method is matched even if server return 404
+    await request(server)
+      .post('/users')
+      .set('Content-Type', 'application/json')
+      .send({ key3: 'value3', key4: 'value4' });
+    expect(requestInterceptor.mock.calls.length).toBe(2);
+    expect(routeInterceptor.mock.calls.length).toBe(1);
 
     await request(server)
       .post('/settings')
       .set('Content-Type', 'application/json')
       .send({ key1: 'value1', key2: 'value2' });
-    expect(requestInterceptor.mock.calls.length).toBe(1);
+    expect(requestInterceptor.mock.calls.length).toBe(2);
+    expect(routeInterceptor.mock.calls.length).toBe(1);
   });
 
-  test('Should call response interceptors in order: route -> request -> server', async () => {
-    const routeInterceptor = jest.fn();
-    const requestInterceptor = jest.fn();
-    const serverInterceptor = jest.fn();
+  test('Should call response interceptors in order: route -> request -> api -> server', async () => {
+    const routeInterceptor = vi.fn();
+    const requestInterceptor = vi.fn();
+    const apiInterceptor = vi.fn();
+    const serverInterceptor = vi.fn();
+
     const server = createServer({
       rest: {
         configs: [
@@ -610,7 +738,8 @@ describe('createRestRoutes: interceptors', () => {
               }
             ]
           }
-        ]
+        ],
+        interceptors: { response: apiInterceptor }
       },
       interceptors: { response: serverInterceptor }
     });
@@ -621,11 +750,15 @@ describe('createRestRoutes: interceptors', () => {
       .send({ key1: 'value1', key2: 'value2' });
     expect(routeInterceptor.mock.calls.length).toBe(1);
     expect(requestInterceptor.mock.calls.length).toBe(1);
+    expect(apiInterceptor.mock.calls.length).toBe(1);
     expect(serverInterceptor.mock.calls.length).toBe(1);
     expect(routeInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
       requestInterceptor.mock.invocationCallOrder[0]
     );
     expect(requestInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
+      apiInterceptor.mock.invocationCallOrder[0]
+    );
+    expect(apiInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
       serverInterceptor.mock.invocationCallOrder[0]
     );
 
@@ -635,6 +768,7 @@ describe('createRestRoutes: interceptors', () => {
       .send({ key1: 'value1', key2: 'value2' });
     expect(routeInterceptor.mock.calls.length).toBe(1);
     expect(requestInterceptor.mock.calls.length).toBe(1);
+    expect(apiInterceptor.mock.calls.length).toBe(2);
     expect(serverInterceptor.mock.calls.length).toBe(2);
 
     await request(server)
@@ -643,6 +777,7 @@ describe('createRestRoutes: interceptors', () => {
       .send({ key1: 'value1', key2: 'value2' });
     expect(routeInterceptor.mock.calls.length).toBe(1);
     expect(requestInterceptor.mock.calls.length).toBe(1);
+    expect(apiInterceptor.mock.calls.length).toBe(2);
     expect(serverInterceptor.mock.calls.length).toBe(2);
   });
 });

@@ -1,5 +1,6 @@
 import type { IRouter } from 'express';
 import { flatten } from 'flat';
+import path from 'path';
 
 import {
   asyncHandler,
@@ -7,15 +8,18 @@ import {
   callResponseInterceptors,
   convertToEntityDescriptor,
   isEntityDescriptor,
-  resolveEntityValues
+  isFilePathValid,
+  resolveEntityValues,
+  sleep
 } from '@/utils/helpers';
 import type {
   Entries,
   Interceptors,
   RestConfig,
   RestEntitiesByEntityName,
-  RestEntityDescriptorOrValue,
-  RestTopLevelPlainEntityDescriptor
+  RestEntity,
+  TopLevelPlainEntityArray,
+  TopLevelPlainEntityDescriptor
 } from '@/utils/types';
 
 import { prepareRestRequestConfigs } from './helpers';
@@ -34,9 +38,11 @@ export const createRestRoutes = ({
   prepareRestRequestConfigs(restConfig.configs).forEach((requestConfig) => {
     router.route(requestConfig.path)[requestConfig.method](
       asyncHandler(async (request, response, next) => {
-        const requestInterceptor = requestConfig.interceptors?.request;
-        if (requestInterceptor) {
-          await callRequestInterceptor({ request, interceptor: requestInterceptor });
+        if (requestConfig.interceptors?.request) {
+          await callRequestInterceptor({
+            request,
+            interceptor: requestConfig.interceptors.request
+          });
         }
 
         const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
@@ -47,11 +53,13 @@ export const createRestRoutes = ({
             const { checkMode, value: descriptorValue } =
               convertToEntityDescriptor(entityDescriptorOrValue);
 
-            // ✅ important: check whole body as plain value strictly if descriptor used for body
+            // ✅ important:
+            // check whole body as plain value strictly if descriptor used for body
             const isEntityBodyByTopLevelDescriptor =
               entityName === 'body' && isEntityDescriptor(entityDescriptorOrValue);
             if (isEntityBodyByTopLevelDescriptor) {
-              // ✅ important: bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
+              // ✅ important:
+              // bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
               return resolveEntityValues(
                 checkMode,
                 Object.keys(request.body).length ? request.body : undefined,
@@ -63,7 +71,8 @@ export const createRestRoutes = ({
               entityName === 'body' && Array.isArray(entityDescriptorOrValue);
             if (isEntityBodyByTopLevelArray) {
               return entityDescriptorOrValue.some((entityDescriptorOrValueElement) =>
-                // ✅ important: bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
+                // ✅ important:
+                // bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
                 resolveEntityValues(
                   checkMode,
                   Object.keys(request.body).length ? request.body : undefined,
@@ -73,7 +82,7 @@ export const createRestRoutes = ({
             }
 
             const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
-              Exclude<RestEntityDescriptorOrValue, RestTopLevelPlainEntityDescriptor | Array<any>>
+              Exclude<RestEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
             >;
             return recordOrArrayEntries.every(([entityKey, mappedEntityDescriptor]) => {
               const { checkMode, value: descriptorValue } =
@@ -91,6 +100,13 @@ export const createRestRoutes = ({
 
         if (!matchedRouteConfig) {
           return next();
+        }
+
+        if (matchedRouteConfig.interceptors?.request) {
+          await callRequestInterceptor({
+            request,
+            interceptor: matchedRouteConfig.interceptors.request
+          });
         }
 
         let matchedRouteConfigData = null;
@@ -135,10 +151,23 @@ export const createRestRoutes = ({
           matchedRouteConfigData = matchedRouteConfig.data;
         }
 
+        if ('file' in matchedRouteConfig) {
+          if (!isFilePathValid(matchedRouteConfig.file)) return next();
+        }
+
         const resolvedData =
           typeof matchedRouteConfigData === 'function'
             ? await matchedRouteConfigData(request, matchedRouteConfig.entities ?? {})
             : matchedRouteConfigData;
+
+        if (matchedRouteConfig.settings?.status) {
+          response.statusCode = matchedRouteConfig.settings.status;
+        }
+
+        // ✅ important:
+        // set 'Cache-Control' header for explicit browsers response revalidate: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+        // this code should place before response interceptors for giving opportunity to rewrite 'Cache-Control' header
+        if (request.method === 'GET') response.set('Cache-control', 'no-cache');
 
         const data = await callResponseInterceptors({
           data: resolvedData,
@@ -152,11 +181,14 @@ export const createRestRoutes = ({
           }
         });
 
-        // ✅ important:
-        // set 'Cache-Control' header for explicit browsers response revalidate
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-        response.set('Cache-control', 'max-age=0, must-revalidate');
-        return response.status(response.statusCode).json(data);
+        if (matchedRouteConfig.settings?.delay) {
+          await sleep(matchedRouteConfig.settings.delay);
+        }
+
+        if ('file' in matchedRouteConfig) {
+          return response.sendFile(path.resolve(matchedRouteConfig.file));
+        }
+        return response.json(data);
       })
     );
   });
