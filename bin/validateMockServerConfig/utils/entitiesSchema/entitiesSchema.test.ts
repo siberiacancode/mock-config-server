@@ -2,7 +2,7 @@ import { getMostSpecificPathFromError, getValidationMessageFromPath } from '../.
 
 import { plainEntitySchema } from './entitiesSchema';
 
-test('Should return correct error path with descriptor schema checked before common record schema', () => {
+test('Should return correct error path: firstly check object as a descriptor', () => {
   const incorrectTopLevelDescriptorBodyEntities = {
     checkMode: 'equals'
   };

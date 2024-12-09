@@ -1,7 +1,13 @@
 import { flatten } from 'flat';
 
 import { NEGATION_CHECK_MODES } from '@/utils/constants';
-import type { CheckActualValueCheckMode, CheckFunction, CheckMode } from '@/utils/types';
+import type {
+  CheckActualValueCheckMode,
+  CheckFunction,
+  CheckMode,
+  EntityFunctionDescriptorValue,
+  PlainObject
+} from '@/utils/types';
 
 import { isPlainObject } from '../../isPlainObject/isPlainObject';
 import { isPrimitive } from '../../isPrimitive/isPrimitive';
@@ -11,15 +17,15 @@ const checkFunction: CheckFunction = (checkMode, actualValue, descriptorValue?) 
   if (checkMode === 'exists') return !isActualValueUndefined;
   if (checkMode === 'notExists') return isActualValueUndefined;
 
-  if (checkMode === 'function' && typeof descriptorValue === 'function') {
-    return !!descriptorValue(actualValue, checkFunction);
+  if (checkMode === 'function') {
+    return !!(descriptorValue as EntityFunctionDescriptorValue<typeof actualValue>)(
+      actualValue,
+      checkFunction
+    );
   }
 
   const actualValueString = String(actualValue);
 
-  // ✅ important:
-  // recreate RegExp because 'g' flag can be cause of unexpected result
-  // this is about https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastIndex#avoiding_side_effects
   if (checkMode === 'regExp' && descriptorValue instanceof RegExp) {
     return new RegExp(descriptorValue).test(actualValueString);
   }
@@ -48,12 +54,12 @@ const compareEntityValues = (checkMode: CheckMode, actualValue: any, descriptorV
     return checkFunction(checkMode, actualValue);
   }
 
-  if (checkMode === 'regExp') {
-    return checkFunction(checkMode, actualValue, descriptorValue);
-  }
-
   if (checkMode === 'function') {
     return !!descriptorValue(actualValue, checkFunction);
+  }
+
+  if (checkMode === 'regExp') {
+    return checkFunction(checkMode, actualValue, descriptorValue);
   }
 
   const isActualValuePrimitive = isPrimitive(actualValue);
@@ -68,8 +74,8 @@ const compareEntityValues = (checkMode: CheckMode, actualValue: any, descriptorV
     checkMode as (typeof NEGATION_CHECK_MODES)[number]
   );
   if (isActualValueObject && isDescriptorValueObject) {
-    const flattenActualValue = flatten<any, any>(actualValue);
-    const flattenDescriptorValue = flatten<any, any>(descriptorValue);
+    const flattenActualValue = flatten<PlainObject | unknown[], PlainObject>(actualValue);
+    const flattenDescriptorValue = flatten<PlainObject | unknown[], PlainObject>(descriptorValue);
 
     if (Object.keys(flattenActualValue).length !== Object.keys(flattenDescriptorValue).length) {
       return isNegationCheckMode;

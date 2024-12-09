@@ -2,46 +2,6 @@ import type { CheckFunction, CheckMode } from '@/utils/types';
 
 import { resolveEntityValues } from './resolveEntityValues';
 
-describe('resolveEntityValues: oneOf', () => {
-  test('Should return true with oneOf=true if at least one passed descriptor value matched to actual value', () => {
-    expect(
-      resolveEntityValues({
-        checkMode: 'equals',
-        actualValue: [1, 2, 3],
-        descriptorValue: [1, 2, 3],
-        oneOf: true
-      })
-    ).toBe(false);
-
-    expect(
-      resolveEntityValues({
-        checkMode: 'equals',
-        actualValue: [1, 2, 3],
-        descriptorValue: [[1], [1, 2], [1, 2, 3]],
-        oneOf: true
-      })
-    ).toBe(true);
-  });
-
-  test('Should return true with oneOf=false/undefined if full passed descriptor value matched to actual value', () => {
-    expect(
-      resolveEntityValues({
-        checkMode: 'equals',
-        actualValue: [1, 2, 3],
-        descriptorValue: [1, 2, 3]
-      })
-    ).toBe(true);
-
-    expect(
-      resolveEntityValues({
-        checkMode: 'equals',
-        actualValue: [1, 2, 3],
-        descriptorValue: [[1], [1, 2], [1, 2, 3]]
-      })
-    ).toBe(false);
-  });
-});
-
 describe('resolveEntityValues: checkMode without descriptor value', () => {
   test('"exists"/"notExists" checkMode should return false/true only for undefined', () => {
     const existedValues = ['string', true, 3000, null, {}, [], () => {}, /\d/];
@@ -71,7 +31,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
       expect(
         resolveEntityValues({
           checkMode: 'regExp',
-          actualValue: { property: 'string' },
+          actualValue: 'String',
           descriptorValue: /string/
         })
       ).toBe(false);
@@ -175,6 +135,13 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
           descriptorValue: null
         })
       ).toBe(true);
+      expect(
+        resolveEntityValues({
+          checkMode: confirmationCheckMode,
+          actualValue: 'undefined',
+          descriptorValue: undefined
+        })
+      ).toBe(true);
     });
 
     const negationCheckModes = [
@@ -210,6 +177,13 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
           checkMode: negationCheckMode,
           actualValue: 'null',
           descriptorValue: null
+        })
+      ).toBe(false);
+      expect(
+        resolveEntityValues({
+          checkMode: negationCheckMode,
+          actualValue: 'undefined',
+          descriptorValue: undefined
         })
       ).toBe(false);
     });
@@ -390,4 +364,60 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
       })
     ).toBe(false);
   });
+});
+
+describe('resolveEntityValues: oneOf', () => {
+  test('Should return true with oneOf=true if at least one passed descriptor value matched to actual value', () => {
+    expect(
+      resolveEntityValues({
+        checkMode: 'equals',
+        actualValue: [1, 2, 3],
+        descriptorValue: [1, 2, 3],
+        oneOf: true
+      })
+    ).toBe(false);
+
+    expect(
+      resolveEntityValues({
+        checkMode: 'equals',
+        actualValue: [1, 2, 3],
+        descriptorValue: [[1], [1, 2], [1, 2, 3]],
+        oneOf: true
+      })
+    ).toBe(true);
+  });
+
+  test('Should return true with oneOf=false/undefined if full passed descriptor value matched to actual value', () => {
+    expect(
+      resolveEntityValues({
+        checkMode: 'equals',
+        actualValue: [1, 2, 3],
+        descriptorValue: [1, 2, 3]
+      })
+    ).toBe(true);
+    expect(
+      resolveEntityValues({
+        checkMode: 'equals',
+        actualValue: [1, 2, 3],
+        descriptorValue: [1, 2, 3],
+        oneOf: false
+      })
+    ).toBe(true);
+
+    expect(
+      resolveEntityValues({
+        checkMode: 'equals',
+        actualValue: [1, 2, 3],
+        descriptorValue: [[1], [1, 2], [1, 2, 3]]
+      })
+    ).toBe(false);
+  });
+  expect(
+    resolveEntityValues({
+      checkMode: 'equals',
+      actualValue: [1, 2, 3],
+      descriptorValue: [[1], [1, 2], [1, 2, 3]],
+      oneOf: false
+    })
+  ).toBe(false);
 });
