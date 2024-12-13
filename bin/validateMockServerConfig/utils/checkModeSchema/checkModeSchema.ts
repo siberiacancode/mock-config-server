@@ -21,7 +21,40 @@ export const compareWithDescriptorValueCheckModeSchema = z.enum(
   COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES
 );
 
-export const entityDescriptorSchema = (
+export function entityDescriptorSchema(
+  checkModeSchema: typeof checkActualValueCheckModeSchema
+): z.ZodObject<{ checkMode: typeof checkModeSchema }, 'strict'>;
+
+export function entityDescriptorSchema(
+  checkModeSchema:
+    | typeof compareWithDescriptorAnyValueCheckModeSchema
+    | typeof compareWithDescriptorStringValueCheckModeSchema
+    | typeof compareWithDescriptorValueCheckModeSchema
+    | z.ZodLiteral<'function'>
+    | z.ZodLiteral<'regExp'>,
+  valueSchema: z.ZodTypeAny
+): z.ZodUnion<
+  [
+    z.ZodObject<
+      {
+        checkMode: typeof checkModeSchema;
+        value: z.ZodArray<typeof valueSchema>;
+        oneOf: z.ZodLiteral<true>;
+      },
+      'strict'
+    >,
+    z.ZodObject<
+      {
+        checkMode: typeof checkModeSchema;
+        value: typeof valueSchema;
+        oneOf: z.ZodOptional<z.ZodLiteral<false>>;
+      },
+      'strict'
+    >
+  ]
+>;
+
+export function entityDescriptorSchema(
   checkModeSchema:
     | typeof checkActualValueCheckModeSchema
     | typeof compareWithDescriptorAnyValueCheckModeSchema
@@ -30,8 +63,8 @@ export const entityDescriptorSchema = (
     | z.ZodLiteral<'function'>
     | z.ZodLiteral<'regExp'>,
   valueSchema?: z.ZodTypeAny
-) =>
-  valueSchema
+) {
+  return valueSchema
     ? z.union([
         z.strictObject({
           checkMode: checkModeSchema,
@@ -47,3 +80,4 @@ export const entityDescriptorSchema = (
     : z.strictObject({
         checkMode: checkModeSchema
       });
+}

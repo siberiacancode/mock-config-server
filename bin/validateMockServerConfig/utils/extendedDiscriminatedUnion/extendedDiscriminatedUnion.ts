@@ -5,7 +5,7 @@ import { isPlainObject } from '@/utils/helpers';
 import { getMostSpecificPathFromError } from '../../../helpers';
 
 // ✅ important:
-// first element for check discriminator, second element for check rest of properties
+// first element for check discriminator, second element for check discriminator + rest of properties
 type ExtendedDiscriminatedUnionOption = readonly [z.ZodTypeAny, z.ZodTypeAny];
 
 export const extendedDiscriminatedUnion = <Discriminator extends string>(

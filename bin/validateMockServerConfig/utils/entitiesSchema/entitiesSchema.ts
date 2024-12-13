@@ -11,30 +11,29 @@ import { extendedDiscriminatedUnion } from '../extendedDiscriminatedUnion/extend
 import { jsonLiteralSchema, jsonSchema } from '../jsonSchema/jsonSchema';
 import { plainObjectSchema } from '../plainObjectSchema/plainObjectSchema';
 
-const extendedDiscriminatedUnionOptionWrapper = (
-  ...args: Parameters<typeof entityDescriptorSchema>
-) => {
-  const [checkModeSchema, valueSchema] = args;
-  return [checkModeSchema, entityDescriptorSchema(checkModeSchema, valueSchema)] as const;
-};
-
 /* ----- Plain entity schema ----- */
 
 const topLevelPlainEntityDescriptorSchema = extendedDiscriminatedUnion('checkMode', [
-  extendedDiscriminatedUnionOptionWrapper(checkActualValueCheckModeSchema),
-  extendedDiscriminatedUnionOptionWrapper(z.literal('function'), z.function()),
-  extendedDiscriminatedUnionOptionWrapper(compareWithDescriptorAnyValueCheckModeSchema, jsonSchema)
+  [checkActualValueCheckModeSchema, entityDescriptorSchema(checkActualValueCheckModeSchema)],
+  [z.literal('function'), entityDescriptorSchema(z.literal('function'), z.function())],
+  [
+    compareWithDescriptorAnyValueCheckModeSchema,
+    entityDescriptorSchema(compareWithDescriptorAnyValueCheckModeSchema, jsonSchema)
+  ]
 ]);
 
 const propertyLevelPlainEntityDescriptorSchema = extendedDiscriminatedUnion('checkMode', [
-  extendedDiscriminatedUnionOptionWrapper(checkActualValueCheckModeSchema),
-  extendedDiscriminatedUnionOptionWrapper(z.literal('function'), z.function()),
-  extendedDiscriminatedUnionOptionWrapper(z.literal('regExp'), z.instanceof(RegExp)),
-  extendedDiscriminatedUnionOptionWrapper(compareWithDescriptorAnyValueCheckModeSchema, jsonSchema),
-  extendedDiscriminatedUnionOptionWrapper(
+  [checkActualValueCheckModeSchema, entityDescriptorSchema(checkActualValueCheckModeSchema)],
+  [z.literal('function'), entityDescriptorSchema(z.literal('function'), z.function())],
+  [z.literal('regExp'), entityDescriptorSchema(z.literal('regExp'), z.instanceof(RegExp))],
+  [
+    compareWithDescriptorAnyValueCheckModeSchema,
+    entityDescriptorSchema(compareWithDescriptorAnyValueCheckModeSchema, jsonSchema)
+  ],
+  [
     compareWithDescriptorStringValueCheckModeSchema,
-    jsonLiteralSchema
-  )
+    entityDescriptorSchema(compareWithDescriptorStringValueCheckModeSchema, jsonLiteralSchema)
+  ]
 ]);
 
 const nonCheckModeRecordSchema = (recordSchema: ReturnType<typeof z.record>) =>
@@ -67,13 +66,13 @@ export const plainEntitySchema = z.union([
 const mappedEntityValueSchema = z.union([z.string(), z.number(), z.boolean()]);
 
 const mappedEntityDescriptorSchema = extendedDiscriminatedUnion('checkMode', [
-  extendedDiscriminatedUnionOptionWrapper(checkActualValueCheckModeSchema),
-  extendedDiscriminatedUnionOptionWrapper(z.literal('function'), z.function()),
-  extendedDiscriminatedUnionOptionWrapper(z.literal('regExp'), z.instanceof(RegExp)),
-  extendedDiscriminatedUnionOptionWrapper(
+  [checkActualValueCheckModeSchema, entityDescriptorSchema(checkActualValueCheckModeSchema)],
+  [z.literal('function'), entityDescriptorSchema(z.literal('function'), z.function())],
+  [z.literal('regExp'), entityDescriptorSchema(z.literal('regExp'), z.instanceof(RegExp))],
+  [
     compareWithDescriptorValueCheckModeSchema,
-    mappedEntityValueSchema
-  )
+    entityDescriptorSchema(compareWithDescriptorValueCheckModeSchema, mappedEntityValueSchema)
+  ]
 ]);
 
 export const mappedEntitySchema = plainObjectSchema(
