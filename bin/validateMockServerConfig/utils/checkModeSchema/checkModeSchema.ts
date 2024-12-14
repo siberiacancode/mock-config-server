@@ -38,16 +38,16 @@ export function entityDescriptorSchema(
     z.ZodObject<
       {
         checkMode: typeof checkModeSchema;
-        value: z.ZodArray<typeof valueSchema>;
         oneOf: z.ZodLiteral<true>;
+        value: z.ZodArray<typeof valueSchema>;
       },
       'strict'
     >,
     z.ZodObject<
       {
         checkMode: typeof checkModeSchema;
-        value: typeof valueSchema;
         oneOf: z.ZodOptional<z.ZodLiteral<false>>;
+        value: typeof valueSchema;
       },
       'strict'
     >

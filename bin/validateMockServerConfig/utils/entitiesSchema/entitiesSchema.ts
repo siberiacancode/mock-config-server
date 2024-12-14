@@ -8,17 +8,23 @@ import {
   entityDescriptorSchema
 } from '../checkModeSchema/checkModeSchema';
 import { extendedDiscriminatedUnion } from '../extendedDiscriminatedUnion/extendedDiscriminatedUnion';
-import { jsonLiteralSchema, jsonSchema } from '../jsonSchema/jsonSchema';
+import { nestedObjectOrArraySchema } from '../nestedObjectOrArraySchema/nestedObjectOrArraySchema';
 import { plainObjectSchema } from '../plainObjectSchema/plainObjectSchema';
 
 /* ----- Plain entity schema ----- */
+
+const plainEntityPrimitiveValueSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+const plainEntityObjectiveValueSchema = nestedObjectOrArraySchema(plainEntityPrimitiveValueSchema);
 
 const topLevelPlainEntityDescriptorSchema = extendedDiscriminatedUnion('checkMode', [
   [checkActualValueCheckModeSchema, entityDescriptorSchema(checkActualValueCheckModeSchema)],
   [z.literal('function'), entityDescriptorSchema(z.literal('function'), z.function())],
   [
     compareWithDescriptorAnyValueCheckModeSchema,
-    entityDescriptorSchema(compareWithDescriptorAnyValueCheckModeSchema, jsonSchema)
+    entityDescriptorSchema(
+      compareWithDescriptorAnyValueCheckModeSchema,
+      plainEntityObjectiveValueSchema
+    )
   ]
 ]);
 
@@ -28,37 +34,41 @@ const propertyLevelPlainEntityDescriptorSchema = extendedDiscriminatedUnion('che
   [z.literal('regExp'), entityDescriptorSchema(z.literal('regExp'), z.instanceof(RegExp))],
   [
     compareWithDescriptorAnyValueCheckModeSchema,
-    entityDescriptorSchema(compareWithDescriptorAnyValueCheckModeSchema, jsonSchema)
+    entityDescriptorSchema(
+      compareWithDescriptorAnyValueCheckModeSchema,
+      z.union([plainEntityPrimitiveValueSchema, plainEntityObjectiveValueSchema])
+    )
   ],
   [
     compareWithDescriptorStringValueCheckModeSchema,
-    entityDescriptorSchema(compareWithDescriptorStringValueCheckModeSchema, jsonLiteralSchema)
+    entityDescriptorSchema(
+      compareWithDescriptorStringValueCheckModeSchema,
+      plainEntityPrimitiveValueSchema
+    )
   ]
 ]);
 
-const nonCheckModeRecordSchema = (recordSchema: ReturnType<typeof z.record>) =>
-  plainObjectSchema(recordSchema.and(z.object({ checkMode: z.never().optional() })));
+const nonCheckModeSchema = (schema: z.ZodTypeAny) =>
+  plainObjectSchema(schema.and(z.object({ checkMode: z.never().optional() })));
 
-// ✅ important:
-// 1st property level record disallow checkMode
-const topLevelRecordValueSchema = z.union([
-  jsonLiteralSchema,
-  z.array(jsonSchema),
-  nonCheckModeRecordSchema(z.record(jsonSchema))
-]);
-
-// ✅ important:
-// top level record disallow checkMode
-const topLevelRecordSchema = nonCheckModeRecordSchema(
-  z.record(z.union([propertyLevelPlainEntityDescriptorSchema, topLevelRecordValueSchema]))
+const topLevelPlainEntityRecordSchema = nonCheckModeSchema(
+  z.record(
+    z.union([
+      propertyLevelPlainEntityDescriptorSchema,
+      nonCheckModeSchema(plainEntityObjectiveValueSchema),
+      plainEntityPrimitiveValueSchema
+    ])
+  )
 );
 
-const topLevelArraySchema = z.array(jsonSchema);
+const topLevelPlainEntityArraySchema = z.array(
+  z.union([plainEntityPrimitiveValueSchema, plainEntityObjectiveValueSchema])
+);
 
 export const plainEntitySchema = z.union([
   topLevelPlainEntityDescriptorSchema,
-  topLevelRecordSchema,
-  topLevelArraySchema
+  topLevelPlainEntityRecordSchema,
+  topLevelPlainEntityArraySchema
 ]);
 
 /* ----- Mapped entity schema ----- */
