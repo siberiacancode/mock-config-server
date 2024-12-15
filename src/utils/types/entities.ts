@@ -46,7 +46,7 @@ type PropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
 
 type NonCheckMode<T extends object> = T & { checkMode?: never };
 
-type TopLevelPlainEntityRecord = NonCheckMode<
+export type TopLevelPlainEntityRecord = NonCheckMode<
   Record<
     string,
     | PropertyLevelPlainEntityDescriptor

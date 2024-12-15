@@ -61,7 +61,7 @@ const topLevelPlainEntityRecordSchema = nonCheckModeSchema(
   )
 );
 
-const topLevelPlainEntityArraySchema = z.array(
+export const topLevelPlainEntityArraySchema = z.array(
   z.union([plainEntityPrimitiveValueSchema, plainEntityObjectiveValueSchema])
 );
 
