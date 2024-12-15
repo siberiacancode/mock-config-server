@@ -58,17 +58,17 @@ export const createGraphQLRoutes = ({
 
       if (
         'query' in requestConfig &&
-        requestConfig.query.replace(/\s+/gi, ' ') !== graphQLInput.query?.replace(/\s+/gi, ' ')
+        requestConfig.query.replace(/[\s\r\n]+/gi, '') !==
+          graphQLInput.query?.replace(/[\s\r\n]+/gi, '')
       )
         return false;
 
       if ('operationName' in requestConfig) {
         if (!query.operationName) return false;
 
-        if (requestConfig.operationName instanceof RegExp)
-          return new RegExp(requestConfig.operationName).test(query.operationName);
-
-        return requestConfig.operationName === query.operationName;
+        return requestConfig.operationName instanceof RegExp
+          ? new RegExp(requestConfig.operationName).test(query.operationName)
+          : requestConfig.operationName === query.operationName;
       }
 
       return true;
