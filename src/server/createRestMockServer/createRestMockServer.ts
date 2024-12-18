@@ -21,7 +21,7 @@ export const createRestMockServer = (
   restMockServerConfig: Omit<RestMockServerConfig, 'port'>,
   server: Express = express()
 ) => {
-  const { cors, staticPath, configs, database, interceptors, loggers } = restMockServerConfig;
+  const { cors, staticPath, configs, database, interceptors } = restMockServerConfig;
 
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../static/views'));
@@ -58,8 +58,7 @@ export const createRestMockServer = (
   const routerWithRestRoutes = createRestRoutes({
     router: express.Router(),
     restConfig: { configs: configs ?? [] },
-    serverResponseInterceptor: interceptors?.response,
-    loggers
+    serverResponseInterceptor: interceptors?.response
   });
 
   server.use(baseUrl, routerWithRestRoutes);

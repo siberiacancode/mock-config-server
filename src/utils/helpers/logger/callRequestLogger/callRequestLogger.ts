@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 
-import type { Logger, LoggerTokenFlags, LoggerTokenValues, RestMethod } from '@/utils/types';
+import type { Logger, LoggerTokenOptions, LoggerTokenValues, RestMethod } from '@/utils/types';
 
 import { formatTimestamp } from '../../date';
 import { filterTokenValues } from '../helpers';
@@ -15,7 +15,7 @@ const formatTokenValues = (tokenValues: Partial<LoggerTokenValues<'request'>>) =
   };
 };
 
-const DEFAULT_LOGGER_REQUEST_TOKEN_FLAGS: LoggerTokenFlags<'request'> = {
+const DEFAULT_LOGGER_REQUEST_TOKEN_OPTIONS: LoggerTokenOptions<'request'> = {
   type: true,
   id: true,
   timestamp: true,
@@ -29,7 +29,7 @@ interface CallRequestLoggerParams {
 }
 
 export const callRequestLogger = ({ logger, request }: CallRequestLoggerParams) => {
-  if (logger?.enabled === false) return;
+  if (logger?.enabled === false) return null;
 
   const rawTokenValues: LoggerTokenValues<'request'> = {
     type: 'request',
@@ -49,15 +49,16 @@ export const callRequestLogger = ({ logger, request }: CallRequestLoggerParams) 
     body: request.body
   };
 
-  const tokenFlags = logger?.tokenFlags ?? DEFAULT_LOGGER_REQUEST_TOKEN_FLAGS;
+  const tokenOptions = logger?.tokenOptions ?? DEFAULT_LOGGER_REQUEST_TOKEN_OPTIONS;
 
-  const filteredTokenValues = filterTokenValues(rawTokenValues, tokenFlags);
+  const filteredTokenValues = filterTokenValues(rawTokenValues, tokenOptions);
 
   if (logger?.rewrite) {
     logger.rewrite(filteredTokenValues);
-    return;
+    return filteredTokenValues;
   }
 
   const formattedTokens = formatTokenValues(filteredTokenValues);
   console.dir(formattedTokens, { depth: null });
+  return filteredTokenValues;
 };

@@ -1,6 +1,12 @@
 import type { Request, Response } from 'express';
 
-import type { Data, Logger, LoggerTokenFlags, LoggerTokenValues, RestMethod } from '@/utils/types';
+import type {
+  Data,
+  Logger,
+  LoggerTokenOptions,
+  LoggerTokenValues,
+  RestMethod
+} from '@/utils/types';
 
 import { formatTimestamp } from '../../date';
 import { filterTokenValues } from '../helpers';
@@ -15,7 +21,7 @@ const formatTokenValues = (tokenValues: Partial<LoggerTokenValues<'response'>>) 
   };
 };
 
-const DEFAULT_LOGGER_RESPONSE_TOKEN_FLAGS: LoggerTokenFlags<'response'> = {
+const DEFAULT_LOGGER_RESPONSE_TOKEN_OPTIONS: LoggerTokenOptions<'response'> = {
   type: true,
   id: true,
   timestamp: true,
@@ -37,7 +43,7 @@ export const callResponseLogger = ({
   request,
   response
 }: CallResponseLoggerParams) => {
-  if (logger?.enabled === false) return;
+  if (logger?.enabled === false) return null;
 
   const rawTokenValues: LoggerTokenValues<'response'> = {
     type: 'response',
@@ -59,15 +65,16 @@ export const callResponseLogger = ({
     data
   };
 
-  const tokenFlags = logger?.tokenFlags ?? DEFAULT_LOGGER_RESPONSE_TOKEN_FLAGS;
+  const tokenOptions = logger?.tokenOptions ?? DEFAULT_LOGGER_RESPONSE_TOKEN_OPTIONS;
 
-  const filteredTokenValues = filterTokenValues(rawTokenValues, tokenFlags);
+  const filteredTokenValues = filterTokenValues(rawTokenValues, tokenOptions);
 
   if (logger?.rewrite) {
     logger.rewrite(filteredTokenValues);
-    return;
+    return filteredTokenValues;
   }
 
   const formattedTokens = formatTokenValues(filteredTokenValues);
   console.dir(formattedTokens, { depth: null });
+  return filteredTokenValues;
 };

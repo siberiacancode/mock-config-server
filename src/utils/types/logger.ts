@@ -4,7 +4,7 @@ import type { Cookies, Headers, Params, PlainObject, Query } from './values';
 
 export type MappedEntityName = Exclude<RestEntityName | GraphQLEntityName, 'body' | 'variables'>;
 
-type LoggerValuesToFlags<Type> = {
+type LoggerTokenValuesToTokenOptions<Type> = {
   [Key in keyof Type]?: Key extends MappedEntityName ? Record<string, boolean> | boolean : boolean;
 };
 
@@ -60,35 +60,33 @@ export type LoggerTokenValues<
         : never
     : never;
 
-type LoggerRestRequestTokenFlags = LoggerValuesToFlags<LoggerRestRequestTokenValues>;
-type LoggerRestResponseTokenFlags = LoggerValuesToFlags<LoggerRestResponseTokenValues>;
-type LoggerGraphQLRequestTokenFlags = LoggerValuesToFlags<LoggerGraphQLRequestTokenValues>;
-type LoggerGraphQLResponseTokenFlags = LoggerValuesToFlags<LoggerGraphQLResponseTokenValues>;
+type LoggerRestRequestTokenOptions = LoggerTokenValuesToTokenOptions<LoggerRestRequestTokenValues>;
+type LoggerRestResponseTokenOptions =
+  LoggerTokenValuesToTokenOptions<LoggerRestResponseTokenValues>;
+type LoggerGraphQLRequestTokenOptions =
+  LoggerTokenValuesToTokenOptions<LoggerGraphQLRequestTokenValues>;
+type LoggerGraphQLResponseTokenOptions =
+  LoggerTokenValuesToTokenOptions<LoggerGraphQLResponseTokenValues>;
 
-export type LoggerTokenFlags<
+export type LoggerTokenOptions<
   Type extends LoggerType = LoggerType,
   API extends LoggerAPI = LoggerAPI
 > = Type extends 'request'
   ? API extends 'rest'
-    ? LoggerRestRequestTokenFlags
+    ? LoggerRestRequestTokenOptions
     : API extends 'graphql'
-      ? LoggerGraphQLRequestTokenFlags
+      ? LoggerGraphQLRequestTokenOptions
       : never
   : Type extends 'response'
     ? API extends 'rest'
-      ? LoggerRestResponseTokenFlags
+      ? LoggerRestResponseTokenOptions
       : API extends 'graphql'
-        ? LoggerGraphQLResponseTokenFlags
+        ? LoggerGraphQLResponseTokenOptions
         : never
     : never;
 
 export interface Logger<Type extends LoggerType = LoggerType, API extends LoggerAPI = LoggerAPI> {
   enabled?: boolean;
-  tokenFlags?: LoggerTokenFlags<Type, API>;
+  tokenOptions?: LoggerTokenOptions<Type, API>;
   rewrite?: (tokenValues: Partial<LoggerTokenValues<Type, API>>) => void;
-}
-
-export interface Loggers<API extends LoggerAPI = LoggerAPI> {
-  request?: Logger<'request', API>;
-  response?: Logger<'response', API>;
 }

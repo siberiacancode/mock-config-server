@@ -1,6 +1,6 @@
 import type { Express } from 'express';
 
-import { callRequestLogger, callResponseLogger, parseGraphQLRequest } from '@/utils/helpers';
+import { parseGraphQLRequest } from '@/utils/helpers';
 import type {
   MockServerConfig,
   OperationNameGraphQLRequestConfig,
@@ -12,7 +12,7 @@ import { getGraphqlUrlSuggestions, getRestUrlSuggestions } from './helpers';
 
 export const notFoundMiddleware = (
   server: Express,
-  mockServerConfig: Pick<MockServerConfig, 'baseUrl' | 'rest' | 'graphql' | 'loggers'>
+  mockServerConfig: Pick<MockServerConfig, 'baseUrl' | 'rest' | 'graphql'>
 ) => {
   const { baseUrl: serverBaseUrl, rest, graphql } = mockServerConfig;
 
@@ -35,11 +35,6 @@ export const notFoundMiddleware = (
       })) ?? [];
 
   server.use((request, response) => {
-    const requestLogger = mockServerConfig.loggers?.request;
-    if (requestLogger) {
-      callRequestLogger({ request, logger: requestLogger });
-    }
-
     const url = new URL(`${request.protocol}://${request.get('host')}${request.originalUrl}`);
 
     let restRequestSuggestions: RestRequestSuggestionConfigs = [];
@@ -59,10 +54,6 @@ export const notFoundMiddleware = (
     }
 
     response.status(404);
-    const responseLogger = mockServerConfig.loggers?.response;
-    if (responseLogger) {
-      callResponseLogger({ request, response, logger: responseLogger, data: undefined });
-    }
 
     const isRequestSupportHtml =
       request.headers.accept?.includes('text/html') || request.headers.accept?.includes('*/*');

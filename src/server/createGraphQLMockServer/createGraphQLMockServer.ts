@@ -21,7 +21,7 @@ export const createGraphQLMockServer = (
   graphqlMockServerConfig: Omit<GraphQLMockServerConfig, 'port'>,
   server: Express = express()
 ) => {
-  const { cors, staticPath, configs, database, interceptors, loggers } = graphqlMockServerConfig;
+  const { cors, staticPath, configs, database, interceptors } = graphqlMockServerConfig;
 
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../static/views'));
@@ -58,8 +58,7 @@ export const createGraphQLMockServer = (
   const routerWithGraphqlRoutes = createGraphQLRoutes({
     router: express.Router(),
     graphqlConfig: { configs: configs ?? [] },
-    serverResponseInterceptor: interceptors?.response,
-    loggers
+    serverResponseInterceptor: interceptors?.response
   });
 
   server.use(baseUrl, routerWithGraphqlRoutes);
