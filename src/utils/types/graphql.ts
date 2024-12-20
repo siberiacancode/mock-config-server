@@ -11,9 +11,7 @@ export type GraphQLEntity<EntityName extends GraphQLEntityName = GraphQLEntityNa
 
 export type GraphQLOperationType = 'query' | 'mutation';
 export type GraphQLOperationName = string | RegExp;
-export type GraphQLEntityNamesByOperationType = {
-  [operationType in GraphQLOperationType]: GraphQLEntityName;
-};
+
 export type GraphQLEntitiesByEntityName = {
   [EntityName in GraphQLEntityName]?: GraphQLEntity<EntityName>;
 };

@@ -33,9 +33,9 @@ interface LoggerRestResponseTokenValues extends LoggerRestRequestTokenValues {
 }
 
 interface LoggerGraphQLRequestTokenValues extends LoggerBaseTokenValues {
-  graphQLOperationType?: GraphQLOperationType;
-  graphQLOperationName?: GraphQLOperationName;
-  variables?: PlainObject | undefined;
+  graphQLOperationType: GraphQLOperationType | null;
+  graphQLOperationName: GraphQLOperationName | null;
+  variables: PlainObject | null;
 }
 
 interface LoggerGraphQLResponseTokenValues extends LoggerGraphQLRequestTokenValues {

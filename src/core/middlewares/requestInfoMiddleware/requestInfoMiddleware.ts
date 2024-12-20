@@ -13,6 +13,7 @@ declare global {
         operationName: GraphQLOperationName;
         variables?: GraphQLEntity<'variables'>;
       } | null;
+      context: any;
     }
   }
 }

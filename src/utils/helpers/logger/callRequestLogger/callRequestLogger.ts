@@ -2,18 +2,7 @@ import type { Request } from 'express';
 
 import type { Logger, LoggerTokenOptions, LoggerTokenValues, RestMethod } from '@/utils/types';
 
-import { formatTimestamp } from '../../date';
-import { filterTokenValues } from '../helpers';
-
-const formatTokenValues = (tokenValues: Partial<LoggerTokenValues<'request'>>) => {
-  const { timestamp, method } = tokenValues;
-
-  return {
-    ...tokenValues,
-    ...(timestamp && { timestamp: formatTimestamp(timestamp) }),
-    ...(method && { method: method.toUpperCase() })
-  };
-};
+import { filterTokenValues, formatTokenValues } from '../helpers';
 
 const DEFAULT_LOGGER_REQUEST_TOKEN_OPTIONS: LoggerTokenOptions<'request'> = {
   type: true,
@@ -34,14 +23,12 @@ export const callRequestLogger = ({ logger, request }: CallRequestLoggerParams) 
   const rawTokenValues: LoggerTokenValues<'request'> = {
     type: 'request',
     id: request.id,
-    timestamp: Date.now(),
+    timestamp: request.timestamp,
     method: request.method.toLowerCase() as RestMethod,
     url: decodeURI(`${request.protocol}://${request.get('host')}${request.originalUrl}`),
-    ...(request.graphQL && {
-      graphQLOperationType: request.graphQL?.operationType,
-      graphQLOperationName: request.graphQL?.operationName,
-      variables: request.graphQL?.variables
-    }),
+    graphQLOperationType: request.graphQL?.operationType ?? null,
+    graphQLOperationName: request.graphQL?.operationName ?? null,
+    variables: request.graphQL?.variables ?? null,
     headers: request.headers,
     cookies: request.cookies,
     query: request.query,
