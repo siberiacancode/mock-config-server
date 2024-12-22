@@ -10,9 +10,3 @@ export type Entries<T extends PlainObject | Array<any>> = ValueOf<{
 export type NestedObjectOrArray<T> =
   | { [key: string]: NestedObjectOrArray<T> | T }
   | Array<NestedObjectOrArray<T> | T>;
-
-export type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: DeepPartial<T[P]>;
-    }
-  : T;
