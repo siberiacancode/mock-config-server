@@ -1,8 +1,8 @@
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 
-import { callRequestLogger } from './callRequestLogger';
+import { callResponseLogger } from './callResponseLogger';
 
-describe('callRequestLogger', () => {
+describe('callResponseLogger', () => {
   const request = {
     url: '/posts/2',
     method: 'POST',
@@ -16,31 +16,42 @@ describe('callRequestLogger', () => {
     originalUrl: '/api/rest/posts/2'
   } as Request;
 
+  const response = {
+    statusCode: 200
+  } as Response;
+
+  const data = { key: 'value' };
+
   test('Should log default tokens if logger or tokenOptions was not provided', () => {
     const consoleDir = vi.spyOn(console, 'dir');
+    vi.spyOn(Date, 'now').mockImplementation(() => 1735623296789);
 
-    callRequestLogger({ request });
+    callResponseLogger({ data, request, response });
 
     expect(consoleDir.mock.lastCall).toStrictEqual([
       {
-        type: 'request',
+        type: 'response',
         id: 1,
         timestamp: '31.12.2024, 12:34:56,789',
         method: 'POST',
-        url: 'http://host/api/rest/posts/2'
+        url: 'http://host/api/rest/posts/2',
+        statusCode: 200,
+        data: { key: 'value' }
       },
       { depth: null }
     ]);
 
-    callRequestLogger({ logger: {}, request });
+    callResponseLogger({ logger: {}, data, request, response });
 
     expect(consoleDir.mock.lastCall).toStrictEqual([
       {
-        type: 'request',
+        type: 'response',
         id: 1,
         timestamp: '31.12.2024, 12:34:56,789',
         method: 'POST',
-        url: 'http://host/api/rest/posts/2'
+        url: 'http://host/api/rest/posts/2',
+        statusCode: 200,
+        data: { key: 'value' }
       },
       { depth: null }
     ]);
@@ -49,7 +60,7 @@ describe('callRequestLogger', () => {
   test('Should not log if enabled is false', () => {
     const consoleDir = vi.spyOn(console, 'dir');
 
-    callRequestLogger({ logger: { enabled: false }, request });
+    callResponseLogger({ logger: { enabled: false }, data, request, response });
 
     expect(consoleDir.mock.lastCall).toStrictEqual(undefined);
   });
@@ -58,17 +69,19 @@ describe('callRequestLogger', () => {
     const consoleDir = vi.spyOn(console, 'dir');
     const rewrite = vi.fn();
 
-    callRequestLogger({ logger: { rewrite }, request });
+    callResponseLogger({ logger: { rewrite }, data, request, response });
 
     expect(consoleDir.mock.calls.length).toBe(0);
     expect(rewrite.mock.calls.length).toBe(1);
     expect(rewrite.mock.lastCall).toStrictEqual([
       {
-        type: 'request',
+        type: 'response',
         id: 1,
         timestamp: 1735623296789,
         method: 'post',
-        url: 'http://host/api/rest/posts/2'
+        url: 'http://host/api/rest/posts/2',
+        statusCode: 200,
+        data: { key: 'value' }
       }
     ]);
   });
@@ -76,22 +89,28 @@ describe('callRequestLogger', () => {
   test('Should return logged token values or null if enabled is false', () => {
     const rewrite = vi.fn();
 
-    expect(callRequestLogger({ request })).toStrictEqual({
-      type: 'request',
+    expect(callResponseLogger({ data, request, response })).toStrictEqual({
+      type: 'response',
       id: 1,
       timestamp: 1735623296789,
       method: 'post',
-      url: 'http://host/api/rest/posts/2'
+      url: 'http://host/api/rest/posts/2',
+      statusCode: 200,
+      data: { key: 'value' }
     });
-    expect(callRequestLogger({ logger: { enabled: false }, request })).toBe(null);
+    expect(callResponseLogger({ logger: { enabled: false }, data, request, response })).toBe(null);
 
-    expect(callRequestLogger({ logger: { rewrite }, request })).toStrictEqual({
-      type: 'request',
+    expect(callResponseLogger({ logger: { rewrite }, data, request, response })).toStrictEqual({
+      type: 'response',
       id: 1,
       timestamp: 1735623296789,
       method: 'post',
-      url: 'http://host/api/rest/posts/2'
+      url: 'http://host/api/rest/posts/2',
+      statusCode: 200,
+      data: { key: 'value' }
     });
-    expect(callRequestLogger({ logger: { enabled: false, rewrite }, request })).toBe(null);
+    expect(
+      callResponseLogger({ logger: { enabled: false, rewrite }, data, request, response })
+    ).toBe(null);
   });
 });

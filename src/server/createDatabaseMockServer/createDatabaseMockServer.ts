@@ -4,12 +4,12 @@ import express from 'express';
 
 import { createDatabaseRoutes } from '@/core/database';
 import {
+  contextMiddleware,
   cookieParseMiddleware,
   corsMiddleware,
   errorMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
-  requestInfoMiddleware,
   requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
@@ -33,7 +33,7 @@ export const createDatabaseMockServer = (
 
   server.use(bodyParser.text());
 
-  requestInfoMiddleware(server);
+  contextMiddleware(server);
 
   cookieParseMiddleware(server);
 

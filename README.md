@@ -680,10 +680,11 @@ You can log requests and responses using `log` function in any [interceptor](#in
     - timestamp
     - method
     - url
+    - statusCode
     - data
-- `rewrite` `(tokenValues: Partial<LoggerTokenValues>) => void` function to customize log default `console.dir(tokenValues, { depth: null })` appearance
+- `rewrite` `(tokenValues: Partial<LoggerTokenValues>) => void` function to customize default `console.dir(tokenValues, { depth: null })` appearance
 
-returns object with logged token values or `null` if log was not `enabled`
+`log` function returns object with logged token values or `null` if log was not `enabled`
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
@@ -699,7 +700,6 @@ const mockServerConfig = {
             interceptors: {
               request: ({ log }) => {
                 log({                 // logs following object in terminal
-                  enabled: true,      //
                   tokenOptions: {     // {
                     id: true,         //  id: 1,
                     type: true,       //  type: 'request',
@@ -707,11 +707,10 @@ const mockServerConfig = {
                     method: true,     //  method: 'GET',
                     url: true         //  url: 'http://localhost:31299/api/rest/posts/1'
                   }                   // }
-                });                   //
+                });
               },
               response: (data, { log }) => {
                 log({                 // logs following string in terminal
-                  enabled: true,      //
                   tokenOptions: {     // response get: http://localhost:31299/api/rest/posts/1 => 200
                     type: true,
                     statusCode: true,
@@ -738,18 +737,18 @@ export default mockServerConfig;
 > By default, `timestamp` and `method` tokens are prettified.
 > Timestamp transforms from UNIX-timestamp number to `DD.MM.YYYY, HH:mm:ss,sss` string.
 > Method transforms from lower case to upper case.
-> If `rewrite` function is used, those tokens will be unformatted. You can format them as you need. 
+> If `rewrite` function is used, those tokens will remain unformatted. You can format them as you need. 
 
 ##### Logger tokens
 
 - `type` `'request' | 'response'` type of log
 - `id` `number` unique id of request to reference request log with response log
 - `timestamp` `number` UNIX-timestamp in milliseconds
-- `method` `'get' | 'post' | 'delete' | 'put' | 'patch' | 'options'` HTTP method 
-- `url` `string` requested URL 
-- `graphQLOperationType` `'query' | 'mutation' | null` GraphQL operation type. null if request is not GraphQL
-- `graphQLOperationName` `string` GraphQL operation name. null if request is not GraphQL
-- `variables`: `Record<string, any>` GraphQL variables. null if request is not GraphQL or variables is not passed
+- `method` `'get' | 'post' | 'delete' | 'put' | 'patch' | 'options'` HTTP method
+- `url` `string` requested URL
+- `graphQLOperationType` `'query' | 'mutation' | null` GraphQL operation type. `null` if request is not GraphQL
+- `graphQLOperationName` `string` GraphQL operation name. `null` if request is not GraphQL
+- `variables`: `Record<string, any>` GraphQL variables. `null` if request is not GraphQL or variables is not passed
 - `headers` `Record<string, any>` headers object
 - `cookies` `Record<string, any>` cookies object
 - `query` `Record<string, any>` query object
@@ -761,10 +760,10 @@ Response logger has additional tokens
 - `data` `any` data returned to client
 
 If you need to log specific mapped entities (headers, cookies, query, params), use `Record<string, boolean>` object instead of boolean.
-In that case log will use following logic:
+In that case logger will use following logic:
 
 - if some token is `true`, entity will be filtered by `whitelist` logic. *Only* enabled ones will be logged.
-- if some token is `false`, entity will be filtered by `blacklist` logic. All entities will be logged *except* disabled.
+- if some token is `false`, entity will be filtered by `blacklist` logic. All entities will be logged *except* disabled ones.
 
 > Whitelist logic have priority over blacklist if you pass `true` and `false` in same entity.
 
@@ -789,24 +788,25 @@ const mockServerConfig = {
                     }
                   }
                 });
-                log({                 // whitelist. only query1 and query2 will be logged
+                log({                 // whitelist. only cookie1 and cookie2 will be logged
                   tokenOptions: {
-                    query: {
-                      query1: true,
-                      query2: true,
-                      query3: false
+                    cookies: {
+                      cookie1: true,
+                      cookie2: true,
+                      cookie3: false
                     }
                   }
                 });
-                log({                 // blacklist. whole query will be logged except query1
+                log({                 // blacklist. all headers will be logged except header1
                   tokenOptions: {
-                    query: {
-                      query1: false
+                    headers: {
+                      header1: false
                     }
                   }
                 });
               }
-            }
+            },
+            data: {}
           }
         ]
       }

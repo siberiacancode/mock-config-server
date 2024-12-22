@@ -16,6 +16,7 @@ const DEFAULT_LOGGER_RESPONSE_TOKEN_OPTIONS: LoggerTokenOptions<'response'> = {
   timestamp: true,
   method: true,
   url: true,
+  statusCode: true,
   data: true
 };
 

@@ -5,12 +5,12 @@ import express from 'express';
 import { createDatabaseRoutes } from '@/core/database';
 import { createGraphQLRoutes } from '@/core/graphql';
 import {
+  contextMiddleware,
   cookieParseMiddleware,
   corsMiddleware,
   errorMiddleware,
   noCorsMiddleware,
   notFoundMiddleware,
-  requestInfoMiddleware,
   requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
@@ -34,7 +34,7 @@ export const createGraphQLMockServer = (
 
   server.use(bodyParser.text());
 
-  requestInfoMiddleware(server);
+  contextMiddleware(server);
 
   cookieParseMiddleware(server);
 

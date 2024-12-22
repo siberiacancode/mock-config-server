@@ -13,12 +13,11 @@ declare global {
         operationName: GraphQLOperationName;
         variables?: GraphQLEntity<'variables'>;
       } | null;
-      context: any;
     }
   }
 }
 
-export const requestInfoMiddleware = (server: Express) => {
+export const contextMiddleware = (server: Express) => {
   let requestId = 0;
 
   server.use((request, _response, next) => {
@@ -29,18 +28,15 @@ export const requestInfoMiddleware = (server: Express) => {
 
     const graphQLInput = getGraphQLInput(request);
     const graphQLQuery = parseQuery(graphQLInput.query ?? '');
-    const isValidGraphQLRequest =
-      graphQLInput &&
-      graphQLInput.query &&
-      graphQLQuery?.operationType &&
-      graphQLQuery.operationName;
-    request.graphQL = isValidGraphQLRequest
-      ? {
-          operationType: graphQLQuery.operationType as GraphQLOperationType,
-          operationName: graphQLQuery.operationName as GraphQLOperationName,
-          variables: graphQLInput.variables
-        }
-      : null;
+
+    request.graphQL =
+      graphQLInput.query && graphQLQuery
+        ? {
+            operationType: graphQLQuery.operationType as GraphQLOperationType,
+            operationName: graphQLQuery.operationName as GraphQLOperationName,
+            variables: graphQLInput.variables
+          }
+        : null;
 
     return next();
   });
