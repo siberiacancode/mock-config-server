@@ -18,8 +18,6 @@ interface CallRequestLoggerParams {
 }
 
 export const callRequestLogger = ({ logger, request }: CallRequestLoggerParams) => {
-  if (logger?.enabled === false) return null;
-
   const rawTokenValues: LoggerTokenValues<'request'> = {
     type: 'request',
     id: request.id,

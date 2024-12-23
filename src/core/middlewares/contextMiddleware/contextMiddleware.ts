@@ -29,15 +29,16 @@ export const contextMiddleware = (server: Express) => {
     const graphQLInput = getGraphQLInput(request);
     const graphQLQuery = parseQuery(graphQLInput.query ?? '');
 
-    request.graphQL =
-      graphQLInput.query && graphQLQuery
-        ? {
-            operationType: graphQLQuery.operationType as GraphQLOperationType,
-            operationName: graphQLQuery.operationName as GraphQLOperationName,
-            variables: graphQLInput.variables
-          }
-        : null;
+    if (graphQLInput.query && graphQLQuery) {
+      request.graphQL = {
+        operationType: graphQLQuery.operationType as GraphQLOperationType,
+        operationName: graphQLQuery.operationName as GraphQLOperationName,
+        variables: graphQLInput.variables
+      };
+      return next();
+    }
 
+    request.graphQL = null;
     return next();
   });
 };

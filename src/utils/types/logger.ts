@@ -86,7 +86,6 @@ export type LoggerTokenOptions<
     : never;
 
 export interface Logger<Type extends LoggerType = LoggerType, API extends LoggerAPI = LoggerAPI> {
-  enabled?: boolean;
   tokenOptions?: LoggerTokenOptions<Type, API>;
   rewrite?: (tokenValues: Partial<LoggerTokenValues<Type, API>>) => void;
 }

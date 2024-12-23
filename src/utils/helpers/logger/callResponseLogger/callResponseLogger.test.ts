@@ -57,14 +57,6 @@ describe('callResponseLogger', () => {
     ]);
   });
 
-  test('Should not log if enabled is false', () => {
-    const consoleDir = vi.spyOn(console, 'dir');
-
-    callResponseLogger({ logger: { enabled: false }, data, request, response });
-
-    expect(consoleDir.mock.lastCall).toStrictEqual(undefined);
-  });
-
   test('Should call rewrite function with unformatted tokens instead of default console.dir if provided', () => {
     const consoleDir = vi.spyOn(console, 'dir');
     const rewrite = vi.fn();
@@ -86,7 +78,7 @@ describe('callResponseLogger', () => {
     ]);
   });
 
-  test('Should return logged token values or null if enabled is false', () => {
+  test('Should return logged token values', () => {
     const rewrite = vi.fn();
 
     expect(callResponseLogger({ data, request, response })).toStrictEqual({
@@ -98,7 +90,6 @@ describe('callResponseLogger', () => {
       statusCode: 200,
       data: { key: 'value' }
     });
-    expect(callResponseLogger({ logger: { enabled: false }, data, request, response })).toBe(null);
 
     expect(callResponseLogger({ logger: { rewrite }, data, request, response })).toStrictEqual({
       type: 'response',
@@ -109,8 +100,5 @@ describe('callResponseLogger', () => {
       statusCode: 200,
       data: { key: 'value' }
     });
-    expect(
-      callResponseLogger({ logger: { enabled: false, rewrite }, data, request, response })
-    ).toBe(null);
   });
 });

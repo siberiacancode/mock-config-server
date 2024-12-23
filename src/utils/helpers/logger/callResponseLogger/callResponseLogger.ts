@@ -33,8 +33,6 @@ export const callResponseLogger = ({
   request,
   response
 }: CallResponseLoggerParams) => {
-  if (logger?.enabled === false) return null;
-
   const rawTokenValues: LoggerTokenValues<'response'> = {
     type: 'response',
     id: request.id,
