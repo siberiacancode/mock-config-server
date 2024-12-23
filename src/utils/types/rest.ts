@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 
-import type { MappedEntity, PlainEntity } from './entities';
+import type { BodyPlainEntity, MappedEntity } from './entities';
 import type { Interceptors } from './interceptors';
 import type { Data } from './values';
 
@@ -8,7 +8,7 @@ export type RestMethod = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options'
 export type RestEntityName = 'headers' | 'cookies' | 'query' | 'params' | 'body';
 
 export type RestEntity<EntityName extends RestEntityName = RestEntityName> =
-  EntityName extends 'body' ? PlainEntity : MappedEntity;
+  EntityName extends 'body' ? BodyPlainEntity : MappedEntity;
 
 export type RestEntityNamesByMethod = {
   [key in RestMethod]: key extends 'get' | 'delete' | 'options'

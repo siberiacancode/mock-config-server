@@ -7,7 +7,7 @@ import { isOnlyRequestedDataResolvingPropertyExists } from '../../../helpers';
 import { interceptorsSchema } from '../../interceptorsSchema/interceptorsSchema';
 import { queueSchema } from '../../queueSchema/queueSchema';
 import { settingsSchema } from '../../settingsSchema/settingsSchema';
-import { mappedEntitySchema, plainEntitySchema, plainObjectSchema } from '../../utils';
+import { bodyPlainEntitySchema, mappedEntitySchema, plainObjectSchema } from '../../utils';
 
 const METHODS_WITH_BODY = ['post', 'put', 'patch'];
 const entitiesByEntityNameSchema = (method: RestMethod) => {
@@ -18,7 +18,7 @@ const entitiesByEntityNameSchema = (method: RestMethod) => {
       cookies: mappedEntitySchema.optional(),
       params: mappedEntitySchema.optional(),
       query: mappedEntitySchema.optional(),
-      ...(isMethodWithBody && { body: plainEntitySchema.optional() })
+      ...(isMethodWithBody && { body: bodyPlainEntitySchema.optional() })
     })
   );
 };

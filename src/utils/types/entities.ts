@@ -46,7 +46,7 @@ type PropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
 
 type NonCheckMode<T extends object> = T & { checkMode?: never };
 
-export type TopLevelPlainEntityRecord = NonCheckMode<
+type TopLevelPlainEntityRecord = NonCheckMode<
   Record<
     string,
     | PropertyLevelPlainEntityDescriptor
@@ -57,10 +57,12 @@ export type TopLevelPlainEntityRecord = NonCheckMode<
 
 export type TopLevelPlainEntityArray = Array<PlainEntityPrimitiveValue | PlainEntityObjectiveValue>;
 
-export type PlainEntity =
+export type BodyPlainEntity =
   | TopLevelPlainEntityDescriptor
   | TopLevelPlainEntityRecord
   | TopLevelPlainEntityArray;
+
+export type VariablesPlainEntity = TopLevelPlainEntityDescriptor | TopLevelPlainEntityRecord;
 
 /* ----- Mapped entity ----- */
 
