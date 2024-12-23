@@ -57,23 +57,19 @@ export const createRestRoutes = ({
             const isEntityBodyByTopLevelDescriptor =
               entityName === 'body' && isEntityDescriptor(entityDescriptorOrValue);
             if (isEntityBodyByTopLevelDescriptor) {
-              // ✅ important:
-              // bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
-              const actualValue = Object.keys(request.body).length ? request.body : undefined;
-
               const bodyDescriptor: EntityDescriptor = entityDescriptorOrValue;
               if (
                 bodyDescriptor.checkMode === 'exists' ||
                 bodyDescriptor.checkMode === 'notExists'
               ) {
                 return resolveEntityValues({
-                  actualValue,
+                  actualValue: request.body,
                   checkMode: bodyDescriptor.checkMode
                 });
               }
 
               return resolveEntityValues({
-                actualValue,
+                actualValue: request.body,
                 descriptorValue: bodyDescriptor.value,
                 checkMode: bodyDescriptor.checkMode,
                 oneOf: bodyDescriptor.oneOf ?? false
@@ -83,11 +79,8 @@ export const createRestRoutes = ({
             const isEntityBodyByTopLevelArray =
               entityName === 'body' && Array.isArray(entityDescriptorOrValue);
             if (isEntityBodyByTopLevelArray) {
-              // ✅ important:
-              // bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
-              const actualValue = Object.keys(request.body).length ? request.body : undefined;
               return resolveEntityValues({
-                actualValue,
+                actualValue: request.body,
                 descriptorValue: entityDescriptorOrValue,
                 checkMode: 'equals'
               });
