@@ -50,8 +50,10 @@ export const createRestRoutes = ({
         const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
           if (!entities) return true;
 
-          const entries = Object.entries(entities) as Entries<Required<RestEntitiesByEntityName>>;
-          return entries.every(([entityName, entityDescriptorOrValue]) => {
+          const entityEntries = Object.entries(entities) as Entries<
+            Required<RestEntitiesByEntityName>
+          >;
+          return entityEntries.every(([entityName, entityDescriptorOrValue]) => {
             // ✅ important:
             // check whole body as plain value strictly if descriptor used for body
             const isEntityBodyByTopLevelDescriptor =
@@ -93,34 +95,39 @@ export const createRestRoutes = ({
               });
             }
 
-            const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
+            const actualEntity = flatten<PlainObject, PlainObject>(request[entityName]);
+            const entityValueEntries = Object.entries(entityDescriptorOrValue) as Entries<
               Exclude<RestEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
             >;
-            return recordOrArrayEntries.every(([entityKey, mappedEntityDescriptorOrValue]) => {
-              const entityDescriptor = convertToEntityDescriptor(mappedEntityDescriptorOrValue);
-              const actualEntity = flatten<PlainObject, PlainObject>(request[entityName]);
+            return entityValueEntries.every(
+              ([entityPropertyKey, entityPropertyDescriptorOrValue]) => {
+                const entityPropertyDescriptor = convertToEntityDescriptor(
+                  entityPropertyDescriptorOrValue
+                );
 
-              // ✅ important: transform header keys to lower case because browsers send headers in lowercase
-              const actualKey = entityName === 'headers' ? entityKey.toLowerCase() : entityKey;
-              const actualValue = actualEntity[actualKey];
+                // ✅ important: transform header keys to lower case because browsers send headers in lowercase
+                const actualPropertyKey =
+                  entityName === 'headers' ? entityPropertyKey.toLowerCase() : entityPropertyKey;
+                const actualPropertyValue = actualEntity[actualPropertyKey];
 
-              if (
-                entityDescriptor.checkMode === 'exists' ||
-                entityDescriptor.checkMode === 'notExists'
-              ) {
+                if (
+                  entityPropertyDescriptor.checkMode === 'exists' ||
+                  entityPropertyDescriptor.checkMode === 'notExists'
+                ) {
+                  return resolveEntityValues({
+                    actualValue: actualPropertyValue,
+                    checkMode: entityPropertyDescriptor.checkMode
+                  });
+                }
+
                 return resolveEntityValues({
-                  actualValue,
-                  checkMode: entityDescriptor.checkMode
+                  actualValue: actualPropertyValue,
+                  descriptorValue: entityPropertyDescriptor.value,
+                  checkMode: entityPropertyDescriptor.checkMode,
+                  oneOf: entityPropertyDescriptor.oneOf ?? false
                 });
               }
-
-              return resolveEntityValues({
-                actualValue,
-                descriptorValue: entityDescriptor.value,
-                checkMode: entityDescriptor.checkMode,
-                oneOf: entityDescriptor.oneOf ?? false
-              });
-            });
+            );
           });
         });
 
