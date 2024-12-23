@@ -666,7 +666,6 @@ You can log requests and responses using `log` function in any [interceptor](#in
 
 `logger` parameter has the following optional properties
 
-- `enabled` `boolean` draw log or not, `true` by default
 - `tokenOptions` `LoggerTokenOptions` object map containing tokens to log. Keys is token names, values is boolean. `true` will add token into log, `false` will remove. If tokenOptions is not passed, following tokens will be logged
   - Request
     - type
@@ -684,7 +683,7 @@ You can log requests and responses using `log` function in any [interceptor](#in
     - data
 - `rewrite` `(tokenValues: Partial<LoggerTokenValues>) => void` function to customize default `console.dir(tokenValues, { depth: null })` appearance
 
-`log` function returns object with logged token values or `null` if log was not `enabled`
+`log` function returns object with logged token values
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
