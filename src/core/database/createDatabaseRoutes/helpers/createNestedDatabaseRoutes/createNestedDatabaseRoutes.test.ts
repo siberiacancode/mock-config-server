@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser';
 import type { Express } from 'express';
 import express from 'express';
 import request from 'supertest';
@@ -39,8 +40,8 @@ describe('CreateNestedDatabaseRoutes', () => {
       storage
     );
 
-    server.use(express.json());
-    server.use(express.text());
+    server.use(bodyParser.json());
+    server.use(bodyParser.text());
     server.use('/', routerWithNestedDatabaseRoutes);
 
     return server;
