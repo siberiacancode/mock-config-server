@@ -173,7 +173,7 @@ describe('createGraphQLRoutes: routing', () => {
     });
   });
 
-  test('Should return 404 and description text for no matched request configs', async () => {
+  test('Should return 404 for no matched request configs', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -303,7 +303,7 @@ describe('createGraphQLRoutes: content', () => {
     });
   });
 
-  test('Should correctly use data function with polling setting', async () => {
+  test('Should correctly use data function with polling enabled', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -347,7 +347,7 @@ describe('createGraphQLRoutes: content', () => {
     });
   });
 
-  test('Should return same polling data with time param', async () => {
+  test('Should return the same polling data until the specified time interval elapses', async () => {
     vi.useFakeTimers();
     const server = createServer({
       graphql: {
@@ -393,7 +393,7 @@ describe('createGraphQLRoutes: content', () => {
     vi.useRealTimers();
   });
 
-  test('Should correct handle empty queue', async () => {
+  test('Should return 404 when the polling queue is empty', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -421,7 +421,7 @@ describe('createGraphQLRoutes: content', () => {
 });
 
 describe('createGraphQLRoutes: settings', () => {
-  test('Should correctly set delay into response with delay setting', async () => {
+  test('Should correctly delay response based on delay setting', async () => {
     const delay = 1000;
     const server = createServer({
       graphql: {
@@ -451,7 +451,7 @@ describe('createGraphQLRoutes: settings', () => {
     expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should correctly set statusCode into response with status setting', async () => {
+  test('Should correctly set status code of response based on status setting', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -478,7 +478,7 @@ describe('createGraphQLRoutes: settings', () => {
     expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should correctly process the request with polling', async () => {
+  test('Should cycle through queue data with polling setting', async () => {
     const server = createServer({
       graphql: {
         configs: [
