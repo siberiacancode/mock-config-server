@@ -422,9 +422,71 @@ const mockServerConfig = {
 module.exports = mockServerConfig;
 ```
 
+#### File responses
+
+Rest routes support paths to files. If a route is matched, the server will send data from the file. If the file is not found, the server will return 404.
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/files/settings',
+        method: 'get',
+        routes: [
+          {
+            file: './settings.json'
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export default mockServerConfig;
+```
+
+> If the file path is absolute, then this path will be used as is. If the file path is relative, it will be appended to the current working directory.
+
+If the file exists, response interceptors will receive `file` path as the data argument.
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/files/settings',
+        method: 'get',
+        routes: [
+          {
+            file: './settings.json',
+            interceptors: {
+              response: (data) => {
+                console.log(data); // './settings.json'
+                return data;
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export default mockServerConfig;
+```
+
+> Any changes to the data will not affect the file (and the response, respectively).
+
 #### Polling
 
-Routes support polling for data. To add polling for data, you must specify the `polling setting` and change `data` property to `queue`.
+Routes support polling for data. To add polling for data, you must specify the `polling setting` and use `queue` property instead of `data` or `file`.
+
+`queue` is an array containing `data` and `file` that should be returned in order.
 
 > After receiving the last value from polling, the queue is reset and the next request will return the first value from the queue.
 
@@ -442,7 +504,8 @@ const mockServerConfig = {
             settings: { polling: true },
             queue: [
               { data: { emoji: '🦁', name: 'Nursultan' } },
-              { data: { emoji: '☄', name: 'Dmitriy' } }
+              { data: { emoji: '☄', name: 'Dmitriy' } },
+              { file: './users/Sergey' }
             ]
           }
         ]
@@ -481,66 +544,6 @@ const mockServerConfig = {
 
 export default mockServerConfig;
 ```
-
-#### File responses
-
-Rest routes support paths to files. If a route is matched, the server will send data from the file. If the file is not found, the server will return 404.
-
-```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
-    configs: [
-      {
-        path: '/files/settings',
-        method: 'get',
-        routes: [
-          {
-            file: './settings.json'
-          }
-        ]
-      }
-    ]
-  }
-};
-
-export default mockServerConfig;
-```
-
-> If the file path is absolute, then this path will be used as is. If the file path is relative, it will be appended to the current working directory.
-
-If the file exists, response interceptors will receive null as the data argument.
-
-```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
-    configs: [
-      {
-        path: '/files/settings',
-        method: 'get',
-        routes: [
-          {
-            file: './settings.json',
-            interceptors: {
-              response: (data) => {
-                console.log(data); // null
-                return data;
-              }
-            }
-          }
-        ]
-      }
-    ]
-  }
-};
-
-export default mockServerConfig;
-```
-
-> Any changes to the data will not affect the file (and the response, respectively).
 
 #### Static Path
 

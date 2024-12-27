@@ -16,8 +16,10 @@ import type {
   Entries,
   Interceptors,
   RestConfig,
+  RestDataResponse,
   RestEntitiesByEntityName,
   RestEntity,
+  RestFileResponse,
   TopLevelPlainEntityArray,
   TopLevelPlainEntityDescriptor
 } from '@/utils/types';
@@ -109,7 +111,11 @@ export const createRestRoutes = ({
           });
         }
 
-        let matchedRouteConfigData = null;
+        const matchedRouteConfigDataDescriptor = {} as {
+          data?: RestDataResponse;
+          file?: RestFileResponse;
+        };
+
         if (matchedRouteConfig.settings?.polling && 'queue' in matchedRouteConfig) {
           if (!matchedRouteConfig.queue.length) return next();
 
@@ -120,8 +126,7 @@ export const createRestRoutes = ({
             };
 
           let index = shallowMatchedRouteConfig.__pollingIndex ?? 0;
-
-          const { time, data } = matchedRouteConfig.queue[index];
+          const { time } = matchedRouteConfig.queue[index];
 
           const updateIndex = () => {
             if (matchedRouteConfig.queue.length - 1 === index) {
@@ -131,6 +136,7 @@ export const createRestRoutes = ({
             }
             shallowMatchedRouteConfig.__pollingIndex = index;
           };
+          const queueItem = matchedRouteConfig.queue[index];
 
           if (time && !shallowMatchedRouteConfig.__timeoutInProgress) {
             shallowMatchedRouteConfig.__timeoutInProgress = true;
@@ -144,21 +150,37 @@ export const createRestRoutes = ({
             updateIndex();
           }
 
-          matchedRouteConfigData = data;
+          if ('file' in queueItem) {
+            if (!isFilePathValid(queueItem.file)) return next();
+            matchedRouteConfigDataDescriptor.file = queueItem.file;
+          }
+          if ('data' in queueItem) {
+            matchedRouteConfigDataDescriptor.data = queueItem.data;
+          }
         }
 
         if ('data' in matchedRouteConfig) {
-          matchedRouteConfigData = matchedRouteConfig.data;
+          matchedRouteConfigDataDescriptor.data = matchedRouteConfig.data;
         }
-
         if ('file' in matchedRouteConfig) {
           if (!isFilePathValid(matchedRouteConfig.file)) return next();
+          matchedRouteConfigDataDescriptor.file = matchedRouteConfig.file;
         }
 
-        const resolvedData =
-          typeof matchedRouteConfigData === 'function'
-            ? await matchedRouteConfigData(request, matchedRouteConfig.entities ?? {})
-            : matchedRouteConfigData;
+        let resolvedData = null;
+
+        if (matchedRouteConfigDataDescriptor.data) {
+          resolvedData =
+            typeof matchedRouteConfigDataDescriptor.data === 'function'
+              ? await matchedRouteConfigDataDescriptor.data(
+                  request,
+                  matchedRouteConfig.entities ?? {}
+                )
+              : matchedRouteConfigDataDescriptor.data;
+        }
+        if (matchedRouteConfigDataDescriptor.file) {
+          resolvedData = matchedRouteConfigDataDescriptor.file;
+        }
 
         if (matchedRouteConfig.settings?.status) {
           response.statusCode = matchedRouteConfig.settings.status;
@@ -185,8 +207,8 @@ export const createRestRoutes = ({
           await sleep(matchedRouteConfig.settings.delay);
         }
 
-        if ('file' in matchedRouteConfig) {
-          return response.sendFile(path.resolve(matchedRouteConfig.file));
+        if (matchedRouteConfigDataDescriptor.file) {
+          return response.sendFile(path.resolve(matchedRouteConfigDataDescriptor.file));
         }
         return response.json(data);
       })
