@@ -1,16 +1,7 @@
 import type { GraphQLEntityName, GraphQLOperationName, GraphQLOperationType } from './graphql';
 import type { RestEntityName, RestMethod } from './rest';
+import type { ApiType } from './shared';
 import type { Cookies, Headers, Params, PlainObject, Query } from './values';
-
-export type MappedEntityName = Exclude<RestEntityName | GraphQLEntityName, 'body' | 'variables'>;
-
-type LoggerTokenValuesToTokenOptions<Type> = {
-  [Key in keyof Type]?: Key extends MappedEntityName ? Record<string, boolean> | boolean : boolean;
-};
-
-export type LoggerType = 'request' | 'response';
-
-export type LoggerAPI = 'rest' | 'graphql';
 
 export interface LoggerBaseTokenValues {
   type: string;
@@ -43,49 +34,37 @@ interface LoggerGraphQLResponseTokenValues extends LoggerGraphQLRequestTokenValu
   data: any;
 }
 
+export type LoggerType = 'request' | 'response';
+
 export type LoggerTokenValues<
   Type extends LoggerType = LoggerType,
-  API extends LoggerAPI = LoggerAPI
+  Api extends ApiType = ApiType
 > = Type extends 'request'
-  ? API extends 'rest'
+  ? Api extends 'rest'
     ? LoggerRestRequestTokenValues
-    : API extends 'graphql'
+    : Api extends 'graphql'
       ? LoggerGraphQLRequestTokenValues
       : never
   : Type extends 'response'
-    ? API extends 'rest'
+    ? Api extends 'rest'
       ? LoggerRestResponseTokenValues
-      : API extends 'graphql'
+      : Api extends 'graphql'
         ? LoggerGraphQLResponseTokenValues
         : never
     : never;
 
-type LoggerRestRequestTokenOptions = LoggerTokenValuesToTokenOptions<LoggerRestRequestTokenValues>;
-type LoggerRestResponseTokenOptions =
-  LoggerTokenValuesToTokenOptions<LoggerRestResponseTokenValues>;
-type LoggerGraphQLRequestTokenOptions =
-  LoggerTokenValuesToTokenOptions<LoggerGraphQLRequestTokenValues>;
-type LoggerGraphQLResponseTokenOptions =
-  LoggerTokenValuesToTokenOptions<LoggerGraphQLResponseTokenValues>;
+export type MappedEntityName = Exclude<RestEntityName | GraphQLEntityName, 'body' | 'variables'>;
+
+type LoggerTokenValuesToTokenOptions<Type> = {
+  [Key in keyof Type]?: Key extends MappedEntityName ? Record<string, boolean> | boolean : boolean;
+};
 
 export type LoggerTokenOptions<
   Type extends LoggerType = LoggerType,
-  API extends LoggerAPI = LoggerAPI
-> = Type extends 'request'
-  ? API extends 'rest'
-    ? LoggerRestRequestTokenOptions
-    : API extends 'graphql'
-      ? LoggerGraphQLRequestTokenOptions
-      : never
-  : Type extends 'response'
-    ? API extends 'rest'
-      ? LoggerRestResponseTokenOptions
-      : API extends 'graphql'
-        ? LoggerGraphQLResponseTokenOptions
-        : never
-    : never;
+  Api extends ApiType = ApiType
+> = LoggerTokenValuesToTokenOptions<LoggerTokenValues<Type, Api>>;
 
-export interface Logger<Type extends LoggerType = LoggerType, API extends LoggerAPI = LoggerAPI> {
-  tokenOptions?: LoggerTokenOptions<Type, API>;
-  rewrite?: (tokenValues: Partial<LoggerTokenValues<Type, API>>) => void;
+export interface Logger<Type extends LoggerType = LoggerType, Api extends ApiType = ApiType> {
+  tokenOptions?: LoggerTokenOptions<Type, Api>;
+  rewrite?: (tokenValues: Partial<LoggerTokenValues<Type, Api>>) => void;
 }

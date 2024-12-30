@@ -13,13 +13,11 @@ describe('filterTokenValues', () => {
   };
 
   test('Should remain only truthy options by whitelist logic on first level', () => {
-    const tokenOptions = {
+    const result = filterTokenValues(rawTokenValues, {
       key1: true,
       key2: false,
       key4: true
-    };
-
-    const result = filterTokenValues(rawTokenValues, tokenOptions);
+    });
 
     expect(result).toStrictEqual({
       key1: 'value1',

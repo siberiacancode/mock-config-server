@@ -38,12 +38,12 @@ export type GraphQLRouteConfig = (
         | ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>)
         | Data;
     }
-) & { entities?: GraphQLEntitiesByEntityName; interceptors?: Interceptors };
+) & { entities?: GraphQLEntitiesByEntityName; interceptors?: Interceptors<'graphql'> };
 
 interface BaseGraphQLRequestConfig {
   operationType: GraphQLOperationType;
   routes: GraphQLRouteConfig[];
-  interceptors?: Interceptors;
+  interceptors?: Interceptors<'graphql'>;
 }
 
 export interface OperationNameGraphQLRequestConfig extends BaseGraphQLRequestConfig {

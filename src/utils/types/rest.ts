@@ -45,7 +45,7 @@ export type RestRouteConfig<Method extends RestMethod> = (
       settings?: RestSettings & { polling?: false };
       file: string;
     }
-) & { entities?: RestEntitiesByEntityName<Method>; interceptors?: Interceptors };
+) & { entities?: RestEntitiesByEntityName<Method>; interceptors?: Interceptors<'rest'> };
 
 export type RestPathString = `/${string}`;
 
@@ -53,7 +53,7 @@ interface BaseRestRequestConfig<Method extends RestMethod> {
   path: RestPathString | RegExp;
   method: Method;
   routes: RestRouteConfig<Method>[];
-  interceptors?: Interceptors;
+  interceptors?: Interceptors<'rest'>;
 }
 
 type RestGetRequestConfig = BaseRestRequestConfig<'get'>;

@@ -10,7 +10,7 @@ describe('callRequestInterceptor: order of calls', () => {
     const interceptor = vi.fn();
 
     callRequestInterceptor({ request, interceptor });
-    expect(interceptor.mock.calls.length).toBe(1);
+    expect(interceptor).toBeCalledTimes(1);
   });
 });
 

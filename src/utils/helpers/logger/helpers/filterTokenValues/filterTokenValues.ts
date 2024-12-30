@@ -6,23 +6,19 @@ type TokenObjectOptions = Record<string, boolean>;
 
 type TokenObjectOptionsFiltering = 'whitelist' | 'blacklist';
 
-type ResolveTokenObjectOptionsFiltering = (
+const resolveTokenObjectOptionsFiltering = (
   tokenObjectOptions: TokenObjectOptions
-) => TokenObjectOptionsFiltering;
-
-const resolveTokenObjectOptionsFiltering: ResolveTokenObjectOptionsFiltering = (
-  tokenObjectOptions
-) => {
+): TokenObjectOptionsFiltering => {
   const values = Object.values(tokenObjectOptions);
-  if (values.some(Boolean)) return 'whitelist';
-  return 'blacklist';
+  return values.some(Boolean) ? 'whitelist' : 'blacklist';
 };
 
 type TokenOptions = Record<string, boolean | TokenObjectOptions>;
 
-type FilterTokenValues = (rawTokenValues: PlainObject, tokenOptions: TokenOptions) => PlainObject;
-
-export const filterTokenValues: FilterTokenValues = (rawTokenValues, tokenOptions) =>
+export const filterTokenValues = (
+  rawTokenValues: PlainObject,
+  tokenOptions: TokenOptions
+): PlainObject =>
   Object.entries(tokenOptions).reduce((acc, [tokenName, tokenOption]) => {
     const tokenValue = rawTokenValues[tokenName];
 

@@ -27,7 +27,7 @@ import { prepareRestRequestConfigs } from './helpers';
 interface CreateRestRoutesParams {
   router: IRouter;
   restConfig: RestConfig;
-  serverResponseInterceptor?: Interceptors['response'];
+  serverResponseInterceptor?: Interceptors<'rest'>['response'];
 }
 
 export const createRestRoutes = ({

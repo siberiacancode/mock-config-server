@@ -52,8 +52,8 @@ describe('callRequestLogger', () => {
 
     callRequestLogger({ logger: { rewrite }, request });
 
-    expect(consoleDir.mock.calls.length).toBe(0);
-    expect(rewrite.mock.calls.length).toBe(1);
+    expect(consoleDir).toBeCalledTimes(0);
+    expect(rewrite).toBeCalledTimes(1);
     expect(rewrite.mock.lastCall).toStrictEqual([
       {
         type: 'request',

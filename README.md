@@ -758,11 +758,11 @@ Response logger has additional tokens
 - `statusCode` `number` response status code
 - `data` `any` data returned to client
 
-If you need to log specific mapped entities (headers, cookies, query, params), use `Record<string, boolean>` object instead of boolean.
+If you need to log specific properties in mapped entities (headers, cookies, query, params), use `Record<string, boolean>` object instead of boolean.
 In that case logger will use following logic:
 
 - if some token is `true`, entity will be filtered by `whitelist` logic. *Only* enabled ones will be logged.
-- if some token is `false`, entity will be filtered by `blacklist` logic. All entities will be logged *except* disabled ones.
+- if all tokens is `false`, entity will be filtered by `blacklist` logic. All entities will be logged *except* disabled ones.
 
 > Whitelist logic have priority over blacklist if you pass `true` and `false` in same entity.
 

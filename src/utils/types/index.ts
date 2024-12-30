@@ -6,5 +6,6 @@ export * from './interceptors';
 export * from './logger';
 export * from './rest';
 export * from './server';
+export * from './shared';
 export * from './utils';
 export * from './values';
