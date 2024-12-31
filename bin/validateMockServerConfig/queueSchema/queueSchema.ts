@@ -11,12 +11,9 @@ export const queueSchema = z.array(
       }),
       ['data']
     ),
-    requiredPropertiesSchema(
-      z.strictObject({
-        time: z.number().int().nonnegative().optional(),
-        file: z.string()
-      }),
-      ['file']
-    )
+    z.strictObject({
+      time: z.number().int().nonnegative().optional(),
+      file: z.string()
+    })
   ])
 );

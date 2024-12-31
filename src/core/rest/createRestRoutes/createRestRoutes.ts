@@ -1,5 +1,6 @@
 import type { IRouter } from 'express';
 import { flatten } from 'flat';
+import fs from 'fs';
 import path from 'path';
 
 import {
@@ -150,12 +151,12 @@ export const createRestRoutes = ({
             updateIndex();
           }
 
+          if ('data' in queueItem) {
+            matchedRouteConfigDataDescriptor.data = queueItem.data;
+          }
           if ('file' in queueItem) {
             if (!isFilePathValid(queueItem.file)) return next();
             matchedRouteConfigDataDescriptor.file = queueItem.file;
-          }
-          if ('data' in queueItem) {
-            matchedRouteConfigDataDescriptor.data = queueItem.data;
           }
         }
 
@@ -166,6 +167,15 @@ export const createRestRoutes = ({
           if (!isFilePathValid(matchedRouteConfig.file)) return next();
           matchedRouteConfigDataDescriptor.file = matchedRouteConfig.file;
         }
+
+        if (matchedRouteConfig.settings?.status) {
+          response.statusCode = matchedRouteConfig.settings.status;
+        }
+
+        // ✅ important:
+        // set 'Cache-Control' header for explicit browsers response revalidate: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+        // this code should place before response interceptors for giving opportunity to rewrite 'Cache-Control' header
+        if (request.method === 'GET') response.set('Cache-control', 'no-cache');
 
         let resolvedData = null;
 
@@ -179,17 +189,12 @@ export const createRestRoutes = ({
               : matchedRouteConfigDataDescriptor.data;
         }
         if (matchedRouteConfigDataDescriptor.file) {
-          resolvedData = matchedRouteConfigDataDescriptor.file;
+          const buffer = fs.readFileSync(path.resolve(matchedRouteConfigDataDescriptor.file));
+          resolvedData = {
+            path: matchedRouteConfigDataDescriptor.file,
+            file: buffer
+          };
         }
-
-        if (matchedRouteConfig.settings?.status) {
-          response.statusCode = matchedRouteConfig.settings.status;
-        }
-
-        // ✅ important:
-        // set 'Cache-Control' header for explicit browsers response revalidate: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-        // this code should place before response interceptors for giving opportunity to rewrite 'Cache-Control' header
-        if (request.method === 'GET') response.set('Cache-control', 'no-cache');
 
         const data = await callResponseInterceptors({
           data: resolvedData,

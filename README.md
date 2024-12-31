@@ -450,7 +450,10 @@ export default mockServerConfig;
 
 > If the file path is absolute, then this path will be used as is. If the file path is relative, it will be appended to the current working directory.
 
-If the file exists, response interceptors will receive `file` path as the data argument.
+If the file exists, response interceptors will receive object with next properties as the `data` argument:
+
+- `path` `string` path to the file
+- `file` `Buffer` file content as binary buffer
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
@@ -465,8 +468,12 @@ const mockServerConfig = {
           {
             file: './settings.json',
             interceptors: {
-              response: (data) => {
-                console.log(data); // './settings.json'
+              response: ({ path, file }) => {
+                // some logic with buffer
+                fs.writeFileSync(
+                  path,
+                  file
+                );
                 return data;
               }
             }
@@ -486,7 +493,7 @@ export default mockServerConfig;
 
 Routes support polling for data. To add polling for data, you must specify the `polling setting` and use `queue` property instead of `data` or `file`.
 
-`queue` is an array containing `data` and `file` that should be returned in order.
+`queue` is an array containing `data` or `file` that should be returned in order.
 
 > After receiving the last value from polling, the queue is reset and the next request will return the first value from the queue.
 
