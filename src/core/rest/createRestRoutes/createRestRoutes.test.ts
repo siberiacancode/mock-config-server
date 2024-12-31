@@ -626,7 +626,7 @@ describe('createRestRoutes: entities', () => {
     expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should not convert empty object body into something else', async () => {
+  test('Should correctly handle empty object body', async () => {
     const server = createServer({
       rest: {
         configs: [
