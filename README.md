@@ -468,11 +468,11 @@ const mockServerConfig = {
           {
             file: './settings.json',
             interceptors: {
-              response: ({ path, file }) => {
+              response: (data) => {
                 // some logic with buffer
                 fs.writeFileSync(
-                  path,
-                  file
+                  data.path,
+                  data.file
                 );
                 return data;
               }
