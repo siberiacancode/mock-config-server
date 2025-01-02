@@ -17,19 +17,17 @@ export interface ShallowOrm<Item = unknown> {
 }
 
 export interface NestedOrm<Item = Record<string, unknown>> {
-  get: () => Item[];
-
-  create: (item: Omit<Item, 'id'>) => void;
+  create: (item: Omit<Item, 'id'>) => Item;
   update: (id: StorageIndex, item: Partial<Omit<Item, 'id'>>) => void;
   delete: (id: StorageIndex) => void;
 
-  createMany: (items: Item[]) => void;
-  updateMany: (ids: StorageIndex[], item: Partial<Omit<Item, 'id'>>) => void;
+  createMany: (items: Omit<Item, 'id'>[]) => void;
+  updateMany: (ids: StorageIndex[], item: Partial<Omit<Item, 'id'>>) => number;
   deleteMany: (ids: StorageIndex[]) => void;
 
   findById: (id: StorageIndex) => Item | undefined;
-  findMany: (filters: Partial<Item>) => Item[];
-  findFirst: (filters: Partial<Item>) => Item | undefined;
+  findMany: (filters?: Partial<Item>) => Item[];
+  findFirst: (filters?: Partial<Item>) => Item | undefined;
   exists: (filters: Partial<Item>) => boolean;
 
   count: () => number;

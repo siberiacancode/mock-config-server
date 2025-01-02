@@ -8,24 +8,20 @@ import {
   splitDatabaseByNesting
 } from '../createDatabaseRoutes/helpers';
 
-export const createOrm = (storage: Storage) => {
+export const createOrm = <Data extends Database = Database>(storage: Storage) => {
   const { shallowDatabase, nestedDatabase } = splitDatabaseByNesting(storage.read());
 
   const nestedOrm = Object.keys(nestedDatabase).reduce(
     (orm, key) => {
       orm[key] = {
-        get: () => storage.read(key),
-
         create: (item) => {
           const collection = storage.read(key);
-          if (!collection) throw new Error('Collection not found');
           const newResourceId = createNewId(collection);
           const newResource = { ...item, id: newResourceId };
           storage.write([key, collection.length], newResource);
 
           return newResource;
         },
-        delete: (id) => storage.delete([key, id]),
         update: (id, item) => {
           const collection = storage.read(key);
           const currentResourceIndex = findIndexById(collection, id);
@@ -36,6 +32,12 @@ export const createOrm = (storage: Storage) => {
           storage.write([key, currentResourceIndex], updatedRecord);
 
           return updatedRecord;
+        },
+        delete: (id) => {
+          const collection = storage.read(key);
+          const currentResourceIndex = findIndexById(collection, id);
+
+          storage.delete([key, currentResourceIndex]);
         },
 
         createMany: (data) =>
@@ -72,33 +74,37 @@ export const createOrm = (storage: Storage) => {
         findMany: (filters) => {
           const collection = storage.read(key);
 
-          const flattendFiltters = flatten<any, any>(filters);
+          if (!filters) return collection;
+
+          const flattenedFilters = flatten<any, any>(filters);
           return collection.filter((resource: any) => {
-            const flattendResource = flatten<any, any>(resource);
-            return Object.entries(flattendFiltters).every(
-              ([key, value]) => flattendResource[key] === value
+            const flattenedResource = flatten<any, any>(resource);
+            return Object.entries(flattenedFilters).every(
+              ([key, value]) => flattenedResource[key] === value
             );
           });
         },
         findFirst: (filters) => {
           const collection = storage.read(key);
 
-          const flattendFiltters = flatten<any, any>(filters);
+          if (!filters) return collection[0];
+
+          const flattenedFilters = flatten<any, any>(filters);
           return collection.find((resource: any) => {
-            const flattendResource = flatten<any, any>(resource);
-            return Object.entries(flattendFiltters).every(
-              ([key, value]) => flattendResource[key] === value
+            const flattenedResource = flatten<any, any>(resource);
+            return Object.entries(flattenedFilters).every(
+              ([key, value]) => flattenedResource[key] === value
             );
           });
         },
         exists: (filters) => {
           const collection = storage.read(key);
 
-          const flattendFiltters = flatten<any, any>(filters);
+          const flattenedFilters = flatten<any, any>(filters);
           return collection.some((resource: any) => {
-            const flattendResource = flatten<any, any>(resource);
-            return Object.entries(flattendFiltters).every(
-              ([key, value]) => flattendResource[key] === value
+            const flattenedResource = flatten<any, any>(resource);
+            return Object.entries(flattenedFilters).every(
+              ([key, value]) => flattenedResource[key] === value
             );
           });
         },
@@ -117,7 +123,6 @@ export const createOrm = (storage: Storage) => {
         get: () => storage.read(key),
         update: (data) => {
           storage.write(key, data);
-          console.log('@key', key, data);
         }
       };
 
@@ -129,5 +134,5 @@ export const createOrm = (storage: Storage) => {
   return {
     ...nestedOrm,
     ...shallowOrm
-  } as Orm<Database>;
+  } as Orm<Data>;
 };
