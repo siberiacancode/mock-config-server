@@ -54,14 +54,14 @@ export type LoggerTokens<
         : never
     : never;
 
-type LoggerTokensToTokenOptions<Type> = {
+type LoggerTokensToLoggerOptions<Type> = {
   [Key in keyof Type]?: Type[Key] extends PlainObject ? Record<string, boolean> | boolean : boolean;
 };
 
 export type LoggerOptions<
   Type extends LoggerType = LoggerType,
   Api extends ApiType = ApiType
-> = LoggerTokensToTokenOptions<LoggerTokens<Type, Api>>;
+> = LoggerTokensToLoggerOptions<LoggerTokens<Type, Api>>;
 
 export interface Logger<Type extends LoggerType = LoggerType, Api extends ApiType = ApiType> {
   tokens?: LoggerOptions<Type, Api>;
