@@ -511,7 +511,7 @@ const mockServerConfig = {
             queue: [
               { data: { emoji: '🦁', name: 'Nursultan' } },
               { data: { emoji: '☄', name: 'Dmitriy' } },
-              { file: './users/Sergey' }
+              { file: './users/Sergey.json' }
             ]
           }
         ]

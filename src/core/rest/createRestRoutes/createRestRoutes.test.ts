@@ -268,7 +268,7 @@ describe('createRestRoutes: content', () => {
 
     const response = await request(server).get('/users');
 
-    expect(response.status).toBe(200);
+    expect(response.statusCode).toBe(200);
     expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
     expect(response.body).toStrictEqual({ standName: 'The World' });
 
@@ -350,15 +350,62 @@ describe('createRestRoutes: settings', () => {
 
     const firstResponse = await request(server).get('/users');
     expect(firstResponse.statusCode).toBe(200);
-    expect(firstResponse.body).toEqual({ name: 'John', surname: 'Doe' });
+    expect(firstResponse.headers['content-type']).toBe('application/json; charset=utf-8');
+    expect(firstResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
 
     const secondResponse = await request(server).get('/users');
     expect(secondResponse.statusCode).toBe(200);
-    expect(secondResponse.body).toEqual({ name: 'John', surname: 'Smith' });
+    expect(secondResponse.headers['content-type']).toBe('application/json; charset=utf-8');
+    expect(secondResponse.body).toStrictEqual({ name: 'John', surname: 'Smith' });
 
     const thirdResponse = await request(server).get('/users');
     expect(thirdResponse.statusCode).toBe(200);
-    expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Doe' });
+    expect(thirdResponse.headers['content-type']).toBe('application/json; charset=utf-8');
+    expect(thirdResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+  });
+
+  test('Should correctly process file polling', async () => {
+    const tmpDirPath = createTmpDir();
+
+    const pathToUser1 = path.join(tmpDirPath, './user1.json');
+    fs.writeFileSync(pathToUser1, JSON.stringify({ name: 'John', surname: 'Doe' }));
+
+    const pathToUser2 = path.join(tmpDirPath, './user2.json');
+    fs.writeFileSync(pathToUser2, JSON.stringify({ name: 'John', surname: 'Smith' }));
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { polling: true },
+                queue: [{ file: pathToUser1 }, { file: pathToUser2 }]
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const firstResponse = await request(server).get('/users');
+    expect(firstResponse.statusCode).toBe(200);
+    expect(firstResponse.headers['content-disposition']).toBe('filename=user1.json');
+    expect(firstResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+
+    const secondResponse = await request(server).get('/users');
+    expect(secondResponse.statusCode).toBe(200);
+    expect(secondResponse.headers['content-disposition']).toBe('filename=user2.json');
+    expect(secondResponse.body).toStrictEqual({ name: 'John', surname: 'Smith' });
+
+    const thirdResponse = await request(server).get('/users');
+    expect(thirdResponse.statusCode).toBe(200);
+    expect(thirdResponse.headers['content-disposition']).toBe('filename=user1.json');
+    expect(thirdResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+
+    fs.rmSync(tmpDirPath, { recursive: true, force: true });
   });
 });
 
