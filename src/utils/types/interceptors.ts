@@ -34,7 +34,7 @@ export interface ResponseInterceptorParams<Api extends ApiType = ApiType> {
   log: (logger?: Logger<'response', Api>) => Partial<LoggerTokens>;
 }
 
-export type ResponseInterceptor<Data = any, Api extends ApiType = ApiType> = (
+export type ResponseInterceptor<Api extends ApiType = ApiType, Data = any> = (
   data: Data,
   params: ResponseInterceptorParams<Api>
 ) => any;

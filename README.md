@@ -662,11 +662,11 @@ Functions to change request or response parameters
 
 You can log requests and responses using `log` function in any [interceptor](#interceptors).
 
-`log` has the following signature `(logger?: Logger) => Partial<LoggerTokenValues> | null`.
+`log` has the following signature `(logger?: Logger) => Partial<LoggerTokens> | null`.
 
 `logger` parameter has the following optional properties
 
-- `tokenOptions` `LoggerTokenOptions` object map containing tokens to log. Keys is token names, values is boolean. `true` will add token into log, `false` will remove. If tokenOptions is not passed, following tokens will be logged
+- `tokens` `LoggerOptions` object map containing tokens to log. Keys is token names, values is boolean. `true` will add token into log, `false` will remove. If `tokens` is not passed, following tokens will be logged
   - Request
     - type
     - id
@@ -681,7 +681,7 @@ You can log requests and responses using `log` function in any [interceptor](#in
     - url
     - statusCode
     - data
-- `rewrite` `(tokenValues: Partial<LoggerTokenValues>) => void` function to customize default `console.dir(tokenValues, { depth: null })` appearance
+- `rewrite` `(tokens: Partial<LoggerTokens>) => void` function to replace default `console.dir(tokens, { depth: null })` appearance
 
 `log` function returns object with logged token values
 
@@ -699,7 +699,7 @@ const mockServerConfig = {
             interceptors: {
               request: ({ log }) => {
                 log({                 // logs following object in terminal
-                  tokenOptions: {     // {
+                  tokens: {     // {
                     id: true,         //  id: 1,
                     type: true,       //  type: 'request',
                     timestamp: true,  //  timestamp: '31.12.2024, 23:59:59,999',
@@ -710,7 +710,7 @@ const mockServerConfig = {
               },
               response: (data, { log }) => {
                 log({                 // logs following string in terminal
-                  tokenOptions: {     // response get: http://localhost:31299/api/rest/posts/1 => 200
+                  tokens: {     // response get: http://localhost:31299/api/rest/posts/1 => 200
                     type: true,
                     statusCode: true,
                     method: true,
@@ -747,6 +747,7 @@ export default mockServerConfig;
 - `url` `string` requested URL
 - `graphQLOperationType` `'query' | 'mutation' | null` GraphQL operation type. `null` if request is not GraphQL
 - `graphQLOperationName` `string` GraphQL operation name. `null` if request is not GraphQL
+- `graphQLQuery` `string` GraphQL query. `null` if request is not GraphQL
 - `variables`: `Record<string, any>` GraphQL variables. `null` if request is not GraphQL or variables is not passed
 - `headers` `Record<string, any>` headers object
 - `cookies` `Record<string, any>` cookies object
@@ -780,7 +781,7 @@ const mockServerConfig = {
             interceptors: {
               request: ({ log }) => {
                 log({                 // whitelist. only query1 and query2 will be logged
-                  tokenOptions: {
+                  tokens: {
                     query: {
                       query1: true,
                       query2: true
@@ -788,7 +789,7 @@ const mockServerConfig = {
                   }
                 });
                 log({                 // whitelist. only cookie1 and cookie2 will be logged
-                  tokenOptions: {
+                  tokens: {
                     cookies: {
                       cookie1: true,
                       cookie2: true,
@@ -797,7 +798,7 @@ const mockServerConfig = {
                   }
                 });
                 log({                 // blacklist. all headers will be logged except header1
-                  tokenOptions: {
+                  tokens: {
                     headers: {
                       header1: false
                     }

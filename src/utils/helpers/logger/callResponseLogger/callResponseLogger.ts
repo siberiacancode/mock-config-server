@@ -1,10 +1,10 @@
 import type { Request, Response } from 'express';
 
-import type { Data, Logger, LoggerTokenOptions, LoggerTokens, RestMethod } from '@/utils/types';
+import type { Data, Logger, LoggerOptions, LoggerTokens, RestMethod } from '@/utils/types';
 
 import { filterTokens, formatTokens } from '../helpers';
 
-const DEFAULT_RESPONSE_LOGGER_OPTIONS: LoggerTokenOptions<'response'> = {
+const DEFAULT_RESPONSE_LOGGER_OPTIONS: LoggerOptions<'response'> = {
   type: true,
   id: true,
   timestamp: true,
