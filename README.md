@@ -283,7 +283,7 @@ module.exports = mockServerConfig;
 
 #### Descriptor *oneOf* property
 
-For `checkMode` with the `value` property (all `checkMode` options except `exists` and `notExists`) you can use an array value.
+For `checkMode` with the `value` property (all `checkMode` options except `exists` and `notExists`) you can use an array as value.
 Mock server will find matches by iterating through the array until **some** match is found.
 To be able to use this functionality you need to explicitly set `oneOf: true` property in descriptor object.
 
