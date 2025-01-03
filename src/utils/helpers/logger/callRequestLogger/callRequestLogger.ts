@@ -1,10 +1,10 @@
 import type { Request } from 'express';
 
-import type { Logger, LoggerTokenOptions, LoggerTokenValues, RestMethod } from '@/utils/types';
+import type { Logger, LoggerTokenOptions, LoggerTokens, RestMethod } from '@/utils/types';
 
-import { filterTokenValues, formatTokenValues } from '../helpers';
+import { filterTokens, formatTokens } from '../helpers';
 
-const DEFAULT_LOGGER_REQUEST_TOKEN_OPTIONS: LoggerTokenOptions<'request'> = {
+const DEFAULT_REQUEST_LOGGER_OPTIONS: LoggerTokenOptions<'request'> = {
   type: true,
   id: true,
   timestamp: true,
@@ -18,7 +18,7 @@ interface CallRequestLoggerParams {
 }
 
 export const callRequestLogger = ({ logger, request }: CallRequestLoggerParams) => {
-  const rawTokenValues: LoggerTokenValues<'request'> = {
+  const tokens: LoggerTokens<'request'> = {
     type: 'request',
     id: request.id,
     timestamp: request.timestamp,
@@ -26,6 +26,7 @@ export const callRequestLogger = ({ logger, request }: CallRequestLoggerParams) 
     url: decodeURI(`${request.protocol}://${request.get('host')}${request.originalUrl}`),
     graphQLOperationType: request.graphQL?.operationType ?? null,
     graphQLOperationName: request.graphQL?.operationName ?? null,
+    graphQLQuery: request.graphQL?.query ?? null,
     variables: request.graphQL?.variables ?? null,
     headers: request.headers,
     cookies: request.cookies,
@@ -34,16 +35,16 @@ export const callRequestLogger = ({ logger, request }: CallRequestLoggerParams) 
     body: request.body
   };
 
-  const tokenOptions = logger?.tokenOptions ?? DEFAULT_LOGGER_REQUEST_TOKEN_OPTIONS;
+  const options = logger?.tokens ?? DEFAULT_REQUEST_LOGGER_OPTIONS;
 
-  const filteredTokenValues = filterTokenValues(rawTokenValues, tokenOptions);
+  const filteredTokens = filterTokens(tokens, options);
 
   if (logger?.rewrite) {
-    logger.rewrite(filteredTokenValues);
-    return filteredTokenValues;
+    logger.rewrite(filteredTokens);
+    return filteredTokens;
   }
 
-  const formattedTokens = formatTokenValues(filteredTokenValues);
+  const formattedTokens = formatTokens(filteredTokens);
   console.dir(formattedTokens, { depth: null });
-  return filteredTokenValues;
+  return filteredTokens;
 };

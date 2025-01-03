@@ -10,7 +10,8 @@ declare global {
       timestamp: number;
       graphQL: {
         operationType: GraphQLOperationType;
-        operationName: GraphQLOperationName;
+        operationName?: GraphQLOperationName;
+        query: string;
         variables?: GraphQLEntity<'variables'>;
       } | null;
     }
@@ -32,7 +33,8 @@ export const contextMiddleware = (server: Express) => {
     if (graphQLInput.query && graphQLQuery) {
       request.graphQL = {
         operationType: graphQLQuery.operationType as GraphQLOperationType,
-        operationName: graphQLQuery.operationName as GraphQLOperationName,
+        operationName: graphQLQuery.operationName,
+        query: graphQLInput.query,
         variables: graphQLInput.variables
       };
       return next();

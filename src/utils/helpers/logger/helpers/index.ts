@@ -1,2 +1,2 @@
-export * from './filterTokenValues/filterTokenValues';
-export * from './formatTokenValues/formatTokenValues';
+export * from './filterTokens/filterTokens';
+export * from './formatTokens/formatTokens';

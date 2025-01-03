@@ -1,7 +1,7 @@
-import { filterTokenValues } from './filterTokenValues';
+import { filterTokens } from './filterTokens';
 
-describe('filterTokenValues', () => {
-  const rawTokenValues = {
+describe('filterTokens', () => {
+  const tokens = {
     key1: 'value1',
     key2: 'value2',
     key3: 'value3',
@@ -13,7 +13,7 @@ describe('filterTokenValues', () => {
   };
 
   test('Should remain only truthy options by whitelist logic on first level', () => {
-    const result = filterTokenValues(rawTokenValues, {
+    const result = filterTokens(tokens, {
       key1: true,
       key2: false,
       key4: true
@@ -31,7 +31,7 @@ describe('filterTokenValues', () => {
 
   test('Should remain only truthy options by whitelist logic on second level', () => {
     expect(
-      filterTokenValues(rawTokenValues, {
+      filterTokens(tokens, {
         key4: {
           nestedKey1: true,
           nestedKey2: true
@@ -45,7 +45,7 @@ describe('filterTokenValues', () => {
     });
 
     expect(
-      filterTokenValues(rawTokenValues, {
+      filterTokens(tokens, {
         key4: {
           nestedKey1: true,
           nestedKey2: false
@@ -60,7 +60,7 @@ describe('filterTokenValues', () => {
 
   test('Should remove all falsy options by blacklist logic on second level', () => {
     expect(
-      filterTokenValues(rawTokenValues, {
+      filterTokens(tokens, {
         key1: true,
         key4: {
           nestedKey1: false,

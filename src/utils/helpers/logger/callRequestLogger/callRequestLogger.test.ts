@@ -16,7 +16,7 @@ describe('callRequestLogger', () => {
     originalUrl: '/api/rest/posts/2'
   } as Request;
 
-  test('Should log default tokens if logger or tokenOptions was not provided', () => {
+  test('Should log default tokens if logger or options was not provided', () => {
     const consoleDir = vi.spyOn(console, 'dir');
 
     callRequestLogger({ request });
@@ -65,7 +65,7 @@ describe('callRequestLogger', () => {
     ]);
   });
 
-  test('Should return logged token values', () => {
+  test('Should return logged tokens', () => {
     const rewrite = vi.fn();
 
     expect(callRequestLogger({ request })).toStrictEqual({

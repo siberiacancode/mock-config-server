@@ -1,16 +1,10 @@
 import type { Request, Response } from 'express';
 
-import type {
-  Data,
-  Logger,
-  LoggerTokenOptions,
-  LoggerTokenValues,
-  RestMethod
-} from '@/utils/types';
+import type { Data, Logger, LoggerTokenOptions, LoggerTokens, RestMethod } from '@/utils/types';
 
-import { filterTokenValues, formatTokenValues } from '../helpers';
+import { filterTokens, formatTokens } from '../helpers';
 
-const DEFAULT_LOGGER_RESPONSE_TOKEN_OPTIONS: LoggerTokenOptions<'response'> = {
+const DEFAULT_RESPONSE_LOGGER_OPTIONS: LoggerTokenOptions<'response'> = {
   type: true,
   id: true,
   timestamp: true,
@@ -33,7 +27,7 @@ export const callResponseLogger = ({
   request,
   response
 }: CallResponseLoggerParams) => {
-  const rawTokenValues: LoggerTokenValues<'response'> = {
+  const tokens: LoggerTokens<'response'> = {
     type: 'response',
     id: request.id,
     timestamp: Date.now(),
@@ -41,6 +35,7 @@ export const callResponseLogger = ({
     url: decodeURI(`${request.protocol}://${request.get('host')}${request.originalUrl}`),
     graphQLOperationType: request.graphQL?.operationType ?? null,
     graphQLOperationName: request.graphQL?.operationName ?? null,
+    graphQLQuery: request.graphQL?.query ?? null,
     variables: request.graphQL?.variables ?? null,
     statusCode: response.statusCode,
     headers: request.headers,
@@ -51,16 +46,16 @@ export const callResponseLogger = ({
     data
   };
 
-  const tokenOptions = logger?.tokenOptions ?? DEFAULT_LOGGER_RESPONSE_TOKEN_OPTIONS;
+  const options = logger?.tokens ?? DEFAULT_RESPONSE_LOGGER_OPTIONS;
 
-  const filteredTokenValues = filterTokenValues(rawTokenValues, tokenOptions);
+  const filteredTokens = filterTokens(tokens, options);
 
   if (logger?.rewrite) {
-    logger.rewrite(filteredTokenValues);
-    return filteredTokenValues;
+    logger.rewrite(filteredTokens);
+    return filteredTokens;
   }
 
-  const formattedTokens = formatTokenValues(filteredTokenValues);
+  const formattedTokens = formatTokens(filteredTokens);
   console.dir(formattedTokens, { depth: null });
-  return filteredTokenValues;
+  return filteredTokens;
 };

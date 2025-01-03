@@ -22,7 +22,7 @@ describe('callResponseLogger', () => {
 
   const data = { key: 'value' };
 
-  test('Should log default tokens if logger or tokenOptions was not provided', () => {
+  test('Should log default tokens if logger or tokens was not provided', () => {
     const consoleDir = vi.spyOn(console, 'dir');
     vi.spyOn(Date, 'now').mockImplementation(() => 1735623296789);
 
@@ -78,7 +78,7 @@ describe('callResponseLogger', () => {
     ]);
   });
 
-  test('Should return logged token values', () => {
+  test('Should return logged tokens', () => {
     const rewrite = vi.fn();
 
     expect(callResponseLogger({ data, request, response })).toStrictEqual({
