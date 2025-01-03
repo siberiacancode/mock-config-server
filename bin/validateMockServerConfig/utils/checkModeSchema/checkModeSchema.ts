@@ -64,20 +64,23 @@ export function entityDescriptorSchema(
     | z.ZodLiteral<'regExp'>,
   valueSchema?: z.ZodTypeAny
 ) {
-  return valueSchema
-    ? z.union([
-        z.strictObject({
-          checkMode: checkModeSchema,
-          value: z.array(valueSchema),
-          oneOf: z.literal(true)
-        }),
-        z.strictObject({
-          checkMode: checkModeSchema,
-          value: valueSchema,
-          oneOf: z.literal(false).optional()
-        })
-      ])
-    : z.strictObject({
-        checkMode: checkModeSchema
-      });
+  const isCheckActualValueCheckMode = !valueSchema;
+  if (isCheckActualValueCheckMode) {
+    return z.strictObject({
+      checkMode: checkModeSchema
+    });
+  }
+
+  return z.union([
+    z.strictObject({
+      checkMode: checkModeSchema,
+      value: z.array(valueSchema),
+      oneOf: z.literal(true)
+    }),
+    z.strictObject({
+      checkMode: checkModeSchema,
+      value: valueSchema,
+      oneOf: z.literal(false).optional()
+    })
+  ]);
 }
