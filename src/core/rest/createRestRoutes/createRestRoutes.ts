@@ -10,6 +10,7 @@ import {
   convertToEntityDescriptor,
   isEntityDescriptor,
   isFilePathValid,
+  isPlainObject,
   resolveEntityValues,
   sleep
 } from '@/utils/helpers';
@@ -212,10 +213,27 @@ export const createRestRoutes = ({
           await sleep(matchedRouteConfig.settings.delay);
         }
 
-        if (matchedRouteConfigDataDescriptor.file) {
-          return response.sendFile(path.resolve(matchedRouteConfigDataDescriptor.file));
+        if (matchedRouteConfigDataDescriptor.data) {
+          return response.json(data);
         }
-        return response.json(data);
+        if (matchedRouteConfigDataDescriptor.file) {
+          if (
+            !data ||
+            !isPlainObject(data) ||
+            !('path' in data) ||
+            typeof data.path !== 'string' ||
+            !isFilePathValid(data.path) ||
+            !('file' in data) ||
+            !data.file
+          ) {
+            return next();
+          }
+          const fileName = data.path.split('/').at(-1)!;
+          const fileExtension = fileName.split('.').at(-1)!;
+          response.type(fileExtension);
+          response.set('Content-Disposition', `filename=${fileName}`);
+          return response.send(data.file);
+        }
       })
     );
   });

@@ -269,7 +269,7 @@ describe('createRestRoutes: content', () => {
     const response = await request(server).get('/users');
 
     expect(response.status).toBe(200);
-    expect(response.headers['content-type']).toBe('application/json; charset=UTF-8');
+    expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
     expect(response.body).toStrictEqual({ standName: 'The World' });
 
     fs.rmSync(tmpDirPath, { recursive: true, force: true });

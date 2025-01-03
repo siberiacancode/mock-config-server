@@ -450,9 +450,11 @@ export default mockServerConfig;
 
 > If the file path is absolute, then this path will be used as is. If the file path is relative, it will be appended to the current working directory.
 
-If the file exists, response interceptors will receive object with next properties as the `data` argument:
+If the file exists, response interceptors will receive `file descriptor` as the `data` argument:
 
-- `path` `string` path to the file
+`File descriptor` is an object with `path` and `file` fields that describe file location and file content.
+
+- `path` `string` path to the file. Same as `file` passed in route
 - `file` `Buffer` file content as binary buffer
 
 ```javascript
@@ -469,11 +471,8 @@ const mockServerConfig = {
             file: './settings.json',
             interceptors: {
               response: (data) => {
-                // some logic with buffer
-                fs.writeFileSync(
-                  data.path,
-                  data.file
-                );
+                data.file = data.file;                  // some logic with buffer 
+                fs.writeFileSync(data.path, data.file); // rewrite ./settings.json file on disk with new content
                 return data;
               }
             }
