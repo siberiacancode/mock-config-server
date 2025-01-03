@@ -10,8 +10,8 @@ test('Should return correct error path if discriminator is not presented in pars
   };
   const schema = z.object({
     property: extendedDiscriminatedUnion('name', [
-      [z.literal('John'), z.object({ name: z.string(), age: z.number() })],
-      [z.literal('Jane'), z.object({ name: z.string(), age: z.number() })]
+      z.object({ name: z.literal('John'), age: z.number() }),
+      z.object({ name: z.literal('Jane'), age: z.number() })
     ])
   });
 
@@ -31,8 +31,8 @@ test('Should return correct error path if none of passed options have matched di
   };
   const schema = z.object({
     property: extendedDiscriminatedUnion('name', [
-      [z.literal('John'), z.object({ name: z.string(), age: z.number() })],
-      [z.literal('Jane'), z.object({ name: z.string(), age: z.number() })]
+      z.object({ name: z.literal('John'), age: z.number() }),
+      z.object({ name: z.literal('Jane'), age: z.number() })
     ])
   });
 
@@ -52,8 +52,8 @@ test('Should return correct error path if none of passed options have matched re
   };
   const schema = z.object({
     property: extendedDiscriminatedUnion('name', [
-      [z.literal('John'), z.object({ name: z.string(), age: z.number() })],
-      [z.literal('Jane'), z.object({ name: z.string(), age: z.number() })]
+      z.object({ name: z.literal('John'), age: z.number() }),
+      z.object({ name: z.literal('Jane'), age: z.number() })
     ])
   });
 

@@ -4,29 +4,35 @@ import { isPlainObject } from '@/utils/helpers';
 
 import { getMostSpecificPathFromError } from '../../../helpers';
 
-// ✅ important:
-// first element for check discriminator, second element for check discriminator + rest of properties
-type ExtendedDiscriminatedUnionOption = readonly [z.ZodTypeAny, z.ZodTypeAny];
+type ExtendedDiscriminatedUnionVariant<
+  Discriminator extends string,
+  Option extends z.ZodObject<{ [Key in Discriminator]: z.ZodTypeAny }> = z.ZodObject<{
+    [Key in Discriminator]: z.ZodTypeAny;
+  }>
+> = Option | z.ZodUnion<[Option, ...Option[]]>;
 
 export const extendedDiscriminatedUnion = <Discriminator extends string>(
   discriminator: Discriminator,
-  options: [
-    ExtendedDiscriminatedUnionOption,
-    ExtendedDiscriminatedUnionOption,
-    ...ExtendedDiscriminatedUnionOption[]
+  variants: [
+    ExtendedDiscriminatedUnionVariant<Discriminator>,
+    ...ExtendedDiscriminatedUnionVariant<Discriminator>[]
   ]
 ) =>
   z
     .custom((value) => isPlainObject(value) && discriminator in value)
     .superRefine((value, context) => {
-      const optionWithMatchedDiscriminatorSchema = options.find(([discriminatorSchema]) => {
-        const discriminatorSchemaParseResult = z
-          .object({ [discriminator]: discriminatorSchema })
-          .safeParse(value);
-        return discriminatorSchemaParseResult.success;
+      const variantWithMatchedDiscriminator = variants.find((variant) => {
+        const isVariantOption = variant instanceof z.ZodUnion;
+        if (isVariantOption) {
+          return variant.options.some(
+            (option) => option.pick({ [discriminator]: true } as any).safeParse(value).success
+          );
+        }
+
+        return variant.pick({ [discriminator]: true } as any).safeParse(value).success;
       });
 
-      if (!optionWithMatchedDiscriminatorSchema) {
+      if (!variantWithMatchedDiscriminator) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
           path: [discriminator],
@@ -35,10 +41,9 @@ export const extendedDiscriminatedUnion = <Discriminator extends string>(
         return z.NEVER;
       }
 
-      const [, restPropertiesSchema] = optionWithMatchedDiscriminatorSchema;
-      const restPropertiesSchemaParseResult = restPropertiesSchema.safeParse(value);
-      if (!restPropertiesSchemaParseResult.success) {
-        const issuePath = getMostSpecificPathFromError(restPropertiesSchemaParseResult.error);
+      const valueParseResult = variantWithMatchedDiscriminator.safeParse(value);
+      if (!valueParseResult.success) {
+        const issuePath = getMostSpecificPathFromError(valueParseResult.error);
         context.addIssue({
           code: z.ZodIssueCode.custom,
           path: issuePath,
