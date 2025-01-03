@@ -367,11 +367,11 @@ describe('createRestRoutes: settings', () => {
   test('Should correctly process file polling', async () => {
     const tmpDirPath = createTmpDir();
 
-    const pathToUser1 = path.join(tmpDirPath, './user1.json');
-    fs.writeFileSync(pathToUser1, JSON.stringify({ name: 'John', surname: 'Doe' }));
+    const pathToFirstUser = path.join(tmpDirPath, './firstUser.json');
+    fs.writeFileSync(pathToFirstUser, JSON.stringify({ name: 'John', surname: 'Doe' }));
 
-    const pathToUser2 = path.join(tmpDirPath, './user2.json');
-    fs.writeFileSync(pathToUser2, JSON.stringify({ name: 'John', surname: 'Smith' }));
+    const pathToSecondUser = path.join(tmpDirPath, './secondUser.json');
+    fs.writeFileSync(pathToSecondUser, JSON.stringify({ name: 'John', surname: 'Smith' }));
 
     const server = createServer({
       rest: {
@@ -382,7 +382,7 @@ describe('createRestRoutes: settings', () => {
             routes: [
               {
                 settings: { polling: true },
-                queue: [{ file: pathToUser1 }, { file: pathToUser2 }]
+                queue: [{ file: pathToFirstUser }, { file: pathToSecondUser }]
               }
             ]
           }
@@ -392,17 +392,17 @@ describe('createRestRoutes: settings', () => {
 
     const firstResponse = await request(server).get('/users');
     expect(firstResponse.statusCode).toBe(200);
-    expect(firstResponse.headers['content-disposition']).toBe('filename=user1.json');
+    expect(firstResponse.headers['content-disposition']).toBe('filename=firstUser.json');
     expect(firstResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
 
     const secondResponse = await request(server).get('/users');
     expect(secondResponse.statusCode).toBe(200);
-    expect(secondResponse.headers['content-disposition']).toBe('filename=user2.json');
+    expect(secondResponse.headers['content-disposition']).toBe('filename=secondUser.json');
     expect(secondResponse.body).toStrictEqual({ name: 'John', surname: 'Smith' });
 
     const thirdResponse = await request(server).get('/users');
     expect(thirdResponse.statusCode).toBe(200);
-    expect(thirdResponse.headers['content-disposition']).toBe('filename=user1.json');
+    expect(thirdResponse.headers['content-disposition']).toBe('filename=firstUser.json');
     expect(thirdResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
 
     fs.rmSync(tmpDirPath, { recursive: true, force: true });

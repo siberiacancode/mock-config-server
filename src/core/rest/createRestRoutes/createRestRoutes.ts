@@ -9,8 +9,8 @@ import {
   callResponseInterceptors,
   convertToEntityDescriptor,
   isEntityDescriptor,
+  isFileDescriptorValid,
   isFilePathValid,
-  isPlainObject,
   resolveEntityValues,
   sleep
 } from '@/utils/helpers';
@@ -217,17 +217,7 @@ export const createRestRoutes = ({
           return response.json(data);
         }
         if (matchedRouteConfigDataDescriptor.file) {
-          if (
-            !data ||
-            !isPlainObject(data) ||
-            !('path' in data) ||
-            typeof data.path !== 'string' ||
-            !isFilePathValid(data.path) ||
-            !('file' in data) ||
-            !data.file
-          ) {
-            return next();
-          }
+          if (!isFileDescriptorValid(data)) return next();
           const fileName = data.path.split('/').at(-1)!;
           const fileExtension = fileName.split('.').at(-1)!;
           response.type(fileExtension);
