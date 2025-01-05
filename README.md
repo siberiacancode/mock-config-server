@@ -698,7 +698,7 @@ const mockServerConfig = {
             interceptors: {
               request: ({ log }) => {
                 log({                 // logs following object in terminal
-                  options: {           // {
+                  options: {          // {
                     id: true,         //  id: 1,
                     type: true,       //  type: 'request',
                     timestamp: true,  //  timestamp: '31.12.2024, 23:59:59,999',
@@ -709,7 +709,7 @@ const mockServerConfig = {
               },
               response: (data, { log }) => {
                 log({                 // logs following string in terminal
-                  options: {           // response get: http://localhost:31299/api/rest/posts/1 => 200
+                  options: {          // response get: http://localhost:31299/api/rest/posts/1 => 200
                     type: true,
                     statusCode: true,
                     method: true,

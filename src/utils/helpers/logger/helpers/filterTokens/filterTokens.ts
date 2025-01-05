@@ -2,18 +2,18 @@ import type { PlainObject } from '@/utils/types';
 
 import { isPlainObject } from '../../../isPlainObject/isPlainObject';
 
-type TokenObjectOptions = Record<string, boolean>;
+type TokenNestedOption = Record<string, boolean>;
 
-type TokenObjectOptionsFilterMode = 'whitelist' | 'blacklist';
+type TokenNestedOptionFilterMode = 'whitelist' | 'blacklist';
 
-const resolveTokenObjectOptionsFilterMode = (
-  tokenObjectOptions: TokenObjectOptions
-): TokenObjectOptionsFilterMode => {
-  const values = Object.values(tokenObjectOptions);
+const resolveNestedOptionFilterMode = (
+  nestedOption: TokenNestedOption
+): TokenNestedOptionFilterMode => {
+  const values = Object.values(nestedOption);
   return values.some(Boolean) ? 'whitelist' : 'blacklist';
 };
 
-type TokenOptions = Record<string, boolean | TokenObjectOptions>;
+type TokenOptions = Record<string, boolean | TokenNestedOption>;
 
 export const filterTokens = (tokens: PlainObject, options: TokenOptions): PlainObject =>
   Object.entries(options).reduce((acc, [name, option]) => {
@@ -24,20 +24,20 @@ export const filterTokens = (tokens: PlainObject, options: TokenOptions): PlainO
       return acc;
     }
 
-    const isObjectOption = isPlainObject(option);
-    const isObjectToken = isPlainObject(token);
-    if (isObjectOption && isObjectToken) {
-      const tokenObjectOptionsFilterMode = resolveTokenObjectOptionsFilterMode(option);
+    const isNestedOption = isPlainObject(option);
+    const isNestedToken = isPlainObject(token);
+    if (isNestedOption && isNestedToken) {
+      const nestedOptionFilterMode = resolveNestedOptionFilterMode(option);
 
-      if (tokenObjectOptionsFilterMode === 'whitelist') {
-        acc[name] = Object.entries(option).reduce((acc, [name, objectTokenOption]) => {
-          if (objectTokenOption) {
+      if (nestedOptionFilterMode === 'whitelist') {
+        acc[name] = Object.entries(option).reduce((acc, [name, nestedOption]) => {
+          if (nestedOption) {
             acc[name] = token[name];
           }
           return acc;
         }, {} as PlainObject);
       }
-      if (tokenObjectOptionsFilterMode === 'blacklist') {
+      if (nestedOptionFilterMode === 'blacklist') {
         acc[name] = Object.keys(token).reduce((acc, name) => {
           if (option[name] !== false) {
             acc[name] = token[name];
