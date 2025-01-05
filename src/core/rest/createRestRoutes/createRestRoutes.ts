@@ -31,7 +31,7 @@ import { prepareRestRequestConfigs } from './helpers';
 interface CreateRestRoutesParams {
   router: IRouter;
   restConfig: RestConfig;
-  serverResponseInterceptor?: Interceptors['response'];
+  serverResponseInterceptor?: Interceptors<'rest'>['response'];
 }
 
 export const createRestRoutes = ({
@@ -102,9 +102,7 @@ export const createRestRoutes = ({
           });
         });
 
-        if (!matchedRouteConfig) {
-          return next();
-        }
+        if (!matchedRouteConfig) return next();
 
         if (matchedRouteConfig.interceptors?.request) {
           await callRequestInterceptor({
