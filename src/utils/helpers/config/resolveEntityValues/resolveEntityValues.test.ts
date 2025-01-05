@@ -100,88 +100,88 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
   });
 
   test('Should compare values independent of their types', () => {
-    const confirmationCheckModes = [
+    const positiveCheckModes = [
       'equals',
       'includes',
       'startsWith',
       'endsWith'
     ] satisfies CheckMode[];
-    confirmationCheckModes.forEach((confirmationCheckMode) => {
+    positiveCheckModes.forEach((positiveCheckMode) => {
       expect(
         resolveEntityValues({
-          checkMode: confirmationCheckMode,
+          checkMode: positiveCheckMode,
           actualValue: '12',
           descriptorValue: 12
         })
       ).toBe(true);
       expect(
         resolveEntityValues({
-          checkMode: confirmationCheckMode,
+          checkMode: positiveCheckMode,
           actualValue: 'true',
           descriptorValue: true
         })
       ).toBe(true);
       expect(
         resolveEntityValues({
-          checkMode: confirmationCheckMode,
+          checkMode: positiveCheckMode,
           actualValue: 'string',
           descriptorValue: 'string'
         })
       ).toBe(true);
       expect(
         resolveEntityValues({
-          checkMode: confirmationCheckMode,
+          checkMode: positiveCheckMode,
           actualValue: 'null',
           descriptorValue: null
         })
       ).toBe(true);
       expect(
         resolveEntityValues({
-          checkMode: confirmationCheckMode,
+          checkMode: positiveCheckMode,
           actualValue: 'undefined',
           descriptorValue: undefined
         })
       ).toBe(true);
     });
 
-    const negationCheckModes = [
+    const negativeCheckModes = [
       'notEquals',
       'notIncludes',
       'notStartsWith',
       'notEndsWith'
     ] satisfies CheckMode[];
-    negationCheckModes.forEach((negationCheckMode) => {
+    negativeCheckModes.forEach((negativeCheckMode) => {
       expect(
         resolveEntityValues({
-          checkMode: negationCheckMode,
+          checkMode: negativeCheckMode,
           actualValue: '12',
           descriptorValue: 12
         })
       ).toBe(false);
       expect(
         resolveEntityValues({
-          checkMode: negationCheckMode,
+          checkMode: negativeCheckMode,
           actualValue: 'true',
           descriptorValue: true
         })
       ).toBe(false);
       expect(
         resolveEntityValues({
-          checkMode: negationCheckMode,
+          checkMode: negativeCheckMode,
           actualValue: 'string',
           descriptorValue: 'string'
         })
       ).toBe(false);
       expect(
         resolveEntityValues({
-          checkMode: negationCheckMode,
+          checkMode: negativeCheckMode,
           actualValue: 'null',
           descriptorValue: null
         })
       ).toBe(false);
       expect(
         resolveEntityValues({
-          checkMode: negationCheckMode,
+          checkMode: negativeCheckMode,
           actualValue: 'undefined',
           descriptorValue: undefined
         })
@@ -189,47 +189,47 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
     });
   });
 
-  test('Should return false/true for confirmation/negation check modes when primitive and object are compared', () => {
-    const confirmationCheckModes = [
+  test('Should return false/true for positive/negative check modes when primitive and object are compared', () => {
+    const positiveCheckModes = [
       'equals',
       'includes',
       'startsWith',
       'endsWith'
     ] satisfies CheckMode[];
-    confirmationCheckModes.forEach((confirmationCheckMode) => {
+    positiveCheckModes.forEach((positiveCheckMode) => {
       expect(
         resolveEntityValues({
-          checkMode: confirmationCheckMode,
+          checkMode: positiveCheckMode,
           actualValue: 'primitive',
           descriptorValue: ['primitive', { property: 'primitive' }]
         })
       ).toBe(false);
       expect(
         resolveEntityValues({
-          checkMode: confirmationCheckMode,
+          checkMode: positiveCheckMode,
           actualValue: ['primitive', { property: 'primitive' }],
           descriptorValue: 'primitive'
         })
       ).toBe(false);
     });
 
-    const negationCheckModes = [
+    const negativeCheckModes = [
       'notEquals',
       'notIncludes',
       'notStartsWith',
       'notEndsWith'
     ] satisfies CheckMode[];
-    negationCheckModes.forEach((negationCheckMode) => {
+    negativeCheckModes.forEach((negativeCheckMode) => {
       expect(
         resolveEntityValues({
-          checkMode: negationCheckMode,
+          checkMode: negativeCheckMode,
           actualValue: 'primitive',
           descriptorValue: ['primitive', { property: 'primitive' }]
         })
       ).toBe(true);
       expect(
         resolveEntityValues({
-          checkMode: negationCheckMode,
+          checkMode: negativeCheckMode,
           actualValue: ['primitive', { property: 'primitive' }],
           descriptorValue: 'primitive'
         })
