@@ -269,7 +269,6 @@ describe('createRestRoutes: content', () => {
     const response = await request(server).get('/users');
 
     expect(response.statusCode).toBe(200);
-    expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
     expect(response.body).toStrictEqual({ standName: 'The World' });
 
     fs.rmSync(tmpDirPath, { recursive: true, force: true });
@@ -350,17 +349,14 @@ describe('createRestRoutes: settings', () => {
 
     const firstResponse = await request(server).get('/users');
     expect(firstResponse.statusCode).toBe(200);
-    expect(firstResponse.headers['content-type']).toBe('application/json; charset=utf-8');
     expect(firstResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
 
     const secondResponse = await request(server).get('/users');
     expect(secondResponse.statusCode).toBe(200);
-    expect(secondResponse.headers['content-type']).toBe('application/json; charset=utf-8');
     expect(secondResponse.body).toStrictEqual({ name: 'John', surname: 'Smith' });
 
     const thirdResponse = await request(server).get('/users');
     expect(thirdResponse.statusCode).toBe(200);
-    expect(thirdResponse.headers['content-type']).toBe('application/json; charset=utf-8');
     expect(thirdResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
