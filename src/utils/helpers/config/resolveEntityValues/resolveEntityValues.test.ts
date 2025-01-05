@@ -20,7 +20,7 @@ describe('resolveEntityValues: checkMode without descriptor value', () => {
 
 describe('resolveEntityValues: checkMode with descriptor value', () => {
   describe('"regExp" checkMode', () => {
-    test('Should correctly test actual value against descriptor reg exp', () => {
+    test('Should correctly test actual value against descriptor regExp', () => {
       expect(
         resolveEntityValues({
           checkMode: 'regExp',
@@ -39,7 +39,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
 
     // ✅ important:
     // this is about https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastIndex#avoiding_side_effects
-    test('Should be independent of reg exp "lastIndex" property when this reg exp using "g" flag', () => {
+    test('Should be independent of regExp "lastIndex" property when this regExp using "g" flag', () => {
       const regExpWithGlobalFlag = /string/g;
       expect(
         resolveEntityValues({
