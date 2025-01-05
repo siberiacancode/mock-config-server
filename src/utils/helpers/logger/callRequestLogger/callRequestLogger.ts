@@ -35,7 +35,7 @@ export const callRequestLogger = ({ logger, request }: CallRequestLoggerParams) 
     body: request.body
   };
 
-  const options = logger?.tokens ?? DEFAULT_REQUEST_LOGGER_OPTIONS;
+  const options = logger?.options ?? DEFAULT_REQUEST_LOGGER_OPTIONS;
 
   const filteredTokens = filterTokens(tokens, options);
 

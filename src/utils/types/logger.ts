@@ -64,6 +64,6 @@ export type LoggerOptions<
 > = LoggerTokensToLoggerOptions<LoggerTokens<Type, Api>>;
 
 export interface Logger<Type extends LoggerType = LoggerType, Api extends ApiType = ApiType> {
-  tokens?: LoggerOptions<Type, Api>;
+  options?: LoggerOptions<Type, Api>;
   rewrite?: (tokens: Partial<LoggerTokens<Type, Api>>) => void;
 }

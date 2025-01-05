@@ -621,7 +621,7 @@ Functions to change request or response parameters
   - `getHeaders` `() => Record<string | number | string[] | undefined>`
   - `getCookie` `(name) => string | undefined`
     - `name` `string` name of cookie
-  - `log` `(logger) => Partial<LoggerTokenValues> | null` logger function [read](#logger)
+  - `log` `(logger) => Partial<LoggerTokens>` logger function [read](#logger)
     - `logger` `Logger | undefined` logger options
 
 ##### Response
@@ -665,7 +665,7 @@ You can log requests and responses using `log` function in any [interceptor](#in
 
 `logger` parameter has the following optional properties
 
-- `tokens?` `LoggerOptions` object map containing tokens to log. Keys is token names, values is boolean. `true` will add token into log, `false` will remove. If `tokens` property is not passed, following tokens will be logged
+- `options?` `LoggerOptions` object map containing tokens to log. Keys is token names, values is boolean. `true` will add token into log, `false` will remove. If `options` property is not passed, following tokens will be logged
   - Request
     - type
     - id
@@ -698,7 +698,7 @@ const mockServerConfig = {
             interceptors: {
               request: ({ log }) => {
                 log({                 // logs following object in terminal
-                  tokens: {           // {
+                  options: {           // {
                     id: true,         //  id: 1,
                     type: true,       //  type: 'request',
                     timestamp: true,  //  timestamp: '31.12.2024, 23:59:59,999',
@@ -709,7 +709,7 @@ const mockServerConfig = {
               },
               response: (data, { log }) => {
                 log({                 // logs following string in terminal
-                  tokens: {           // response get: http://localhost:31299/api/rest/posts/1 => 200
+                  options: {           // response get: http://localhost:31299/api/rest/posts/1 => 200
                     type: true,
                     statusCode: true,
                     method: true,
@@ -780,7 +780,7 @@ const mockServerConfig = {
             interceptors: {
               request: ({ log }) => {
                 log({                 // whitelist. only query1 and query2 will be logged
-                  tokens: {
+                  options: {
                     query: {
                       query1: true,
                       query2: true
@@ -788,7 +788,7 @@ const mockServerConfig = {
                   }
                 });
                 log({                 // whitelist. only cookie1 and cookie2 will be logged
-                  tokens: {
+                  options: {
                     cookies: {
                       cookie1: true,
                       cookie2: true,
@@ -797,7 +797,7 @@ const mockServerConfig = {
                   }
                 });
                 log({                 // blacklist. all headers will be logged except header1
-                  tokens: {
+                  options: {
                     headers: {
                       header1: false
                     }

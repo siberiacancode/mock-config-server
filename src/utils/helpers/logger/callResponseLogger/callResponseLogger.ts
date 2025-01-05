@@ -46,7 +46,7 @@ export const callResponseLogger = ({
     data
   };
 
-  const options = logger?.tokens ?? DEFAULT_RESPONSE_LOGGER_OPTIONS;
+  const options = logger?.options ?? DEFAULT_RESPONSE_LOGGER_OPTIONS;
 
   const filteredTokens = filterTokens(tokens, options);
 
