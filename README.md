@@ -665,7 +665,7 @@ You can log requests and responses using `log` function in any [interceptor](#in
 
 `logger` parameter has the following optional properties
 
-- `tokens` `LoggerOptions` object map containing tokens to log. Keys is token names, values is boolean. `true` will add token into log, `false` will remove. If `tokens` property is not passed, following tokens will be logged
+- `tokens?` `LoggerOptions` object map containing tokens to log. Keys is token names, values is boolean. `true` will add token into log, `false` will remove. If `tokens` property is not passed, following tokens will be logged
   - Request
     - type
     - id
@@ -680,7 +680,7 @@ You can log requests and responses using `log` function in any [interceptor](#in
     - url
     - statusCode
     - data
-- `rewrite` `(tokens: Partial<LoggerTokens>) => void` function to replace default `console.dir(tokens, { depth: null })` appearance
+- `rewrite?` `(tokens: Partial<LoggerTokens>) => void` function to replace default `console.dir(tokens, { depth: null })` appearance
 
 `log` function returns object with logged token values
 
