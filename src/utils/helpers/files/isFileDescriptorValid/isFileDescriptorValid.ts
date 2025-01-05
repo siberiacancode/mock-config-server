@@ -1,12 +1,14 @@
+import { z } from 'zod';
+
 import type { FileDescriptor } from '@/utils/types';
 
-import { isPlainObject } from '../../isPlainObject/isPlainObject';
 import { isFilePathValid } from '../isFilePathValid/isFilePathValid';
 
 export const isFileDescriptorValid = (value: any): value is FileDescriptor =>
-  isPlainObject(value) &&
-  'path' in value &&
-  typeof value.path === 'string' &&
-  isFilePathValid(value.path) &&
-  'file' in value &&
-  Buffer.isBuffer(value.file);
+  z
+    .object({
+      path: z.string().refine(isFilePathValid),
+      file: z.instanceof(Buffer)
+    })
+    .strict()
+    .safeParse(value).success;
