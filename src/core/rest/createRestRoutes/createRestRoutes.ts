@@ -216,6 +216,10 @@ export const createRestRoutes = ({
         }
         if (matchedRouteConfigDataDescriptor.file) {
           if (!isFileDescriptorValid(data)) return next();
+          const isFilePathChanged = matchedRouteConfigDataDescriptor.file !== data.path;
+          if (isFilePathChanged) {
+            data.file = fs.readFileSync(path.resolve(data.path));
+          }
           const fileName = data.path.split('/').at(-1)!;
           const fileExtension = fileName.split('.').at(-1)!;
           response.type(fileExtension);
