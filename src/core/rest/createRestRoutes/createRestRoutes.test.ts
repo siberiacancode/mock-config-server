@@ -269,6 +269,44 @@ describe('createRestRoutes: content', () => {
     const response = await request(server).get('/users');
 
     expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
+    expect(response.headers['content-disposition']).toBe('filename=data.json');
+    expect(response.body).toStrictEqual({ standName: 'The World' });
+
+    fs.rmSync(tmpDirPath, { recursive: true, force: true });
+  });
+
+  test('Should send a new file if interceptor return different path', async () => {
+    const tmpDirPath = createTmpDir();
+    const pathToFirstFile = path.join(tmpDirPath, './firstFile.json');
+    fs.writeFileSync(pathToFirstFile, JSON.stringify({ standName: 'Star Platinum' }));
+    const pathToSecondFile = path.join(tmpDirPath, './secondFile.json');
+    fs.writeFileSync(pathToSecondFile, JSON.stringify({ standName: 'The World' }));
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                file: pathToFirstFile,
+                interceptors: {
+                  response: ({ file }) => ({ path: pathToSecondFile, file })
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
+    expect(response.headers['content-disposition']).toBe('filename=secondFile.json');
     expect(response.body).toStrictEqual({ standName: 'The World' });
 
     fs.rmSync(tmpDirPath, { recursive: true, force: true });
