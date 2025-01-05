@@ -364,7 +364,7 @@ describe('createRestRoutes: settings', () => {
     expect(thirdResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should correctly process file polling', async () => {
+  test('Should correctly process the request with file polling setting', async () => {
     const tmpDirPath = createTmpDir();
 
     const pathToFirstUser = path.join(tmpDirPath, './firstUser.json');
