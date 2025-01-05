@@ -25,11 +25,18 @@ export const extendedDiscriminatedUnion = <Discriminator extends string>(
         const isVariantOption = variant instanceof z.ZodUnion;
         if (isVariantOption) {
           return variant.options.some(
-            (option) => option.pick({ [discriminator]: true } as any).safeParse(value).success
+            (option) =>
+              option
+                .strip()
+                .pick({ [discriminator]: true } as any)
+                .safeParse(value).success
           );
         }
 
-        return variant.pick({ [discriminator]: true } as any).safeParse(value).success;
+        return variant
+          .strip()
+          .pick({ [discriminator]: true } as any)
+          .safeParse(value).success;
       });
 
       if (!variantWithMatchedDiscriminator) {
