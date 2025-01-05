@@ -53,6 +53,17 @@ export const createNestedDatabaseRoutes = ({
           data = search(data, request.query._q as ParsedUrlQuery);
         }
 
+        if (_sort) {
+          data = sort(data, request.query as ParsedUrlQuery);
+        }
+
+        if (_begin || _end) {
+          data = data.slice(request.query._begin ?? 0, request.query._end);
+          response.set('X-Total-Count', data.length);
+        }
+
+        // ✅ important:
+        // The pagination should be last because it changes the form of the response
         if (_page) {
           data = pagination(data, request.query as ParsedUrlQuery);
           if (data._link) {
@@ -80,14 +91,6 @@ export const createNestedDatabaseRoutes = ({
           }
         }
 
-        if (_sort) {
-          data = sort(data, request.query as ParsedUrlQuery);
-        }
-
-        if (_begin || _end) {
-          data = data.slice(request.query._begin ?? 0, request.query._end);
-          response.set('X-Total-Count', data.length);
-        }
         // ✅ important:
         // set 'Cache-Control' header for explicit browsers response revalidate
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control

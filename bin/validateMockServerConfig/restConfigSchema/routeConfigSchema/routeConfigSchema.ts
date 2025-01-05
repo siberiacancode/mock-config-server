@@ -26,7 +26,7 @@ const entitiesByEntityNameSchema = (method: RestMethod) => {
 const baseRouteConfigSchema = (method: RestMethod) =>
   z.strictObject({
     entities: entitiesByEntityNameSchema(method).optional(),
-    interceptors: plainObjectSchema(interceptorsSchema.pick({ response: true })).optional()
+    interceptors: plainObjectSchema(interceptorsSchema).optional()
   });
 
 const dataRouteConfigSchema = (method: RestMethod) =>

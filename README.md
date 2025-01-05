@@ -66,57 +66,40 @@ $ npx mock-config-server
 ## 🎭 Parameters for mock-server.config.(js|ts)
 
 - `rest?` Rest configs for mock requests
-  - `baseUrl?` {string} part of the url that will be substituted at the beginning of rest request url (default: `'/'`)
-  - `configs` {Array<RestRequestConfig>} configs for mock requests, [read](#configs)
-  - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
+  - `baseUrl?` `string` part of the url that will be substituted at the beginning of rest request url (default: `'/'`)
+  - `configs` `Array<RestRequestConfig>` configs for mock requests, [read](#configs)
+  - `interceptors?` `Interceptors` functions to change request or response parameters, [read](#interceptors)
 - `graphql?` GraphQL configs for mock requests
-  - `baseUrl?` {string} part of the url that will be substituted at the beginning of graphql request url (default: `'/'`)
-  - `configs` {Array<GraphQLRequestConfig>} configs for mock requests, [read](#configs)
-  - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
+  - `baseUrl?` `string` part of the url that will be substituted at the beginning of graphql request url (default: `'/'`)
+  - `configs` `Array<GraphQLRequestConfig>` configs for mock requests, [read](#configs)
+  - `interceptors?` `Interceptors` functions to change request or response parameters, [read](#interceptors)
 - `database?` Database config for mock requests [read](#database)
-  - `data` {Object | string} initial data for database
-  - `routes?` {Object | string} map of custom routes for database
-- `staticPath?` {StaticPath} entity for working with static files, [read](#static-path)
-- `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
-- `cors?` {Cors} CORS settings object (default: `CORS is turn off`), [read](#cors)
-- `port?` {number} server port (default: `31299`)
-- `baseUrl?` {string} part of the url that will be substituted at the beginning of the request url (default: `'/'`)
+  - `data` `Object | string` initial data for database
+  - `routes?` `Object | string` map of custom routes for database
+- `staticPath?` `StaticPath` entity for working with static files, [read](#static-path)
+- `interceptors?` `Interceptors` functions to change request or response parameters, [read](#interceptors)
+- `cors?` `Cors` CORS settings object (default: `CORS is turn off`), [read](#cors)
+- `port?` `number` server port (default: `31299`)
+- `baseUrl?` `string` part of the url that will be substituted at the beginning of the request url (default: `'/'`)
 
 ### Configs
 
 Configs are the fundamental part of the mock server. These configs are easy to fill and maintain. Config entities is an object with which you can emulate various application behaviors. You can specify `headers` | `cookies` | `query` | `params` | `body` for Rest request or `headers` | `cookies` | `query` | `variables` for GraphQL request to define what contract data you need to get. Using this mechanism, you can easily simulate the operation of the server and emulate various cases
 
-##### Rest request config
+#### Rest request config
 
 Every route must be configured to handle response content in one of three ways: data or [queue](#polling) or [file](#file-responses).
 
-- `path` {string | RegExp} request path
-- `method` {get | post | delete | put | patch | options} rest api method
-- `routes` {RestRouteConfig[]} request routes
-  - `data?` {any} mock data of request
-  - `queue?` {Array<{ time?: number; data: any}>} queue for polling with opportunity to set time for each response
-  - `file?` {string} path to file for return in response
-  - `settings?` {Settings} settings for route (polling on/off, etc.)
-  - `entities?` Object<headers | cookies | query | params | body> object that helps in data retrieval
-  - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
-- `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
-
-##### GraphQL request config
-
-Every route must be configured to handle response content in one of two ways: data or [queue](#polling).
-
-- `operationType` {query | mutation} graphql operation type
-- `operationName?` {string | RegExp} graphql operation name
-- `query?`: {string} graphql query as string
-- `routes` {GraphQLRouteConfig[]} request routes
-  - `data?` {any} mock data of request
-  - `queue?` {Array<{ time?: number; data: any}>} queue for polling with opportunity to set time for each response
-  - `settings?` {Settings} settings for route (polling on/off, etc.)
-  - `entities?` Object<headers | cookies | query | variables> object that helps in data retrieval
-  - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
-- `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
-
-> Every graphql config should contain `operationName` or `query` or both of them
+- `path` `string | RegExp` request path
+- `method` `'get' | 'post' | 'delete' | 'put' | 'patch' | 'options'` rest api method
+- `routes` `RestRouteConfig[]` request routes
+  - `data?` `any` mock data of request
+  - `queue?` `Array<{ time?: number; data: any}>` queue for polling with opportunity to set time for each response
+  - `file?` `string` path to file for return in response
+  - `settings?` `Settings` settings for route (polling on/off, etc.)
+  - `entities?` `Object<headers | cookies | query | params | body>` object that helps in data retrieval
+  - `interceptors?` `Interceptors` functions to change request or response parameters, [read](#interceptors)
+- `interceptors?` `Interceptors` functions to change request or response parameters, [read](#interceptors)
 
 ##### Rest example
 
@@ -163,6 +146,23 @@ fetch('http://localhost:31299/api/user', {
   .then((response) => response.json())
   .then((data) => console.log(data)); // {  emoji: '🦁', name: 'Nursultan' }
 ```
+
+#### GraphQL request config
+
+Every route must be configured to handle response content in one of two ways: data or [queue](#polling).
+
+- `operationType` `query | mutation` graphql operation type
+- `operationName?` `string | RegExp` graphql operation name
+- `query?`: `string` graphql query as string
+- `routes` `GraphQLRouteConfig[]` request routes
+  - `data?` `any` mock data of request
+  - `queue?` `Array<{ time?: number; data: any}>` queue for polling with opportunity to set time for each response
+  - `settings?` `Settings` settings for route (polling on/off, etc.)
+  - `entities?` `Object<headers | cookies | query | variables>` object that helps in data retrieval
+  - `interceptors?` `Interceptors` functions to change request or response parameters, [read](#interceptors)
+- `interceptors?` `Interceptors` functions to change request or response parameters, [read](#interceptors)
+
+> Every graphql config should contain `operationName` or `query` or both of them
 
 ##### GraphQL example
 
@@ -318,6 +318,44 @@ Return `true` if `actualValue` matches your logic or `false` otherwise.
 
 You can use the `checkFunction` from second argument if you want to describe your logic in a more declarative way.
 `checkFunction` has the following signature `(checkMode, actualValue, descriptorValue?) => boolean`.
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/posts/:postId',
+        method: 'post',
+        routes: [
+          {
+            entities: {
+              params: {
+                postId: {
+                  checkMode: 'function',
+                  value: (actualValue) => +actualValue >= 0 && +actualValue <= 50
+                },
+              },
+              cookies: {
+                authToken: {
+                  checkMode: 'function',
+                  value: (actualValue, checkFunction) => 
+                    checkFunction('equals', actualValue, 123) ||
+                    checkFunction('startsWith', actualValue, 2)
+                }
+              }
+            },
+            data: 'Some user data'
+          }
+        ]
+      }
+    ]
+  }
+};
+
+module.exports = mockServerConfig;
+```
 
 ##### Using descriptors for part of REST body or GraphQL variables
 
@@ -548,77 +586,242 @@ Entity for connecting statics to the server, like HTML, JSON, PNG, etc.
 
 - `string` path to your static files
 - `Object<{prefix, path}`
-  - `prefix` {string} path prefix for request
-  - `path` {string} path to your static files
+  - `prefix` `string` path prefix for request
+  - `path` `string` path to your static files
 - `Array<string | Object<{prefix, path}>>`
 
 #### Cors
 
 Object with settings for [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). You can flexibly configure the required origin, methods, headers, credentials, maxAge for the entire server. If you do not specify `CORS` settings, then it will be disabled.
 
-- `origin` {string | RegExp | Array<string | RegExp> | Function | Promise } available origins from which requests can be made
-- `methods?` {Array<GET | POST | DELETE | PUT | PATCH>} available methods (default: `GET,OPTIONS,PUT,PATCH,POST,DELETE`)
-- `allowedHeaders?` {Array<string>} allowed headers (default: `*`)
-- `exposedHeaders?` {Array<string>} exposed headers (default: `*`)
-- `credentials?` {boolean} param tells browsers whether to expose the response to the frontend JavaScript code (default: `true`)
-- `maxAge?` {number} how long the results can be cached (default: `3600`)
+- `origin` `string | RegExp | Array<string | RegExp> | Function | Promise` available origins from which requests can be made
+- `methods?` `Array<GET | POST | DELETE | PUT | PATCH>` available methods (default: `GET,OPTIONS,PUT,PATCH,POST,DELETE`)
+- `allowedHeaders?` `Array<string>` allowed headers (default: `*`)
+- `exposedHeaders?` `Array<string>` exposed headers (default: `*`)
+- `credentials?` `boolean` param tells browsers whether to expose the response to the frontend JavaScript code (default: `true`)
+- `maxAge?` `number` how long the results can be cached (default: `3600`)
 
 #### Interceptors
 
 Functions to change request or response parameters
 
-- `request?` (params) => void
-- `response?` (data, params) => any
+- `request?` `(params) => void`
+- `response?` `(data, params) => any`
+
+> request interceptors (except interceptor for route) are called regardless of whether the server found a route match or not. So changes in request interceptors can affect whether the server finds the route or not
 
 ##### Request
 
 - `params`
   - `request` request object
-  - `setDelay` (delay) => Promise<void>
-    - `delay` {number} milliseconds of delay time
-  - `getHeader` (field) => string | number | string[] | undefined
-    - `field` {string} name of response header
-  - `getHeaders` () => Record<string | number | string[] | undefined>
-  - `getCookie` (name) => string | undefined
-    - `name` {string} name of cookie
+  - `setDelay` `(delay) => Promise<void>`
+    - `delay` `number` milliseconds of delay time
+  - `getHeader` `(field) => string | number | string[] | undefined`
+    - `field` `string` name of response header
+  - `getHeaders` `() => Record<string | number | string[] | undefined>`
+  - `getCookie` `(name) => string | undefined`
+    - `name` `string` name of cookie
+  - `log` `(logger) => Partial<LoggerTokens>` logger function [read](#logger)
+    - `logger` `Logger | undefined` logger options
 
 ##### Response
 
-- `data` {any} mock data of request
+- `data` `any` mock data of request
 - `params`
   - `request` request object
   - `response` response object
-  - `setDelay` (delay) => Promise<void>
-    - `delay` {number} milliseconds of delay time
-  - `setStatusCode` (statusCode) => void
-    - `statusCode` {number} status code for response
-  - `setHeader` (field, value) => void
-    - `field` {string} name of response header
-    - `value` {string | string[] | undefined} value of response header
-  - `appendHeader` (field, value) => void
-    - `field` {string} name of response header
-    - `value` {string | string[] | undefined} value of response header
-  - `getHeader` (field) => string | number | string[] | undefined
-    - `field` {string} name of response header
-  - `getHeaders` () => Record<string | number | string[] | undefined>
-  - `setCookie` (name, value, options) => void
-    - `name` {string} name of cookie
-    - `value` {string} value of cookie
-    - `options` {[CookieOptions](https://expressjs.com/en/resources/middleware/cookie-session.html) | undefined} cookie options (like path, expires, etc.)
-  - `getCookie` (name) => string | undefined
-    - `name` {string} name of cookie
-  - `clearCookie` (name, options) => void
-    - `name` {string} name of cookie
-    - `options` {[CookieOptions](https://expressjs.com/en/resources/middleware/cookie-session.html) | undefined} cookie options (like path, expires, etc.)
-  - `attachment` (filename) => void
-    - `filename` {string} name of file in 'Content-Disposition' header
+  - `setDelay` `(delay) => Promise<void>`
+    - `delay` `number` milliseconds of delay time
+  - `setStatusCode` `(statusCode) => void`
+    - `statusCode` `number` status code for response
+  - `setHeader` `(field, value) => void`
+    - `field` `string` name of response header
+    - `value` `string | string[] | undefined` value of response header
+  - `appendHeader` `(field, value) => void`
+    - `field` `string` name of response header
+    - `value` `string | string[] | undefined` value of response header
+  - `getHeader` `(field) => string | number | string[] | undefined`
+    - `field` `string` name of response header
+  - `getHeaders` `() => Record<string | number | string[] | undefined>`
+  - `setCookie` `(name, value, options) => void`
+    - `name` `string` name of cookie
+    - `value` `string` value of cookie
+    - `options` `[CookieOptions](https://expressjs.com/en/resources/middleware/cookie-session.html) | undefined` cookie options (like path, expires, etc.)
+  - `getCookie` `(name) => string | undefined`
+    - `name` `string` name of cookie
+  - `clearCookie` `(name, options) => void`
+    - `name` `string` name of cookie
+    - `options` `[CookieOptions](https://expressjs.com/en/resources/middleware/cookie-session.html) | undefined` cookie options (like path, expires, etc.)
+  - `attachment` `(filename) => void`
+    - `filename` `string` name of file in 'Content-Disposition' header
+  - `log` `(logger) => Partial<LoggerTokens>` logger function [read](#logger)
+    - `logger` `Logger | undefined` logger options
+
+#### Logger
+
+You can log requests and responses using `log` function in any [interceptor](#interceptors).
+
+`log` has the following signature `(logger?: Logger) => Partial<LoggerTokens>`.
+
+`logger` parameter has the following optional properties
+
+- `options?` `LoggerOptions` object map containing tokens to log. Keys is token names, values is boolean. `true` will add token into log, `false` will remove. If `options` property is not passed, following tokens will be logged
+  - Request
+    - type
+    - id
+    - timestamp
+    - method
+    - url
+  - Response
+    - type
+    - id
+    - timestamp
+    - method
+    - url
+    - statusCode
+    - data
+- `rewrite?` `(tokens: Partial<LoggerTokens>) => void` function to replace default `console.dir(tokens, { depth: null })` appearance
+
+`log` function returns object with logged token values
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/posts',
+        method: 'get',
+        routes: [
+          {
+            interceptors: {
+              request: ({ log }) => {
+                log({                 // logs following object in terminal
+                  options: {          // {
+                    id: true,         //  id: 1,
+                    type: true,       //  type: 'request',
+                    timestamp: true,  //  timestamp: '31.12.2024, 23:59:59,999',
+                    method: true,     //  method: 'GET',
+                    url: true         //  url: 'http://localhost:31299/api/rest/posts/1'
+                  }                   // }
+                });
+              },
+              response: (data, { log }) => {
+                log({                 // logs following string in terminal
+                  options: {          // response get: http://localhost:31299/api/rest/posts/1 => 200
+                    type: true,
+                    statusCode: true,
+                    method: true,
+                    url: true
+                  },
+                  rewrite: ({ type, statusCode, method, url }) => {
+                    console.info(`${type} ${method}: ${url} => ${statusCode}`);
+                  }
+                });
+                return data;
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export default mockServerConfig;
+```
+
+> By default, `timestamp` and `method` tokens are prettified.
+> Timestamp transforms from UNIX-timestamp number to `DD.MM.YYYY, HH:mm:ss,sss` string.
+> Method transforms from lower case to upper case.
+> If `rewrite` function is used, those tokens will remain unformatted. You can format them as you need. 
+
+##### Logger tokens
+
+- `type?` `'request' | 'response'` type of log
+- `id?` `number` unique id of request to reference request log with response log
+- `timestamp?` `number` UNIX-timestamp in milliseconds
+- `method?` `'get' | 'post' | 'delete' | 'put' | 'patch' | 'options'` HTTP method
+- `url?` `string` requested URL
+- `graphQLOperationType?` `'query' | 'mutation' | null` GraphQL operation type. `null` if request is not GraphQL
+- `graphQLOperationName?` `string` GraphQL operation name. `null` if request is not GraphQL
+- `graphQLQuery?` `string` GraphQL query. `null` if request is not GraphQL
+- `variables?`: `Record<string, any>` GraphQL variables. `null` if request is not GraphQL or variables is not passed
+- `headers?` `Record<string, any>` headers object
+- `cookies?` `Record<string, any>` cookies object
+- `query?` `Record<string, any>` query object
+- `params?` `Record<string, any>` params object
+- `body?` `any` body
+
+Response logger has additional tokens
+- `statusCode?` `number` response status code
+- `data?` `any` data returned to client
+
+If you need to log specific properties in mapped entities (headers, cookies, query, params), use `Record<string, boolean>` object instead of boolean.
+In that case logger will use following logic:
+
+- if some token is `true`, entity will be filtered by `whitelist` logic. *Only* enabled ones will be logged.
+- if all tokens is `false`, entity will be filtered by `blacklist` logic. All entities will be logged *except* disabled ones.
+
+> Whitelist logic have priority over blacklist if you pass `true` and `false` in same entity.
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/posts',
+        method: 'get',
+        routes: [
+          {
+            interceptors: {
+              request: ({ log }) => {
+                log({                 // whitelist. only query1 and query2 will be logged
+                  options: {
+                    query: {
+                      query1: true,
+                      query2: true
+                    }
+                  }
+                });
+                log({                 // whitelist. only cookie1 and cookie2 will be logged
+                  options: {
+                    cookies: {
+                      cookie1: true,
+                      cookie2: true,
+                      cookie3: false
+                    }
+                  }
+                });
+                log({                 // blacklist. all headers will be logged except header1
+                  options: {
+                    headers: {
+                      header1: false
+                    }
+                  }
+                });
+              }
+            },
+            data: {}
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export default mockServerConfig;
+```
 
 ## Database
 
 With `mock-config-server` you can create your own mock database with all CRUD operations
 
-- `data` {Object | string} initial data for database
-- `routes?` {Object | string} map of custom routes for database
+- `data` `Object | string` initial data for database
+- `routes?` `Object | string` map of custom routes for database
 
 ### Basic example
 
@@ -732,10 +935,10 @@ In the **Link** header you'll get **count**, **pages**, **next** and **prev** li
 
 #### Link
 
-- `count` {number} total count of elements
-- `pages` {number} count of pages
-- `next` {string | null} query string for next link
-- `prev` {string | null} query string for prev link
+- `count` `number` total count of elements
+- `pages` `number` count of pages
+- `next` `string | null` query string for next link
+- `prev` `string | null` query string for prev link
 
 ### Sort
 
@@ -813,7 +1016,7 @@ Examples:
   mcs --help
 ```
 
-# Init Command
+## Init Command
 
 The init command is used to initialize a new project or set up the initial configuration for a tool. It helps users get started with a new project by providing a streamlined setup process.
 

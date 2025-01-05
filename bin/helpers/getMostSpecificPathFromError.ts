@@ -10,7 +10,6 @@ export const getMostSpecificPathFromError = (error: z.ZodError): (string | numbe
           currentMostSpecificPath = unionErrorMostSpecificPath;
         }
       }
-      // eslint-disable-next-line no-continue
       continue;
     }
 
@@ -20,7 +19,6 @@ export const getMostSpecificPathFromError = (error: z.ZodError): (string | numbe
       if (issuePath.length > currentMostSpecificPath.length) {
         currentMostSpecificPath = issuePath;
       }
-      // eslint-disable-next-line no-continue
       continue;
     }
 

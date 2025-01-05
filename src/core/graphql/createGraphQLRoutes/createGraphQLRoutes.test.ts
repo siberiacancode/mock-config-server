@@ -246,7 +246,7 @@ describe('createRestRoutes: content', () => {
   });
 
   test('Should return same polling data with time param', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     const server = createServer({
       graphql: {
         configs: [
@@ -276,19 +276,19 @@ describe('createRestRoutes: content', () => {
     expect(firstResponse.statusCode).toBe(200);
     expect(firstResponse.body).toEqual({ name: 'John', surname: 'Doe' });
 
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
 
     const secondResponse = await request(server).get('/').query(query);
     expect(secondResponse.statusCode).toBe(200);
     expect(secondResponse.body).toEqual({ name: 'John', surname: 'Doe' });
 
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
 
     const thirdResponse = await request(server).get('/').query(query);
     expect(thirdResponse.statusCode).toBe(200);
     expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Smith' });
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('Should correct handle empty queue', async () => {
@@ -798,8 +798,10 @@ describe('createRestRoutes: entities', () => {
 });
 
 describe('createRestRoutes: interceptors', () => {
-  test('Should call request interceptor', async () => {
-    const requestInterceptor = jest.fn();
+  test('Should call request interceptors in order: request -> route', async () => {
+    const routeInterceptor = vi.fn();
+    const requestInterceptor = vi.fn();
+
     const server = createServer({
       graphql: {
         configs: [
@@ -814,7 +816,8 @@ describe('createRestRoutes: interceptors', () => {
                     key2: 'value2'
                   }
                 },
-                data: { name: 'John', surname: 'Doe' }
+                data: { name: 'John', surname: 'Doe' },
+                interceptors: { request: routeInterceptor }
               }
             ],
             interceptors: { request: requestInterceptor }
@@ -842,7 +845,20 @@ describe('createRestRoutes: interceptors', () => {
       query: 'query GetUsers { users { name } }',
       variables: '{ "key1": "value1", "key2": "value2" }'
     });
-    expect(requestInterceptor.mock.calls.length).toBe(1);
+    expect(requestInterceptor).toBeCalledTimes(1);
+    expect(routeInterceptor).toBeCalledTimes(1);
+    expect(requestInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
+      routeInterceptor.mock.invocationCallOrder[0]
+    );
+
+    // ✅ important:
+    // request interceptor called when operation type and operation name is matched even if server return 404
+    await request(server).get('/').set('Content-Type', 'application/json').query({
+      query: 'query GetUsers { users { name } }',
+      variables: '{ "key3": "value3", "key4": "value4" }'
+    });
+    expect(requestInterceptor).toBeCalledTimes(2);
+    expect(routeInterceptor).toBeCalledTimes(1);
 
     await request(server)
       .post('/')
@@ -851,13 +867,16 @@ describe('createRestRoutes: interceptors', () => {
         query: 'mutation CreateUser($name: String!) { createUser(name: $name) { name } }',
         variables: { key1: 'value1', key2: 'value2' }
       });
-    expect(requestInterceptor.mock.calls.length).toBe(1);
+    expect(requestInterceptor).toBeCalledTimes(2);
+    expect(routeInterceptor).toBeCalledTimes(1);
   });
 
   test('Should call response interceptors in order: route -> request -> server', async () => {
-    const routeInterceptor = jest.fn();
-    const requestInterceptor = jest.fn();
-    const serverInterceptor = jest.fn();
+    const routeInterceptor = vi.fn();
+    const requestInterceptor = vi.fn();
+    const apiInterceptor = vi.fn();
+    const serverInterceptor = vi.fn();
+
     const server = createServer({
       graphql: {
         configs: [
@@ -893,7 +912,8 @@ describe('createRestRoutes: interceptors', () => {
               }
             ]
           }
-        ]
+        ],
+        interceptors: { response: apiInterceptor }
       },
       interceptors: { response: serverInterceptor }
     });
@@ -902,13 +922,17 @@ describe('createRestRoutes: interceptors', () => {
       query: 'query GetUsers { users { name } }',
       variables: '{ "key1": "value1", "key2": "value2" }'
     });
-    expect(routeInterceptor.mock.calls.length).toBe(1);
-    expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(serverInterceptor.mock.calls.length).toBe(1);
+    expect(routeInterceptor).toBeCalledTimes(1);
+    expect(requestInterceptor).toBeCalledTimes(1);
+    expect(apiInterceptor).toBeCalledTimes(1);
+    expect(serverInterceptor).toBeCalledTimes(1);
     expect(routeInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
       requestInterceptor.mock.invocationCallOrder[0]
     );
     expect(requestInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
+      apiInterceptor.mock.invocationCallOrder[0]
+    );
+    expect(apiInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
       serverInterceptor.mock.invocationCallOrder[0]
     );
 
@@ -919,9 +943,10 @@ describe('createRestRoutes: interceptors', () => {
         query: 'mutation CreateUser($name: String!) { createUser(name: $name) { name } }',
         variables: { key1: 'value1', key2: 'value2' }
       });
-    expect(routeInterceptor.mock.calls.length).toBe(1);
-    expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(serverInterceptor.mock.calls.length).toBe(2);
+    expect(routeInterceptor).toBeCalledTimes(1);
+    expect(requestInterceptor).toBeCalledTimes(1);
+    expect(apiInterceptor).toBeCalledTimes(2);
+    expect(serverInterceptor).toBeCalledTimes(2);
 
     await request(server)
       .post('/')
@@ -930,8 +955,9 @@ describe('createRestRoutes: interceptors', () => {
         query: 'query GetSettings { settings { notifications } }',
         variables: { key1: 'value1', key2: 'value2' }
       });
-    expect(routeInterceptor.mock.calls.length).toBe(1);
-    expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(serverInterceptor.mock.calls.length).toBe(2);
+    expect(routeInterceptor).toBeCalledTimes(1);
+    expect(requestInterceptor).toBeCalledTimes(1);
+    expect(apiInterceptor).toBeCalledTimes(2);
+    expect(serverInterceptor).toBeCalledTimes(2);
   });
 });

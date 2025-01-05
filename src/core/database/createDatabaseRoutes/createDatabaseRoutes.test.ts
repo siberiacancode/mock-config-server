@@ -117,8 +117,8 @@ describe('createDatabaseRoutes: routes /__routes and /__db', () => {
 
 describe('createDatabaseRoutes: interceptors', () => {
   test('Should call response interceptors in order: api -> server', async () => {
-    const apiInterceptor = jest.fn();
-    const serverInterceptor = jest.fn();
+    const apiInterceptor = vi.fn();
+    const serverInterceptor = vi.fn();
 
     const data = { profile: { name: 'John' }, users: [{ id: 1 }, { id: 2 }] };
     const routes = { '/api/profile': '/profile' } as const;

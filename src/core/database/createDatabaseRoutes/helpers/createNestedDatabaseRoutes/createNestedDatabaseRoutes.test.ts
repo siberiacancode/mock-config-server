@@ -11,8 +11,20 @@ import { createNestedDatabaseRoutes } from './createNestedDatabaseRoutes';
 describe('CreateNestedDatabaseRoutes', () => {
   const createNestedDatabase = () => ({
     users: [
-      { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
-      { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+      {
+        id: 1,
+        name: 'John Doe',
+        age: 25,
+        address: { city: 'Novosibirsk' },
+        hobbies: ['music', 'sport']
+      },
+      {
+        id: 2,
+        name: 'Jane Smith',
+        age: 30,
+        address: { city: 'Tomsk' },
+        hobbies: ['sport', 'games']
+      }
     ]
   });
 
@@ -137,7 +149,8 @@ describe('CreateNestedDatabaseRoutes', () => {
         id: 1,
         name: 'John Smith',
         age: 25,
-        address: { city: 'Novosibirsk' }
+        address: { city: 'Novosibirsk' },
+        hobbies: ['music', 'sport']
       });
     });
 
@@ -183,7 +196,8 @@ describe('CreateNestedDatabaseRoutes', () => {
           id: 1,
           name: 'John Doe',
           age: 25,
-          address: { city: 'Novosibirsk' }
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
         }
       ]);
     });
@@ -202,7 +216,8 @@ describe('CreateNestedDatabaseRoutes', () => {
           id: 1,
           name: 'John Doe',
           age: 25,
-          address: { city: 'Novosibirsk' }
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
         }
       ]);
     });
@@ -211,7 +226,13 @@ describe('CreateNestedDatabaseRoutes', () => {
       const response = await request(server).get('/users?id_neq=1');
 
       expect(response.body).toStrictEqual([
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        }
       ]);
     });
 
@@ -219,7 +240,13 @@ describe('CreateNestedDatabaseRoutes', () => {
       const response = await request(server).get('/users?id_gt=1');
 
       expect(response.body).toStrictEqual([
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        }
       ]);
     });
 
@@ -237,7 +264,8 @@ describe('CreateNestedDatabaseRoutes', () => {
           id: 1,
           name: 'John Doe',
           age: 25,
-          address: { city: 'Novosibirsk' }
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
         }
       ]);
     });
@@ -252,7 +280,13 @@ describe('CreateNestedDatabaseRoutes', () => {
       const response = await request(server).get('/users?name_cn=Jane');
 
       expect(response.body).toStrictEqual([
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        }
       ]);
     });
 
@@ -264,7 +298,8 @@ describe('CreateNestedDatabaseRoutes', () => {
           id: 1,
           name: 'John Doe',
           age: 25,
-          address: { city: 'Novosibirsk' }
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
         }
       ]);
     });
@@ -292,6 +327,20 @@ describe('CreateNestedDatabaseRoutes', () => {
 
       expect(response.body).toStrictEqual(nestedDatabase.users);
     });
+
+    test('Should return filtered array by some operator', async () => {
+      const response = await request(server).get('/users?hobbies_some=games');
+
+      expect(response.body).toStrictEqual([
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        }
+      ]);
+    });
   });
 
   describe('createNestedDatabaseRoutes: pagination function', () => {
@@ -302,8 +351,20 @@ describe('CreateNestedDatabaseRoutes', () => {
       const response = await request(server).get('/users?_page=1');
 
       expect(response.body.results).toStrictEqual([
-        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
+        },
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        }
       ]);
       expect(response.body._link).toEqual(
         expect.objectContaining({
@@ -322,7 +383,13 @@ describe('CreateNestedDatabaseRoutes', () => {
       const response = await request(server).get('/users?_page=1&_limit=1');
 
       expect(response.body.results).toStrictEqual([
-        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
+        }
       ]);
       expect(response.body._link).toEqual(
         expect.objectContaining({
@@ -354,7 +421,13 @@ describe('CreateNestedDatabaseRoutes', () => {
       expect(firstLastLink).toContain('/users?_page=2&_limit=1>; rel="last"');
 
       expect(firstResponse.body.results).toStrictEqual([
-        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
+        }
       ]);
       expect(firstResponse.body._link).toEqual(
         expect.objectContaining({
@@ -383,7 +456,13 @@ describe('CreateNestedDatabaseRoutes', () => {
       expect(secondLastLink).toContain('/users?_page=2&_limit=1>; rel="last"');
 
       expect(secondResponse.body.results).toStrictEqual([
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        }
       ]);
       expect(secondResponse.body._link).toEqual(
         expect.objectContaining({
@@ -402,8 +481,20 @@ describe('CreateNestedDatabaseRoutes', () => {
       const response = await request(server).get('/users?_page=2');
 
       expect(response.body).toStrictEqual([
-        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
+        },
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        }
       ]);
     });
   });
@@ -436,7 +527,7 @@ describe('CreateNestedDatabaseRoutes', () => {
     const server = createServer({
       users: [
         ...nestedDatabase.users,
-        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } }
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' }, hobbies: ['music'] }
       ]
     });
 
@@ -444,9 +535,21 @@ describe('CreateNestedDatabaseRoutes', () => {
       const response = await request(server).get('/users?_sort=age');
 
       expect(response.body).toStrictEqual([
-        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
-        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } },
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
+        },
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' }, hobbies: ['music'] },
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        }
       ]);
     });
 
@@ -454,9 +557,21 @@ describe('CreateNestedDatabaseRoutes', () => {
       const response = await request(server).get('/users?_sort=age&_order=desc');
 
       expect(response.body).toStrictEqual([
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } },
-        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } },
-        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        },
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' }, hobbies: ['music'] },
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
+        }
       ]);
     });
 
@@ -466,9 +581,21 @@ describe('CreateNestedDatabaseRoutes', () => {
       );
 
       expect(response.body).toStrictEqual([
-        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } },
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } },
-        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } }
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' }, hobbies: ['music'] },
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        },
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
+        }
       ]);
     });
 
@@ -476,9 +603,21 @@ describe('CreateNestedDatabaseRoutes', () => {
       const response = await request(server).get('/users?_sort=address.city&_order=desc');
 
       expect(response.body).toStrictEqual([
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } },
-        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
-        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' } }
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        },
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
+        },
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' }, hobbies: ['music'] }
       ]);
     });
   });
@@ -505,7 +644,13 @@ describe('CreateNestedDatabaseRoutes', () => {
       const response = await request(server).get('/users?_q=Tomsk');
 
       expect(response.body).toStrictEqual([
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        }
       ]);
     });
 
@@ -513,8 +658,20 @@ describe('CreateNestedDatabaseRoutes', () => {
       const response = await request(server).get('/users?_q=Tomsk&_q=Novosibirsk');
 
       expect(response.body).toStrictEqual([
-        { id: 1, name: 'John Doe', age: 25, address: { city: 'Novosibirsk' } },
-        { id: 2, name: 'Jane Smith', age: 30, address: { city: 'Tomsk' } }
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
+        },
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        }
       ]);
     });
   });

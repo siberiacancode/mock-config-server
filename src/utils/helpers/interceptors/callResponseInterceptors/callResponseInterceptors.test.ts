@@ -9,10 +9,10 @@ describe('callResponseInterceptors: order of calls', () => {
     const initialData = '';
     const request = {} as Request;
     const response = {} as Response;
-    const routeInterceptor = jest.fn((data) => `${data}routeInterceptor;`);
-    const requestInterceptor = jest.fn((data) => `${data}requestInterceptor;`);
-    const apiInterceptor = jest.fn((data) => `${data}apiInterceptor;`);
-    const serverInterceptor = jest.fn((data) => `${data}serverInterceptor`);
+    const routeInterceptor = vi.fn((data) => `${data}routeInterceptor;`);
+    const requestInterceptor = vi.fn((data) => `${data}requestInterceptor;`);
+    const apiInterceptor = vi.fn((data) => `${data}apiInterceptor;`);
+    const serverInterceptor = vi.fn((data) => `${data}serverInterceptor`);
 
     expect(
       await callResponseInterceptors({
@@ -21,10 +21,10 @@ describe('callResponseInterceptors: order of calls', () => {
         response
       })
     ).toBe('');
-    expect(routeInterceptor.mock.calls.length).toBe(0);
-    expect(requestInterceptor.mock.calls.length).toBe(0);
-    expect(apiInterceptor.mock.calls.length).toBe(0);
-    expect(serverInterceptor.mock.calls.length).toBe(0);
+    expect(routeInterceptor).toBeCalledTimes(0);
+    expect(requestInterceptor).toBeCalledTimes(0);
+    expect(apiInterceptor).toBeCalledTimes(0);
+    expect(serverInterceptor).toBeCalledTimes(0);
 
     expect(
       await callResponseInterceptors({
@@ -39,10 +39,10 @@ describe('callResponseInterceptors: order of calls', () => {
         }
       })
     ).toBe('routeInterceptor;requestInterceptor;apiInterceptor;serverInterceptor');
-    expect(routeInterceptor.mock.calls.length).toBe(1);
-    expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(apiInterceptor.mock.calls.length).toBe(1);
-    expect(serverInterceptor.mock.calls.length).toBe(1);
+    expect(routeInterceptor).toBeCalledTimes(1);
+    expect(requestInterceptor).toBeCalledTimes(1);
+    expect(apiInterceptor).toBeCalledTimes(1);
+    expect(serverInterceptor).toBeCalledTimes(1);
 
     expect(routeInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
       requestInterceptor.mock.invocationCallOrder[0]
@@ -60,7 +60,7 @@ describe('callResponseInterceptors: params functions', () => {
   test('Should correctly call response getHeader method when use getHeader param', async () => {
     const data = null;
     const request = {};
-    const response = { getHeader: jest.fn() };
+    const response = { getHeader: vi.fn() };
 
     const getHeaderRouteInterceptor: ResponseInterceptor = (data, { getHeader }) => {
       getHeader('header');
@@ -81,7 +81,7 @@ describe('callResponseInterceptors: params functions', () => {
   test('Should correctly call response getHeaders method when use getHeaders param', async () => {
     const data = null;
     const request = {};
-    const response = { getHeaders: jest.fn() };
+    const response = { getHeaders: vi.fn() };
 
     const getHeadersRouteInterceptor: ResponseInterceptor = (data, { getHeaders }) => {
       getHeaders();
@@ -102,7 +102,7 @@ describe('callResponseInterceptors: params functions', () => {
   test('Should correctly call response set method when use setHeader param', async () => {
     const data = null;
     const request = {};
-    const response = { set: jest.fn() };
+    const response = { set: vi.fn() };
 
     const setHeaderRouteInterceptor: ResponseInterceptor = (data, { setHeader }) => {
       setHeader('name', 'value');
@@ -123,7 +123,7 @@ describe('callResponseInterceptors: params functions', () => {
   test('Should correctly call response append method when use appendHeader param', async () => {
     const data = null;
     const request = {};
-    const response = { append: jest.fn() };
+    const response = { append: vi.fn() };
 
     const appendHeaderRouteInterceptor: ResponseInterceptor = (data, { appendHeader }) => {
       appendHeader('name', 'value');
@@ -183,7 +183,7 @@ describe('callResponseInterceptors: params functions', () => {
   test('Should correctly call response cookie method with/without options when use setCookie param', async () => {
     const data = null;
     const request = {};
-    const response = { cookie: jest.fn() };
+    const response = { cookie: vi.fn() };
 
     const setCookieWithoutOptionsRouteInterceptor: ResponseInterceptor = (data, { setCookie }) => {
       setCookie('name', 'value');
@@ -221,7 +221,7 @@ describe('callResponseInterceptors: params functions', () => {
   test('Should correctly call response clearCookie method when use clearCookie param', async () => {
     const data = null;
     const request = {};
-    const response = { clearCookie: jest.fn() };
+    const response = { clearCookie: vi.fn() };
 
     const clearCookieRouteInterceptor: ResponseInterceptor = (data, { clearCookie }) => {
       clearCookie('name', { path: '/your/path' });
@@ -242,7 +242,7 @@ describe('callResponseInterceptors: params functions', () => {
   test('Should correctly call response attachment method when use attachment param', async () => {
     const data = null;
     const request = {};
-    const response = { attachment: jest.fn() };
+    const response = { attachment: vi.fn() };
 
     const attachmentRouteInterceptor: ResponseInterceptor = (data, { attachment }) => {
       attachment('filename');

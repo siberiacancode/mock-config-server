@@ -27,7 +27,7 @@ import { prepareRestRequestConfigs } from './helpers';
 interface CreateRestRoutesParams {
   router: IRouter;
   restConfig: RestConfig;
-  serverResponseInterceptor?: Interceptors['response'];
+  serverResponseInterceptor?: Interceptors<'rest'>['response'];
 }
 
 export const createRestRoutes = ({
@@ -38,9 +38,11 @@ export const createRestRoutes = ({
   prepareRestRequestConfigs(restConfig.configs).forEach((requestConfig) => {
     router.route(requestConfig.path)[requestConfig.method](
       asyncHandler(async (request, response, next) => {
-        const requestInterceptor = requestConfig.interceptors?.request;
-        if (requestInterceptor) {
-          await callRequestInterceptor({ request, interceptor: requestInterceptor });
+        if (requestConfig.interceptors?.request) {
+          await callRequestInterceptor({
+            request,
+            interceptor: requestConfig.interceptors.request
+          });
         }
 
         const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
@@ -96,8 +98,13 @@ export const createRestRoutes = ({
           });
         });
 
-        if (!matchedRouteConfig) {
-          return next();
+        if (!matchedRouteConfig) return next();
+
+        if (matchedRouteConfig.interceptors?.request) {
+          await callRequestInterceptor({
+            request,
+            interceptor: matchedRouteConfig.interceptors.request
+          });
         }
 
         let matchedRouteConfigData = null;

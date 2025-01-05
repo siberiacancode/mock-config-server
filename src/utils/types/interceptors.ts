@@ -1,18 +1,24 @@
 import type { CookieOptions, Request, Response } from 'express';
 
+import type { Logger, LoggerTokens } from './logger';
+import type { ApiType } from './shared';
+
 type RequestInterceptorCookieValue = string | undefined;
 type RequestInterceptorHeaderValue = string | number | string[] | undefined;
-export interface RequestInterceptorParams {
+export interface RequestInterceptorParams<Api extends ApiType = ApiType> {
   request: Request;
   setDelay: (delay: number) => Promise<void>;
   getCookie: (name: string) => RequestInterceptorCookieValue;
   getHeader: (field: string) => RequestInterceptorHeaderValue;
   getHeaders: () => Record<string, RequestInterceptorHeaderValue>;
+  log: (logger?: Logger<'request', Api>) => Partial<LoggerTokens>;
 }
 
-export type RequestInterceptor = (params: RequestInterceptorParams) => void | Promise<void>;
+export type RequestInterceptor<Api extends ApiType = ApiType> = (
+  params: RequestInterceptorParams<Api>
+) => void | Promise<void>;
 
-export interface ResponseInterceptorParams {
+export interface ResponseInterceptorParams<Api extends ApiType = ApiType> {
   request: Request;
   response: Response;
   setDelay: (delay: number) => Promise<void>;
@@ -25,14 +31,15 @@ export interface ResponseInterceptorParams {
   getCookie: (name: string) => RequestInterceptorCookieValue;
   clearCookie: (name: string, options?: CookieOptions) => void;
   attachment: (filename: string) => void;
+  log: (logger?: Logger<'response', Api>) => Partial<LoggerTokens>;
 }
 
-export type ResponseInterceptor<Data = any> = (
+export type ResponseInterceptor<Data = any, Api extends ApiType = ApiType> = (
   data: Data,
-  params: ResponseInterceptorParams
+  params: ResponseInterceptorParams<Api>
 ) => any;
 
-export interface Interceptors {
-  request?: RequestInterceptor;
-  response?: ResponseInterceptor;
+export interface Interceptors<Api extends ApiType = ApiType> {
+  request?: RequestInterceptor<Api>;
+  response?: ResponseInterceptor<any, Api>;
 }

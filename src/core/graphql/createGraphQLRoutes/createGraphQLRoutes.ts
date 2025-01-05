@@ -27,7 +27,7 @@ import { prepareGraphQLRequestConfigs } from './helpers';
 interface CreateGraphQLRoutesParams {
   router: IRouter;
   graphqlConfig: GraphqlConfig;
-  serverResponseInterceptor?: Interceptors['response'];
+  serverResponseInterceptor?: Interceptors<'graphql'>['response'];
 }
 
 export const createGraphQLRoutes = ({
@@ -77,9 +77,11 @@ export const createGraphQLRoutes = ({
       return next();
     }
 
-    const requestInterceptor = matchedRequestConfig.interceptors?.request;
-    if (requestInterceptor) {
-      await callRequestInterceptor({ request, interceptor: requestInterceptor });
+    if (matchedRequestConfig.interceptors?.request) {
+      await callRequestInterceptor({
+        request,
+        interceptor: matchedRequestConfig.interceptors.request
+      });
     }
 
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
@@ -124,8 +126,13 @@ export const createGraphQLRoutes = ({
       });
     });
 
-    if (!matchedRouteConfig) {
-      return next();
+    if (!matchedRouteConfig) return next();
+
+    if (matchedRouteConfig.interceptors?.request) {
+      await callRequestInterceptor({
+        request,
+        interceptor: matchedRouteConfig.interceptors.request
+      });
     }
 
     let matchedRouteConfigData = null;
