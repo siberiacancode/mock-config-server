@@ -21,10 +21,10 @@ describe('callResponseInterceptors: order of calls', () => {
         response
       })
     ).toBe('');
-    expect(routeInterceptor.mock.calls.length).toBe(0);
-    expect(requestInterceptor.mock.calls.length).toBe(0);
-    expect(apiInterceptor.mock.calls.length).toBe(0);
-    expect(serverInterceptor.mock.calls.length).toBe(0);
+    expect(routeInterceptor).toBeCalledTimes(0);
+    expect(requestInterceptor).toBeCalledTimes(0);
+    expect(apiInterceptor).toBeCalledTimes(0);
+    expect(serverInterceptor).toBeCalledTimes(0);
 
     expect(
       await callResponseInterceptors({
@@ -39,10 +39,10 @@ describe('callResponseInterceptors: order of calls', () => {
         }
       })
     ).toBe('routeInterceptor;requestInterceptor;apiInterceptor;serverInterceptor');
-    expect(routeInterceptor.mock.calls.length).toBe(1);
-    expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(apiInterceptor.mock.calls.length).toBe(1);
-    expect(serverInterceptor.mock.calls.length).toBe(1);
+    expect(routeInterceptor).toBeCalledTimes(1);
+    expect(requestInterceptor).toBeCalledTimes(1);
+    expect(apiInterceptor).toBeCalledTimes(1);
+    expect(serverInterceptor).toBeCalledTimes(1);
 
     expect(routeInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
       requestInterceptor.mock.invocationCallOrder[0]
