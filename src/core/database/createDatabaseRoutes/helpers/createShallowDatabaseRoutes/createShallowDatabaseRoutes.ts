@@ -117,14 +117,17 @@ export const createShallowDatabaseRoutes = ({
     router.route(path).post(
       asyncHandler(async (request, response) => {
         storage.write(key, request.body);
+
         response.set('Location', request.url);
         response.status(201);
+
         const updatedData = await callResponseInterceptors({
           data: request.body,
           request,
           response,
           interceptors: responseInterceptors
         });
+
         response.json(updatedData);
       })
     );
@@ -132,12 +135,14 @@ export const createShallowDatabaseRoutes = ({
     router.route(path).put(
       asyncHandler(async (request, response) => {
         storage.write(key, request.body);
+
         const updatedData = await callResponseInterceptors({
           data: request.body,
           request,
           response,
           interceptors: responseInterceptors
         });
+
         response.json(updatedData);
       })
     );
@@ -146,13 +151,16 @@ export const createShallowDatabaseRoutes = ({
       asyncHandler(async (request, response) => {
         const currentResource = storage.read(key);
         const updatedResource = { ...currentResource, ...request.body };
+
         storage.write(key, updatedResource);
+
         const updatedData = await callResponseInterceptors({
           data: updatedResource,
           request,
           response,
           interceptors: responseInterceptors
         });
+
         response.json(updatedData);
       })
     );

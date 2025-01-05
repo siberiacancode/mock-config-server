@@ -1,6 +1,5 @@
 import type { IRouter } from 'express';
 
-import { asyncHandler, callResponseInterceptors } from '@/utils/helpers';
 import type { DatabaseConfig, Interceptors, NestedDatabase, ShallowDatabase } from '@/utils/types';
 
 import {
@@ -33,20 +32,9 @@ export const createDatabaseRoutes = ({
       : new MemoryStorage(routes);
     createRewrittenDatabaseRoutes(router, storage.read());
 
-    router.route('/__routes').get(
-      asyncHandler(async (request, response) => {
-        const data = await callResponseInterceptors({
-          data: storage.read(),
-          request,
-          response,
-          interceptors: {
-            apiInterceptor: databaseConfig.interceptors?.response,
-            serverInterceptor: serverResponseInterceptor
-          }
-        });
-        response.json(data);
-      })
-    );
+    router.route('/__routes').get((_request, response) => {
+      response.json(storage.read());
+    });
   }
 
   const storage = isVariableJsonFile(data) ? new FileStorage(data) : new MemoryStorage(data);
@@ -70,20 +58,9 @@ export const createDatabaseRoutes = ({
     }
   });
 
-  router.route('/__db').get(
-    asyncHandler(async (request, response) => {
-      const data = await callResponseInterceptors({
-        data: storage.read(),
-        request,
-        response,
-        interceptors: {
-          apiInterceptor: databaseConfig.interceptors?.response,
-          serverInterceptor: serverResponseInterceptor
-        }
-      });
-      response.json(data);
-    })
-  );
+  router.route('/__db').get((_request, response) => {
+    response.json(storage.read());
+  });
 
   return router;
 };

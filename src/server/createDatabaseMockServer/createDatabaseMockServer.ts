@@ -37,7 +37,7 @@ export const createDatabaseMockServer = (
 
   cookieParseMiddleware(server);
 
-  const serverRequestInterceptor = databaseMockServerConfig.interceptors?.request;
+  const serverRequestInterceptor = interceptors?.request;
   if (serverRequestInterceptor) {
     requestInterceptorMiddleware({ server, interceptor: serverRequestInterceptor });
   }

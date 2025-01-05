@@ -1,7 +1,7 @@
 import type { IRouter } from 'express';
 import type { ParsedUrlQuery } from 'node:querystring';
 
-import { asyncHandler, callResponseInterceptors } from '@/utils/helpers';
+import { asyncHandler, callResponseInterceptors, isPlainObject } from '@/utils/helpers';
 import type { Interceptors, NestedDatabase } from '@/utils/types';
 
 import type { MemoryStorage } from '../../storages';
@@ -102,18 +102,34 @@ export const createNestedDatabaseRoutes = ({
           response,
           interceptors: responseInterceptors
         });
+
         response.json(updatedData);
       })
     );
 
-    router.route(collectionPath).post((request, response) => {
-      const collection = storage.read(key);
-      const newResourceId = createNewId(collection);
-      const newResource = { ...request.body, id: newResourceId };
-      storage.write([key, collection.length], newResource);
-      response.set('Location', `${request.url}/${newResourceId}`);
-      response.status(201).json(newResource);
-    });
+    router.route(collectionPath).post(
+      asyncHandler(async (request, response) => {
+        const collection = storage.read(key);
+        const newResourceId = createNewId(collection);
+        const newResource = { ...request.body, id: newResourceId };
+
+        storage.write([key, collection.length], newResource);
+
+        const updatedResource = await callResponseInterceptors({
+          data: newResource,
+          request,
+          response,
+          interceptors: responseInterceptors
+        });
+
+        if (isPlainObject(updatedResource) && typeof updatedResource.id === 'number') {
+          response.set('Location', `${request.url}/${updatedResource.id}`);
+          response.status(201).json(updatedResource);
+          return;
+        }
+        response.status(400).end();
+      })
+    );
 
     router.route(itemPath).get(
       asyncHandler(async (request, response) => {
@@ -149,13 +165,16 @@ export const createNestedDatabaseRoutes = ({
 
         const currentResource = storage.read([key, currentResourceIndex]);
         const updatedResource = { ...request.body, id: currentResource.id };
+
         storage.write([key, currentResourceIndex], updatedResource);
+
         const updatedData = await callResponseInterceptors({
           data: updatedResource,
           request,
           response,
           interceptors: responseInterceptors
         });
+
         response.json(updatedData);
       })
     );
@@ -171,13 +190,16 @@ export const createNestedDatabaseRoutes = ({
 
         const currentResource = storage.read([key, currentResourceIndex]);
         const updatedResource = { ...currentResource, ...request.body, id: currentResource.id };
+
         storage.write([key, currentResourceIndex], updatedResource);
+
         const updatedData = await callResponseInterceptors({
           data: updatedResource,
           request,
           response,
           interceptors: responseInterceptors
         });
+
         response.json(updatedData);
       })
     );
@@ -190,13 +212,16 @@ export const createNestedDatabaseRoutes = ({
           response.status(404).end();
           return;
         }
+
         storage.delete([key, currentResourceIndex]);
+
         await callResponseInterceptors({
-          data: {},
+          data: null,
           request,
           response,
           interceptors: responseInterceptors
         });
+
         response.status(204).end();
       })
     );

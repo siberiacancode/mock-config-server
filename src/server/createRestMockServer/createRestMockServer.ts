@@ -38,7 +38,7 @@ export const createRestMockServer = (
 
   cookieParseMiddleware(server);
 
-  const serverRequestInterceptor = restMockServerConfig.interceptors?.request;
+  const serverRequestInterceptor = interceptors?.request;
   if (serverRequestInterceptor) {
     requestInterceptorMiddleware({ server, interceptor: serverRequestInterceptor });
   }
@@ -69,6 +69,18 @@ export const createRestMockServer = (
       databaseConfig: database,
       serverResponseInterceptor: interceptors?.response
     });
+
+    const databaseBaseUrl = urlJoin(baseUrl, database.baseUrl ?? '/');
+
+    const apiRequestInterceptor = database.interceptors?.request;
+    if (apiRequestInterceptor) {
+      requestInterceptorMiddleware({
+        server,
+        path: databaseBaseUrl,
+        interceptor: apiRequestInterceptor
+      });
+    }
+
     server.use(baseUrl, routerWithDatabaseRoutes);
   }
 
