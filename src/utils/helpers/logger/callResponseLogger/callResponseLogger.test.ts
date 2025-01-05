@@ -22,9 +22,10 @@ describe('callResponseLogger', () => {
 
   const data = { key: 'value' };
 
+  vi.spyOn(Date, 'now').mockImplementation(() => 1735623296789);
+
   test('Should log default tokens if logger or tokens was not provided', () => {
     const consoleDir = vi.spyOn(console, 'dir');
-    vi.spyOn(Date, 'now').mockImplementation(() => 1735623296789);
 
     callResponseLogger({ data, request, response });
 
