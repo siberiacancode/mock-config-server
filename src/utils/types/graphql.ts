@@ -11,9 +11,7 @@ export type GraphQLEntity<EntityName extends GraphQLEntityName = GraphQLEntityNa
 
 export type GraphQLOperationType = 'query' | 'mutation';
 export type GraphQLOperationName = string | RegExp;
-export type GraphQLEntityNamesByOperationType = {
-  [operationType in GraphQLOperationType]: GraphQLEntityName;
-};
+
 export type GraphQLEntitiesByEntityName = {
   [EntityName in GraphQLEntityName]?: GraphQLEntity<EntityName>;
 };
@@ -40,12 +38,12 @@ export type GraphQLRouteConfig = (
         | ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>)
         | Data;
     }
-) & { entities?: GraphQLEntitiesByEntityName; interceptors?: Interceptors };
+) & { entities?: GraphQLEntitiesByEntityName; interceptors?: Interceptors<'graphql'> };
 
 interface BaseGraphQLRequestConfig {
   operationType: GraphQLOperationType;
   routes: GraphQLRouteConfig[];
-  interceptors?: Interceptors;
+  interceptors?: Interceptors<'graphql'>;
 }
 
 export interface OperationNameGraphQLRequestConfig extends BaseGraphQLRequestConfig {
