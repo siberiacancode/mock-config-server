@@ -16,35 +16,31 @@ const resolveTokenObjectOptionsFilterMode = (
 type TokenOptions = Record<string, boolean | TokenObjectOptions>;
 
 export const filterTokens = (tokens: PlainObject, options: TokenOptions): PlainObject =>
-  Object.entries(options).reduce((acc, [tokenName, tokenOption]) => {
-    const tokenValue = tokens[tokenName];
+  Object.entries(options).reduce((acc, [name, option]) => {
+    const token = tokens[name];
 
-    if (tokenOption === true) {
-      acc[tokenName] = tokenValue;
+    if (option === true) {
+      acc[name] = token;
       return acc;
     }
 
-    const isObjectOption = isPlainObject(tokenOption);
-    if (isObjectOption) {
-      const objectTokenOptions = tokenOption;
-      const objectTokenValues = tokenValue;
-      const tokenObjectOptionsFilterMode = resolveTokenObjectOptionsFilterMode(objectTokenOptions);
+    const isObjectOption = isPlainObject(option);
+    const isObjectToken = isPlainObject(token);
+    if (isObjectOption && isObjectToken) {
+      const tokenObjectOptionsFilterMode = resolveTokenObjectOptionsFilterMode(option);
 
       if (tokenObjectOptionsFilterMode === 'whitelist') {
-        acc[tokenName] = Object.entries(objectTokenOptions).reduce(
-          (acc, [objectTokenName, objectTokenOption]) => {
-            if (objectTokenOption) {
-              acc[objectTokenName] = objectTokenValues[objectTokenName];
-            }
-            return acc;
-          },
-          {} as PlainObject
-        );
+        acc[name] = Object.entries(option).reduce((acc, [name, objectTokenOption]) => {
+          if (objectTokenOption) {
+            acc[name] = token[name];
+          }
+          return acc;
+        }, {} as PlainObject);
       }
       if (tokenObjectOptionsFilterMode === 'blacklist') {
-        acc[tokenName] = Object.keys(objectTokenValues).reduce((acc, objectTokenName) => {
-          if (objectTokenOptions[objectTokenName] !== false) {
-            acc[objectTokenName] = objectTokenValues[objectTokenName];
+        acc[name] = Object.keys(token).reduce((acc, name) => {
+          if (option[name] !== false) {
+            acc[name] = token[name];
           }
           return acc;
         }, {} as PlainObject);

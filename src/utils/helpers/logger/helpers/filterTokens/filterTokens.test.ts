@@ -12,14 +12,14 @@ describe('filterTokens', () => {
     }
   };
 
-  test('Should remain only truthy options by whitelist logic on first level', () => {
-    const result = filterTokens(tokens, {
-      key1: true,
-      key2: false,
-      key4: true
-    });
-
-    expect(result).toStrictEqual({
+  test('Should remain only "true" options by whitelist logic on first level', () => {
+    expect(
+      filterTokens(tokens, {
+        key1: true,
+        key2: false,
+        key4: true
+      })
+    ).toStrictEqual({
       key1: 'value1',
       key4: {
         nestedKey1: 'nestedValue1',
@@ -29,7 +29,7 @@ describe('filterTokens', () => {
     });
   });
 
-  test('Should remain only truthy options by whitelist logic on second level', () => {
+  test('Should remain only "true" options by whitelist logic on second level', () => {
     expect(
       filterTokens(tokens, {
         key4: {
@@ -58,7 +58,7 @@ describe('filterTokens', () => {
     });
   });
 
-  test('Should remove all falsy options by blacklist logic on second level', () => {
+  test('Should remove all "false" options by blacklist logic on second level', () => {
     expect(
       filterTokens(tokens, {
         key1: true,

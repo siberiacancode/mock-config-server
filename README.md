@@ -336,7 +336,6 @@ const mockServerConfig = {
                   checkMode: 'function',
                   value: (actualValue) => +actualValue >= 0 && +actualValue <= 50
                 },
-                
               },
               cookies: {
                 authToken: {
@@ -655,18 +654,18 @@ Functions to change request or response parameters
     - `options` `[CookieOptions](https://expressjs.com/en/resources/middleware/cookie-session.html) | undefined` cookie options (like path, expires, etc.)
   - `attachment` `(filename) => void`
     - `filename` `string` name of file in 'Content-Disposition' header
-  - `log` `(logger) => Partial<LoggerTokenValues> | null` logger function [read](#logger)
+  - `log` `(logger) => Partial<LoggerTokens>` logger function [read](#logger)
     - `logger` `Logger | undefined` logger options
 
 #### Logger
 
 You can log requests and responses using `log` function in any [interceptor](#interceptors).
 
-`log` has the following signature `(logger?: Logger) => Partial<LoggerTokens> | null`.
+`log` has the following signature `(logger?: Logger) => Partial<LoggerTokens>`.
 
 `logger` parameter has the following optional properties
 
-- `tokens` `LoggerOptions` object map containing tokens to log. Keys is token names, values is boolean. `true` will add token into log, `false` will remove. If `tokens` is not passed, following tokens will be logged
+- `tokens` `LoggerOptions` object map containing tokens to log. Keys is token names, values is boolean. `true` will add token into log, `false` will remove. If `tokens` property is not passed, following tokens will be logged
   - Request
     - type
     - id
@@ -699,7 +698,7 @@ const mockServerConfig = {
             interceptors: {
               request: ({ log }) => {
                 log({                 // logs following object in terminal
-                  tokens: {     // {
+                  tokens: {           // {
                     id: true,         //  id: 1,
                     type: true,       //  type: 'request',
                     timestamp: true,  //  timestamp: '31.12.2024, 23:59:59,999',
@@ -710,7 +709,7 @@ const mockServerConfig = {
               },
               response: (data, { log }) => {
                 log({                 // logs following string in terminal
-                  tokens: {     // response get: http://localhost:31299/api/rest/posts/1 => 200
+                  tokens: {           // response get: http://localhost:31299/api/rest/posts/1 => 200
                     type: true,
                     statusCode: true,
                     method: true,
@@ -740,24 +739,24 @@ export default mockServerConfig;
 
 ##### Logger tokens
 
-- `type` `'request' | 'response'` type of log
-- `id` `number` unique id of request to reference request log with response log
-- `timestamp` `number` UNIX-timestamp in milliseconds
-- `method` `'get' | 'post' | 'delete' | 'put' | 'patch' | 'options'` HTTP method
-- `url` `string` requested URL
-- `graphQLOperationType` `'query' | 'mutation' | null` GraphQL operation type. `null` if request is not GraphQL
-- `graphQLOperationName` `string` GraphQL operation name. `null` if request is not GraphQL
-- `graphQLQuery` `string` GraphQL query. `null` if request is not GraphQL
-- `variables`: `Record<string, any>` GraphQL variables. `null` if request is not GraphQL or variables is not passed
-- `headers` `Record<string, any>` headers object
-- `cookies` `Record<string, any>` cookies object
-- `query` `Record<string, any>` query object
-- `params` `Record<string, any>` params object
-- `body` `any` body
+- `type?` `'request' | 'response'` type of log
+- `id?` `number` unique id of request to reference request log with response log
+- `timestamp?` `number` UNIX-timestamp in milliseconds
+- `method?` `'get' | 'post' | 'delete' | 'put' | 'patch' | 'options'` HTTP method
+- `url?` `string` requested URL
+- `graphQLOperationType?` `'query' | 'mutation' | null` GraphQL operation type. `null` if request is not GraphQL
+- `graphQLOperationName?` `string` GraphQL operation name. `null` if request is not GraphQL
+- `graphQLQuery?` `string` GraphQL query. `null` if request is not GraphQL
+- `variables?`: `Record<string, any>` GraphQL variables. `null` if request is not GraphQL or variables is not passed
+- `headers?` `Record<string, any>` headers object
+- `cookies?` `Record<string, any>` cookies object
+- `query?` `Record<string, any>` query object
+- `params?` `Record<string, any>` params object
+- `body?` `any` body
 
 Response logger has additional tokens
-- `statusCode` `number` response status code
-- `data` `any` data returned to client
+- `statusCode?` `number` response status code
+- `data?` `any` data returned to client
 
 If you need to log specific properties in mapped entities (headers, cookies, query, params), use `Record<string, boolean>` object instead of boolean.
 In that case logger will use following logic:
