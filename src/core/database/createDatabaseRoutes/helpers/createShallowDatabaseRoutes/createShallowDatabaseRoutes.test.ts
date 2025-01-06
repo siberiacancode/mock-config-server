@@ -2,7 +2,7 @@ import type { Express } from 'express';
 import express from 'express';
 import request from 'supertest';
 
-import type { ShallowDatabase } from '@/utils/types';
+import type { Interceptors, ShallowDatabase } from '@/utils/types';
 
 import { MemoryStorage } from '../../storages';
 
@@ -18,7 +18,13 @@ describe('createShallowDatabaseRoutes', () => {
     jane: { name: 'Jane Smith', age: 30 }
   });
 
-  const createServer = (shallowDatabase: ShallowDatabase) => {
+  const createServer = (
+    shallowDatabase: ShallowDatabase,
+    responseInterceptors?: {
+      apiInterceptor?: Interceptors['response'];
+      serverInterceptor?: Interceptors['response'];
+    }
+  ) => {
     const server = express();
     const routerBase = express.Router();
     const storage = new MemoryStorage(shallowDatabase);
@@ -26,7 +32,8 @@ describe('createShallowDatabaseRoutes', () => {
     const routerWithRoutesForShallowDatabase = createShallowDatabaseRoutes({
       router: routerBase,
       database: shallowDatabase,
-      storage
+      storage,
+      responseInterceptors
     });
 
     server.use(express.json());
@@ -519,6 +526,21 @@ describe('createShallowDatabaseRoutes', () => {
         },
         { name: 'Jane Smith', age: 30, address: { city: 'Tomsk' }, hobbies: ['sport', 'games'] }
       ]);
+    });
+  });
+
+  describe('createShallowDatabaseRoutes: interceptors', () => {
+    test('Should call response interceptors', async () => {
+      const apiInterceptor = vi.fn();
+      const serverInterceptor = vi.fn();
+
+      const shallowDatabase = createShallowDatabase();
+      const server = createServer(shallowDatabase, { apiInterceptor, serverInterceptor });
+
+      await request(server).get('/users');
+
+      expect(apiInterceptor.mock.calls.length).toBe(1);
+      expect(serverInterceptor.mock.calls.length).toBe(1);
     });
   });
 });

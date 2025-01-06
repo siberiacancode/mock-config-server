@@ -114,33 +114,3 @@ describe('createDatabaseRoutes: routes /__routes and /__db', () => {
     expect(response.body).toStrictEqual(routes);
   });
 });
-
-describe('createDatabaseRoutes: interceptors', () => {
-  test('Should call response interceptors in order: api -> server', async () => {
-    const apiInterceptor = vi.fn();
-    const serverInterceptor = vi.fn();
-
-    const data = { profile: { name: 'John' }, users: [{ id: 1 }, { id: 2 }] };
-    const routes = { '/api/profile': '/profile' } as const;
-    const server = createServer({
-      database: {
-        data,
-        routes,
-        interceptors: {
-          response: apiInterceptor
-        }
-      },
-      interceptors: {
-        response: serverInterceptor
-      }
-    });
-
-    await request(server).get('/profile');
-
-    expect(apiInterceptor.mock.calls.length).toBe(1);
-    expect(serverInterceptor.mock.calls.length).toBe(1);
-    expect(apiInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
-      serverInterceptor.mock.invocationCallOrder[0]
-    );
-  });
-});

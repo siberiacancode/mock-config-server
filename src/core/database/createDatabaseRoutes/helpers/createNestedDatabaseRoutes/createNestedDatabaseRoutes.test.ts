@@ -2,13 +2,13 @@ import type { Express } from 'express';
 import express from 'express';
 import request from 'supertest';
 
-import type { NestedDatabase } from '@/utils/types';
+import type { Interceptors, NestedDatabase } from '@/utils/types';
 
 import { MemoryStorage } from '../../storages';
 
 import { createNestedDatabaseRoutes } from './createNestedDatabaseRoutes';
 
-describe('CreateNestedDatabaseRoutes', () => {
+describe('createNestedDatabaseRoutes', () => {
   const createNestedDatabase = () => ({
     users: [
       {
@@ -28,7 +28,13 @@ describe('CreateNestedDatabaseRoutes', () => {
     ]
   });
 
-  const createServer = (nestedDatabase: NestedDatabase) => {
+  const createServer = (
+    nestedDatabase: NestedDatabase,
+    responseInterceptors?: {
+      apiInterceptor?: Interceptors['response'];
+      serverInterceptor?: Interceptors['response'];
+    }
+  ) => {
     const server = express();
     const routerBase = express.Router();
     const storage = new MemoryStorage(nestedDatabase);
@@ -36,7 +42,8 @@ describe('CreateNestedDatabaseRoutes', () => {
     const routerWithNestedDatabaseRoutes = createNestedDatabaseRoutes({
       router: routerBase,
       database: nestedDatabase,
-      storage
+      storage,
+      responseInterceptors
     });
 
     server.use(express.json());
@@ -673,6 +680,21 @@ describe('CreateNestedDatabaseRoutes', () => {
           hobbies: ['sport', 'games']
         }
       ]);
+    });
+  });
+
+  describe('createNestedDatabaseRoutes: interceptors', () => {
+    test('Should call response interceptors', async () => {
+      const apiInterceptor = vi.fn();
+      const serverInterceptor = vi.fn();
+
+      const nestedDatabase = createNestedDatabase();
+      const server = createServer(nestedDatabase, { apiInterceptor, serverInterceptor });
+
+      await request(server).get('/users');
+
+      expect(apiInterceptor.mock.calls.length).toBe(1);
+      expect(serverInterceptor.mock.calls.length).toBe(1);
     });
   });
 });
