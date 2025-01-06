@@ -9,7 +9,7 @@ import {
   callResponseInterceptors,
   convertToEntityDescriptor,
   isEntityDescriptor,
-  isFileDescriptorValid,
+  isFileDescriptor,
   isFilePathValid,
   resolveEntityValues,
   sleep
@@ -211,13 +211,10 @@ export const createRestRoutes = ({
           await sleep(matchedRouteConfig.settings.delay);
         }
 
-        if (matchedRouteConfigDataDescriptor.data) {
-          return response.json(data);
-        }
-        if (matchedRouteConfigDataDescriptor.file) {
-          if (!isFileDescriptorValid(data)) return next();
+        if (isFileDescriptor(data)) {
           const isFilePathChanged = matchedRouteConfigDataDescriptor.file !== data.path;
           if (isFilePathChanged) {
+            if (!isFilePathValid(data.path)) return next();
             data.file = fs.readFileSync(path.resolve(data.path));
           }
           const fileName = data.path.split('/').at(-1)!;
@@ -226,6 +223,7 @@ export const createRestRoutes = ({
           response.set('Content-Disposition', `filename=${fileName}`);
           return response.send(data.file);
         }
+        response.json(data);
       })
     );
   });

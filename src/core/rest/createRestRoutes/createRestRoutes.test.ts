@@ -311,6 +311,72 @@ describe('createRestRoutes: content', () => {
 
     fs.rmSync(tmpDirPath, { recursive: true, force: true });
   });
+
+  test('Should send a 404 if interceptor return file descriptor with invalid path', async () => {
+    const tmpDirPath = createTmpDir();
+    const existedFilePath = path.join(tmpDirPath, './existedFile.json');
+    fs.writeFileSync(existedFilePath, JSON.stringify({ some: 'data' }));
+    const notExistedFilePath = path.join(tmpDirPath, './notExistedFile.json');
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                file: existedFilePath,
+                interceptors: {
+                  response: ({ file }) => ({ path: notExistedFilePath, file })
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+
+    expect(response.statusCode).toBe(404);
+    expect(response.headers['content-type']).toContain('text/html; charset=utf-8');
+
+    fs.rmSync(tmpDirPath, { recursive: true, force: true });
+  });
+
+  test('Should send a file descriptor "as is" if interceptor return invalid one', async () => {
+    const tmpDirPath = createTmpDir();
+    const pathToFile = path.join(tmpDirPath, './data.json');
+    fs.writeFileSync(pathToFile, 'Star Platinum', 'utf-8');
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                file: pathToFile,
+                interceptors: {
+                  response: ({ path }) => ({ path, file: 123 })
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
+    expect(response.body).toStrictEqual({ path: pathToFile, file: 123 });
+
+    fs.rmSync(tmpDirPath, { recursive: true, force: true });
+  });
 });
 
 describe('createRestRoutes: settings', () => {

@@ -1,2 +1,2 @@
-export * from './isFileDescriptorValid/isFileDescriptorValid';
+export * from './isFileDescriptor/isFileDescriptor';
 export * from './isFilePathValid/isFilePathValid';

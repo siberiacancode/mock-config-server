@@ -496,6 +496,7 @@ If the file exists, response interceptors will receive `file descriptor` as the 
 - `file` `Buffer` file content as binary buffer
 
 > Note to return file descriptor from interceptor. Server will send a buffer from `data.file` with corresponding `Content-Type` and `Content-Disposition` headers.
+> If you return invalid file descriptor, server will send it as json data.
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
@@ -528,7 +529,7 @@ export default mockServerConfig;
 
 > Any changes to the data will not affect the file on disk unless you manually rewrite it.
 
-> If you return a new `path` from interceptor, server will send file corresponding to this path.
+> If you return a new `path` from interceptor, server will send file corresponding to this path or 404 error otherwise.
 
 #### Polling
 
