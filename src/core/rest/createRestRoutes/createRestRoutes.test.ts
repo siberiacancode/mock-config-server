@@ -360,7 +360,7 @@ describe('createRestRoutes: content', () => {
               {
                 file: pathToFile,
                 interceptors: {
-                  response: ({ path }) => ({ path, file: 123 })
+                  response: ({ path }) => ({ path, file: 'file' })
                 }
               }
             ]
@@ -373,7 +373,7 @@ describe('createRestRoutes: content', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
-    expect(response.body).toStrictEqual({ path: pathToFile, file: 123 });
+    expect(response.body).toStrictEqual({ path: pathToFile, file: 'file' });
 
     fs.rmSync(tmpDirPath, { recursive: true, force: true });
   });
