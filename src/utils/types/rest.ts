@@ -25,25 +25,33 @@ interface RestSettings {
   readonly delay?: number;
 }
 
+export type RestDataResponse<Method extends RestMethod = RestMethod> =
+  | ((request: Request, entities: RestEntitiesByEntityName<Method>) => Data | Promise<Data>)
+  | Data;
+
+export type RestFileResponse = string;
+
 export type RestRouteConfig<Method extends RestMethod> = (
   | {
       settings: RestSettings & { polling: true };
-      queue: Array<{
-        time?: number;
-        data:
-          | ((request: Request, entities: RestEntitiesByEntityName<Method>) => Data | Promise<Data>)
-          | Data;
-      }>;
+      queue: Array<
+        | {
+            time?: number;
+            data: RestDataResponse<Method>;
+          }
+        | {
+            time?: number;
+            file: RestFileResponse;
+          }
+      >;
     }
   | {
       settings?: RestSettings & { polling?: false };
-      data:
-        | ((request: Request, entities: RestEntitiesByEntityName<Method>) => Data | Promise<Data>)
-        | Data;
+      data: RestDataResponse<Method>;
     }
   | {
       settings?: RestSettings & { polling?: false };
-      file: string;
+      file: RestFileResponse;
     }
 ) & { entities?: RestEntitiesByEntityName<Method>; interceptors?: Interceptors<'rest'> };
 

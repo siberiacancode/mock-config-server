@@ -22,21 +22,21 @@ interface GraphQLSettings {
   readonly delay?: number;
 }
 
+export type GraphqlDataResponse =
+  | ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>)
+  | Data;
+
 export type GraphQLRouteConfig = (
   | {
       settings: GraphQLSettings & { polling: true };
       queue: Array<{
         time?: number;
-        data:
-          | ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>)
-          | Data;
+        data: GraphqlDataResponse;
       }>;
     }
   | {
       settings?: GraphQLSettings & { polling?: false };
-      data:
-        | ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>)
-        | Data;
+      data: GraphqlDataResponse;
     }
 ) & { entities?: GraphQLEntitiesByEntityName; interceptors?: Interceptors<'graphql'> };
 

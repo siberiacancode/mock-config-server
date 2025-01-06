@@ -460,9 +460,82 @@ const mockServerConfig = {
 module.exports = mockServerConfig;
 ```
 
+#### File responses
+
+Rest routes support paths to files. If a route is matched, the server will send data from the file. If the file is not found, the server will return 404.
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/files/settings',
+        method: 'get',
+        routes: [
+          {
+            file: './settings.json'
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export default mockServerConfig;
+```
+
+> If the file path is absolute, then this path will be used as is. If the file path is relative, it will be appended to the current working directory.
+
+If the file exists, response interceptors will receive `file descriptor` as the `data` argument:
+
+`File descriptor` is an object with `path` and `file` fields that describe file location and file content.
+
+- `path` `string` path to the file. Same as `file` passed in route
+- `file` `Buffer` file content as binary buffer
+
+> Note to return file descriptor from interceptor. Server will send a buffer from `data.file` with corresponding `Content-Type` and `Content-Disposition` headers.
+> If you return invalid file descriptor, server will send it as json data.
+
+```javascript
+/** @type {import('mock-config-server').MockServerConfig} */
+const mockServerConfig = {
+  rest: {
+    baseUrl: '/api',
+    configs: [
+      {
+        path: '/files/settings',
+        method: 'get',
+        routes: [
+          {
+            file: './settings.json',
+            interceptors: {
+              response: (data) => {
+                data.file = data.file;                  // some logic with buffer 
+                fs.writeFileSync(data.path, data.file); // rewrite ./settings.json file on disk with new content
+                return data;
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export default mockServerConfig;
+```
+
+> Any changes to the data will not affect the file on disk unless you manually rewrite it.
+
+> If you return a new `path` from interceptor, server will send file corresponding to this path or 404 error otherwise.
+
 #### Polling
 
-Routes support polling for data. To add polling for data, you must specify the `polling setting` and change `data` property to `queue`.
+Routes support polling for data. To add polling for data, you must specify the `polling setting` and use `queue` property instead of `data` or `file`.
+
+`queue` is an array containing `data` or `file` that should be returned in order.
 
 > After receiving the last value from polling, the queue is reset and the next request will return the first value from the queue.
 
@@ -480,7 +553,8 @@ const mockServerConfig = {
             settings: { polling: true },
             queue: [
               { data: { emoji: '🦁', name: 'Nursultan' } },
-              { data: { emoji: '☄', name: 'Dmitriy' } }
+              { data: { emoji: '☄', name: 'Dmitriy' } },
+              { file: './users/Sergey.json' }
             ]
           }
         ]
@@ -519,66 +593,6 @@ const mockServerConfig = {
 
 export default mockServerConfig;
 ```
-
-#### File responses
-
-Rest routes support paths to files. If a route is matched, the server will send data from the file. If the file is not found, the server will return 404.
-
-```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
-    configs: [
-      {
-        path: '/files/settings',
-        method: 'get',
-        routes: [
-          {
-            file: './settings.json'
-          }
-        ]
-      }
-    ]
-  }
-};
-
-export default mockServerConfig;
-```
-
-> If the file path is absolute, then this path will be used as is. If the file path is relative, it will be appended to the current working directory.
-
-If the file exists, response interceptors will receive null as the data argument.
-
-```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
-    configs: [
-      {
-        path: '/files/settings',
-        method: 'get',
-        routes: [
-          {
-            file: './settings.json',
-            interceptors: {
-              response: (data) => {
-                console.log(data); // null
-                return data;
-              }
-            }
-          }
-        ]
-      }
-    ]
-  }
-};
-
-export default mockServerConfig;
-```
-
-> Any changes to the data will not affect the file (and the response, respectively).
 
 #### Static Path
 
