@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { isPlainObject } from '@/utils/helpers';
+
 import {
   checkActualValueCheckModeSchema,
   compareWithDescriptorAnyValueCheckModeSchema,
@@ -40,7 +42,9 @@ const propertyLevelPlainEntityDescriptorSchema = extendedDiscriminatedUnion('che
 ]);
 
 const nonCheckModeSchema = (schema: z.ZodTypeAny) =>
-  plainObjectSchema(schema.and(z.object({ checkMode: z.never().optional() })));
+  z
+    .custom((value) => !isPlainObject(value))
+    .or(schema.and(z.object({ checkMode: z.never().optional() })));
 
 const topLevelPlainEntityRecordSchema = nonCheckModeSchema(
   z.record(
