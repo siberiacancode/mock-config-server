@@ -237,7 +237,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
     });
   });
 
-  test('"equals"/"notEquals" checkMode should true/false when actual and descriptor values are equal', () => {
+  test('"equals"/"notEquals" checkMode should return true/false when actual and descriptor values are equal', () => {
     expect(
       resolveEntityValues({
         checkMode: 'equals',
