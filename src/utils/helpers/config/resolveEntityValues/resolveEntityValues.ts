@@ -1,6 +1,6 @@
 import { flatten } from 'flat';
 
-import { NEGATION_CHECK_MODES } from '@/utils/constants';
+import { NEGATIVE_CHECK_MODES } from '@/utils/constants';
 import type {
   CheckActualValueCheckMode,
   CheckFunction,
@@ -70,18 +70,18 @@ const compareEntityValues = (checkMode: CheckMode, actualValue: any, descriptorV
 
   const isActualValueObject = isPlainObject(actualValue) || Array.isArray(actualValue);
   const isDescriptorValueObject = isPlainObject(descriptorValue) || Array.isArray(descriptorValue);
-  const isNegationCheckMode = NEGATION_CHECK_MODES.includes(
-    checkMode as (typeof NEGATION_CHECK_MODES)[number]
+  const isNegativeCheckMode = NEGATIVE_CHECK_MODES.includes(
+    checkMode as (typeof NEGATIVE_CHECK_MODES)[number]
   );
   if (isActualValueObject && isDescriptorValueObject) {
     const flattenActualValue = flatten<PlainObject | unknown[], PlainObject>(actualValue);
     const flattenDescriptorValue = flatten<PlainObject | unknown[], PlainObject>(descriptorValue);
 
     if (Object.keys(flattenActualValue).length !== Object.keys(flattenDescriptorValue).length) {
-      return isNegationCheckMode;
+      return isNegativeCheckMode;
     }
 
-    return Object.keys(flattenDescriptorValue)[isNegationCheckMode ? 'some' : 'every'](
+    return Object.keys(flattenDescriptorValue)[isNegativeCheckMode ? 'some' : 'every'](
       (flattenDescriptorValueKey) =>
         checkFunction(
           checkMode,
@@ -91,7 +91,7 @@ const compareEntityValues = (checkMode: CheckMode, actualValue: any, descriptorV
     );
   }
 
-  return isNegationCheckMode;
+  return isNegativeCheckMode;
 };
 
 interface ResolveEntityValuesParamsWithCheckActualValueCheckMode {

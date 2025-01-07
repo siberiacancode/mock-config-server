@@ -36,7 +36,7 @@ export const CALCULATE_BY_DESCRIPTOR_VALUE_CHECK_MODES = [
   'function'
 ] as const satisfies readonly CalculateByDescriptorValueCheckMode[];
 
-export const NEGATION_CHECK_MODES = [
+export const NEGATIVE_CHECK_MODES = [
   'notExists',
   'notEquals',
   'notIncludes',
