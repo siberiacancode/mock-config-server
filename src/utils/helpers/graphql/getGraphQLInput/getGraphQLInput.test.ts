@@ -114,10 +114,16 @@ describe('getGraphQLInput', () => {
     });
   });
 
-  test('Should throw error if request method is not GET or POST', () => {
+  test('Should get correct graphQL input from PUT/PATCH/DELETE requests', () => {
     const invalidMockRequests = [
       {
         method: 'PUT',
+        body: {
+          query: 'query GetCharacters { characters { name } }'
+        }
+      },
+      {
+        method: 'PATCH',
         body: {
           query: 'query GetCharacters { characters { name } }'
         }

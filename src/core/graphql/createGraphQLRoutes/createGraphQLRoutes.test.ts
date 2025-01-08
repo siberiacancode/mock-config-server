@@ -28,7 +28,7 @@ const createServer = (
 };
 
 describe('createGraphQLRoutes', () => {
-  test('Should return 400 and description text for methods except GET and POST', async () => {
+  test('Should return 400 and description text for PUT/PATCH/DELETE methods', async () => {
     const server = createServer({
       graphql: {
         configs: [
