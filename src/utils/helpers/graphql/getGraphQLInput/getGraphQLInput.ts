@@ -24,5 +24,5 @@ export const getGraphQLInput = (request: Request): GetGraphQLInputResult => {
     return { query, variables };
   }
 
-  throw new Error(`Not allowed request method ${request.method} for graphql request`);
+  return { query: undefined, variables: undefined };
 };

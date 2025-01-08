@@ -38,6 +38,11 @@ export const createGraphQLRoutes = ({
   const preparedGraphQLRequestConfig = prepareGraphQLRequestConfigs(graphqlConfig.configs);
 
   const graphqlMiddleware = async (request: Request, response: Response, next: NextFunction) => {
+    if (request.method !== 'GET' && request.method !== 'POST') {
+      return response
+        .status(400)
+        .json({ message: `Not allowed request method ${request.method} for graphql request` });
+    }
     const graphQLInput = getGraphQLInput(request);
     if (!graphQLInput.query) {
       return response
@@ -212,6 +217,9 @@ export const createGraphQLRoutes = ({
 
   router.route('/').get(asyncHandler(graphqlMiddleware));
   router.route('/').post(asyncHandler(graphqlMiddleware));
+  router.route('/').put(asyncHandler(graphqlMiddleware));
+  router.route('/').patch(asyncHandler(graphqlMiddleware));
+  router.route('/').delete(asyncHandler(graphqlMiddleware));
 
   return router;
 };

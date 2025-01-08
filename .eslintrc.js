@@ -22,7 +22,8 @@ module.exports = {
         'no-continue': 'off',
         'promise/always-return': ['error', { ignoreLastCallback: true }],
         'arrow-body-style': ['error', 'as-needed'],
-        'no-console': ['warn', { allow: ['info', 'dir', 'error'] }]
+        'no-console': ['warn', { allow: ['info', 'dir', 'error'] }],
+        'no-await-in-loop': 'off'
       }
     }
   ]

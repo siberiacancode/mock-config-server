@@ -115,26 +115,26 @@ describe('getGraphQLInput', () => {
   });
 
   test('Should throw error if request method is not GET or POST', () => {
-    const deleteMockRequest = {
-      method: 'DELETE',
-      query: {
-        query: 'query GetCharacters { characters { name } }'
+    const invalidMockRequests = [
+      {
+        method: 'PUT',
+        body: {
+          query: 'query GetCharacters { characters { name } }'
+        }
+      },
+      {
+        method: 'DELETE',
+        query: {
+          query: 'query GetCharacters { characters { name } }'
+        }
       }
-    } as unknown as Request;
+    ] as unknown as Request[];
 
-    expect(() => getGraphQLInput(deleteMockRequest)).toThrow(
-      'Not allowed request method DELETE for graphql request'
-    );
-
-    const putMockRequest = {
-      method: 'PUT',
-      body: {
-        query: 'query GetCharacters { characters { name } }'
-      }
-    } as unknown as Request;
-
-    expect(() => getGraphQLInput(putMockRequest)).toThrow(
-      'Not allowed request method PUT for graphql request'
-    );
+    invalidMockRequests.forEach((invalidMockRequest) => {
+      expect(getGraphQLInput(invalidMockRequest)).toStrictEqual({
+        query: undefined,
+        variables: undefined
+      });
+    });
   });
 });
