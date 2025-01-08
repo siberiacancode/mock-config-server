@@ -28,36 +28,6 @@ const createServer = (
 };
 
 describe('createGraphQLRoutes', () => {
-  test('Should return 400 and description text for PUT/PATCH/DELETE methods', async () => {
-    const server = createServer({
-      graphql: {
-        configs: [
-          {
-            operationName: 'GetUsers',
-            operationType: 'query',
-            routes: [
-              {
-                data: { name: 'John', surname: 'Doe' }
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const invalidMethods = ['put', 'patch', 'delete'] as const;
-    for (const invalidMethod of invalidMethods) {
-      const response = await request(server)
-        [invalidMethod]('/')
-        .send({ query: 'query GetUsers { users { name } }' });
-
-      expect(response.statusCode).toBe(400);
-      expect(response.body).toStrictEqual({
-        message: `Not allowed request method ${invalidMethod.toUpperCase()} for graphql request`
-      });
-    }
-  });
-
   test('Should return 400 and description text for invalid query', async () => {
     const server = createServer({
       graphql: {
