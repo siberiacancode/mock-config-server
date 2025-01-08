@@ -845,8 +845,8 @@ describe('createRestRoutes: interceptors', () => {
       query: 'query GetUsers { users { name } }',
       variables: '{ "key1": "value1", "key2": "value2" }'
     });
-    expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(routeInterceptor.mock.calls.length).toBe(1);
+    expect(requestInterceptor).toBeCalledTimes(1);
+    expect(routeInterceptor).toBeCalledTimes(1);
     expect(requestInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
       routeInterceptor.mock.invocationCallOrder[0]
     );
@@ -857,8 +857,8 @@ describe('createRestRoutes: interceptors', () => {
       query: 'query GetUsers { users { name } }',
       variables: '{ "key3": "value3", "key4": "value4" }'
     });
-    expect(requestInterceptor.mock.calls.length).toBe(2);
-    expect(routeInterceptor.mock.calls.length).toBe(1);
+    expect(requestInterceptor).toBeCalledTimes(2);
+    expect(routeInterceptor).toBeCalledTimes(1);
 
     await request(server)
       .post('/')
@@ -867,8 +867,8 @@ describe('createRestRoutes: interceptors', () => {
         query: 'mutation CreateUser($name: String!) { createUser(name: $name) { name } }',
         variables: { key1: 'value1', key2: 'value2' }
       });
-    expect(requestInterceptor.mock.calls.length).toBe(2);
-    expect(routeInterceptor.mock.calls.length).toBe(1);
+    expect(requestInterceptor).toBeCalledTimes(2);
+    expect(routeInterceptor).toBeCalledTimes(1);
   });
 
   test('Should call response interceptors in order: route -> request -> server', async () => {
@@ -922,10 +922,10 @@ describe('createRestRoutes: interceptors', () => {
       query: 'query GetUsers { users { name } }',
       variables: '{ "key1": "value1", "key2": "value2" }'
     });
-    expect(routeInterceptor.mock.calls.length).toBe(1);
-    expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(apiInterceptor.mock.calls.length).toBe(1);
-    expect(serverInterceptor.mock.calls.length).toBe(1);
+    expect(routeInterceptor).toBeCalledTimes(1);
+    expect(requestInterceptor).toBeCalledTimes(1);
+    expect(apiInterceptor).toBeCalledTimes(1);
+    expect(serverInterceptor).toBeCalledTimes(1);
     expect(routeInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
       requestInterceptor.mock.invocationCallOrder[0]
     );
@@ -943,10 +943,10 @@ describe('createRestRoutes: interceptors', () => {
         query: 'mutation CreateUser($name: String!) { createUser(name: $name) { name } }',
         variables: { key1: 'value1', key2: 'value2' }
       });
-    expect(routeInterceptor.mock.calls.length).toBe(1);
-    expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(apiInterceptor.mock.calls.length).toBe(2);
-    expect(serverInterceptor.mock.calls.length).toBe(2);
+    expect(routeInterceptor).toBeCalledTimes(1);
+    expect(requestInterceptor).toBeCalledTimes(1);
+    expect(apiInterceptor).toBeCalledTimes(2);
+    expect(serverInterceptor).toBeCalledTimes(2);
 
     await request(server)
       .post('/')
@@ -955,9 +955,9 @@ describe('createRestRoutes: interceptors', () => {
         query: 'query GetSettings { settings { notifications } }',
         variables: { key1: 'value1', key2: 'value2' }
       });
-    expect(routeInterceptor.mock.calls.length).toBe(1);
-    expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(apiInterceptor.mock.calls.length).toBe(2);
-    expect(serverInterceptor.mock.calls.length).toBe(2);
+    expect(routeInterceptor).toBeCalledTimes(1);
+    expect(requestInterceptor).toBeCalledTimes(1);
+    expect(apiInterceptor).toBeCalledTimes(2);
+    expect(serverInterceptor).toBeCalledTimes(2);
   });
 });

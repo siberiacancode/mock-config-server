@@ -86,7 +86,7 @@ describe('createOrm', () => {
       orm = createOrm<typeof data>(storage);
     });
 
-    test('Should create a new resource', () => {
+    test('Should create many new resources', () => {
       const newUser = {
         name: 'Bob Marley',
         age: 35,
@@ -115,7 +115,7 @@ describe('createOrm', () => {
       expect(remainingUsers.find((user) => user.id === 1)).toBeUndefined();
     });
 
-    test('Should create a new resource', () => {
+    test('Should create many new resources', () => {
       const newUsers = [
         {
           name: 'Bob Marley',
@@ -135,12 +135,12 @@ describe('createOrm', () => {
       const users = orm.users.findMany();
       expect(users.length).toBe(5);
       expect([users[3], users[4]]).toStrictEqual([
-        { ...users[3], id: 4 },
-        { ...users[4], id: 5 }
+        { ...newUsers[0], id: 4 },
+        { ...newUsers[1], id: 5 }
       ]);
     });
 
-    test('Should update many users', () => {
+    test('Should update many resources', () => {
       const usersLength = orm.users.updateMany([1, 2], { age: 40 });
       const users = orm.users.findMany();
 
@@ -168,6 +168,9 @@ describe('createOrm', () => {
       orm.users.deleteMany([1, 2]);
       const remainingUsers = orm.users.findMany();
       expect(remainingUsers.length).toBe(1);
+      expect(remainingUsers).toStrictEqual([
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' }, hobbies: ['music'] }
+      ]);
     });
 
     test('Should find by id', () => {
@@ -219,13 +222,24 @@ describe('createOrm', () => {
     });
 
     test('Should find first', () => {
-      const user = orm.users.findFirst({ id: 1 });
+      const user = orm.users.findFirst();
       expect(user).toStrictEqual({
         id: 1,
         name: 'John Doe',
         age: 25,
         address: { city: 'Novosibirsk' },
         hobbies: ['music', 'sport']
+      });
+    });
+
+    test('Should find first by filters', () => {
+      const user = orm.users.findFirst({ id: 2 });
+      expect(user).toStrictEqual({
+        id: 2,
+        name: 'Jane Smith',
+        age: 30,
+        address: { city: 'Tomsk' },
+        hobbies: ['sport', 'games']
       });
     });
 

@@ -20,10 +20,10 @@ describe('errorMiddleware', () => {
     const errorResponse = await request(server).get('/error');
     const successResponse = await request(server).get('/success');
 
-    expect(errorResponse.status).toEqual(500);
+    expect(errorResponse.statusCode).toEqual(500);
     expect(errorResponse.text).toContain('error');
 
-    expect(successResponse.status).toEqual(200);
+    expect(successResponse.statusCode).toEqual(200);
     expect(successResponse.text).toEqual('success');
   });
 });

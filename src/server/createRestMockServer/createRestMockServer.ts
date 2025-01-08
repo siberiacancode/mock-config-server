@@ -35,6 +35,7 @@ export const createRestMockServer = (
   server.use(bodyParser.text());
 
   contextMiddleware(server, restMockServerConfig);
+
   cookieParseMiddleware(server);
 
   const serverRequestInterceptor = restMockServerConfig.interceptors?.request;

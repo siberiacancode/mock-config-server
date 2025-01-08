@@ -11,7 +11,7 @@ export const startDatabaseMockServer = (databaseMockServerConfig: DatabaseMockSe
   const port = databaseMockServerConfig.port ?? DEFAULT.PORT;
 
   const server = mockServer.listen(port, () => {
-    console.log(color.green(`🎉 Database Mock Server is running at http://localhost:${port}`));
+    console.info(color.green(`🎉 Database Mock Server is running at http://localhost:${port}`));
   });
 
   // ✅ important: add destroy method for closing keep-alive connections after server shutdown

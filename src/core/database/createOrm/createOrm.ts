@@ -30,8 +30,6 @@ export const createOrm = <Data extends Database = Database>(storage: Storage) =>
           const updatedRecord = { ...currentResource, ...item, id };
 
           storage.write([key, currentResourceIndex], updatedRecord);
-
-          return updatedRecord;
         },
         delete: (id) => {
           const collection = storage.read(key);
@@ -47,13 +45,6 @@ export const createOrm = <Data extends Database = Database>(storage: Storage) =>
             const newResource = { ...element, id: newResourceId };
             storage.write([key, collection.length], newResource);
           }),
-        deleteMany: (ids) => {
-          const collection = storage.read(key);
-          ids.forEach((id) => {
-            const index = findIndexById(collection, id);
-            storage.delete([key, index]);
-          });
-        },
         updateMany: (ids, item) => {
           ids.forEach((id) => {
             const collection = storage.read(key);
@@ -64,6 +55,13 @@ export const createOrm = <Data extends Database = Database>(storage: Storage) =>
           });
 
           return ids.length;
+        },
+        deleteMany: (ids) => {
+          const collection = storage.read(key);
+          ids.forEach((id) => {
+            const index = findIndexById(collection, id);
+            storage.delete([key, index]);
+          });
         },
 
         findById: (id) => {
@@ -77,7 +75,7 @@ export const createOrm = <Data extends Database = Database>(storage: Storage) =>
           if (!filters) return collection;
 
           const flattenedFilters = flatten<any, any>(filters);
-          return collection.filter((resource: any) => {
+          return collection.filter((resource: Record<string, unknown>) => {
             const flattenedResource = flatten<any, any>(resource);
             return Object.entries(flattenedFilters).every(
               ([key, value]) => flattenedResource[key] === value
@@ -90,7 +88,7 @@ export const createOrm = <Data extends Database = Database>(storage: Storage) =>
           if (!filters) return collection[0];
 
           const flattenedFilters = flatten<any, any>(filters);
-          return collection.find((resource: any) => {
+          return collection.find((resource: Record<string, unknown>) => {
             const flattenedResource = flatten<any, any>(resource);
             return Object.entries(flattenedFilters).every(
               ([key, value]) => flattenedResource[key] === value
@@ -101,7 +99,7 @@ export const createOrm = <Data extends Database = Database>(storage: Storage) =>
           const collection = storage.read(key);
 
           const flattenedFilters = flatten<any, any>(filters);
-          return collection.some((resource: any) => {
+          return collection.some((resource: Record<string, unknown>) => {
             const flattenedResource = flatten<any, any>(resource);
             return Object.entries(flattenedFilters).every(
               ([key, value]) => flattenedResource[key] === value
