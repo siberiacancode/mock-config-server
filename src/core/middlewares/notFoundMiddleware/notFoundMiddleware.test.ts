@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser';
 import express from 'express';
 import request from 'supertest';
 
@@ -38,7 +39,7 @@ const createServer = (
   server.set('view engine', 'ejs');
   server.set('views', urlJoin(__dirname, '../../../static/views'));
   server.use(express.static(urlJoin(__dirname, '../../../static/views')));
-  server.use(express.json());
+  server.use(bodyParser.json());
 
   notFoundMiddleware(server, mockServerConfig);
 

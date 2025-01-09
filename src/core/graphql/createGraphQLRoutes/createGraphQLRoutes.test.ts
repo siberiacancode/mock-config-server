@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser';
 import express from 'express';
 import request from 'supertest';
 
@@ -22,7 +23,7 @@ const createServer = (
 
   const graphqlBaseUrl = urlJoin(baseUrl ?? '/', graphql?.baseUrl ?? '/');
 
-  server.use(express.json());
+  server.use(bodyParser.json());
   server.use(graphqlBaseUrl, routerWithRoutes);
   return server;
 };

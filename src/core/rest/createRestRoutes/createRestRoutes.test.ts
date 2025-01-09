@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
@@ -25,7 +26,7 @@ const createServer = (
 
   const restBaseUrl = urlJoin(baseUrl ?? '/', rest?.baseUrl ?? '/');
 
-  server.use(express.json());
+  server.use(bodyParser.json());
   server.use(restBaseUrl, routerWithRoutes);
   return server;
 };
@@ -837,6 +838,38 @@ describe('createRestRoutes: entities', () => {
       .get('/users')
       .set('Content-Type', 'application/json')
       .set({ LowerCase: 'lowercase', upperCase: 'UPPERCASE' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+  });
+
+  test('Should correctly handle empty object body', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'post',
+            routes: [
+              {
+                entities: {
+                  body: {
+                    checkMode: 'equals',
+                    value: {}
+                  }
+                },
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .post('/users')
+      .set('Content-Type', 'application/json')
+      .send({});
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
