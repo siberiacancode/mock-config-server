@@ -27,17 +27,19 @@ export const contextMiddleware = (server: Express) => {
 
     request.timestamp = Date.now();
 
-    const graphQLInput = getGraphQLInput(request);
-    const graphQLQuery = parseQuery(graphQLInput.query ?? '');
+    if (request.method === 'GET' || request.method === 'POST') {
+      const graphQLInput = getGraphQLInput(request);
+      const graphQLQuery = parseQuery(graphQLInput.query ?? '');
 
-    if (graphQLInput.query && graphQLQuery) {
-      request.graphQL = {
-        operationType: graphQLQuery.operationType as GraphQLOperationType,
-        operationName: graphQLQuery.operationName,
-        query: graphQLInput.query,
-        variables: graphQLInput.variables
-      };
-      return next();
+      if (graphQLInput.query && graphQLQuery) {
+        request.graphQL = {
+          operationType: graphQLQuery.operationType as GraphQLOperationType,
+          operationName: graphQLQuery.operationName,
+          query: graphQLInput.query,
+          variables: graphQLInput.variables
+        };
+        return next();
+      }
     }
 
     request.graphQL = null;

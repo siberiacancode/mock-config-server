@@ -46,7 +46,11 @@ export const notFoundMiddleware = (
     }
 
     let graphqlRequestSuggestions: GraphqlRequestSuggestionConfigs = [];
-    if (graphql && parseGraphQLRequest(request)) {
+    if (
+      (request.method === 'GET' || request.method === 'POST') &&
+      graphql &&
+      parseGraphQLRequest(request)
+    ) {
       graphqlRequestSuggestions = getGraphqlUrlSuggestions({
         url,
         requestConfigs: graphqlRequestConfigs
