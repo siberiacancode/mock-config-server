@@ -1,5 +1,6 @@
 import type { IRouter } from 'express';
 import { flatten } from 'flat';
+import fs from 'fs';
 import path from 'path';
 
 import {
@@ -8,6 +9,7 @@ import {
   callResponseInterceptors,
   convertToEntityDescriptor,
   isEntityDescriptor,
+  isFileDescriptor,
   isFilePathValid,
   resolveEntityValues,
   sleep
@@ -18,8 +20,10 @@ import type {
   Interceptors,
   PlainObject,
   RestConfig,
+  RestDataResponse,
   RestEntitiesByEntityName,
   RestEntity,
+  RestFileResponse,
   TopLevelPlainEntityArray,
   TopLevelPlainEntityDescriptor
 } from '@/utils/types';
@@ -29,7 +33,7 @@ import { prepareRestRequestConfigs } from './helpers';
 interface CreateRestRoutesParams {
   router: IRouter;
   restConfig: RestConfig;
-  serverResponseInterceptor?: Interceptors['response'];
+  serverResponseInterceptor?: Interceptors<'rest'>['response'];
 }
 
 export const createRestRoutes = ({
@@ -50,8 +54,10 @@ export const createRestRoutes = ({
         const matchedRouteConfig = requestConfig.routes.find(({ entities }) => {
           if (!entities) return true;
 
-          const entries = Object.entries(entities) as Entries<Required<RestEntitiesByEntityName>>;
-          return entries.every(([entityName, entityDescriptorOrValue]) => {
+          const entityEntries = Object.entries(entities) as Entries<
+            Required<RestEntitiesByEntityName>
+          >;
+          return entityEntries.every(([entityName, entityDescriptorOrValue]) => {
             // ✅ important:
             // check whole body as plain value strictly if descriptor used for body
             const isEntityBodyByTopLevelDescriptor =
@@ -79,6 +85,8 @@ export const createRestRoutes = ({
             const isEntityBodyByTopLevelArray =
               entityName === 'body' && Array.isArray(entityDescriptorOrValue);
             if (isEntityBodyByTopLevelArray) {
+              if (!Array.isArray(request.body)) return false;
+
               return resolveEntityValues({
                 actualValue: request.body,
                 descriptorValue: entityDescriptorOrValue,
@@ -86,40 +94,43 @@ export const createRestRoutes = ({
               });
             }
 
-            const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
+            const actualEntity = flatten<PlainObject, PlainObject>(request[entityName]);
+            const entityValueEntries = Object.entries(entityDescriptorOrValue) as Entries<
               Exclude<RestEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
             >;
-            return recordOrArrayEntries.every(([entityKey, mappedEntityDescriptorOrValue]) => {
-              const entityDescriptor = convertToEntityDescriptor(mappedEntityDescriptorOrValue);
-              const actualEntity = flatten<PlainObject, PlainObject>(request[entityName]);
+            return entityValueEntries.every(
+              ([entityPropertyKey, entityPropertyDescriptorOrValue]) => {
+                const entityPropertyDescriptor = convertToEntityDescriptor(
+                  entityPropertyDescriptorOrValue
+                );
 
-              // ✅ important: transform header keys to lower case because browsers send headers in lowercase
-              const actualKey = entityName === 'headers' ? entityKey.toLowerCase() : entityKey;
-              const actualValue = actualEntity[actualKey];
+                // ✅ important: transform header keys to lower case because browsers send headers in lowercase
+                const actualPropertyKey =
+                  entityName === 'headers' ? entityPropertyKey.toLowerCase() : entityPropertyKey;
+                const actualPropertyValue = actualEntity[actualPropertyKey];
 
-              if (
-                entityDescriptor.checkMode === 'exists' ||
-                entityDescriptor.checkMode === 'notExists'
-              ) {
+                if (
+                  entityPropertyDescriptor.checkMode === 'exists' ||
+                  entityPropertyDescriptor.checkMode === 'notExists'
+                ) {
+                  return resolveEntityValues({
+                    actualValue: actualPropertyValue,
+                    checkMode: entityPropertyDescriptor.checkMode
+                  });
+                }
+
                 return resolveEntityValues({
-                  actualValue,
-                  checkMode: entityDescriptor.checkMode
+                  actualValue: actualPropertyValue,
+                  descriptorValue: entityPropertyDescriptor.value,
+                  checkMode: entityPropertyDescriptor.checkMode,
+                  oneOf: entityPropertyDescriptor.oneOf ?? false
                 });
               }
-
-              return resolveEntityValues({
-                actualValue,
-                descriptorValue: entityDescriptor.value,
-                checkMode: entityDescriptor.checkMode,
-                oneOf: entityDescriptor.oneOf ?? false
-              });
-            });
+            );
           });
         });
 
-        if (!matchedRouteConfig) {
-          return next();
-        }
+        if (!matchedRouteConfig) return next();
 
         if (matchedRouteConfig.interceptors?.request) {
           await callRequestInterceptor({
@@ -128,7 +139,11 @@ export const createRestRoutes = ({
           });
         }
 
-        let matchedRouteConfigData = null;
+        const matchedRouteConfigDataDescriptor = {} as {
+          data?: RestDataResponse;
+          file?: RestFileResponse;
+        };
+
         if (matchedRouteConfig.settings?.polling && 'queue' in matchedRouteConfig) {
           if (!matchedRouteConfig.queue.length) return next();
 
@@ -139,8 +154,7 @@ export const createRestRoutes = ({
             };
 
           let index = shallowMatchedRouteConfig.__pollingIndex ?? 0;
-
-          const { time, data } = matchedRouteConfig.queue[index];
+          const { time } = matchedRouteConfig.queue[index];
 
           const updateIndex = () => {
             if (matchedRouteConfig.queue.length - 1 === index) {
@@ -150,6 +164,7 @@ export const createRestRoutes = ({
             }
             shallowMatchedRouteConfig.__pollingIndex = index;
           };
+          const queueItem = matchedRouteConfig.queue[index];
 
           if (time && !shallowMatchedRouteConfig.__timeoutInProgress) {
             shallowMatchedRouteConfig.__timeoutInProgress = true;
@@ -163,21 +178,22 @@ export const createRestRoutes = ({
             updateIndex();
           }
 
-          matchedRouteConfigData = data;
+          if ('data' in queueItem) {
+            matchedRouteConfigDataDescriptor.data = queueItem.data;
+          }
+          if ('file' in queueItem) {
+            if (!isFilePathValid(queueItem.file)) return next();
+            matchedRouteConfigDataDescriptor.file = queueItem.file;
+          }
         }
 
         if ('data' in matchedRouteConfig) {
-          matchedRouteConfigData = matchedRouteConfig.data;
+          matchedRouteConfigDataDescriptor.data = matchedRouteConfig.data;
         }
-
         if ('file' in matchedRouteConfig) {
           if (!isFilePathValid(matchedRouteConfig.file)) return next();
+          matchedRouteConfigDataDescriptor.file = matchedRouteConfig.file;
         }
-
-        const resolvedData =
-          typeof matchedRouteConfigData === 'function'
-            ? await matchedRouteConfigData(request, matchedRouteConfig.entities ?? {})
-            : matchedRouteConfigData;
 
         if (matchedRouteConfig.settings?.status) {
           response.statusCode = matchedRouteConfig.settings.status;
@@ -187,6 +203,25 @@ export const createRestRoutes = ({
         // set 'Cache-Control' header for explicit browsers response revalidate: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
         // this code should place before response interceptors for giving opportunity to rewrite 'Cache-Control' header
         if (request.method === 'GET') response.set('Cache-control', 'no-cache');
+
+        let resolvedData = null;
+
+        if (matchedRouteConfigDataDescriptor.data) {
+          resolvedData =
+            typeof matchedRouteConfigDataDescriptor.data === 'function'
+              ? await matchedRouteConfigDataDescriptor.data(
+                  request,
+                  matchedRouteConfig.entities ?? {}
+                )
+              : matchedRouteConfigDataDescriptor.data;
+        }
+        if (matchedRouteConfigDataDescriptor.file) {
+          const buffer = fs.readFileSync(path.resolve(matchedRouteConfigDataDescriptor.file));
+          resolvedData = {
+            path: matchedRouteConfigDataDescriptor.file,
+            file: buffer
+          };
+        }
 
         const data = await callResponseInterceptors({
           data: resolvedData,
@@ -204,10 +239,19 @@ export const createRestRoutes = ({
           await sleep(matchedRouteConfig.settings.delay);
         }
 
-        if ('file' in matchedRouteConfig) {
-          return response.sendFile(path.resolve(matchedRouteConfig.file));
+        if (isFileDescriptor(data)) {
+          const isFilePathChanged = matchedRouteConfigDataDescriptor.file !== data.path;
+          if (isFilePathChanged) {
+            if (!isFilePathValid(data.path)) return next();
+            data.file = fs.readFileSync(path.resolve(data.path));
+          }
+          const fileName = data.path.split('/').at(-1)!;
+          const fileExtension = fileName.split('.').at(-1)!;
+          response.type(fileExtension);
+          response.set('Content-Disposition', `filename=${fileName}`);
+          return response.send(data.file);
         }
-        return response.json(data);
+        response.json(data);
       })
     );
   });

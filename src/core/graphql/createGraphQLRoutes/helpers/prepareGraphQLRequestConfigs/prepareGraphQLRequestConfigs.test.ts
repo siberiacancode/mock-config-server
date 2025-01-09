@@ -114,58 +114,6 @@ describe('prepareGraphQLRequestConfigs', () => {
     );
   });
 
-  test('Should set not object variables weight equals to one', () => {
-    const graphQLRequestConfigs: GraphQLRequestConfig[] = [
-      {
-        operationName: 'GetUser',
-        operationType: 'query',
-        routes: [
-          {
-            entities: {
-              variables: [{}, {}, {}]
-            },
-            data: { name: 'John', surname: 'Doe' }
-          },
-          {
-            entities: {
-              headers: {
-                header1: 'value',
-                header2: 'value'
-              }
-            },
-            data: { name: 'John', surname: 'Doe' }
-          }
-        ]
-      }
-    ];
-    const expectedGraphQLRequestConfigs: GraphQLRequestConfig[] = [
-      {
-        operationName: 'GetUser',
-        operationType: 'query',
-        routes: [
-          {
-            entities: {
-              headers: {
-                header1: 'value',
-                header2: 'value'
-              }
-            },
-            data: { name: 'John', surname: 'Doe' }
-          },
-          {
-            entities: {
-              variables: [{}, {}, {}]
-            },
-            data: { name: 'John', surname: 'Doe' }
-          }
-        ]
-      }
-    ];
-    expect(prepareGraphQLRequestConfigs(graphQLRequestConfigs)).toStrictEqual(
-      expectedGraphQLRequestConfigs
-    );
-  });
-
   test('Should set descriptor variables with value weight equals to variables.value weight', () => {
     const graphQLRequestConfigs: GraphQLRequestConfig[] = [
       {

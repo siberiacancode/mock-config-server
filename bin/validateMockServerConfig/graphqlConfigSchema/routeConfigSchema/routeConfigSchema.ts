@@ -1,22 +1,12 @@
 import { z } from 'zod';
 
 import { isPlainObject } from '@/utils/helpers';
-import type { TopLevelPlainEntityDescriptor, TopLevelPlainEntityRecord } from '@/utils/types';
 
 import { isOnlyRequestedDataResolvingPropertyExists } from '../../../helpers';
 import { interceptorsSchema } from '../../interceptorsSchema/interceptorsSchema';
 import { queueSchema } from '../../queueSchema/queueSchema';
 import { settingsSchema } from '../../settingsSchema/settingsSchema';
-import {
-  mappedEntitySchema,
-  plainEntitySchema,
-  plainObjectSchema,
-  topLevelPlainEntityArraySchema
-} from '../../utils';
-
-const plainEntitySchemaWithoutTopLevelArray = z.union([
-  ...plainEntitySchema.options.filter((option) => option !== topLevelPlainEntityArraySchema)
-] as unknown as [z.ZodType<TopLevelPlainEntityDescriptor>, z.ZodType<TopLevelPlainEntityRecord>]);
+import { mappedEntitySchema, plainObjectSchema, variablesPlainEntitySchema } from '../../utils';
 
 const baseRouteConfigSchema = z.strictObject({
   entities: plainObjectSchema(
@@ -24,7 +14,7 @@ const baseRouteConfigSchema = z.strictObject({
       headers: mappedEntitySchema.optional(),
       cookies: mappedEntitySchema.optional(),
       query: mappedEntitySchema.optional(),
-      variables: plainEntitySchemaWithoutTopLevelArray.optional()
+      variables: variablesPlainEntitySchema.optional()
     })
   ).optional(),
   interceptors: plainObjectSchema(interceptorsSchema).optional()

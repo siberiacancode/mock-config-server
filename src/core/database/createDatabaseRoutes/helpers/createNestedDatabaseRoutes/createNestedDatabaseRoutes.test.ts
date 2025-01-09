@@ -110,7 +110,7 @@ describe('CreateNestedDatabaseRoutes', () => {
     test('Should return 404 for non-existent id', async () => {
       const response = await request(server).get('/users/3');
 
-      expect(response.status).toBe(404);
+      expect(response.statusCode).toBe(404);
     });
   });
 
@@ -131,7 +131,7 @@ describe('CreateNestedDatabaseRoutes', () => {
     test('Should return 404 for non-existent id', async () => {
       const response = await request(server).put('/users/3');
 
-      expect(response.status).toBe(404);
+      expect(response.statusCode).toBe(404);
     });
   });
 
@@ -158,7 +158,7 @@ describe('CreateNestedDatabaseRoutes', () => {
     test('Should return 404 for non-existent id', async () => {
       const response = await request(server).patch('/users/3');
 
-      expect(response.status).toBe(404);
+      expect(response.statusCode).toBe(404);
     });
   });
 
@@ -172,16 +172,16 @@ describe('CreateNestedDatabaseRoutes', () => {
 
     test('Should correctly delete item from collection for valid key and id', async () => {
       const deleteResponse = await request(server).delete('/users/1');
-      expect(deleteResponse.status).toBe(204);
+      expect(deleteResponse.statusCode).toBe(204);
 
       const getResponse = await request(server).get('/users/1');
-      expect(getResponse.status).toBe(404);
+      expect(getResponse.statusCode).toBe(404);
     });
 
     test('Should return 404 for non-existent id', async () => {
       const response = await request(server).delete('/users/3');
 
-      expect(response.status).toBe(404);
+      expect(response.statusCode).toBe(404);
     });
   });
 
