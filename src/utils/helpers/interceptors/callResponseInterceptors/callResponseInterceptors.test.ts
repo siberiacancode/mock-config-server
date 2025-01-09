@@ -21,10 +21,10 @@ describe('callResponseInterceptors: order of calls', () => {
         response
       })
     ).toBe('');
-    expect(routeInterceptor.mock.calls.length).toBe(0);
-    expect(requestInterceptor.mock.calls.length).toBe(0);
-    expect(apiInterceptor.mock.calls.length).toBe(0);
-    expect(serverInterceptor.mock.calls.length).toBe(0);
+    expect(routeInterceptor).toBeCalledTimes(0);
+    expect(requestInterceptor).toBeCalledTimes(0);
+    expect(apiInterceptor).toBeCalledTimes(0);
+    expect(serverInterceptor).toBeCalledTimes(0);
 
     expect(
       await callResponseInterceptors({
@@ -39,10 +39,10 @@ describe('callResponseInterceptors: order of calls', () => {
         }
       })
     ).toBe('routeInterceptor;requestInterceptor;apiInterceptor;serverInterceptor');
-    expect(routeInterceptor.mock.calls.length).toBe(1);
-    expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(apiInterceptor.mock.calls.length).toBe(1);
-    expect(serverInterceptor.mock.calls.length).toBe(1);
+    expect(routeInterceptor).toBeCalledTimes(1);
+    expect(requestInterceptor).toBeCalledTimes(1);
+    expect(apiInterceptor).toBeCalledTimes(1);
+    expect(serverInterceptor).toBeCalledTimes(1);
 
     expect(routeInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
       requestInterceptor.mock.invocationCallOrder[0]
@@ -57,13 +57,51 @@ describe('callResponseInterceptors: order of calls', () => {
 });
 
 describe('callResponseInterceptors: params functions', () => {
-  test('Should correctly call response getHeader method when use getHeader param', async () => {
+  test('Should correctly get header from request.headers when use getRequestHeader param', async () => {
+    const data = null;
+    const request = { headers: { name: 'value' } };
+    const response = {};
+
+    const getCookieRouteInterceptor: ResponseInterceptor = (data, { getRequestHeader }) => {
+      expect(getRequestHeader('name')).toBe('value');
+      return data;
+    };
+    await callResponseInterceptors({
+      data,
+      request: request as unknown as Request,
+      response: response as Response,
+      interceptors: {
+        routeInterceptor: getCookieRouteInterceptor
+      }
+    });
+  });
+
+  test('Should correctly get headers property from request when use getRequestHeaders param', async () => {
+    const data = null;
+    const request = { headers: { name: 'value' } };
+    const response = {};
+
+    const getCookieRouteInterceptor: ResponseInterceptor = (data, { getRequestHeaders }) => {
+      expect(getRequestHeaders()).toBe(request.headers);
+      return data;
+    };
+    await callResponseInterceptors({
+      data,
+      request: request as unknown as Request,
+      response: response as Response,
+      interceptors: {
+        routeInterceptor: getCookieRouteInterceptor
+      }
+    });
+  });
+
+  test('Should correctly call response getHeader method when use getResponseHeader param', async () => {
     const data = null;
     const request = {};
     const response = { getHeader: vi.fn() };
 
-    const getHeaderRouteInterceptor: ResponseInterceptor = (data, { getHeader }) => {
-      getHeader('header');
+    const getHeaderRouteInterceptor: ResponseInterceptor = (data, { getResponseHeader }) => {
+      getResponseHeader('header');
       return data;
     };
     await callResponseInterceptors({
@@ -78,13 +116,13 @@ describe('callResponseInterceptors: params functions', () => {
     expect(response.getHeader).toHaveBeenCalledTimes(1);
   });
 
-  test('Should correctly call response getHeaders method when use getHeaders param', async () => {
+  test('Should correctly call response getHeaders method when use getResponseHeaders param', async () => {
     const data = null;
     const request = {};
     const response = { getHeaders: vi.fn() };
 
-    const getHeadersRouteInterceptor: ResponseInterceptor = (data, { getHeaders }) => {
-      getHeaders();
+    const getHeadersRouteInterceptor: ResponseInterceptor = (data, { getResponseHeaders }) => {
+      getResponseHeaders();
       return data;
     };
     await callResponseInterceptors({

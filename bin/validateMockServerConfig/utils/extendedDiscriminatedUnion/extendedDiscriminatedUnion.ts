@@ -9,7 +9,7 @@ type ExtendedDiscriminatedUnionVariant<
   Option extends z.ZodObject<{ [Key in Discriminator]: z.ZodTypeAny }> = z.ZodObject<{
     [Key in Discriminator]: z.ZodTypeAny;
   }>
-> = Option | z.ZodUnion<[Option, ...Option[]]>;
+> = Option | z.ZodDiscriminatedUnion<string, [Option, ...Option[]]>;
 
 export const extendedDiscriminatedUnion = <Discriminator extends string>(
   discriminator: Discriminator,
@@ -22,7 +22,7 @@ export const extendedDiscriminatedUnion = <Discriminator extends string>(
     .custom((value) => isPlainObject(value) && discriminator in value)
     .superRefine((value, context) => {
       const variantWithMatchedDiscriminator = variants.find((variant) => {
-        const isVariantOption = variant instanceof z.ZodUnion;
+        const isVariantOption = variant instanceof z.ZodDiscriminatedUnion;
         if (isVariantOption) {
           return variant.options.some(
             (option) =>

@@ -30,7 +30,40 @@ const calculateRouteConfigWeight = (restRouteConfig: RestRouteConfig<RestMethod>
 };
 
 export const prepareRestRequestConfigs = (requestConfigs: RestRequestConfig[]) => {
-  requestConfigs.forEach((requestConfig) => {
+  const sortedByPathRequestConfigs = requestConfigs.sort(
+    ({ path: firstPath }, { path: secondPath }) => {
+      // ✅ important:
+      // do not compare RegExp paths and non-parameterized paths
+      if (firstPath instanceof RegExp || secondPath instanceof RegExp) return 0;
+      if (!firstPath.includes('/:') && !secondPath.includes('/:')) return 0;
+
+      const firstPathParts = firstPath.split('/');
+      const secondPathParts = secondPath.split('/');
+      const minimalPathPartsLength = Math.min(firstPathParts.length, secondPathParts.length);
+
+      // ✅ important:
+      // need to find the leftmost parameter/non-parameter pair and give priority to non-parameter one
+      for (let i = 0; i < minimalPathPartsLength; i += 1) {
+        const firstPathPart = firstPathParts[i];
+        const secondPathPart = secondPathParts[i];
+
+        const isFirstPathPartParameter = firstPathPart.startsWith(':');
+        const isSecondPathPartParameter = secondPathPart.startsWith(':');
+
+        if (!isFirstPathPartParameter && !isSecondPathPartParameter) {
+          if (firstPathPart === secondPathPart) continue;
+          return 0;
+        }
+
+        if (isFirstPathPartParameter && isSecondPathPartParameter) continue;
+
+        return +isFirstPathPartParameter - +isSecondPathPartParameter;
+      }
+      return 0;
+    }
+  );
+
+  sortedByPathRequestConfigs.forEach((requestConfig) => {
     requestConfig.routes.sort(
       (first, second) =>
         // ✅ important:

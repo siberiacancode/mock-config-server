@@ -7,8 +7,8 @@ export const nestedObjectOrArraySchema = <Value>(
   valueSchema: z.ZodType<Value>
 ): z.ZodType<NestedObjectOrArray<Value>> => {
   const nestedValueSchema = z.union([
-    z.lazy(() => nestedObjectOrArraySchema(valueSchema)),
-    valueSchema
+    valueSchema,
+    z.lazy(() => nestedObjectOrArraySchema(valueSchema))
   ]);
 
   return z.union([

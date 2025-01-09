@@ -53,17 +53,19 @@ export const notFoundMiddleware = (
       });
     }
 
+    response.status(404);
+
     const isRequestSupportHtml =
       request.headers.accept?.includes('text/html') || request.headers.accept?.includes('*/*');
     if (isRequestSupportHtml) {
-      response.status(404).render('pages/404', {
+      response.render('pages/404', {
         restRequestSuggestions,
         graphqlRequestSuggestions
       });
       return;
     }
 
-    response.status(404).json({
+    response.json({
       message: 'Request or page not found. Similar requests in data',
       data: {
         restRequestSuggestions,

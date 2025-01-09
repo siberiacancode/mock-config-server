@@ -12,7 +12,7 @@ describe('extendedDiscriminatedUnion', () => {
     const schema = z.object({
       property: extendedDiscriminatedUnion('name', [
         z.object({ name: z.literal('John'), age: z.number() }),
-        z.union([
+        z.discriminatedUnion('name', [
           z.object({ name: z.literal('Jane'), age: z.number() }),
           z.object({ name: z.literal('Jack'), age: z.number() })
         ])
@@ -36,7 +36,7 @@ describe('extendedDiscriminatedUnion', () => {
     const schema = z.object({
       property: extendedDiscriminatedUnion('name', [
         z.object({ name: z.literal('John'), age: z.number() }),
-        z.union([
+        z.discriminatedUnion('name', [
           z.object({ name: z.literal('Jane'), age: z.number() }),
           z.object({ name: z.literal('Jack'), age: z.number() })
         ])
@@ -79,7 +79,7 @@ describe('extendedDiscriminatedUnion', () => {
     };
     const schema = z.object({
       property: extendedDiscriminatedUnion('name', [
-        z.union([
+        z.discriminatedUnion('name', [
           z.object({ name: z.literal('Jane'), age: z.number() }),
           z.object({ name: z.literal('Jack'), age: z.number() })
         ])

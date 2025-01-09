@@ -43,8 +43,18 @@ const propertyLevelPlainEntityDescriptorSchema = extendedDiscriminatedUnion('che
 
 const nonCheckModeSchema = (schema: z.ZodTypeAny) =>
   z
-    .custom((value) => !isPlainObject(value))
-    .or(schema.and(z.object({ checkMode: z.never().optional() })));
+    .custom((value) => typeof value === 'object')
+    .superRefine((value, context) => {
+      if (isPlainObject(value) && 'checkMode' in value) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['checkMode'],
+          fatal: true
+        });
+        return z.NEVER;
+      }
+    })
+    .pipe(schema);
 
 const topLevelPlainEntityRecordSchema = nonCheckModeSchema(
   z.record(

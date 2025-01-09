@@ -1,5 +1,6 @@
 import type { IRouter } from 'express';
 import { flatten } from 'flat';
+import fs from 'fs';
 import path from 'path';
 
 import {
@@ -8,6 +9,7 @@ import {
   callResponseInterceptors,
   convertToEntityDescriptor,
   isEntityDescriptor,
+  isFileDescriptor,
   isFilePathValid,
   resolveEntityValues,
   sleep
@@ -18,8 +20,10 @@ import type {
   Interceptors,
   PlainObject,
   RestConfig,
+  RestDataResponse,
   RestEntitiesByEntityName,
   RestEntity,
+  RestFileResponse,
   TopLevelPlainEntityArray,
   TopLevelPlainEntityDescriptor
 } from '@/utils/types';
@@ -29,7 +33,7 @@ import { prepareRestRequestConfigs } from './helpers';
 interface CreateRestRoutesParams {
   router: IRouter;
   restConfig: RestConfig;
-  serverResponseInterceptor?: Interceptors['response'];
+  serverResponseInterceptor?: Interceptors<'rest'>['response'];
 }
 
 export const createRestRoutes = ({
@@ -124,9 +128,7 @@ export const createRestRoutes = ({
           });
         });
 
-        if (!matchedRouteConfig) {
-          return next();
-        }
+        if (!matchedRouteConfig) return next();
 
         if (matchedRouteConfig.interceptors?.request) {
           await callRequestInterceptor({
@@ -135,7 +137,11 @@ export const createRestRoutes = ({
           });
         }
 
-        let matchedRouteConfigData = null;
+        const matchedRouteConfigDataDescriptor = {} as {
+          data?: RestDataResponse;
+          file?: RestFileResponse;
+        };
+
         if (matchedRouteConfig.settings?.polling && 'queue' in matchedRouteConfig) {
           if (!matchedRouteConfig.queue.length) return next();
 
@@ -146,8 +152,7 @@ export const createRestRoutes = ({
             };
 
           let index = shallowMatchedRouteConfig.__pollingIndex ?? 0;
-
-          const { time, data } = matchedRouteConfig.queue[index];
+          const { time } = matchedRouteConfig.queue[index];
 
           const updateIndex = () => {
             if (matchedRouteConfig.queue.length - 1 === index) {
@@ -157,6 +162,7 @@ export const createRestRoutes = ({
             }
             shallowMatchedRouteConfig.__pollingIndex = index;
           };
+          const queueItem = matchedRouteConfig.queue[index];
 
           if (time && !shallowMatchedRouteConfig.__timeoutInProgress) {
             shallowMatchedRouteConfig.__timeoutInProgress = true;
@@ -170,21 +176,22 @@ export const createRestRoutes = ({
             updateIndex();
           }
 
-          matchedRouteConfigData = data;
+          if ('data' in queueItem) {
+            matchedRouteConfigDataDescriptor.data = queueItem.data;
+          }
+          if ('file' in queueItem) {
+            if (!isFilePathValid(queueItem.file)) return next();
+            matchedRouteConfigDataDescriptor.file = queueItem.file;
+          }
         }
 
         if ('data' in matchedRouteConfig) {
-          matchedRouteConfigData = matchedRouteConfig.data;
+          matchedRouteConfigDataDescriptor.data = matchedRouteConfig.data;
         }
-
         if ('file' in matchedRouteConfig) {
           if (!isFilePathValid(matchedRouteConfig.file)) return next();
+          matchedRouteConfigDataDescriptor.file = matchedRouteConfig.file;
         }
-
-        const resolvedData =
-          typeof matchedRouteConfigData === 'function'
-            ? await matchedRouteConfigData(request, matchedRouteConfig.entities ?? {})
-            : matchedRouteConfigData;
 
         if (matchedRouteConfig.settings?.status) {
           response.statusCode = matchedRouteConfig.settings.status;
@@ -194,6 +201,25 @@ export const createRestRoutes = ({
         // set 'Cache-Control' header for explicit browsers response revalidate: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
         // this code should place before response interceptors for giving opportunity to rewrite 'Cache-Control' header
         if (request.method === 'GET') response.set('Cache-control', 'no-cache');
+
+        let resolvedData = null;
+
+        if (matchedRouteConfigDataDescriptor.data) {
+          resolvedData =
+            typeof matchedRouteConfigDataDescriptor.data === 'function'
+              ? await matchedRouteConfigDataDescriptor.data(
+                  request,
+                  matchedRouteConfig.entities ?? {}
+                )
+              : matchedRouteConfigDataDescriptor.data;
+        }
+        if (matchedRouteConfigDataDescriptor.file) {
+          const buffer = fs.readFileSync(path.resolve(matchedRouteConfigDataDescriptor.file));
+          resolvedData = {
+            path: matchedRouteConfigDataDescriptor.file,
+            file: buffer
+          };
+        }
 
         const data = await callResponseInterceptors({
           data: resolvedData,
@@ -211,10 +237,19 @@ export const createRestRoutes = ({
           await sleep(matchedRouteConfig.settings.delay);
         }
 
-        if ('file' in matchedRouteConfig) {
-          return response.sendFile(path.resolve(matchedRouteConfig.file));
+        if (isFileDescriptor(data)) {
+          const isFilePathChanged = matchedRouteConfigDataDescriptor.file !== data.path;
+          if (isFilePathChanged) {
+            if (!isFilePathValid(data.path)) return next();
+            data.file = fs.readFileSync(path.resolve(data.path));
+          }
+          const fileName = data.path.split('/').at(-1)!;
+          const fileExtension = fileName.split('.').at(-1)!;
+          response.type(fileExtension);
+          response.set('Content-Disposition', `filename=${fileName}`);
+          return response.send(data.file);
         }
-        return response.json(data);
+        response.json(data);
       })
     );
   });

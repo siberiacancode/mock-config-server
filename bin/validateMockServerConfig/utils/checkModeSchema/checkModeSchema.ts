@@ -34,7 +34,8 @@ export interface EntityDescriptorSchema {
       | z.ZodLiteral<'function'>
       | z.ZodLiteral<'regExp'>,
     valueSchema: z.ZodTypeAny
-  ): z.ZodUnion<
+  ): z.ZodDiscriminatedUnion<
+    'oneOf',
     [
       z.ZodObject<
         {
@@ -73,16 +74,16 @@ export const entityDescriptorSchema = ((
     });
   }
 
-  return z.union([
-    z.strictObject({
-      checkMode: checkModeSchema,
-      value: z.array(valueSchema),
-      oneOf: z.literal(true)
-    }),
+  return z.discriminatedUnion('oneOf', [
     z.strictObject({
       checkMode: checkModeSchema,
       value: valueSchema,
       oneOf: z.literal(false).optional()
+    }),
+    z.strictObject({
+      checkMode: checkModeSchema,
+      value: z.array(valueSchema),
+      oneOf: z.literal(true)
     })
   ]);
 }) as EntityDescriptorSchema;
