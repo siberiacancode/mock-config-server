@@ -585,12 +585,10 @@ describe('createRestRoutes: entities', () => {
                 entities: {
                   variables: {
                     checkMode: 'equals',
-                    value: [
-                      {
-                        key1: 'value1',
-                        key2: { nestedKey1: 'nestedValue1' }
-                      }
-                    ]
+                    value: {
+                      key1: 'value1',
+                      key2: { nestedKey1: 'nestedValue1' }
+                    }
                   }
                 },
                 data: { name: 'John', surname: 'Doe' }

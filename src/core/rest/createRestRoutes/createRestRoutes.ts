@@ -15,8 +15,10 @@ import {
   sleep
 } from '@/utils/helpers';
 import type {
+  EntityDescriptor,
   Entries,
   Interceptors,
+  PlainObject,
   RestConfig,
   RestDataResponse,
   RestEntitiesByEntityName,
@@ -54,9 +56,6 @@ export const createRestRoutes = ({
 
           const entries = Object.entries(entities) as Entries<Required<RestEntitiesByEntityName>>;
           return entries.every(([entityName, entityDescriptorOrValue]) => {
-            const { checkMode, value: descriptorValue } =
-              convertToEntityDescriptor(entityDescriptorOrValue);
-
             // ✅ important:
             // check whole body as plain value strictly if descriptor used for body
             const isEntityBodyByTopLevelDescriptor =
@@ -64,40 +63,67 @@ export const createRestRoutes = ({
             if (isEntityBodyByTopLevelDescriptor) {
               // ✅ important:
               // bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
-              return resolveEntityValues(
-                checkMode,
-                Object.keys(request.body).length ? request.body : undefined,
-                descriptorValue
-              );
+              const actualValue = Object.keys(request.body).length ? request.body : undefined;
+
+              const bodyDescriptor: EntityDescriptor = entityDescriptorOrValue;
+              if (
+                bodyDescriptor.checkMode === 'exists' ||
+                bodyDescriptor.checkMode === 'notExists'
+              ) {
+                return resolveEntityValues({
+                  actualValue,
+                  checkMode: bodyDescriptor.checkMode
+                });
+              }
+
+              return resolveEntityValues({
+                actualValue,
+                descriptorValue: bodyDescriptor.value,
+                checkMode: bodyDescriptor.checkMode,
+                oneOf: bodyDescriptor.oneOf ?? false
+              });
             }
 
             const isEntityBodyByTopLevelArray =
               entityName === 'body' && Array.isArray(entityDescriptorOrValue);
             if (isEntityBodyByTopLevelArray) {
-              return entityDescriptorOrValue.some((entityDescriptorOrValueElement) =>
-                // ✅ important:
-                // bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
-                resolveEntityValues(
-                  checkMode,
-                  Object.keys(request.body).length ? request.body : undefined,
-                  entityDescriptorOrValueElement
-                )
-              );
+              // ✅ important:
+              // bodyParser sets body to empty object if body not sent or invalid, so assume {} as undefined
+              const actualValue = Object.keys(request.body).length ? request.body : undefined;
+              return resolveEntityValues({
+                actualValue,
+                descriptorValue: entityDescriptorOrValue,
+                checkMode: 'equals'
+              });
             }
 
             const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
               Exclude<RestEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
             >;
-            return recordOrArrayEntries.every(([entityKey, mappedEntityDescriptor]) => {
-              const { checkMode, value: descriptorValue } =
-                convertToEntityDescriptor(mappedEntityDescriptor);
-              const flattenEntity = flatten<any, any>(request[entityName]);
+            return recordOrArrayEntries.every(([entityKey, mappedEntityDescriptorOrValue]) => {
+              const entityDescriptor = convertToEntityDescriptor(mappedEntityDescriptorOrValue);
+              const actualEntity = flatten<PlainObject, PlainObject>(request[entityName]);
+
               // ✅ important: transform header keys to lower case because browsers send headers in lowercase
-              return resolveEntityValues(
-                checkMode,
-                flattenEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey],
-                descriptorValue
-              );
+              const actualKey = entityName === 'headers' ? entityKey.toLowerCase() : entityKey;
+              const actualValue = actualEntity[actualKey];
+
+              if (
+                entityDescriptor.checkMode === 'exists' ||
+                entityDescriptor.checkMode === 'notExists'
+              ) {
+                return resolveEntityValues({
+                  actualValue,
+                  checkMode: entityDescriptor.checkMode
+                });
+              }
+
+              return resolveEntityValues({
+                actualValue,
+                descriptorValue: entityDescriptor.value,
+                checkMode: entityDescriptor.checkMode,
+                oneOf: entityDescriptor.oneOf ?? false
+              });
             });
           });
         });

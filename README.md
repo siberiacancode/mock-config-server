@@ -236,8 +236,6 @@ Allowed `checkModes`
 - regExp - checks actual value with descriptor regExp.
 - function - checks actual value with descriptor function.
 
-Value for `checkMode` except `function` | `exists` | `notExists` can be array, so you can write even more complex logic. For example "does not contain these values" or "must be match to one of these regExp".
-
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
 const mockServerConfig = {
@@ -251,12 +249,13 @@ const mockServerConfig = {
           {
             entities: {
               headers: {
-                // 'name-header' is 'Dmitriy' or 'Nursultan'
+                // 'name-header' is 'Dmitriy'
                 'name-header': {
                   checkMode: 'equals',
-                  value: ['Dmitriy', 'Nursultan']
+                  value: 'Dmitriy'
                 },
                 // check for 'equals' if descriptor not provided
+                // i.e. it is the same as `role: { checkMode: 'equals', value: 'developer' }`
                 role: 'developer'
               },
               cookies: {
@@ -264,14 +263,14 @@ const mockServerConfig = {
                 token: {
                   checkMode: 'exists'
                 },
-                // 'someSecretToken' cookie can be '123-abc' or 'abc-999' for example
+                // 'someSecretToken' cookie can be '123-abc' or '456-abc' for example
                 someSecretToken: {
                   checkMode: 'regExp',
-                  value: [/^\d\d\d-abc$/, /^abc-\d\d\d$/]
+                  value: /^\d\d\d-abc$/
                 }
               }
             },
-            data: 'Some user data for Dmitriy and Nursultan'
+            data: 'Some user data for Dmitriy'
           }
         ]
       }
@@ -282,8 +281,11 @@ const mockServerConfig = {
 module.exports = mockServerConfig;
 ```
 
-Also you can use array as value for REST body and GraphQL variables entities: in this case mock-config-server will iterate
-over array until `checkMode=equals` finds a match or return 404
+#### Descriptor *oneOf* property
+
+For `checkMode` with the `value` property (all `checkMode` options except `exists` and `notExists`) you can use an array as value.
+Mock server will find matches by iterating through the array until **some** match is found.
+To be able to use this functionality you need to explicitly set `oneOf: true` property in descriptor object.
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
@@ -297,10 +299,25 @@ const mockServerConfig = {
         routes: [
           {
             entities: {
-              // if body equals to { key1: 'value1' } or ['value1'] then mock-config-server return data
-              body: [{ key1: 'value1' }, ['value1']]
+              // if body equals to { key1: 'value1' } OR { key2: 'value2' } then mock-config-server return 'Some user data 1'
+              body: {
+                checkMode: 'equals',
+                value: [{ key1: 'value1' }, { key2: 'value2' }],
+                oneOf: true
+              }
             },
-            data: 'Some user data'
+            data: 'Some user data 1'
+          },
+          {
+            entities: {
+              // if body equals to [{ key1: 'value1' }, { key2: 'value2' }] then mock-config-server return 'Some user data 2'
+              // NO `oneOf` => array processed entirely
+              body: {
+                checkMode: 'equals',
+                value: [{ key1: 'value1' }, { key2: 'value2' }]
+              }
+            },
+            data: 'Some user data 2'
           }
         ]
       }
@@ -310,6 +327,8 @@ const mockServerConfig = {
 
 module.exports = mockServerConfig;
 ```
+
+#### Function check mode
 
 `function checkMode` is the most powerful way to describe your `entities` logic, but in most cases you will be fine using other `checkModes`.
 
@@ -359,8 +378,7 @@ module.exports = mockServerConfig;
 
 ##### Using descriptors for part of REST body or GraphQL variables
 
-If you want to check a certain field of your body or variables, you can use descriptors in flatten object style. In this case server will check every field in entity with corresponding actual field.
-You can use descriptors for array body elements as well.
+If you want to check a deep nested property of your body or variables via descriptor you can use flatten object style. In this case server will check every field in entity with corresponding actual field. I.e. you can use descriptors only for properties of entity object (not for properties of nested objects).
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
@@ -375,45 +393,14 @@ const mockServerConfig = {
           {
             entities: {
               body: {
-                'user.name': 'Sergey'
-              }
-            },
-            data: 'user.name in body is "Sergey"'
-          }
-        ]
-      },
-      {
-        path: '/posts',
-        method: 'post',
-        routes: [
-          {
-            entities: {
-              body: {
-                title: {
-                  checkMode: 'startsWith',
-                  value: 'A'
+                // if body has properties like { user: { name: 'Sergey' } } OR { 'user.name': 'Sergey' } then mock-config-server return data
+                'user.name': {
+                  checkMode: 'equals',
+                  value: 'Sergey'
                 }
               }
             },
-            data: 'title in body starts with "A"'
-          }
-        ]
-      },
-      {
-        path: '/posts',
-        method: 'post',
-        routes: [
-          {
-            entities: {
-              body: [
-                {
-                  checkMode: 'startsWith',
-                  value: 1
-                },
-                2
-              ]
-            },
-            data: 'array[0] starts with "1" and array[1] equals "2"'
+            data: 'user.name in body is "Sergey"'
           }
         ]
       }
@@ -424,7 +411,9 @@ const mockServerConfig = {
 module.exports = mockServerConfig;
 ```
 
-> To enable whole body/variables checking as plain object you should use descriptor for entire body/variables.
+You can also use descriptor for whole body or variables entity.
+
+> When you use 'equals'/'notEquals' check mode for whole body or variables mock-config-server is strictly compare entity and actual value. It means that you must specify **ALL** properties from actual body or variables.
 
 ```javascript
 /** @type {import('mock-config-server').MockServerConfig} */
@@ -439,6 +428,7 @@ const mockServerConfig = {
           {
             entities: {
               body: {
+                // if actual body contains some extra property(-ies) then this entity won't match
                 checkMode: 'equals',
                 value: {
                   user: {

@@ -13,11 +13,13 @@ import {
   sleep
 } from '@/utils/helpers';
 import type {
+  EntityDescriptor,
   Entries,
   GraphqlConfig,
   GraphQLEntitiesByEntityName,
   GraphQLEntity,
   Interceptors,
+  PlainObject,
   TopLevelPlainEntityArray,
   TopLevelPlainEntityDescriptor
 } from '@/utils/types';
@@ -89,39 +91,69 @@ export const createGraphQLRoutes = ({
 
       const entries = Object.entries(entities) as Entries<Required<GraphQLEntitiesByEntityName>>;
       return entries.every(([entityName, entityDescriptorOrValue]) => {
-        const { checkMode, value: entityDescriptorValue } =
-          convertToEntityDescriptor(entityDescriptorOrValue);
-
-        // ✅ important: check whole variables as plain value strictly if descriptor used for variables
+        // ✅ important:
+        // check whole variables as plain value strictly if descriptor used for variables
         const isEntityVariablesByTopLevelDescriptor =
           entityName === 'variables' && isEntityDescriptor(entityDescriptorOrValue);
         if (isEntityVariablesByTopLevelDescriptor) {
-          return resolveEntityValues(checkMode, graphQLInput.variables, entityDescriptorValue);
+          const variablesDescriptor = entityDescriptorOrValue as EntityDescriptor;
+          if (
+            variablesDescriptor.checkMode === 'exists' ||
+            variablesDescriptor.checkMode === 'notExists'
+          ) {
+            return resolveEntityValues({
+              actualValue: graphQLInput.variables,
+              checkMode: variablesDescriptor.checkMode
+            });
+          }
+
+          return resolveEntityValues({
+            actualValue: graphQLInput.variables,
+            descriptorValue: variablesDescriptor.value,
+            checkMode: variablesDescriptor.checkMode,
+            oneOf: variablesDescriptor.oneOf ?? false
+          });
         }
 
         const isEntityVariablesByTopLevelArray =
           entityName === 'variables' && Array.isArray(entityDescriptorOrValue);
         if (isEntityVariablesByTopLevelArray) {
-          return entityDescriptorOrValue.some((entityDescriptorOrValueElement) =>
-            resolveEntityValues(checkMode, graphQLInput.variables, entityDescriptorOrValueElement)
-          );
+          return resolveEntityValues({
+            actualValue: graphQLInput.variables,
+            descriptorValue: entityDescriptorOrValue,
+            checkMode: 'equals'
+          });
         }
 
         const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
           Exclude<GraphQLEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
         >;
         return recordOrArrayEntries.every(([entityKey, entityValue]) => {
-          const { checkMode, value: descriptorValue } = convertToEntityDescriptor(entityValue);
-          const flattenEntity = flatten<any, any>(
+          const entityDescriptor = convertToEntityDescriptor(entityValue);
+          const actualEntity = flatten<PlainObject, PlainObject>(
             entityName === 'variables' ? graphQLInput.variables : request[entityName]
           );
 
           // ✅ important: transform header keys to lower case because browsers send headers in lowercase
-          return resolveEntityValues(
-            checkMode,
-            flattenEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey],
-            descriptorValue
-          );
+          const actualKey = entityName === 'headers' ? entityKey.toLowerCase() : entityKey;
+          const actualValue = actualEntity[actualKey];
+
+          if (
+            entityDescriptor.checkMode === 'exists' ||
+            entityDescriptor.checkMode === 'notExists'
+          ) {
+            return resolveEntityValues({
+              actualValue,
+              checkMode: entityDescriptor.checkMode
+            });
+          }
+
+          return resolveEntityValues({
+            actualValue,
+            descriptorValue: entityDescriptor.value,
+            checkMode: entityDescriptor.checkMode,
+            oneOf: entityDescriptor.oneOf ?? false
+          });
         });
       });
     });

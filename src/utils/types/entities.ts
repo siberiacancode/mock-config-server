@@ -4,62 +4,44 @@ import type {
   CheckMode,
   CompareWithDescriptorAnyValueCheckMode,
   CompareWithDescriptorStringValueCheckMode,
-  CompareWithDescriptorValueCheckMode
+  CompareWithDescriptorValueCheckMode,
+  EntityDescriptor
 } from './checkModes';
 import type { NestedObjectOrArray } from './utils';
 
 /* ----- Plain entity ----- */
 
-type PlainEntityValue = string | number | boolean | null;
+type PlainEntityPrimitiveValue = string | number | boolean | null;
+type PlainEntityObjectiveValue = NestedObjectOrArray<PlainEntityPrimitiveValue>;
+
+export type EntityFunctionDescriptorValue<ActualValue> = (
+  actualValue: ActualValue,
+  checkFunction: CheckFunction
+) => boolean;
 
 export type TopLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
   Check extends 'function'
-    ? {
-        checkMode: Check;
-        value: (
-          actualValue: NestedObjectOrArray<PlainEntityValue>,
-          checkFunction: CheckFunction
-        ) => boolean;
-      }
+    ? EntityDescriptor<Check, EntityFunctionDescriptorValue<PlainEntityObjectiveValue>>
     : Check extends CompareWithDescriptorAnyValueCheckMode
-      ? {
-          checkMode: Check;
-          value: NestedObjectOrArray<PlainEntityValue>;
-        }
+      ? EntityDescriptor<Check, PlainEntityObjectiveValue>
       : Check extends CheckActualValueCheckMode
-        ? {
-            checkMode: Check;
-          }
+        ? EntityDescriptor<Check>
         : never;
 
 type PropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
   Check extends 'function'
-    ? {
-        checkMode: Check;
-        value: (
-          actualValue: PlainEntityValue | NestedObjectOrArray<PlainEntityValue>,
-          checkFunction: CheckFunction
-        ) => boolean;
-      }
-    : Check extends CompareWithDescriptorAnyValueCheckMode
-      ? {
-          checkMode: Check;
-          value: PlainEntityValue | NestedObjectOrArray<PlainEntityValue>;
-        }
-      : Check extends 'regExp'
-        ? {
-            checkMode: Check;
-            value: RegExp | RegExp[];
-          }
+    ? EntityDescriptor<
+        Check,
+        EntityFunctionDescriptorValue<PlainEntityPrimitiveValue | PlainEntityObjectiveValue>
+      >
+    : Check extends 'regExp'
+      ? EntityDescriptor<Check, RegExp>
+      : Check extends CompareWithDescriptorAnyValueCheckMode
+        ? EntityDescriptor<Check, PlainEntityPrimitiveValue | PlainEntityObjectiveValue>
         : Check extends CompareWithDescriptorStringValueCheckMode
-          ? {
-              checkMode: Check;
-              value: PlainEntityValue | PlainEntityValue[];
-            }
+          ? EntityDescriptor<Check, PlainEntityPrimitiveValue>
           : Check extends CheckActualValueCheckMode
-            ? {
-                checkMode: Check;
-              }
+            ? EntityDescriptor<Check>
             : never;
 
 type NonCheckMode<T extends object> = T & { checkMode?: never };
@@ -68,12 +50,12 @@ type TopLevelPlainEntityRecord = NonCheckMode<
   Record<
     string,
     | PropertyLevelPlainEntityDescriptor
-    | NonCheckMode<NestedObjectOrArray<PlainEntityValue>>
-    | PlainEntityValue
+    | NonCheckMode<PlainEntityObjectiveValue>
+    | PlainEntityPrimitiveValue
   >
 >;
 
-export type TopLevelPlainEntityArray = Array<NestedObjectOrArray<PlainEntityValue>>;
+export type TopLevelPlainEntityArray = Array<PlainEntityPrimitiveValue | PlainEntityObjectiveValue>;
 
 export type PlainEntity =
   | TopLevelPlainEntityDescriptor
@@ -85,27 +67,13 @@ export type PlainEntity =
 type MappedEntityValue = string | number | boolean;
 
 type MappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check extends 'function'
-  ? {
-      checkMode: Check;
-      value: (actualValue: MappedEntityValue, checkFunction: CheckFunction) => boolean;
-    }
+  ? EntityDescriptor<Check, EntityFunctionDescriptorValue<MappedEntityValue>>
   : Check extends 'regExp'
-    ? {
-        checkMode: Check;
-        value: RegExp | RegExp[];
-      }
+    ? EntityDescriptor<Check, RegExp>
     : Check extends CompareWithDescriptorValueCheckMode
-      ? {
-          checkMode: Check;
-          value: MappedEntityValue | MappedEntityValue[];
-        }
+      ? EntityDescriptor<Check, MappedEntityValue>
       : Check extends CheckActualValueCheckMode
-        ? {
-            checkMode: Check;
-          }
+        ? EntityDescriptor<Check>
         : never;
 
-export type MappedEntity = Record<
-  string,
-  MappedEntityDescriptor | MappedEntityValue | MappedEntityValue[]
->;
+export type MappedEntity = Record<string, MappedEntityDescriptor | MappedEntityValue>;

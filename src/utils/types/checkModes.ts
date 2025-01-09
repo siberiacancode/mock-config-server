@@ -21,10 +21,14 @@ export type CheckMode =
   | CompareWithDescriptorValueCheckMode
   | CalculateByDescriptorValueCheckMode;
 
-export interface EntityDescriptor {
-  checkMode: CheckMode;
-  value?: any;
-}
+export type EntityDescriptor<
+  Check extends CheckMode = CheckMode,
+  Value = any
+> = Check extends CheckActualValueCheckMode
+  ? { checkMode: Check }
+  :
+      | { checkMode: Check; value: Value[]; oneOf: true }
+      | { checkMode: Check; value: Value; oneOf?: false };
 
 export type CheckFunction = <ActualValue = any, DescriptorValue = any>(
   checkMode: CheckMode,
