@@ -20,7 +20,6 @@ import type {
   GraphQLEntity,
   Interceptors,
   PlainObject,
-  TopLevelPlainEntityArray,
   TopLevelPlainEntityDescriptor
 } from '@/utils/types';
 
@@ -59,17 +58,17 @@ export const createGraphQLRoutes = ({
 
       if (
         'query' in requestConfig &&
-        requestConfig.query.replace(/\s+/gi, ' ') !== graphQLInput.query?.replace(/\s+/gi, ' ')
+        requestConfig.query.replace(/[\s\r\n]+/gi, '') !==
+          graphQLInput.query?.replace(/[\s\r\n]+/gi, '')
       )
         return false;
 
       if ('operationName' in requestConfig) {
         if (!query.operationName) return false;
 
-        if (requestConfig.operationName instanceof RegExp)
-          return new RegExp(requestConfig.operationName).test(query.operationName);
-
-        return requestConfig.operationName === query.operationName;
+        return requestConfig.operationName instanceof RegExp
+          ? new RegExp(requestConfig.operationName).test(query.operationName)
+          : requestConfig.operationName === query.operationName;
       }
 
       return true;
@@ -89,8 +88,10 @@ export const createGraphQLRoutes = ({
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
       if (!entities) return true;
 
-      const entries = Object.entries(entities) as Entries<Required<GraphQLEntitiesByEntityName>>;
-      return entries.every(([entityName, entityDescriptorOrValue]) => {
+      const entityEntries = Object.entries(entities) as Entries<
+        Required<GraphQLEntitiesByEntityName>
+      >;
+      return entityEntries.every(([entityName, entityDescriptorOrValue]) => {
         // ✅ important:
         // check whole variables as plain value strictly if descriptor used for variables
         const isEntityVariablesByTopLevelDescriptor =
@@ -115,44 +116,37 @@ export const createGraphQLRoutes = ({
           });
         }
 
-        const isEntityVariablesByTopLevelArray =
-          entityName === 'variables' && Array.isArray(entityDescriptorOrValue);
-        if (isEntityVariablesByTopLevelArray) {
-          return resolveEntityValues({
-            actualValue: graphQLInput.variables,
-            descriptorValue: entityDescriptorOrValue,
-            checkMode: 'equals'
-          });
-        }
-
-        const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
-          Exclude<GraphQLEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
+        const actualEntity = flatten<PlainObject, PlainObject>(
+          entityName === 'variables' ? graphQLInput.variables : request[entityName]
+        );
+        const entityValueEntries = Object.entries(entityDescriptorOrValue) as Entries<
+          Exclude<GraphQLEntity, TopLevelPlainEntityDescriptor>
         >;
-        return recordOrArrayEntries.every(([entityKey, entityValue]) => {
-          const entityDescriptor = convertToEntityDescriptor(entityValue);
-          const actualEntity = flatten<PlainObject, PlainObject>(
-            entityName === 'variables' ? graphQLInput.variables : request[entityName]
+        return entityValueEntries.every(([entityPropertyKey, entityPropertyDescriptorOrValue]) => {
+          const entityPropertyDescriptor = convertToEntityDescriptor(
+            entityPropertyDescriptorOrValue
           );
 
           // ✅ important: transform header keys to lower case because browsers send headers in lowercase
-          const actualKey = entityName === 'headers' ? entityKey.toLowerCase() : entityKey;
-          const actualValue = actualEntity[actualKey];
+          const actualPropertyKey =
+            entityName === 'headers' ? entityPropertyKey.toLowerCase() : entityPropertyKey;
+          const actualPropertyValue = actualEntity[actualPropertyKey];
 
           if (
-            entityDescriptor.checkMode === 'exists' ||
-            entityDescriptor.checkMode === 'notExists'
+            entityPropertyDescriptor.checkMode === 'exists' ||
+            entityPropertyDescriptor.checkMode === 'notExists'
           ) {
             return resolveEntityValues({
-              actualValue,
-              checkMode: entityDescriptor.checkMode
+              actualValue: actualPropertyValue,
+              checkMode: entityPropertyDescriptor.checkMode
             });
           }
 
           return resolveEntityValues({
-            actualValue,
-            descriptorValue: entityDescriptor.value,
-            checkMode: entityDescriptor.checkMode,
-            oneOf: entityDescriptor.oneOf ?? false
+            actualValue: actualPropertyValue,
+            descriptorValue: entityPropertyDescriptor.value,
+            checkMode: entityPropertyDescriptor.checkMode,
+            oneOf: entityPropertyDescriptor.oneOf ?? false
           });
         });
       });

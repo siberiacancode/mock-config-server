@@ -6,7 +6,7 @@ import { isOnlyRequestedDataResolvingPropertyExists } from '../../../helpers';
 import { interceptorsSchema } from '../../interceptorsSchema/interceptorsSchema';
 import { queueSchema } from '../../queueSchema/queueSchema';
 import { settingsSchema } from '../../settingsSchema/settingsSchema';
-import { mappedEntitySchema, plainEntitySchema, plainObjectSchema } from '../../utils';
+import { mappedEntitySchema, plainObjectSchema, variablesPlainEntitySchema } from '../../utils';
 
 const baseRouteConfigSchema = z.strictObject({
   entities: plainObjectSchema(
@@ -14,7 +14,7 @@ const baseRouteConfigSchema = z.strictObject({
       headers: mappedEntitySchema.optional(),
       cookies: mappedEntitySchema.optional(),
       query: mappedEntitySchema.optional(),
-      variables: plainEntitySchema.optional()
+      variables: variablesPlainEntitySchema.optional()
     })
   ).optional(),
   interceptors: plainObjectSchema(interceptorsSchema).optional()

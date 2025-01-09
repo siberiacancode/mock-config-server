@@ -57,10 +57,12 @@ type TopLevelPlainEntityRecord = NonCheckMode<
 
 export type TopLevelPlainEntityArray = Array<PlainEntityPrimitiveValue | PlainEntityObjectiveValue>;
 
-export type PlainEntity =
+export type BodyPlainEntity =
   | TopLevelPlainEntityDescriptor
   | TopLevelPlainEntityRecord
   | TopLevelPlainEntityArray;
+
+export type VariablesPlainEntity = TopLevelPlainEntityDescriptor | TopLevelPlainEntityRecord;
 
 /* ----- Mapped entity ----- */
 

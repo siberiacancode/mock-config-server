@@ -1,13 +1,13 @@
 import type { Request } from 'express';
 
-import type { MappedEntity, PlainEntity } from './entities';
+import type { MappedEntity, VariablesPlainEntity } from './entities';
 import type { Interceptors } from './interceptors';
 import type { Data } from './values';
 
 export type GraphQLEntityName = 'headers' | 'cookies' | 'query' | 'variables';
 
 export type GraphQLEntity<EntityName extends GraphQLEntityName = GraphQLEntityName> =
-  EntityName extends 'variables' ? PlainEntity : MappedEntity;
+  EntityName extends 'variables' ? VariablesPlainEntity : MappedEntity;
 
 export type GraphQLOperationType = 'query' | 'mutation';
 export type GraphQLOperationName = string | RegExp;

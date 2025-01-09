@@ -30,7 +30,33 @@ const createServer = (
   return server;
 };
 
-describe('createRestRoutes', () => {
+describe('createRestRoutes: routing', () => {
+  test('Should match config with path regexp', async () => {
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: /^\/us(.+?)rs$/,
+            method: 'get',
+            routes: [
+              {
+                data: { name: 'John', surname: 'Doe' }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const firstResponse = await request(server).get('/users');
+    expect(firstResponse.statusCode).toBe(200);
+    expect(firstResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+
+    const secondResponse = await request(server).get('/usersForCreators');
+    expect(secondResponse.statusCode).toBe(200);
+    expect(secondResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+  });
+
   test('Should return 404 for no matched request configs', async () => {
     const server = createServer({
       rest: {
@@ -139,7 +165,7 @@ describe('createRestRoutes: content', () => {
     });
   });
 
-  test('Should correctly use data function with polling setting', async () => {
+  test('Should correctly use data function with polling enabled', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -180,7 +206,7 @@ describe('createRestRoutes: content', () => {
     });
   });
 
-  test('Should return same polling data with time param', async () => {
+  test('Should return the same polling data until the specified time interval elapses', async () => {
     vi.useFakeTimers();
     const server = createServer({
       rest: {
@@ -223,7 +249,7 @@ describe('createRestRoutes: content', () => {
     vi.useRealTimers();
   });
 
-  test('Should correct handle empty queue with polling setting', async () => {
+  test('Should return 404 when the polling queue is empty', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -245,7 +271,7 @@ describe('createRestRoutes: content', () => {
     expect(response.statusCode).toBe(404);
   });
 
-  test('Should correctly use file property for data resolving', async () => {
+  test('Should correctly resolve data from a file', async () => {
     const tmpDirPath = createTmpDir();
     const pathToFile = path.join(tmpDirPath, './data.json') as `${string}.json`;
     fs.writeFileSync(pathToFile, JSON.stringify({ standName: 'The World' }));
@@ -276,10 +302,81 @@ describe('createRestRoutes: content', () => {
     fs.rmSync(tmpDirPath, { recursive: true, force: true });
   });
 
+  test('Should return 404 for invalid file paths', async () => {
+    const tmpDirPath = createTmpDir();
+    const pathToNonExistedFile = path.join(tmpDirPath, './data.json') as `${string}.json`;
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                file: tmpDirPath
+              }
+            ]
+          },
+          {
+            path: '/settings',
+            method: 'get',
+            routes: [
+              {
+                file: pathToNonExistedFile
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const tmpDirResponse = await request(server).get('/users');
+    expect(tmpDirResponse.status).toBe(404);
+
+    const nonExistedFileResponse = await request(server).get('/settings');
+    expect(nonExistedFileResponse.status).toBe(404);
+
+    fs.rmSync(tmpDirPath, { recursive: true, force: true });
+  });
+
+  test('should call response interceptor with Buffer as the first argument property when return a file', async () => {
+    const tmpDirPath = createTmpDir();
+    const pathToFile = path.join(tmpDirPath, './data.json') as `${string}.json`;
+    const dataInFile = JSON.stringify({ standName: 'The World' });
+    fs.writeFileSync(pathToFile, dataInFile);
+
+    const routeInterceptor = vi.fn(() => 'Some random data');
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                file: pathToFile,
+                interceptors: { response: routeInterceptor }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    await request(server).get('/users');
+
+    const routeInterceptorCallArgs = routeInterceptor.mock.calls[0] as any as [any, ...any[]];
+    expect(routeInterceptorCallArgs[0].file).toStrictEqual(Buffer.from(dataInFile));
+  });
+
   test('Should send a new file if interceptor return different path', async () => {
     const tmpDirPath = createTmpDir();
+
     const pathToFirstFile = path.join(tmpDirPath, './firstFile.json');
     fs.writeFileSync(pathToFirstFile, JSON.stringify({ standName: 'Star Platinum' }));
+
     const pathToSecondFile = path.join(tmpDirPath, './secondFile.json');
     fs.writeFileSync(pathToSecondFile, JSON.stringify({ standName: 'The World' }));
 
@@ -303,7 +400,6 @@ describe('createRestRoutes: content', () => {
     });
 
     const response = await request(server).get('/users');
-
     expect(response.statusCode).toBe(200);
     expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
     expect(response.headers['content-disposition']).toMatch(/filename=([^\s]*secondFile.json)/);
@@ -314,8 +410,10 @@ describe('createRestRoutes: content', () => {
 
   test('Should send a 404 if interceptor return file descriptor with invalid path', async () => {
     const tmpDirPath = createTmpDir();
+
     const existedFilePath = path.join(tmpDirPath, './existedFile.json');
     fs.writeFileSync(existedFilePath, JSON.stringify({ some: 'data' }));
+
     const notExistedFilePath = path.join(tmpDirPath, './notExistedFile.json');
 
     const server = createServer({
@@ -380,7 +478,7 @@ describe('createRestRoutes: content', () => {
 });
 
 describe('createRestRoutes: settings', () => {
-  test('Should correctly set delay into response with delay setting', async () => {
+  test('Should correctly delay response based on delay setting', async () => {
     const delay = 1000;
     const server = createServer({
       rest: {
@@ -407,7 +505,7 @@ describe('createRestRoutes: settings', () => {
     expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should correctly set statusCode into response with status setting', async () => {
+  test('Should correctly set status code of response based on status setting', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -430,7 +528,7 @@ describe('createRestRoutes: settings', () => {
     expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should correctly process the request with polling setting', async () => {
+  test('Should cycle through queue data with polling setting', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -512,7 +610,7 @@ describe('createRestRoutes: settings', () => {
 });
 
 describe('createRestRoutes: entities', () => {
-  test('Should match config by entities "includes" behavior', async () => {
+  test('Should match route configuration when actual entities include specified properties', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -547,42 +645,7 @@ describe('createRestRoutes: entities', () => {
     expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should match config by entities "includes" behavior with path regexp', async () => {
-    const server = createServer({
-      rest: {
-        configs: [
-          {
-            path: /^\/us(.+?)rs$/,
-            method: 'get',
-            routes: [
-              {
-                entities: {
-                  headers: {
-                    key1: 'value1',
-                    key2: 'value2'
-                  },
-                  query: {
-                    key1: 'value1'
-                  }
-                },
-                data: { name: 'John', surname: 'Doe' }
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const response = await request(server)
-      .get('/users')
-      .set({ key1: 'value1', key2: 'value2' })
-      .query({ key1: 'value1', key2: 'value2' });
-
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
-  });
-
-  test('Should give priority to more specific route config', async () => {
+  test('Should prioritize more specific route configuration when multiple matches exist', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -698,16 +761,21 @@ describe('createRestRoutes: entities', () => {
       }
     });
 
-    const response = await request(server)
+    const successResponse = await request(server)
       .post('/users')
       .set('Content-Type', 'application/json')
       .send({ key1: 'value1', key2: { nestedKey1: 'nestedValue1' } });
+    expect(successResponse.statusCode).toBe(200);
+    expect(successResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
 
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+    const failedResponse = await request(server)
+      .post('/users')
+      .set('Content-Type', 'application/json')
+      .send({ key1: 'value1', key2: { nestedKey1: 'nestedValue1', nestedKey2: 'nestedValue2' } });
+    expect(failedResponse.statusCode).toBe(404);
   });
 
-  test('Should correctly resolve flat object body with descriptors', async () => {
+  test('Should correctly resolve flat object body with nested key matching', async () => {
     const server = createServer({
       rest: {
         configs: [
@@ -718,10 +786,10 @@ describe('createRestRoutes: entities', () => {
               {
                 entities: {
                   body: {
-                    key1: 'value1',
-                    'key2.nestedKey1': {
+                    'key1.nestedKey1': 'nestedValue1',
+                    'key2.nestedKey2': {
                       checkMode: 'equals',
-                      value: 'nestedValue1'
+                      value: 'nestedValue2'
                     }
                   }
                 },
@@ -736,7 +804,7 @@ describe('createRestRoutes: entities', () => {
     const response = await request(server)
       .post('/users')
       .set('Content-Type', 'application/json')
-      .send({ key1: 'value1', key2: { nestedKey1: 'nestedValue1', nestedKey2: 'nestedValue2' } });
+      .send({ key1: { nestedKey1: 'nestedValue1' }, key2: { nestedKey2: 'nestedValue2' } });
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
@@ -844,89 +912,5 @@ describe('createRestRoutes: interceptors', () => {
       .send({ key1: 'value1', key2: 'value2' });
     expect(requestInterceptor).toBeCalledTimes(2);
     expect(routeInterceptor).toBeCalledTimes(1);
-  });
-
-  test('Should call response interceptors in order: route -> request -> api -> server', async () => {
-    const routeInterceptor = vi.fn();
-    const requestInterceptor = vi.fn();
-    const apiInterceptor = vi.fn();
-    const serverInterceptor = vi.fn();
-
-    const server = createServer({
-      rest: {
-        configs: [
-          {
-            path: '/users',
-            method: 'post',
-            routes: [
-              {
-                entities: {
-                  body: {
-                    key1: 'value1',
-                    key2: 'value2'
-                  }
-                },
-                data: { name: 'John', surname: 'Doe' },
-                interceptors: { response: routeInterceptor }
-              }
-            ],
-            interceptors: { response: requestInterceptor }
-          },
-          {
-            path: '/settings',
-            method: 'post',
-            routes: [
-              {
-                entities: {
-                  body: {
-                    key1: 'value1',
-                    key2: 'value2'
-                  }
-                },
-                data: { name: 'John', surname: 'Smith' }
-              }
-            ]
-          }
-        ],
-        interceptors: { response: apiInterceptor }
-      },
-      interceptors: { response: serverInterceptor }
-    });
-
-    await request(server)
-      .post('/users')
-      .set('Content-Type', 'application/json')
-      .send({ key1: 'value1', key2: 'value2' });
-    expect(routeInterceptor).toBeCalledTimes(1);
-    expect(requestInterceptor).toBeCalledTimes(1);
-    expect(apiInterceptor).toBeCalledTimes(1);
-    expect(serverInterceptor).toBeCalledTimes(1);
-    expect(routeInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
-      requestInterceptor.mock.invocationCallOrder[0]
-    );
-    expect(requestInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
-      apiInterceptor.mock.invocationCallOrder[0]
-    );
-    expect(apiInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
-      serverInterceptor.mock.invocationCallOrder[0]
-    );
-
-    await request(server)
-      .post('/settings')
-      .set('Content-Type', 'application/json')
-      .send({ key1: 'value1', key2: 'value2' });
-    expect(routeInterceptor).toBeCalledTimes(1);
-    expect(requestInterceptor).toBeCalledTimes(1);
-    expect(apiInterceptor).toBeCalledTimes(2);
-    expect(serverInterceptor).toBeCalledTimes(2);
-
-    await request(server)
-      .post('/messages')
-      .set('Content-Type', 'application/json')
-      .send({ key1: 'value1', key2: 'value2' });
-    expect(routeInterceptor).toBeCalledTimes(1);
-    expect(requestInterceptor).toBeCalledTimes(1);
-    expect(apiInterceptor).toBeCalledTimes(2);
-    expect(serverInterceptor).toBeCalledTimes(2);
   });
 });

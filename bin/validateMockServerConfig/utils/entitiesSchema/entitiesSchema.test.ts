@@ -1,12 +1,14 @@
 import { getMostSpecificPathFromError, getValidationMessageFromPath } from '../../../helpers';
 
-import { plainEntitySchema } from './entitiesSchema';
+import { bodyPlainEntitySchema } from './entitiesSchema';
 
 test('Should return correct error path: firstly check object as a descriptor', () => {
   const incorrectTopLevelDescriptorBodyEntities = {
     checkMode: 'equals'
   };
-  const topLevelParseResult = plainEntitySchema.safeParse(incorrectTopLevelDescriptorBodyEntities);
+  const topLevelParseResult = bodyPlainEntitySchema.safeParse(
+    incorrectTopLevelDescriptorBodyEntities
+  );
   expect(topLevelParseResult.success).toBe(false);
 
   if (!topLevelParseResult.success) {
@@ -20,7 +22,7 @@ test('Should return correct error path: firstly check object as a descriptor', (
       checkMode: 'equals'
     }
   };
-  const propertyLevelParseResult = plainEntitySchema.safeParse(
+  const propertyLevelParseResult = bodyPlainEntitySchema.safeParse(
     incorrectPropertyLevelDescriptorBodyEntities
   );
   expect(propertyLevelParseResult.success).toBe(false);

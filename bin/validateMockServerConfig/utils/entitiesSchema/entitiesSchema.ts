@@ -70,10 +70,15 @@ const topLevelPlainEntityArraySchema = z.array(
   z.union([plainEntityPrimitiveValueSchema, plainEntityObjectiveValueSchema])
 );
 
-export const plainEntitySchema = z.union([
+export const bodyPlainEntitySchema = z.union([
   topLevelPlainEntityDescriptorSchema,
   topLevelPlainEntityRecordSchema,
   topLevelPlainEntityArraySchema
+]);
+
+export const variablesPlainEntitySchema = z.union([
+  topLevelPlainEntityDescriptorSchema,
+  topLevelPlainEntityRecordSchema
 ]);
 
 /* ----- Mapped entity schema ----- */
