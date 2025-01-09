@@ -294,8 +294,9 @@ describe('createRestRoutes: content', () => {
 
     const response = await request(server).get('/users');
 
-    expect(response.status).toBe(200);
-    expect(response.headers['content-type']).toBe('application/json; charset=UTF-8');
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
+    expect(response.headers['content-disposition']).toMatch(/filename=([^\s]*data.json)/);
     expect(response.body).toStrictEqual({ standName: 'The World' });
 
     fs.rmSync(tmpDirPath, { recursive: true, force: true });
@@ -335,6 +336,142 @@ describe('createRestRoutes: content', () => {
 
     const nonExistedFileResponse = await request(server).get('/settings');
     expect(nonExistedFileResponse.status).toBe(404);
+
+    fs.rmSync(tmpDirPath, { recursive: true, force: true });
+  });
+
+  test('should call response interceptor with Buffer as the first argument property when return a file', async () => {
+    const tmpDirPath = createTmpDir();
+    const pathToFile = path.join(tmpDirPath, './data.json') as `${string}.json`;
+    const dataInFile = JSON.stringify({ standName: 'The World' });
+    fs.writeFileSync(pathToFile, dataInFile);
+
+    const routeInterceptor = vi.fn(() => 'Some random data');
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                file: pathToFile,
+                interceptors: { response: routeInterceptor }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    await request(server).get('/users');
+
+    const routeInterceptorCallArgs = routeInterceptor.mock.calls[0] as any as [any, ...any[]];
+    expect(routeInterceptorCallArgs[0].file).toStrictEqual(Buffer.from(dataInFile));
+  });
+
+  test('Should send a new file if interceptor return different path', async () => {
+    const tmpDirPath = createTmpDir();
+
+    const pathToFirstFile = path.join(tmpDirPath, './firstFile.json');
+    fs.writeFileSync(pathToFirstFile, JSON.stringify({ standName: 'Star Platinum' }));
+
+    const pathToSecondFile = path.join(tmpDirPath, './secondFile.json');
+    fs.writeFileSync(pathToSecondFile, JSON.stringify({ standName: 'The World' }));
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                file: pathToFirstFile,
+                interceptors: {
+                  response: ({ file }) => ({ path: pathToSecondFile, file })
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
+    expect(response.headers['content-disposition']).toMatch(/filename=([^\s]*secondFile.json)/);
+    expect(response.body).toStrictEqual({ standName: 'The World' });
+
+    fs.rmSync(tmpDirPath, { recursive: true, force: true });
+  });
+
+  test('Should send a 404 if interceptor return file descriptor with invalid path', async () => {
+    const tmpDirPath = createTmpDir();
+
+    const existedFilePath = path.join(tmpDirPath, './existedFile.json');
+    fs.writeFileSync(existedFilePath, JSON.stringify({ some: 'data' }));
+
+    const notExistedFilePath = path.join(tmpDirPath, './notExistedFile.json');
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                file: existedFilePath,
+                interceptors: {
+                  response: ({ file }) => ({ path: notExistedFilePath, file })
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+
+    expect(response.statusCode).toBe(404);
+    expect(response.headers['content-type']).toContain('text/html; charset=utf-8');
+
+    fs.rmSync(tmpDirPath, { recursive: true, force: true });
+  });
+
+  test('Should send a file descriptor "as is" if interceptor return invalid one', async () => {
+    const tmpDirPath = createTmpDir();
+    const pathToFile = path.join(tmpDirPath, './data.json');
+    fs.writeFileSync(pathToFile, 'Star Platinum', 'utf-8');
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                file: pathToFile,
+                interceptors: {
+                  response: ({ path }) => ({ path, file: 'file' })
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toBe('application/json; charset=utf-8');
+    expect(response.body).toStrictEqual({ path: pathToFile, file: 'file' });
 
     fs.rmSync(tmpDirPath, { recursive: true, force: true });
   });
@@ -414,15 +551,61 @@ describe('createRestRoutes: settings', () => {
 
     const firstResponse = await request(server).get('/users');
     expect(firstResponse.statusCode).toBe(200);
-    expect(firstResponse.body).toEqual({ name: 'John', surname: 'Doe' });
+    expect(firstResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
 
     const secondResponse = await request(server).get('/users');
     expect(secondResponse.statusCode).toBe(200);
-    expect(secondResponse.body).toEqual({ name: 'John', surname: 'Smith' });
+    expect(secondResponse.body).toStrictEqual({ name: 'John', surname: 'Smith' });
 
     const thirdResponse = await request(server).get('/users');
     expect(thirdResponse.statusCode).toBe(200);
-    expect(thirdResponse.body).toEqual({ name: 'John', surname: 'Doe' });
+    expect(thirdResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+  });
+
+  test('Should correctly process the request with file polling setting', async () => {
+    const tmpDirPath = createTmpDir();
+
+    const pathToFirstUser = path.join(tmpDirPath, './firstUser.json');
+    fs.writeFileSync(pathToFirstUser, JSON.stringify({ name: 'John', surname: 'Doe' }));
+
+    const pathToSecondUser = path.join(tmpDirPath, './secondUser.json');
+    fs.writeFileSync(pathToSecondUser, JSON.stringify({ name: 'John', surname: 'Smith' }));
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                settings: { polling: true },
+                queue: [{ file: pathToFirstUser }, { file: pathToSecondUser }]
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const firstResponse = await request(server).get('/users');
+    expect(firstResponse.statusCode).toBe(200);
+    expect(firstResponse.headers['content-disposition']).toMatch(/filename=([^\s]*firstUser.json)/);
+    expect(firstResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+
+    const secondResponse = await request(server).get('/users');
+    expect(secondResponse.statusCode).toBe(200);
+    expect(secondResponse.headers['content-disposition']).toMatch(
+      /filename=([^\s]*secondUser.json)/
+    );
+    expect(secondResponse.body).toStrictEqual({ name: 'John', surname: 'Smith' });
+
+    const thirdResponse = await request(server).get('/users');
+    expect(thirdResponse.statusCode).toBe(200);
+    expect(thirdResponse.headers['content-disposition']).toMatch(/filename=([^\s]*firstUser.json)/);
+    expect(thirdResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
+
+    fs.rmSync(tmpDirPath, { recursive: true, force: true });
   });
 });
 
@@ -708,8 +891,8 @@ describe('createRestRoutes: interceptors', () => {
       .post('/users')
       .set('Content-Type', 'application/json')
       .send({ key1: 'value1', key2: 'value2' });
-    expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(routeInterceptor.mock.calls.length).toBe(1);
+    expect(requestInterceptor).toBeCalledTimes(1);
+    expect(routeInterceptor).toBeCalledTimes(1);
     expect(requestInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
       routeInterceptor.mock.invocationCallOrder[0]
     );
@@ -720,50 +903,14 @@ describe('createRestRoutes: interceptors', () => {
       .post('/users')
       .set('Content-Type', 'application/json')
       .send({ key3: 'value3', key4: 'value4' });
-    expect(requestInterceptor.mock.calls.length).toBe(2);
-    expect(routeInterceptor.mock.calls.length).toBe(1);
+    expect(requestInterceptor).toBeCalledTimes(2);
+    expect(routeInterceptor).toBeCalledTimes(1);
 
     await request(server)
       .post('/settings')
       .set('Content-Type', 'application/json')
       .send({ key1: 'value1', key2: 'value2' });
-    expect(requestInterceptor.mock.calls.length).toBe(2);
-    expect(routeInterceptor.mock.calls.length).toBe(1);
-  });
-
-  test('should call response interceptor with null as the first argument and return the unmodified file content', async () => {
-    const tmpDirPath = createTmpDir();
-    const pathToFile = path.join(tmpDirPath, './data.json') as `${string}.json`;
-    fs.writeFileSync(pathToFile, JSON.stringify({ standName: 'The World' }));
-
-    const routeInterceptor = vi.fn(() => 'Some random data');
-
-    const server = createServer({
-      rest: {
-        configs: [
-          {
-            path: '/users',
-            method: 'get',
-            routes: [
-              {
-                file: pathToFile,
-                interceptors: { response: routeInterceptor }
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const response = await request(server).get('/users');
-
-    const routeInterceptorCallArgs = routeInterceptor.mock.calls[0] as any as [any, ...any[]];
-    expect(routeInterceptorCallArgs[0]).toBe(null);
-
-    expect(response.status).toBe(200);
-    expect(response.headers['content-type']).toBe('application/json; charset=UTF-8');
-    expect(response.body).toStrictEqual({ standName: 'The World' });
-
-    fs.rmSync(tmpDirPath, { recursive: true, force: true });
+    expect(requestInterceptor).toBeCalledTimes(2);
+    expect(routeInterceptor).toBeCalledTimes(1);
   });
 });

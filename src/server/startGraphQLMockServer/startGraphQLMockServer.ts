@@ -11,7 +11,7 @@ export const startGraphQLMockServer = (graphQLMockServerConfig: GraphQLMockServe
   const port = graphQLMockServerConfig.port ?? DEFAULT.PORT;
 
   const server = mockServer.listen(port, () => {
-    console.log(color.green(`🎉 GraphQL Mock Server is running at http://localhost:${port}`));
+    console.info(color.green(`🎉 GraphQL Mock Server is running at http://localhost:${port}`));
   });
 
   // ✅ important: add destroy method for closing keep-alive connections after server shutdown

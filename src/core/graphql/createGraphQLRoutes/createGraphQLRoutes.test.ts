@@ -840,8 +840,8 @@ describe('createGraphQLRoutes: interceptors', () => {
       query: 'query GetUsers { users { name } }',
       variables: '{ "key1": "value1", "key2": "value2" }'
     });
-    expect(requestInterceptor.mock.calls.length).toBe(1);
-    expect(routeInterceptor.mock.calls.length).toBe(1);
+    expect(requestInterceptor).toBeCalledTimes(1);
+    expect(routeInterceptor).toBeCalledTimes(1);
     expect(requestInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
       routeInterceptor.mock.invocationCallOrder[0]
     );
@@ -852,8 +852,8 @@ describe('createGraphQLRoutes: interceptors', () => {
       query: 'query GetUsers { users { name } }',
       variables: '{ "key3": "value3", "key4": "value4" }'
     });
-    expect(requestInterceptor.mock.calls.length).toBe(2);
-    expect(routeInterceptor.mock.calls.length).toBe(1);
+    expect(requestInterceptor).toBeCalledTimes(2);
+    expect(routeInterceptor).toBeCalledTimes(1);
 
     await request(server)
       .post('/')
@@ -862,7 +862,7 @@ describe('createGraphQLRoutes: interceptors', () => {
         query: 'mutation CreateUser($name: String!) { createUser(name: $name) { name } }',
         variables: { name: 'John' }
       });
-    expect(requestInterceptor.mock.calls.length).toBe(2);
-    expect(routeInterceptor.mock.calls.length).toBe(1);
+    expect(requestInterceptor).toBeCalledTimes(2);
+    expect(routeInterceptor).toBeCalledTimes(1);
   });
 });

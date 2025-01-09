@@ -21,40 +21,43 @@ export const compareWithDescriptorValueCheckModeSchema = z.enum(
   COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES
 );
 
-export function entityDescriptorSchema(
-  checkModeSchema: typeof checkActualValueCheckModeSchema
-): z.ZodObject<{ checkMode: typeof checkModeSchema }, 'strict'>;
+export interface EntityDescriptorSchema {
+  (
+    checkModeSchema: typeof checkActualValueCheckModeSchema
+  ): z.ZodObject<{ checkMode: typeof checkModeSchema }, 'strict'>;
 
-export function entityDescriptorSchema(
-  checkModeSchema:
-    | typeof compareWithDescriptorAnyValueCheckModeSchema
-    | typeof compareWithDescriptorStringValueCheckModeSchema
-    | typeof compareWithDescriptorValueCheckModeSchema
-    | z.ZodLiteral<'function'>
-    | z.ZodLiteral<'regExp'>,
-  valueSchema: z.ZodTypeAny
-): z.ZodUnion<
-  [
-    z.ZodObject<
-      {
-        checkMode: typeof checkModeSchema;
-        oneOf: z.ZodLiteral<true>;
-        value: z.ZodArray<typeof valueSchema>;
-      },
-      'strict'
-    >,
-    z.ZodObject<
-      {
-        checkMode: typeof checkModeSchema;
-        oneOf: z.ZodOptional<z.ZodLiteral<false>>;
-        value: typeof valueSchema;
-      },
-      'strict'
-    >
-  ]
->;
+  (
+    checkModeSchema:
+      | typeof compareWithDescriptorAnyValueCheckModeSchema
+      | typeof compareWithDescriptorStringValueCheckModeSchema
+      | typeof compareWithDescriptorValueCheckModeSchema
+      | z.ZodLiteral<'function'>
+      | z.ZodLiteral<'regExp'>,
+    valueSchema: z.ZodTypeAny
+  ): z.ZodDiscriminatedUnion<
+    'oneOf',
+    [
+      z.ZodObject<
+        {
+          checkMode: typeof checkModeSchema;
+          oneOf: z.ZodLiteral<true>;
+          value: z.ZodArray<typeof valueSchema>;
+        },
+        'strict'
+      >,
+      z.ZodObject<
+        {
+          checkMode: typeof checkModeSchema;
+          oneOf: z.ZodOptional<z.ZodLiteral<false>>;
+          value: typeof valueSchema;
+        },
+        'strict'
+      >
+    ]
+  >;
+}
 
-export function entityDescriptorSchema(
+export const entityDescriptorSchema = ((
   checkModeSchema:
     | typeof checkActualValueCheckModeSchema
     | typeof compareWithDescriptorAnyValueCheckModeSchema
@@ -63,21 +66,24 @@ export function entityDescriptorSchema(
     | z.ZodLiteral<'function'>
     | z.ZodLiteral<'regExp'>,
   valueSchema?: z.ZodTypeAny
-) {
-  return valueSchema
-    ? z.union([
-        z.strictObject({
-          checkMode: checkModeSchema,
-          value: z.array(valueSchema),
-          oneOf: z.literal(true)
-        }),
-        z.strictObject({
-          checkMode: checkModeSchema,
-          value: valueSchema,
-          oneOf: z.literal(false).optional()
-        })
-      ])
-    : z.strictObject({
-        checkMode: checkModeSchema
-      });
-}
+) => {
+  const isCheckActualValueCheckMode = !valueSchema;
+  if (isCheckActualValueCheckMode) {
+    return z.strictObject({
+      checkMode: checkModeSchema
+    });
+  }
+
+  return z.discriminatedUnion('oneOf', [
+    z.strictObject({
+      checkMode: checkModeSchema,
+      value: valueSchema,
+      oneOf: z.literal(false).optional()
+    }),
+    z.strictObject({
+      checkMode: checkModeSchema,
+      value: z.array(valueSchema),
+      oneOf: z.literal(true)
+    })
+  ]);
+}) as EntityDescriptorSchema;
