@@ -18,6 +18,7 @@ export const createOrm = <Data extends Database = Database>(storage: Storage) =>
           const collection = storage.read(key);
           const newResourceId = createNewId(collection);
           const newResource = { ...item, id: newResourceId };
+
           storage.write([key, collection.length], newResource);
 
           return newResource;
@@ -25,11 +26,10 @@ export const createOrm = <Data extends Database = Database>(storage: Storage) =>
         update: (id, item) => {
           const collection = storage.read(key);
           const currentResourceIndex = findIndexById(collection, id);
-
           const currentResource = storage.read([key, currentResourceIndex]);
-          const updatedRecord = { ...currentResource, ...item, id };
+          const updatedResource = { ...currentResource, ...item, id };
 
-          storage.write([key, currentResourceIndex], updatedRecord);
+          storage.write([key, currentResourceIndex], updatedResource);
         },
         delete: (id) => {
           const collection = storage.read(key);
@@ -38,30 +38,15 @@ export const createOrm = <Data extends Database = Database>(storage: Storage) =>
           storage.delete([key, currentResourceIndex]);
         },
 
-        createMany: (data) =>
-          data.forEach((element) => {
-            const collection = storage.read(key);
-            const newResourceId = createNewId(collection);
-            const newResource = { ...element, id: newResourceId };
-            storage.write([key, collection.length], newResource);
-          }),
-        updateMany: (ids, item) => {
-          ids.forEach((id) => {
-            const collection = storage.read(key);
-            const currentResourceIndex = findIndexById(collection, id);
-            const currentResource = storage.read([key, currentResourceIndex]);
-            const updatedRecord = { ...currentResource, ...item, id };
-            storage.write([key, currentResourceIndex], updatedRecord);
-          });
-
+        createMany(items) {
+          items.forEach((item) => this.create(item));
+        },
+        updateMany(ids, item) {
+          ids.forEach((id) => this.update(id, item));
           return ids.length;
         },
-        deleteMany: (ids) => {
-          const collection = storage.read(key);
-          ids.forEach((id) => {
-            const index = findIndexById(collection, id);
-            storage.delete([key, index]);
-          });
+        deleteMany(ids) {
+          ids.forEach((id) => this.delete(id));
         },
 
         findById: (id) => {

@@ -94,16 +94,16 @@ describe('createOrm', () => {
         hobbies: ['music', 'sports']
       };
       const createdUser = orm.users.create(newUser);
-
       const users = orm.users.findMany();
+
       expect(users.length).toBe(4);
       expect(createdUser).toStrictEqual({ ...newUser, id: 4 });
     });
 
     test('Should update a resource', () => {
       orm.users.update(1, { age: 26 });
-
       const updatedUser = orm.users.findById(1)!;
+
       expect(updatedUser.age).toBe(26);
     });
 
@@ -130,9 +130,10 @@ describe('createOrm', () => {
           hobbies: ['music', 'sports']
         }
       ];
-      orm.users.createMany(newUsers);
 
+      orm.users.createMany(newUsers);
       const users = orm.users.findMany();
+
       expect(users.length).toBe(5);
       expect([users[3], users[4]]).toStrictEqual([
         { ...newUsers[0], id: 4 },
@@ -164,9 +165,10 @@ describe('createOrm', () => {
       ]);
     });
 
-    test('Should delete many resources by ids', () => {
+    test('Should delete many resources', () => {
       orm.users.deleteMany([1, 2]);
       const remainingUsers = orm.users.findMany();
+
       expect(remainingUsers.length).toBe(1);
       expect(remainingUsers).toStrictEqual([
         { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' }, hobbies: ['music'] }
