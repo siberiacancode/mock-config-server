@@ -23,6 +23,11 @@ const createServer = (
     serverResponseInterceptor: interceptors?.response
   });
 
+  server.use((request, _, next) => {
+    request.context = { orm: {} };
+    next();
+  });
+
   const restBaseUrl = urlJoin(baseUrl ?? '/', rest?.baseUrl ?? '/');
 
   server.use(express.json());

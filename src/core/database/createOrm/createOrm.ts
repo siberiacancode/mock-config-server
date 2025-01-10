@@ -95,6 +95,9 @@ export const createOrm = <Data extends Database = Database>(storage: Storage) =>
         count: () => storage.read(key).length
       };
 
+      orm[key].createMany = orm[key].createMany.bind(orm[key]);
+      orm[key].updateMany = orm[key].updateMany.bind(orm[key]);
+      orm[key].deleteMany = orm[key].deleteMany.bind(orm[key]);
       return orm;
     },
     {} as { [key: string]: NestedOrm }

@@ -86,7 +86,7 @@ describe('createOrm', () => {
       orm = createOrm<typeof data>(storage);
     });
 
-    test('Should create many new resources', () => {
+    test('Should create new resource', () => {
       const newUser = {
         name: 'Bob Marley',
         age: 35,
@@ -96,23 +96,72 @@ describe('createOrm', () => {
       const createdUser = orm.users.create(newUser);
       const users = orm.users.findMany();
 
-      expect(users.length).toBe(4);
       expect(createdUser).toStrictEqual({ ...newUser, id: 4 });
+      expect(users).toStrictEqual([
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
+        },
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        },
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' }, hobbies: ['music'] },
+        {
+          id: 4,
+          name: 'Bob Marley',
+          age: 35,
+          address: { city: 'London' },
+          hobbies: ['music', 'sports']
+        }
+      ]);
     });
 
     test('Should update a resource', () => {
       orm.users.update(1, { age: 26 });
       const updatedUser = orm.users.findById(1)!;
+      const users = orm.users.findMany();
 
       expect(updatedUser.age).toBe(26);
+      expect(users).toStrictEqual([
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 26,
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
+        },
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        },
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' }, hobbies: ['music'] }
+      ]);
     });
 
     test('Should delete a resource', () => {
       orm.users.delete(1);
       const remainingUsers = orm.users.findMany();
 
-      expect(remainingUsers.length).toBe(2);
-      expect(remainingUsers.find((user) => user.id === 1)).toBeUndefined();
+      expect(remainingUsers).toStrictEqual([
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        },
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' }, hobbies: ['music'] }
+      ]);
     });
 
     test('Should create many new resources', () => {
@@ -134,10 +183,36 @@ describe('createOrm', () => {
       orm.users.createMany(newUsers);
       const users = orm.users.findMany();
 
-      expect(users.length).toBe(5);
-      expect([users[3], users[4]]).toStrictEqual([
-        { ...newUsers[0], id: 4 },
-        { ...newUsers[1], id: 5 }
+      expect(users).toStrictEqual([
+        {
+          id: 1,
+          name: 'John Doe',
+          age: 25,
+          address: { city: 'Novosibirsk' },
+          hobbies: ['music', 'sport']
+        },
+        {
+          id: 2,
+          name: 'Jane Smith',
+          age: 30,
+          address: { city: 'Tomsk' },
+          hobbies: ['sport', 'games']
+        },
+        { id: 3, name: 'Will Smith', age: 27, address: { city: 'Moscow' }, hobbies: ['music'] },
+        {
+          id: 4,
+          name: 'Bob Marley',
+          age: 35,
+          address: { city: 'London' },
+          hobbies: ['music', 'sports']
+        },
+        {
+          id: 5,
+          name: 'Jorge Luis',
+          age: 35,
+          address: { city: 'London' },
+          hobbies: ['music', 'sports']
+        }
       ]);
     });
 
