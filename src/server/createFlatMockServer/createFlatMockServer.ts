@@ -9,12 +9,10 @@ import {
   corsMiddleware,
   errorMiddleware,
   noCorsMiddleware,
-  notFoundMiddleware,
   requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
-import { urlJoin } from '@/utils/helpers';
 import type {
   FlatMockServerConfig,
   GraphQLRequestConfig,
@@ -37,10 +35,6 @@ export const createFlatMockServer = (
     baseUrl: serverBaseUrl = '/',
     database
   } = flatMockServerSettings ?? {};
-
-  server.set('view engine', 'ejs');
-  server.set('views', urlJoin(__dirname, '../../static/views'));
-  server.use(express.static(urlJoin(__dirname, '../../static/views')));
 
   server.use(bodyParser.urlencoded({ extended: false }));
 
@@ -152,16 +146,6 @@ export const createFlatMockServer = (
 
     server.use(serverBaseUrl, routerWithGraphQLRoutes);
   }
-
-  notFoundMiddleware(server, {
-    baseUrl: flatMockServerSettings?.baseUrl,
-    rest: {
-      configs: restRequestConfigs
-    },
-    graphql: {
-      configs: graphQLRequestConfigs
-    }
-  });
 
   errorMiddleware(server);
 
