@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
-import type { PlainObject } from '../../src';
-import { getMostSpecificPathFromError, getValidationMessageFromPath } from '../helpers';
+import type { PlainObject } from '@/utils/types';
 
 import { baseUrlSchema } from './baseUrlSchema/baseUrlSchema';
 import { corsSchema } from './corsSchema/corsSchema';
@@ -11,19 +10,22 @@ import { interceptorsSchema } from './interceptorsSchema/interceptorsSchema';
 import { portSchema } from './portSchema/portSchema';
 import { restConfigSchema } from './restConfigSchema/restConfigSchema';
 import { staticPathSchema } from './staticPathSchema/staticPathSchema';
+import { getMostSpecificPathFromError } from './getMostSpecificPathFromError';
+import { getValidationMessageFromPath } from './getValidationMessageFromPath';
 import { plainObjectSchema } from './utils';
 
-export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
-  if (
-    !mockServerConfig.rest &&
-    !mockServerConfig.graphql &&
-    !mockServerConfig.database &&
-    !mockServerConfig.staticPath
-  ) {
+export const validateApiMockServerConfig = (
+  mockServerConfig: PlainObject,
+  api: 'graphql' | 'rest'
+) => {
+  if (!mockServerConfig.configs && !mockServerConfig.database && !mockServerConfig.staticPath) {
     throw new Error(
-      'Configuration should contain at least one of these configs: rest | graphql | database | staticPath; see our doc (https://github.com/siberiacancode/mock-config-server) for more information'
+      'Configuration should contain at least one of these configs: configs | database | staticPath; see our doc (https://github.com/siberiacancode/mock-config-server) for more information'
     );
   }
+
+  const isConfigsContainAtLeastOneElement =
+    Array.isArray(mockServerConfig.configs) && !!mockServerConfig.configs.length;
 
   const mockServerConfigSchema = z.strictObject({
     baseUrl: baseUrlSchema.optional(),
@@ -31,9 +33,11 @@ export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
     staticPath: staticPathSchema.optional(),
     interceptors: plainObjectSchema(interceptorsSchema).optional(),
     cors: corsSchema.optional(),
-    rest: restConfigSchema.optional(),
-    graphql: graphqlConfigSchema.optional(),
-    database: databaseConfigSchema.optional()
+    database: databaseConfigSchema.optional(),
+    ...(isConfigsContainAtLeastOneElement &&
+      api === 'graphql' && { configs: graphqlConfigSchema.shape.configs }),
+    ...(isConfigsContainAtLeastOneElement &&
+      api === 'rest' && { configs: restConfigSchema.shape.configs })
   });
 
   const validationResult = mockServerConfigSchema.safeParse(mockServerConfig);

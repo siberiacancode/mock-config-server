@@ -2,10 +2,8 @@ import color from 'ansi-colors';
 import prompts from 'prompts';
 
 import type { MockServerConfigArgv } from '@/utils/types';
+import { baseUrlSchema, portSchema, staticPathSchema } from '@/utils/validate';
 
-import { baseUrlSchema } from './validateMockServerConfig/baseUrlSchema/baseUrlSchema';
-import { portSchema } from './validateMockServerConfig/portSchema/portSchema';
-import { staticPathSchema } from './validateMockServerConfig/staticPathSchema/staticPathSchema';
 import { createTemplate } from './helpers';
 
 export const init = async (argv: MockServerConfigArgv) => {

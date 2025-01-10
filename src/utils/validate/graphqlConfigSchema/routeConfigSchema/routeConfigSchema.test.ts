@@ -1,4 +1,5 @@
-import { getMostSpecificPathFromError, getValidationMessageFromPath } from '../../../helpers';
+import { getMostSpecificPathFromError } from '../../getMostSpecificPathFromError';
+import { getValidationMessageFromPath } from '../../getValidationMessageFromPath';
 
 import { routeConfigSchema } from './routeConfigSchema';
 

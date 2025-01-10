@@ -15,11 +15,13 @@ import {
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
 import type { MockServerConfig } from '@/utils/types';
+import { validateMockServerConfig } from '@/utils/validate';
 
 export const createMockServer = (
   mockServerConfig: Omit<MockServerConfig, 'port'>,
   server: Express = express()
 ) => {
+  validateMockServerConfig(mockServerConfig);
   const { cors, staticPath, rest, graphql, database, interceptors } = mockServerConfig;
 
   server.use(bodyParser.urlencoded({ extended: false }));

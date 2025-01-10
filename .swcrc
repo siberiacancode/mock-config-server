@@ -22,7 +22,8 @@
       "@/utils/helpers": ["./src/utils/helpers"],
       "@/utils/helpers/tests": ["./src/utils/helpers/tests"],
       "@/utils/types": ["./src/utils/types"],
-      "@/utils/constants": ["./src/utils/constants"]
+      "@/utils/constants": ["./src/utils/constants"],
+      "@/utils/validate": ["./src/utils/validate"]
     }
   }
 }

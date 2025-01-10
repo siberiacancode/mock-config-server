@@ -4,8 +4,6 @@ import { startFlatMockServer } from '@/server';
 
 import type { FlatMockServerConfig, MockServerConfigArgv } from '../src';
 
-import { validateFlatMockServerConfig } from './validateMockServerConfig/validateFlatMockServerConfig';
-
 export const runFlatConfig = (
   flatMockServerConfig: FlatMockServerConfig,
   { baseUrl, port, staticPath }: MockServerConfigArgv
@@ -23,8 +21,6 @@ export const runFlatConfig = (
       },
       ...(flatMockServerSettings ? flatMockServerComponents : flatMockServerConfig)
     ] as FlatMockServerConfig;
-
-    validateFlatMockServerConfig(mergedFlatMockServerConfig);
 
     return startFlatMockServer(mergedFlatMockServerConfig);
   } catch (error: any) {
