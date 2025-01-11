@@ -7,6 +7,7 @@ module.exports = {
     {
       files: ['*.ts'],
       rules: {
+        '@typescript-eslint/no-namespace': ['error', { allowDeclarations: true }],
         '@typescript-eslint/no-floating-promises': 'off',
         '@typescript-eslint/await-thenable': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',

@@ -33,7 +33,7 @@ export const createDatabaseMockServer = (
 
   server.use(bodyParser.text());
 
-  contextMiddleware(server);
+  contextMiddleware(server, { database: { data, routes } });
 
   cookieParseMiddleware(server);
 

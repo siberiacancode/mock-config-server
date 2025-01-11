@@ -34,7 +34,7 @@ export const createGraphQLMockServer = (
 
   server.use(bodyParser.text());
 
-  contextMiddleware(server);
+  contextMiddleware(server, graphqlMockServerConfig);
 
   cookieParseMiddleware(server);
 

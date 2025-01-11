@@ -74,7 +74,8 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
     getCookie,
     clearCookie,
     attachment,
-    log
+    log,
+    orm: request.context.orm
   };
 
   let updatedData = data;

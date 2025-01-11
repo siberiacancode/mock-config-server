@@ -35,7 +35,7 @@ export const createMockServer = (
 
   server.use(bodyParser.text());
 
-  contextMiddleware(server);
+  contextMiddleware(server, mockServerConfig);
 
   cookieParseMiddleware(server);
 

@@ -21,6 +21,11 @@ const createServer = (
     serverResponseInterceptor: interceptors?.response
   });
 
+  server.use((request, _, next) => {
+    request.context = { orm: {} };
+    next();
+  });
+
   const graphqlBaseUrl = urlJoin(baseUrl ?? '/', graphql?.baseUrl ?? '/');
 
   server.use(bodyParser.json());

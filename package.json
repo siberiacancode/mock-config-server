@@ -50,6 +50,7 @@
     "build": "shx rm -rf dist && yarn build:types && yarn build:swc && yarn build:copy-templates",
     "start": "yarn build && node ./dist/bin/bin.js",
     "dev": "nodemon --watch src --watch bin --watch mock-server.config.* -e js,ts,ejs --exec \"yarn start\"",
+    "type": "tsc --noEmit",
     "unit-test": "vitest",
     "lint": "eslint . --ext .ts --no-error-on-unmatched-pattern --fix",
     "stylelint": "stylelint \"src/static/**/*.css\" --fix",

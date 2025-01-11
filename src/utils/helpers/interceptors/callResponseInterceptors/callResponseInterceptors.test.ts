@@ -4,10 +4,16 @@ import type { ResponseInterceptor } from '@/utils/types';
 
 import { callResponseInterceptors } from './callResponseInterceptors';
 
+const createRequest = (value: object) =>
+  ({
+    context: { orm: {} },
+    ...value
+  }) as Request;
+
 describe('callResponseInterceptors: order of calls', () => {
   test('Should call all passed response interceptors in order: route -> request -> api -> server', async () => {
     const initialData = '';
-    const request = {} as Request;
+    const request = createRequest({});
     const response = {} as Response;
     const routeInterceptor = vi.fn((data) => `${data}routeInterceptor;`);
     const requestInterceptor = vi.fn((data) => `${data}requestInterceptor;`);
@@ -59,7 +65,7 @@ describe('callResponseInterceptors: order of calls', () => {
 describe('callResponseInterceptors: params functions', () => {
   test('Should correctly get header from request.headers when use getRequestHeader param', async () => {
     const data = null;
-    const request = { headers: { name: 'value' } };
+    const request = createRequest({ headers: { name: 'value' } });
     const response = {};
 
     const getCookieRouteInterceptor: ResponseInterceptor = (data, { getRequestHeader }) => {
@@ -78,7 +84,7 @@ describe('callResponseInterceptors: params functions', () => {
 
   test('Should correctly get headers property from request when use getRequestHeaders param', async () => {
     const data = null;
-    const request = { headers: { name: 'value' } };
+    const request = createRequest({ headers: { name: 'value' } });
     const response = {};
 
     const getCookieRouteInterceptor: ResponseInterceptor = (data, { getRequestHeaders }) => {
@@ -97,7 +103,7 @@ describe('callResponseInterceptors: params functions', () => {
 
   test('Should correctly call response getHeader method when use getResponseHeader param', async () => {
     const data = null;
-    const request = {};
+    const request = createRequest({});
     const response = { getHeader: vi.fn() };
 
     const getHeaderRouteInterceptor: ResponseInterceptor = (data, { getResponseHeader }) => {
@@ -106,7 +112,7 @@ describe('callResponseInterceptors: params functions', () => {
     };
     await callResponseInterceptors({
       data,
-      request: request as Request,
+      request,
       response: response as unknown as Response,
       interceptors: {
         routeInterceptor: getHeaderRouteInterceptor
@@ -118,7 +124,7 @@ describe('callResponseInterceptors: params functions', () => {
 
   test('Should correctly call response getHeaders method when use getResponseHeaders param', async () => {
     const data = null;
-    const request = {};
+    const request = createRequest({});
     const response = { getHeaders: vi.fn() };
 
     const getHeadersRouteInterceptor: ResponseInterceptor = (data, { getResponseHeaders }) => {
@@ -127,7 +133,7 @@ describe('callResponseInterceptors: params functions', () => {
     };
     await callResponseInterceptors({
       data,
-      request: request as Request,
+      request,
       response: response as unknown as Response,
       interceptors: {
         routeInterceptor: getHeadersRouteInterceptor
@@ -139,7 +145,7 @@ describe('callResponseInterceptors: params functions', () => {
 
   test('Should correctly call response set method when use setHeader param', async () => {
     const data = null;
-    const request = {};
+    const request = createRequest({});
     const response = { set: vi.fn() };
 
     const setHeaderRouteInterceptor: ResponseInterceptor = (data, { setHeader }) => {
@@ -148,7 +154,7 @@ describe('callResponseInterceptors: params functions', () => {
     };
     await callResponseInterceptors({
       data,
-      request: request as Request,
+      request,
       response: response as unknown as Response,
       interceptors: {
         routeInterceptor: setHeaderRouteInterceptor
@@ -160,7 +166,7 @@ describe('callResponseInterceptors: params functions', () => {
 
   test('Should correctly call response append method when use appendHeader param', async () => {
     const data = null;
-    const request = {};
+    const request = createRequest({});
     const response = { append: vi.fn() };
 
     const appendHeaderRouteInterceptor: ResponseInterceptor = (data, { appendHeader }) => {
@@ -169,7 +175,7 @@ describe('callResponseInterceptors: params functions', () => {
     };
     await callResponseInterceptors({
       data,
-      request: request as Request,
+      request,
       response: response as unknown as Response,
       interceptors: {
         routeInterceptor: appendHeaderRouteInterceptor
@@ -181,7 +187,7 @@ describe('callResponseInterceptors: params functions', () => {
 
   test('Should correctly set statusCode into response when use setStatusCode param', async () => {
     const data = null;
-    const request = {} as Request;
+    const request = createRequest({});
     const response = {} as Response;
 
     const setStatusCodeRouteInterceptor: ResponseInterceptor = (data, { setStatusCode }) => {
@@ -201,7 +207,7 @@ describe('callResponseInterceptors: params functions', () => {
 
   test('Should correctly get cookie from request.cookies object when use getCookie param', async () => {
     const data = null;
-    const request = { cookies: { name: 'value' } };
+    const request = createRequest({ cookies: { name: 'value' } });
     const response = {};
 
     const getCookieRouteInterceptor: ResponseInterceptor = (data, { getCookie }) => {
@@ -220,7 +226,7 @@ describe('callResponseInterceptors: params functions', () => {
 
   test('Should correctly call response cookie method with/without options when use setCookie param', async () => {
     const data = null;
-    const request = {};
+    const request = createRequest({});
     const response = { cookie: vi.fn() };
 
     const setCookieWithoutOptionsRouteInterceptor: ResponseInterceptor = (data, { setCookie }) => {
@@ -229,7 +235,7 @@ describe('callResponseInterceptors: params functions', () => {
     };
     await callResponseInterceptors({
       data,
-      request: request as Request,
+      request,
       response: response as unknown as Response,
       interceptors: {
         routeInterceptor: setCookieWithoutOptionsRouteInterceptor
@@ -246,7 +252,7 @@ describe('callResponseInterceptors: params functions', () => {
     };
     await callResponseInterceptors({
       data,
-      request: request as Request,
+      request,
       response: response as unknown as Response,
       interceptors: {
         routeInterceptor: setCookieWithOptionsRouteInterceptor
@@ -258,7 +264,7 @@ describe('callResponseInterceptors: params functions', () => {
 
   test('Should correctly call response clearCookie method when use clearCookie param', async () => {
     const data = null;
-    const request = {};
+    const request = createRequest({});
     const response = { clearCookie: vi.fn() };
 
     const clearCookieRouteInterceptor: ResponseInterceptor = (data, { clearCookie }) => {
@@ -267,7 +273,7 @@ describe('callResponseInterceptors: params functions', () => {
     };
     await callResponseInterceptors({
       data,
-      request: request as Request,
+      request,
       response: response as unknown as Response,
       interceptors: {
         routeInterceptor: clearCookieRouteInterceptor
@@ -279,7 +285,7 @@ describe('callResponseInterceptors: params functions', () => {
 
   test('Should correctly call response attachment method when use attachment param', async () => {
     const data = null;
-    const request = {};
+    const request = createRequest({});
     const response = { attachment: vi.fn() };
 
     const attachmentRouteInterceptor: ResponseInterceptor = (data, { attachment }) => {
@@ -288,7 +294,7 @@ describe('callResponseInterceptors: params functions', () => {
     };
     await callResponseInterceptors({
       data,
-      request: request as Request,
+      request,
       response: response as unknown as Response,
       interceptors: {
         routeInterceptor: attachmentRouteInterceptor
