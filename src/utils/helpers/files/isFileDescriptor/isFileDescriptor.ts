@@ -1,5 +1,4 @@
-import type { Buffer } from 'node:buffer';
-
+import { Buffer } from 'node:buffer';
 import { z } from 'zod';
 
 import type { FileDescriptor } from '@/utils/types';
