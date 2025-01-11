@@ -38,10 +38,12 @@ $ yarn add mock-config-server --dev
 Create a `mock-server.config.js` file with server configuration
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/api'
+  },
+  {
     configs: [
       {
         path: '/user',
@@ -50,9 +52,9 @@ const mockServerConfig = {
       }
     ]
   }
-};
+];
 
-export default mockServerConfig;
+export default flatMockServerConfig;
 ```
 
 Start **🎉 Mock Config Server**
@@ -65,22 +67,23 @@ $ npx mock-config-server
 
 ## 🎭 Parameters for mock-server.config.(js|ts)
 
-- `rest?` Rest configs for mock requests
-  - `baseUrl?` `string` part of the url that will be substituted at the beginning of rest request url (default: `'/'`)
-  - `configs` `Array<RestRequestConfig>` configs for mock requests, [read](#configs)
-  - `interceptors?` `Interceptors` functions to change request or response parameters, [read](#interceptors)
-- `graphql?` GraphQL configs for mock requests
-  - `baseUrl?` `string` part of the url that will be substituted at the beginning of graphql request url (default: `'/'`)
-  - `configs` `Array<GraphQLRequestConfig>` configs for mock requests, [read](#configs)
-  - `interceptors?` `Interceptors` functions to change request or response parameters, [read](#interceptors)
+### Settings
+
+- `staticPath?` {StaticPath} entity for working with static files, [read](#static-path)
+- `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
+- `cors?` {Cors} CORS settings object (default: `CORS is turn off`), [read](#cors)
+- `port?` {number} server port (default: `31299`)
+- `baseUrl?` {string} part of the url that will be substituted at the beginning of the request url (default: `'/'`)
 - `database?` Database config for mock requests [read](#database)
-  - `data` `Object | string` initial data for database
-  - `routes?` `Object | string` map of custom routes for database
-- `staticPath?` `StaticPath` entity for working with static files, [read](#static-path)
-- `interceptors?` `Interceptors` functions to change request or response parameters, [read](#interceptors)
-- `cors?` `Cors` CORS settings object (default: `CORS is turn off`), [read](#cors)
-- `port?` `number` server port (default: `31299`)
-- `baseUrl?` `string` part of the url that will be substituted at the beginning of the request url (default: `'/'`)
+  - `data` {Object | string} initial data for database
+  - `routes?` {Object | string} map of custom routes for database
+
+### Components
+
+- `name` {string} name of component
+- `baseUrl?` {string} part of the url that will be substituted at the beginning of rest request url (default: `'/'`)
+- `configs` {Array<RestRequestConfig | GraphQLRequestConfig>} configs for mock requests, [read](#configs)
+  - `interceptors?` {Interceptors} functions to change request or response parameters, [read](#interceptors)
 
 ### Configs
 
@@ -104,10 +107,12 @@ Every route must be configured to handle response content in one of three ways: 
 ##### Rest example
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/api'
+  },
+  {
     configs: [
       {
         path: '/user',
@@ -129,9 +134,9 @@ const mockServerConfig = {
       }
     ]
   }
-};
+];
 
-module.exports = mockServerConfig;
+export default flatMockServerConfig;
 ```
 
 Now you can make a request with an additional header and get the desired result
@@ -167,10 +172,12 @@ Every route must be configured to handle response content in one of two ways: da
 ##### GraphQL example
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  graphql: {
-    baseUrl: '/graphql',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/graphql'
+  },
+  {
     configs: [
       {
         operationType: 'query',
@@ -192,9 +199,9 @@ const mockServerConfig = {
       }
     ]
   }
-};
+];
 
-module.exports = mockServerConfig;
+export default flatMockServerConfig;
 ```
 
 Now you can make a request with an additional header and get the desired result
@@ -237,10 +244,12 @@ Allowed `checkModes`
 - function - checks actual value with descriptor function.
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/api'
+  },
+  {
     configs: [
       {
         path: '/user',
@@ -276,22 +285,24 @@ const mockServerConfig = {
       }
     ]
   }
-};
+];
 
-module.exports = mockServerConfig;
+export default flatMockServerConfig;
 ```
 
-#### Descriptor *oneOf* property
+#### Descriptor _oneOf_ property
 
 For `checkMode` with the `value` property (all `checkMode` options except `exists` and `notExists`) you can use an array as value.
 Mock server will find matches by iterating through the array until **some** match is found.
 To be able to use this functionality you need to explicitly set `oneOf: true` property in descriptor object.
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/api'
+  },
+  {
     configs: [
       {
         path: '/user',
@@ -323,9 +334,9 @@ const mockServerConfig = {
       }
     ]
   }
-};
+];
 
-module.exports = mockServerConfig;
+export default flatMockServerConfig;
 ```
 
 #### Function check mode
@@ -339,10 +350,12 @@ You can use the `checkFunction` from second argument if you want to describe you
 `checkFunction` has the following signature `(checkMode, actualValue, descriptorValue?) => boolean`.
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/api'
+  },
+  {
     configs: [
       {
         path: '/posts/:postId',
@@ -359,7 +372,7 @@ const mockServerConfig = {
               cookies: {
                 authToken: {
                   checkMode: 'function',
-                  value: (actualValue, checkFunction) => 
+                  value: (actualValue, checkFunction) =>
                     checkFunction('equals', actualValue, 123) ||
                     checkFunction('startsWith', actualValue, 2)
                 }
@@ -373,7 +386,7 @@ const mockServerConfig = {
   }
 };
 
-module.exports = mockServerConfig;
+module.exports = flatMockServerConfig;
 ```
 
 ##### Using descriptors for part of REST body or GraphQL variables
@@ -381,10 +394,12 @@ module.exports = mockServerConfig;
 If you want to check a deep nested property of your body or variables via descriptor you can use flatten object style. In this case server will check every field in entity with corresponding actual field. I.e. you can use descriptors only for properties of entity object (not for properties of nested objects).
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/api'
+  },
+  {
     configs: [
       {
         path: '/users',
@@ -406,9 +421,10 @@ const mockServerConfig = {
       }
     ]
   }
-};
+];
+];
 
-module.exports = mockServerConfig;
+export default flatMockServerConfig;
 ```
 
 You can also use descriptor for whole body or variables entity.
@@ -416,10 +432,12 @@ You can also use descriptor for whole body or variables entity.
 > When you use 'equals'/'notEquals' check mode for whole body or variables mock-config-server is strictly compare entity and actual value. It means that you must specify **ALL** properties from actual body or variables.
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/api'
+  },
+  {
     configs: [
       {
         path: '/users',
@@ -445,9 +463,9 @@ const mockServerConfig = {
       }
     ]
   }
-};
+];
 
-module.exports = mockServerConfig;
+export default flatMockServerConfig;
 ```
 
 #### File responses
@@ -455,10 +473,12 @@ module.exports = mockServerConfig;
 Rest routes support paths to files. If a route is matched, the server will send data from the file. If the file is not found, the server will return 404.
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/api'
+  },
+  {
     configs: [
       {
         path: '/files/settings',
@@ -471,9 +491,9 @@ const mockServerConfig = {
       }
     ]
   }
-};
+];
 
-export default mockServerConfig;
+export default flatMockServerConfig;
 ```
 
 > If the file path is absolute, then this path will be used as is. If the file path is relative, it will be appended to the current working directory.
@@ -489,10 +509,12 @@ If the file exists, response interceptors will receive `file descriptor` as the 
 > If you return invalid file descriptor, server will send it as json data.
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/api'
+  },
+  {
     configs: [
       {
         path: '/files/settings',
@@ -502,7 +524,7 @@ const mockServerConfig = {
             file: './settings.json',
             interceptors: {
               response: (data) => {
-                data.file = data.file;                  // some logic with buffer 
+                data.file = data.file; // some logic with buffer
                 fs.writeFileSync(data.path, data.file); // rewrite ./settings.json file on disk with new content
                 return data;
               }
@@ -512,9 +534,9 @@ const mockServerConfig = {
       }
     ]
   }
-};
+];
 
-export default mockServerConfig;
+export default flatMockServerConfig;
 ```
 
 > Any changes to the data will not affect the file on disk unless you manually rewrite it.
@@ -530,10 +552,12 @@ Routes support polling for data. To add polling for data, you must specify the `
 > After receiving the last value from polling, the queue is reset and the next request will return the first value from the queue.
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/api'
+  },
+  {
     configs: [
       {
         path: '/user',
@@ -551,18 +575,20 @@ const mockServerConfig = {
       }
     ]
   }
-};
+];
 
-export default mockServerConfig;
+export default flatMockServerConfig;
 ```
 
 Using the additional `time` properties in milliseconds, you can specify how much time certain data should be returned
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/api'
+  },
+  {
     configs: [
       {
         path: '/user',
@@ -579,9 +605,9 @@ const mockServerConfig = {
       }
     ]
   }
-};
+];
 
-export default mockServerConfig;
+export default flatMockServerConfig;
 ```
 
 #### Static Path
@@ -689,10 +715,12 @@ You can log requests and responses using `log` function in any [interceptor](#in
 `log` function returns object with logged token values
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/api'
+  },
+  {
     configs: [
       {
         path: '/posts',
@@ -701,19 +729,23 @@ const mockServerConfig = {
           {
             interceptors: {
               request: ({ log }) => {
-                log({                 // logs following object in terminal
-                  options: {          // {
-                    id: true,         //  id: 1,
-                    type: true,       //  type: 'request',
-                    timestamp: true,  //  timestamp: '31.12.2024, 23:59:59,999',
-                    method: true,     //  method: 'GET',
-                    url: true         //  url: 'http://localhost:31299/api/rest/posts/1'
-                  }                   // }
+                log({
+                  // logs following object in terminal
+                  options: {
+                    // {
+                    id: true, //  id: 1,
+                    type: true, //  type: 'request',
+                    timestamp: true, //  timestamp: '31.12.2024, 23:59:59,999',
+                    method: true, //  method: 'GET',
+                    url: true //  url: 'http://localhost:31299/api/rest/posts/1'
+                  } // }
                 });
               },
               response: (data, { log }) => {
-                log({                 // logs following string in terminal
-                  options: {          // response get: http://localhost:31299/api/rest/posts/1 => 200
+                log({
+                  // logs following string in terminal
+                  options: {
+                    // response get: http://localhost:31299/api/rest/posts/1 => 200
                     type: true,
                     statusCode: true,
                     method: true,
@@ -731,15 +763,15 @@ const mockServerConfig = {
       }
     ]
   }
-};
+];
 
-export default mockServerConfig;
+export default flatMockServerConfig;
 ```
 
 > By default, `timestamp` and `method` tokens are prettified.
 > Timestamp transforms from UNIX-timestamp number to `DD.MM.YYYY, HH:mm:ss,sss` string.
 > Method transforms from lower case to upper case.
-> If `rewrite` function is used, those tokens will remain unformatted. You can format them as you need. 
+> If `rewrite` function is used, those tokens will remain unformatted. You can format them as you need.
 
 ##### Logger tokens
 
@@ -759,22 +791,25 @@ export default mockServerConfig;
 - `body?` `any` body
 
 Response logger has additional tokens
+
 - `statusCode?` `number` response status code
 - `data?` `any` data returned to client
 
 If you need to log specific properties in mapped entities (headers, cookies, query, params), use `Record<string, boolean>` object instead of boolean.
 In that case logger will use following logic:
 
-- if some token is `true`, entity will be filtered by `whitelist` logic. *Only* enabled ones will be logged.
-- if all tokens is `false`, entity will be filtered by `blacklist` logic. All entities will be logged *except* disabled ones.
+- if some token is `true`, entity will be filtered by `whitelist` logic. _Only_ enabled ones will be logged.
+- if all tokens is `false`, entity will be filtered by `blacklist` logic. All entities will be logged _except_ disabled ones.
 
 > Whitelist logic have priority over blacklist if you pass `true` and `false` in same entity.
 
 ```javascript
-/** @type {import('mock-config-server').MockServerConfig} */
-const mockServerConfig = {
-  rest: {
-    baseUrl: '/api',
+/** @type {import('mock-config-server').FlatMockServerConfig} */
+const flatMockServerConfig = [
+  {
+    baseUrl: '/api'
+  },
+  {
     configs: [
       {
         path: '/posts',
@@ -783,7 +818,8 @@ const mockServerConfig = {
           {
             interceptors: {
               request: ({ log }) => {
-                log({                 // whitelist. only query1 and query2 will be logged
+                log({
+                  // whitelist. only query1 and query2 will be logged
                   options: {
                     query: {
                       query1: true,
@@ -791,7 +827,8 @@ const mockServerConfig = {
                     }
                   }
                 });
-                log({                 // whitelist. only cookie1 and cookie2 will be logged
+                log({
+                  // whitelist. only cookie1 and cookie2 will be logged
                   options: {
                     cookies: {
                       cookie1: true,
@@ -800,7 +837,8 @@ const mockServerConfig = {
                     }
                   }
                 });
-                log({                 // blacklist. all headers will be logged except header1
+                log({
+                  // blacklist. all headers will be logged except header1
                   options: {
                     headers: {
                       header1: false
@@ -815,9 +853,9 @@ const mockServerConfig = {
       }
     ]
   }
-};
+];
 
-export default mockServerConfig;
+export default flatMockServerConfig;
 ```
 
 ## Database
@@ -830,16 +868,18 @@ With `mock-config-server` you can create your own mock database with all CRUD op
 ### Basic example
 
 ```javascript
-const mockServerConfig = {
-  database: {
-    data: {
-      users: [{ id: 1, name: 'John' }],
-      settings: {
-        blocked: false
+const flatMockServerConfig = [
+  {
+    database: {
+      data: {
+        users: [{ id: 1, name: 'John' }],
+        settings: {
+          blocked: false
+        }
       }
     }
   }
-};
+];
 ```
 
 Now you have the following routes for requests
@@ -876,20 +916,22 @@ __routes -> return routes from database config
 ### Routes example
 
 ```javascript
-const mockServerConfig = {
-  database: {
-    data: {
-      users: [{ id: 1, name: 'John' }],
-      settings: {
-        blocked: false
+const flatMockServerConfig = [
+  {
+    database: {
+      data: {
+        users: [{ id: 1, name: 'John' }],
+        settings: {
+          blocked: false
+        }
+      },
+      routes: {
+        '/api/users/:id': '/users/:id',
+        '/*/my-settings': '/settings'
       }
-    },
-    routes: {
-      '/api/users/:id': '/users/:id',
-      '/*/my-settings': '/settings'
     }
   }
-};
+];
 ```
 
 Now following routes will work correctly
@@ -990,12 +1032,14 @@ GET /users?_q=siberia&_q=24
 ### File example
 
 ```javascript
-const mockServerConfig = {
-  database: {
-    data: './data.json',
-    routes: './routes.json'
+const flatMockServerConfig = [
+  {
+    database: {
+      data: './data.json',
+      routes: './routes.json'
+    }
   }
-};
+];
 ```
 
 Instead of objects you can use paths to **JSON** files which contain needed data or routes

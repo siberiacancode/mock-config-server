@@ -1,11 +1,16 @@
-import type { RestMockServerConfig } from 'mock-config-server';
+import type { FlatMockServerConfig } from 'mock-config-server';
 
 import { getUserRequest, getUsersRequest, postUserRequest } from './mock-requests';
 
-const restMockServerConfig: RestMockServerConfig = {
-  port: 31299,
-  baseUrl: '/',
-  configs: [getUserRequest, getUsersRequest, postUserRequest]
-};
+const mockServerConfig: FlatMockServerConfig = [
+  {
+    port: 31299,
+    baseUrl: '/'
+  },
+  {
+    name: 'rest',
+    configs: [getUserRequest, getUsersRequest, postUserRequest]
+  }
+];
 
-export default restMockServerConfig;
+export default mockServerConfig;

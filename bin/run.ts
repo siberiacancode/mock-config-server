@@ -6,13 +6,14 @@ import type { GraphQLMockServerConfig, RestMockServerConfig } from '@/utils/type
 
 import type { MockServerConfig, MockServerConfigArgv } from '../src';
 
-import { validateApiMockServerConfig } from './validateMockServerConfig/validateApiMockServerConfig';
-import { validateMockServerConfig } from './validateMockServerConfig/validateMockServerConfig';
-
 export const run = (
   mockConfig: MockServerConfig,
   { baseUrl, port, staticPath }: MockServerConfigArgv
 ) => {
+  console.warn(
+    `**DEPRECATION WARNING**\nThe old mock config format is deprecated and will be removed in the next major version. Please use new format of config (flat config); see our doc (https://github.com/siberiacancode/mock-config-server) for more information`
+  );
+
   try {
     const mergedMockServerConfig = {
       ...mockConfig,
@@ -35,7 +36,6 @@ export const run = (
         isPlainObject(mergedApiMockServerConfig.configs[0]) &&
         'path' in mergedApiMockServerConfig.configs[0]
       ) {
-        validateApiMockServerConfig(mergedApiMockServerConfig, 'rest');
         return startRestMockServer(mergedApiMockServerConfig as RestMockServerConfig);
       }
 
@@ -45,15 +45,12 @@ export const run = (
         ('query' in mergedApiMockServerConfig.configs[0] ||
           'operationName' in mergedApiMockServerConfig.configs[0])
       ) {
-        validateApiMockServerConfig(mergedApiMockServerConfig, 'graphql');
         return startGraphQLMockServer(mergedApiMockServerConfig as GraphQLMockServerConfig);
       }
 
-      validateApiMockServerConfig(mergedApiMockServerConfig, 'rest');
       return startRestMockServer(mergedApiMockServerConfig as RestMockServerConfig);
     }
 
-    validateMockServerConfig(mergedMockServerConfig);
     return startMockServer(mergedMockServerConfig);
   } catch (error: any) {
     console.error(error.message);

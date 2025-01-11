@@ -10,23 +10,20 @@ import {
   corsMiddleware,
   errorMiddleware,
   noCorsMiddleware,
-  notFoundMiddleware,
   requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
 import type { MockServerConfig } from '@/utils/types';
+import { validateMockServerConfig } from '@/utils/validate';
 
 export const createMockServer = (
   mockServerConfig: Omit<MockServerConfig, 'port'>,
   server: Express = express()
 ) => {
+  validateMockServerConfig(mockServerConfig);
   const { cors, staticPath, rest, graphql, database, interceptors } = mockServerConfig;
-
-  server.set('view engine', 'ejs');
-  server.set('views', urlJoin(__dirname, '../../static/views'));
-  server.use(express.static(urlJoin(__dirname, '../../static/views')));
 
   server.use(bodyParser.urlencoded({ extended: false }));
 
@@ -102,8 +99,6 @@ export const createMockServer = (
     const routerWithDatabaseRoutes = createDatabaseRoutes(express.Router(), database);
     server.use(baseUrl, routerWithDatabaseRoutes);
   }
-
-  notFoundMiddleware(server, mockServerConfig);
 
   errorMiddleware(server);
 

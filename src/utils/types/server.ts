@@ -86,3 +86,23 @@ declare global {
     }
   }
 }
+export type FlatMockServerComponent = {
+  name?: string;
+  configs: Array<RestRequestConfig | GraphQLRequestConfig>;
+  baseUrl?: BaseUrl;
+  interceptors?: Interceptors;
+};
+
+export type FlatMockServerSettings = {
+  baseUrl?: BaseUrl;
+  port?: Port;
+  staticPath?: StaticPath;
+  interceptors?: Interceptors;
+  database?: DatabaseConfig;
+  cors?: Cors;
+};
+
+export type FlatMockServerConfig = [
+  option: FlatMockServerSettings | FlatMockServerComponent,
+  ...flatMockServerComponents: FlatMockServerComponent[]
+];
