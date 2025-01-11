@@ -1,6 +1,9 @@
-import bodyParser from 'body-parser';
 import type { Express } from 'express';
+
+import bodyParser from 'body-parser';
 import express from 'express';
+
+import type { MockServerConfig } from '@/utils/types';
 
 import { createDatabaseRoutes } from '@/core/database';
 import { createGraphQLRoutes } from '@/core/graphql';
@@ -10,23 +13,19 @@ import {
   corsMiddleware,
   errorMiddleware,
   noCorsMiddleware,
-  notFoundMiddleware,
   requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
-import type { MockServerConfig } from '@/utils/types';
+import { validateMockServerConfig } from '@/utils/validate';
 
 export const createMockServer = (
   mockServerConfig: Omit<MockServerConfig, 'port'>,
   server: Express = express()
 ) => {
+  validateMockServerConfig(mockServerConfig);
   const { cors, staticPath, rest, graphql, database, interceptors } = mockServerConfig;
-
-  server.set('view engine', 'ejs');
-  server.set('views', urlJoin(__dirname, '../../static/views'));
-  server.use(express.static(urlJoin(__dirname, '../../static/views')));
 
   server.use(bodyParser.urlencoded({ extended: false }));
 
@@ -35,7 +34,7 @@ export const createMockServer = (
 
   server.use(bodyParser.text());
 
-  contextMiddleware(server);
+  contextMiddleware(server, mockServerConfig);
 
   cookieParseMiddleware(server);
 
@@ -102,8 +101,6 @@ export const createMockServer = (
     const routerWithDatabaseRoutes = createDatabaseRoutes(express.Router(), database);
     server.use(baseUrl, routerWithDatabaseRoutes);
   }
-
-  notFoundMiddleware(server, mockServerConfig);
 
   errorMiddleware(server);
 

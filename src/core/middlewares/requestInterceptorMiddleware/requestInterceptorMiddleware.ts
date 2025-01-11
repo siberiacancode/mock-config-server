@@ -1,12 +1,13 @@
 import type { Express } from 'express';
 
-import { asyncHandler, callRequestInterceptor } from '@/utils/helpers';
 import type { RequestInterceptor } from '@/utils/types';
 
+import { asyncHandler, callRequestInterceptor } from '@/utils/helpers';
+
 interface RequestInterceptorMiddlewareParams {
-  server: Express;
-  path?: string;
   interceptor: RequestInterceptor;
+  path?: string;
+  server: Express;
 }
 
 export const requestInterceptorMiddleware = ({

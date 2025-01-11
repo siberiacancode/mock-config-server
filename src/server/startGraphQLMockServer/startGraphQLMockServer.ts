@@ -1,8 +1,9 @@
 import color from 'ansi-colors';
 
+import type { GraphQLMockServerConfig } from '@/utils/types';
+
 import { destroyerMiddleware } from '@/core/middlewares';
 import { DEFAULT } from '@/utils/constants';
-import type { GraphQLMockServerConfig } from '@/utils/types';
 
 import { createGraphQLMockServer } from '../createGraphQLMockServer/createGraphQLMockServer';
 

@@ -1,15 +1,15 @@
 import type { Request } from 'express';
 
-import type { MappedEntity, PlainEntity } from './entities';
+import type { MappedEntity, VariablesPlainEntity } from './entities';
 import type { Interceptors } from './interceptors';
 import type { Data } from './values';
 
-export type GraphQLEntityName = 'headers' | 'cookies' | 'query' | 'variables';
+export type GraphQLEntityName = 'cookies' | 'headers' | 'query' | 'variables';
 
 export type GraphQLEntity<EntityName extends GraphQLEntityName = GraphQLEntityName> =
-  EntityName extends 'variables' ? PlainEntity : MappedEntity;
+  EntityName extends 'variables' ? VariablesPlainEntity : MappedEntity;
 
-export type GraphQLOperationType = 'query' | 'mutation';
+export type GraphQLOperationType = 'mutation' | 'query';
 export type GraphQLOperationName = string | RegExp;
 
 export type GraphQLEntitiesByEntityName = {
@@ -17,33 +17,33 @@ export type GraphQLEntitiesByEntityName = {
 };
 
 interface GraphQLSettings {
+  readonly delay?: number;
   readonly polling?: boolean;
   readonly status?: number;
-  readonly delay?: number;
 }
+
+export type GraphqlDataResponse =
+  | ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>)
+  | Data;
 
 export type GraphQLRouteConfig = (
   | {
       settings: GraphQLSettings & { polling: true };
       queue: Array<{
         time?: number;
-        data:
-          | ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>)
-          | Data;
+        data: GraphqlDataResponse;
       }>;
     }
   | {
       settings?: GraphQLSettings & { polling?: false };
-      data:
-        | ((request: Request, entities: GraphQLEntitiesByEntityName) => Data | Promise<Data>)
-        | Data;
+      data: GraphqlDataResponse;
     }
 ) & { entities?: GraphQLEntitiesByEntityName; interceptors?: Interceptors<'graphql'> };
 
 interface BaseGraphQLRequestConfig {
+  interceptors?: Interceptors<'graphql'>;
   operationType: GraphQLOperationType;
   routes: GraphQLRouteConfig[];
-  interceptors?: Interceptors<'graphql'>;
 }
 
 export interface OperationNameGraphQLRequestConfig extends BaseGraphQLRequestConfig {

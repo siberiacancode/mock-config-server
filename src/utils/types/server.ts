@@ -1,23 +1,27 @@
 import type { Request } from 'express';
 import type { Arguments } from 'yargs';
 
+import type { Database, Orm } from './database';
 import type { GraphQLRequestConfig } from './graphql';
 import type { Interceptors } from './interceptors';
 import type { RestMethod, RestRequestConfig } from './rest';
 
-type StaticPathObject = { prefix: `/${string}`; path: `/${string}` };
-export type StaticPath = `/${string}` | StaticPathObject | (StaticPathObject | `/${string}`)[];
+interface StaticPathObject {
+  path: `/${string}`;
+  prefix: `/${string}`;
+}
+export type StaticPath = `/${string}` | (`/${string}` | StaticPathObject)[] | StaticPathObject;
 
 type CorsHeader = string;
-export type CorsOrigin = string | RegExp | (RegExp | string)[];
-export type Cors = {
-  origin: CorsOrigin | ((request: Request) => Promise<CorsOrigin> | CorsOrigin);
-  methods?: Uppercase<RestMethod>[];
+export type CorsOrigin = string | (string | RegExp)[] | RegExp;
+export interface Cors {
   allowedHeaders?: CorsHeader[];
-  exposedHeaders?: CorsHeader[];
   credentials?: boolean;
+  exposedHeaders?: CorsHeader[];
   maxAge?: number;
-};
+  methods?: Uppercase<RestMethod>[];
+  origin: ((request: Request) => CorsOrigin | Promise<CorsOrigin>) | CorsOrigin;
+}
 
 type Port = number;
 export type BaseUrl = `/${string}`;
@@ -34,23 +38,23 @@ export interface GraphqlConfig {
   interceptors?: Interceptors<'graphql'>;
 }
 
-export type DatabaseConfig = {
-  data: Record<string, unknown> | `${string}.json`;
-  routes?: Record<`/${string}`, `/${string}`> | `${string}.json`;
-};
+export interface DatabaseConfig {
+  data: `${string}.json` | Record<string, unknown>;
+  routes?: `${string}.json` | Record<`/${string}`, `/${string}`>;
+}
 
 export interface BaseMockServerConfig {
   baseUrl?: BaseUrl;
+  cors?: Cors;
+  interceptors?: Interceptors;
   port?: Port;
   staticPath?: StaticPath;
-  interceptors?: Interceptors;
-  cors?: Cors;
 }
 
 export interface MockServerConfig extends BaseMockServerConfig {
-  rest?: RestConfig;
-  graphql?: GraphqlConfig;
   database?: DatabaseConfig;
+  graphql?: GraphqlConfig;
+  rest?: RestConfig;
 }
 
 export interface RestMockServerConfig extends BaseMockServerConfig {
@@ -64,8 +68,8 @@ export interface GraphQLMockServerConfig extends BaseMockServerConfig {
 }
 
 export interface DatabaseMockServerConfig extends BaseMockServerConfig {
-  data: Record<string, unknown> | `${string}.json`;
-  routes?: Record<`/${string}`, `/${string}`> | `${string}.json`;
+  data: `${string}.json` | Record<string, unknown>;
+  routes?: `${string}.json` | Record<`/${string}`, `/${string}`>;
 }
 
 export type MockServerConfigArgv = Arguments<{
@@ -75,3 +79,33 @@ export type MockServerConfigArgv = Arguments<{
   config?: string;
   watch?: boolean;
 }>;
+
+declare global {
+  namespace Express {
+    interface Request {
+      context: {
+        orm: Orm<Database>;
+      };
+    }
+  }
+}
+export interface FlatMockServerComponent {
+  baseUrl?: BaseUrl;
+  configs: Array<GraphQLRequestConfig | RestRequestConfig>;
+  interceptors?: Interceptors;
+  name?: string;
+}
+
+export interface FlatMockServerSettings {
+  baseUrl?: BaseUrl;
+  cors?: Cors;
+  database?: DatabaseConfig;
+  interceptors?: Interceptors;
+  port?: Port;
+  staticPath?: StaticPath;
+}
+
+export type FlatMockServerConfig = [
+  option: FlatMockServerComponent | FlatMockServerSettings,
+  ...flatMockServerComponents: FlatMockServerComponent[]
+];

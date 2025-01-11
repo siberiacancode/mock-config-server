@@ -1,5 +1,5 @@
-import type { Server } from 'http';
-import type { Socket } from 'net';
+import type { Server } from 'node:http';
+import type { Socket } from 'node:net';
 
 type ServerWithDestroyer = Server & { destroy: Server['close'] };
 

@@ -36,19 +36,7 @@ export const CALCULATE_BY_DESCRIPTOR_VALUE_CHECK_MODES = [
   'function'
 ] as const satisfies readonly CalculateByDescriptorValueCheckMode[];
 
-export const CHECK_MODES = [
-  ...CHECK_ACTUAL_VALUE_CHECK_MODES,
-  ...COMPARE_WITH_DESCRIPTOR_VALUE_CHECK_MODES,
-  ...CALCULATE_BY_DESCRIPTOR_VALUE_CHECK_MODES
-] as const satisfies readonly CheckMode[];
-
-export const PLAIN_ENTITY_CHECK_MODES = [
-  ...CHECK_ACTUAL_VALUE_CHECK_MODES,
-  ...COMPARE_WITH_DESCRIPTOR_ANY_VALUE_CHECK_MODES,
-  'function'
-] as const satisfies readonly CheckMode[];
-
-export const NEGATION_CHECK_MODES = [
+export const NEGATIVE_CHECK_MODES = [
   'notExists',
   'notEquals',
   'notIncludes',

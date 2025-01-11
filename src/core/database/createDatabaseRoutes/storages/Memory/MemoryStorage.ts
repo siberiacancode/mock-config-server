@@ -1,15 +1,17 @@
+import type { Storage, StorageIndex } from '@/utils/types';
+
 import { isIndex } from '../../helpers';
 
-type Index = string | number;
+export class MemoryStorage<Data extends Record<StorageIndex, any> = Record<StorageIndex, any>>
+  implements Storage
+{
+  private readonly data: Data;
 
-export class MemoryStorage<T extends Record<Index, any> = Record<Index, any>> {
-  private readonly data: T;
-
-  public constructor(initialData: T) {
+  public constructor(initialData: Data) {
     this.data = initialData;
   }
 
-  public read(key?: Index | Index[]): any {
+  public read(key?: StorageIndex | StorageIndex[]): any {
     if (!key) return this.data;
     const keys = Array.isArray(key) ? key : [key];
 
@@ -20,7 +22,7 @@ export class MemoryStorage<T extends Record<Index, any> = Record<Index, any>> {
     return readable;
   }
 
-  public write(key: Index | Index[], value: unknown): void {
+  public write(key: StorageIndex | StorageIndex[], value: unknown): void {
     const keys = Array.isArray(key) ? key : [key];
     let writable: any = this.data;
     let index = 0;
@@ -33,7 +35,7 @@ export class MemoryStorage<T extends Record<Index, any> = Record<Index, any>> {
     writable[keys[index]] = value;
   }
 
-  public delete(key: Index | Index[]): void {
+  public delete(key: StorageIndex | StorageIndex[]): void {
     const keys = Array.isArray(key) ? key : [key];
     let deletable: any = this.data;
     let index = 0;

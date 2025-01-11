@@ -1,10 +1,11 @@
-import { isPlainObject } from '@/utils/helpers';
 import type {
   DatabaseConfig,
   NestedDatabase,
   NestedDatabaseId,
   ShallowDatabase
 } from '@/utils/types';
+
+import { isPlainObject } from '@/utils/helpers';
 
 const isAllArrayElementsHaveValidTypeId = (array: unknown[]) =>
   array.every(

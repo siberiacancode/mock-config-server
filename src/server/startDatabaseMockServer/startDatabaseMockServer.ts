@@ -1,8 +1,9 @@
 import color from 'ansi-colors';
 
+import type { DatabaseMockServerConfig } from '@/utils/types';
+
 import { destroyerMiddleware } from '@/core/middlewares';
 import { DEFAULT } from '@/utils/constants';
-import type { DatabaseMockServerConfig } from '@/utils/types';
 
 import { createDatabaseMockServer } from '../createDatabaseMockServer/createDatabaseMockServer';
 

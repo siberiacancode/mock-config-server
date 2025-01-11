@@ -1,8 +1,9 @@
 import color from 'ansi-colors';
 
+import type { MockServerConfig } from '@/utils/types';
+
 import { destroyerMiddleware } from '@/core/middlewares';
 import { DEFAULT } from '@/utils/constants';
-import type { MockServerConfig } from '@/utils/types';
 
 import { createMockServer } from '../createMockServer/createMockServer';
 

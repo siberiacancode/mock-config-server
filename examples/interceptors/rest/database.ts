@@ -1,5 +1,6 @@
-import type { MockServerConfig } from 'mock-config-server';
-import { createMockServer, startMockServer } from 'mock-config-server';
+import type { FlatMockServerConfig } from 'mock-config-server';
+
+import { createFlatMockServer, startFlatMockServer } from 'mock-config-server';
 
 let todos = [
   { id: '1', name: 'todo 1', checked: false },
@@ -7,11 +8,13 @@ let todos = [
   { id: '3', name: 'todo 3', checked: false }
 ];
 
-export const mockServerConfig: MockServerConfig = {
-  interceptors: {
-    request: (params) => params.setDelay(1000)
+export const mockServerConfig: FlatMockServerConfig = [
+  {
+    interceptors: {
+      request: (params) => params.setDelay(1000)
+    }
   },
-  rest: {
+  {
     configs: [
       {
         path: '/todos',
@@ -80,7 +83,7 @@ export const mockServerConfig: MockServerConfig = {
       }
     ]
   }
-};
+];
 
-createMockServer(mockServerConfig);
-startMockServer(mockServerConfig);
+createFlatMockServer(mockServerConfig);
+startFlatMockServer(mockServerConfig);

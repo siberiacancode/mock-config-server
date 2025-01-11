@@ -1,9 +1,12 @@
-import type { MockServerConfig } from 'mock-config-server';
-import { createMockServer, startMockServer } from 'mock-config-server';
+import type { FlatMockServerConfig } from 'mock-config-server';
 
-export const mockServerConfig: MockServerConfig = {
-  staticPath: '/images'
-};
+import { createFlatMockServer, startFlatMockServer } from 'mock-config-server';
 
-createMockServer(mockServerConfig);
-startMockServer(mockServerConfig);
+export const mockServerConfig: FlatMockServerConfig = [
+  {
+    staticPath: '/images'
+  }
+];
+
+createFlatMockServer(mockServerConfig);
+startFlatMockServer(mockServerConfig);

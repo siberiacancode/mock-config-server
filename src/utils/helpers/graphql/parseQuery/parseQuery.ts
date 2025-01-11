@@ -1,9 +1,10 @@
 import type { DocumentNode, OperationDefinitionNode, OperationTypeNode } from 'graphql';
+
 import { parse } from 'graphql';
 
 interface ParseDocumentNodeResult {
-  operationType: OperationTypeNode;
   operationName: string | undefined;
+  operationType: OperationTypeNode;
 }
 
 const parseDocumentNode = (node: DocumentNode): ParseDocumentNodeResult => {

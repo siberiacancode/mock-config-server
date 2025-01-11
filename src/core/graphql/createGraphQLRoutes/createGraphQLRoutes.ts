@@ -1,5 +1,17 @@
 import type { IRouter, NextFunction, Request, Response } from 'express';
+
 import { flatten } from 'flat';
+
+import type {
+  EntityDescriptor,
+  Entries,
+  GraphqlConfig,
+  GraphQLEntitiesByEntityName,
+  GraphQLEntity,
+  Interceptors,
+  PlainObject,
+  TopLevelPlainEntityDescriptor
+} from '@/utils/types';
 
 import {
   asyncHandler,
@@ -12,21 +24,12 @@ import {
   resolveEntityValues,
   sleep
 } from '@/utils/helpers';
-import type {
-  Entries,
-  GraphqlConfig,
-  GraphQLEntitiesByEntityName,
-  GraphQLEntity,
-  Interceptors,
-  TopLevelPlainEntityArray,
-  TopLevelPlainEntityDescriptor
-} from '@/utils/types';
 
 import { prepareGraphQLRequestConfigs } from './helpers';
 
 interface CreateGraphQLRoutesParams {
-  router: IRouter;
   graphqlConfig: GraphqlConfig;
+  router: IRouter;
   serverResponseInterceptor?: Interceptors<'graphql'>['response'];
 }
 
@@ -57,17 +60,16 @@ export const createGraphQLRoutes = ({
 
       if (
         'query' in requestConfig &&
-        requestConfig.query.replace(/\s+/gi, ' ') !== graphQLInput.query?.replace(/\s+/gi, ' ')
+        requestConfig.query.replace(/\s+/g, '') !== graphQLInput.query?.replace(/\s+/g, '')
       )
         return false;
 
       if ('operationName' in requestConfig) {
         if (!query.operationName) return false;
 
-        if (requestConfig.operationName instanceof RegExp)
-          return new RegExp(requestConfig.operationName).test(query.operationName);
-
-        return requestConfig.operationName === query.operationName;
+        return requestConfig.operationName instanceof RegExp
+          ? new RegExp(requestConfig.operationName).test(query.operationName)
+          : requestConfig.operationName === query.operationName;
       }
 
       return true;
@@ -87,41 +89,66 @@ export const createGraphQLRoutes = ({
     const matchedRouteConfig = matchedRequestConfig.routes.find(({ entities }) => {
       if (!entities) return true;
 
-      const entries = Object.entries(entities) as Entries<Required<GraphQLEntitiesByEntityName>>;
-      return entries.every(([entityName, entityDescriptorOrValue]) => {
-        const { checkMode, value: entityDescriptorValue } =
-          convertToEntityDescriptor(entityDescriptorOrValue);
-
-        // ✅ important: check whole variables as plain value strictly if descriptor used for variables
+      const entityEntries = Object.entries(entities) as Entries<
+        Required<GraphQLEntitiesByEntityName>
+      >;
+      return entityEntries.every(([entityName, entityDescriptorOrValue]) => {
+        // ✅ important:
+        // check whole variables as plain value strictly if descriptor used for variables
         const isEntityVariablesByTopLevelDescriptor =
           entityName === 'variables' && isEntityDescriptor(entityDescriptorOrValue);
         if (isEntityVariablesByTopLevelDescriptor) {
-          return resolveEntityValues(checkMode, graphQLInput.variables, entityDescriptorValue);
+          const variablesDescriptor = entityDescriptorOrValue as EntityDescriptor;
+          if (
+            variablesDescriptor.checkMode === 'exists' ||
+            variablesDescriptor.checkMode === 'notExists'
+          ) {
+            return resolveEntityValues({
+              actualValue: graphQLInput.variables,
+              checkMode: variablesDescriptor.checkMode
+            });
+          }
+
+          return resolveEntityValues({
+            actualValue: graphQLInput.variables,
+            descriptorValue: variablesDescriptor.value,
+            checkMode: variablesDescriptor.checkMode,
+            oneOf: variablesDescriptor.oneOf ?? false
+          });
         }
 
-        const isEntityVariablesByTopLevelArray =
-          entityName === 'variables' && Array.isArray(entityDescriptorOrValue);
-        if (isEntityVariablesByTopLevelArray) {
-          return entityDescriptorOrValue.some((entityDescriptorOrValueElement) =>
-            resolveEntityValues(checkMode, graphQLInput.variables, entityDescriptorOrValueElement)
-          );
-        }
-
-        const recordOrArrayEntries = Object.entries(entityDescriptorOrValue) as Entries<
-          Exclude<GraphQLEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
+        const actualEntity = flatten<PlainObject, PlainObject>(
+          entityName === 'variables' ? graphQLInput.variables : request[entityName]
+        );
+        const entityValueEntries = Object.entries(entityDescriptorOrValue) as Entries<
+          Exclude<GraphQLEntity, TopLevelPlainEntityDescriptor>
         >;
-        return recordOrArrayEntries.every(([entityKey, entityValue]) => {
-          const { checkMode, value: descriptorValue } = convertToEntityDescriptor(entityValue);
-          const flattenEntity = flatten<any, any>(
-            entityName === 'variables' ? graphQLInput.variables : request[entityName]
+        return entityValueEntries.every(([entityPropertyKey, entityPropertyDescriptorOrValue]) => {
+          const entityPropertyDescriptor = convertToEntityDescriptor(
+            entityPropertyDescriptorOrValue
           );
 
           // ✅ important: transform header keys to lower case because browsers send headers in lowercase
-          return resolveEntityValues(
-            checkMode,
-            flattenEntity[entityName === 'headers' ? entityKey.toLowerCase() : entityKey],
-            descriptorValue
-          );
+          const actualPropertyKey =
+            entityName === 'headers' ? entityPropertyKey.toLowerCase() : entityPropertyKey;
+          const actualPropertyValue = actualEntity[actualPropertyKey];
+
+          if (
+            entityPropertyDescriptor.checkMode === 'exists' ||
+            entityPropertyDescriptor.checkMode === 'notExists'
+          ) {
+            return resolveEntityValues({
+              actualValue: actualPropertyValue,
+              checkMode: entityPropertyDescriptor.checkMode
+            });
+          }
+
+          return resolveEntityValues({
+            actualValue: actualPropertyValue,
+            descriptorValue: entityPropertyDescriptor.value,
+            checkMode: entityPropertyDescriptor.checkMode,
+            oneOf: entityPropertyDescriptor.oneOf ?? false
+          });
         });
       });
     });

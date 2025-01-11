@@ -1,7 +1,14 @@
 import type { Express } from 'express';
 
+import type {
+  GraphQLEntity,
+  GraphQLOperationName,
+  GraphQLOperationType,
+  MockServerConfig
+} from '@/utils/types';
+
+import { createOrm, createStorage } from '@/core/database';
 import { getGraphQLInput, parseQuery } from '@/utils/helpers';
-import type { GraphQLEntity, GraphQLOperationName, GraphQLOperationType } from '@/utils/types';
 
 declare global {
   namespace Express {
@@ -18,8 +25,18 @@ declare global {
   }
 }
 
-export const contextMiddleware = (server: Express) => {
+export const contextMiddleware = (
+  server: Express,
+  { database }: Pick<MockServerConfig, 'database'>
+) => {
   let requestId = 0;
+  const context: Express['request']['context'] = { orm: {} };
+
+  if (database) {
+    const storage = createStorage(database.data);
+    const orm = createOrm(storage);
+    context.orm = orm;
+  }
 
   server.use((request, _response, next) => {
     requestId += 1;
@@ -43,6 +60,7 @@ export const contextMiddleware = (server: Express) => {
     }
 
     request.graphQL = null;
+    request.context = context;
     return next();
   });
 };

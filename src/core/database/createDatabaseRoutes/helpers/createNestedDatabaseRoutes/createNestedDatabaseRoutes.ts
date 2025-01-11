@@ -4,6 +4,7 @@ import type { ParsedUrlQuery } from 'node:querystring';
 import type { NestedDatabase } from '@/utils/types';
 
 import type { MemoryStorage } from '../../storages';
+
 import { createNewId, findIndexById } from '../array';
 import { filter } from '../filter/filter';
 import { pagination } from '../pagination/pagination';
@@ -91,12 +92,11 @@ export const createNestedDatabaseRoutes = (
       response.status(201).json(newResource);
     });
 
-    router.route(itemPath).get((request, response) => {
+    router.route(itemPath).get((request, response, next) => {
       const currentResourceCollection = storage.read(key);
       const currentResourceIndex = findIndexById(currentResourceCollection, request.params.id);
       if (currentResourceIndex === -1) {
-        response.status(404).end();
-        return;
+        return next();
       }
 
       // ✅ important:
@@ -106,12 +106,11 @@ export const createNestedDatabaseRoutes = (
       response.json(storage.read([key, currentResourceIndex]));
     });
 
-    router.route(itemPath).put((request, response) => {
+    router.route(itemPath).put((request, response, next) => {
       const currentResourceCollection = storage.read(key);
       const currentResourceIndex = findIndexById(currentResourceCollection, request.params.id);
       if (currentResourceIndex === -1) {
-        response.status(404).end();
-        return;
+        return next();
       }
 
       const currentResource = storage.read([key, currentResourceIndex]);
@@ -120,12 +119,11 @@ export const createNestedDatabaseRoutes = (
       response.json(updatedResource);
     });
 
-    router.route(itemPath).patch((request, response) => {
+    router.route(itemPath).patch((request, response, next) => {
       const currentResourceCollection = storage.read(key);
       const currentResourceIndex = findIndexById(currentResourceCollection, request.params.id);
       if (currentResourceIndex === -1) {
-        response.status(404).end();
-        return;
+        return next();
       }
 
       const currentResource = storage.read([key, currentResourceIndex]);
@@ -134,12 +132,11 @@ export const createNestedDatabaseRoutes = (
       response.json(updatedResource);
     });
 
-    router.route(itemPath).delete((request, response) => {
+    router.route(itemPath).delete((request, response, next) => {
       const currentResourceCollection = storage.read(key);
       const currentResourceIndex = findIndexById(currentResourceCollection, request.params.id);
       if (currentResourceIndex === -1) {
-        response.status(404).end();
-        return;
+        return next();
       }
       storage.delete([key, currentResourceIndex]);
       response.status(204).end();

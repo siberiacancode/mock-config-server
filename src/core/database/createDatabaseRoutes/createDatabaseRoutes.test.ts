@@ -1,12 +1,14 @@
 import type { Express } from 'express';
+
 import express from 'express';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import request from 'supertest';
+
+import type { DatabaseConfig, MockServerConfig } from '@/utils/types';
 
 import { createDatabaseRoutes } from '@/core/database';
 import { createTmpDir } from '@/utils/helpers/tests';
-import type { DatabaseConfig, MockServerConfig } from '@/utils/types';
 
 import { findIndexById } from './helpers';
 
@@ -27,7 +29,7 @@ describe('createDatabaseRoutes', () => {
     const routes = { '/api/profile': '/profile' } as const;
     const server = createServer({ database: { data, routes } });
 
-    test('Should overwrite routes according to routes object (but default url should work too)', async () => {
+    it('Should overwrite routes according to routes object (but default url should work too)', async () => {
       const overwrittenUrlResponse = await request(server).get('/api/profile');
       expect(overwrittenUrlResponse.body).toStrictEqual(data.profile);
 
@@ -35,7 +37,7 @@ describe('createDatabaseRoutes', () => {
       expect(defaultUrlResponse.body).toStrictEqual(data.profile);
     });
 
-    test('Should successfully handle requests to shallow and nested database parts', async () => {
+    it('Should successfully handle requests to shallow and nested database parts', async () => {
       const shallowDatabaseResponse = await request(server).get('/profile');
       expect(shallowDatabaseResponse.body).toStrictEqual(data.profile);
 
@@ -72,7 +74,7 @@ describe('createDatabaseRoutes', () => {
       fs.rmSync(tmpDirPath, { recursive: true, force: true });
     });
 
-    test('Should overwrite routes according to routes object (but default url should work too)', async () => {
+    it('Should overwrite routes according to routes object (but default url should work too)', async () => {
       const overwrittenUrlResponse = await request(server).get('/api/profile');
       expect(overwrittenUrlResponse.body).toStrictEqual(data.profile);
 
@@ -80,7 +82,7 @@ describe('createDatabaseRoutes', () => {
       expect(defaultUrlResponse.body).toStrictEqual(data.profile);
     });
 
-    test('Should successfully handle requests to shallow and nested database parts', async () => {
+    it('Should successfully handle requests to shallow and nested database parts', async () => {
       const shallowDatabaseResponse = await request(server).get('/profile');
       expect(shallowDatabaseResponse.body).toStrictEqual(data.profile);
 
@@ -99,12 +101,12 @@ describe('createDatabaseRoutes', () => {
     const routes = { '/api/profile': '/profile' } as const;
     const server = createServer({ database: { data, routes } });
 
-    test('Should create /__db route that return data from databaseConfig', async () => {
+    it('Should create /__db route that return data from databaseConfig', async () => {
       const response = await request(server).get('/__db');
       expect(response.body).toStrictEqual(data);
     });
 
-    test('Should create /__routes route that return routes from databaseConfig', async () => {
+    it('Should create /__routes route that return routes from databaseConfig', async () => {
       const response = await request(server).get('/__routes');
       expect(response.body).toStrictEqual(routes);
     });

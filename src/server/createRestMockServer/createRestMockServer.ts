@@ -1,6 +1,9 @@
-import bodyParser from 'body-parser';
 import type { Express } from 'express';
+
+import bodyParser from 'body-parser';
 import express from 'express';
+
+import type { RestMockServerConfig } from '@/utils/types';
 
 import { createDatabaseRoutes } from '@/core/database';
 import {
@@ -9,23 +12,18 @@ import {
   corsMiddleware,
   errorMiddleware,
   noCorsMiddleware,
-  notFoundMiddleware,
   requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
-import { urlJoin } from '@/utils/helpers';
-import type { RestMockServerConfig } from '@/utils/types';
+import { validateApiMockServerConfig } from '@/utils/validate';
 
 export const createRestMockServer = (
   restMockServerConfig: Omit<RestMockServerConfig, 'port'>,
   server: Express = express()
 ) => {
+  validateApiMockServerConfig(restMockServerConfig, 'rest');
   const { cors, staticPath, configs, database, interceptors } = restMockServerConfig;
-
-  server.set('view engine', 'ejs');
-  server.set('views', urlJoin(__dirname, '../../static/views'));
-  server.use(express.static(urlJoin(__dirname, '../../static/views')));
 
   server.use(bodyParser.urlencoded({ extended: false }));
 
@@ -34,7 +32,7 @@ export const createRestMockServer = (
 
   server.use(bodyParser.text());
 
-  contextMiddleware(server);
+  contextMiddleware(server, restMockServerConfig);
 
   cookieParseMiddleware(server);
 
@@ -67,8 +65,6 @@ export const createRestMockServer = (
     const routerWithDatabaseRoutes = createDatabaseRoutes(express.Router(), database);
     server.use(baseUrl, routerWithDatabaseRoutes);
   }
-
-  notFoundMiddleware(server, restMockServerConfig);
 
   errorMiddleware(server);
 

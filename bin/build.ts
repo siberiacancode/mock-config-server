@@ -1,10 +1,12 @@
 import type { BuildOptions, Plugin } from 'esbuild';
-import { build as esBuild, context } from 'esbuild';
+
+import { context, build as esBuild } from 'esbuild';
 
 import type { MockServerConfigArgv } from '@/utils/types';
 
 import { resolveConfigFile, resolveConfigFilePath } from './helpers';
 import { run } from './run';
+import { runFlatConfig } from './runFlatConfig';
 
 export const build = async (argv: MockServerConfigArgv) => {
   const configFilePath = resolveConfigFilePath(argv.config);
@@ -29,7 +31,7 @@ export const build = async (argv: MockServerConfigArgv) => {
     const watchPlugin: Plugin = {
       name: 'watch',
       setup: (build) => {
-        let instance: Awaited<ReturnType<typeof run>>;
+        let instance: Awaited<ReturnType<typeof run | typeof runFlatConfig>>;
 
         build.onStart(() => {
           instance?.destroy();
@@ -38,6 +40,13 @@ export const build = async (argv: MockServerConfigArgv) => {
         build.onEnd((result) => {
           if (!result.errors.length) {
             const mockConfig = resolveConfigFile(result.outputFiles![0].text);
+            const isFlatConfig = Array.isArray(mockConfig);
+
+            if (isFlatConfig) {
+              instance = runFlatConfig(mockConfig, argv);
+              return;
+            }
+
             instance = run(mockConfig, argv);
           }
         });
@@ -55,5 +64,11 @@ export const build = async (argv: MockServerConfigArgv) => {
   const { outputFiles } = await esBuild(buildOptions);
 
   const mockConfig = resolveConfigFile(outputFiles[0].text);
+  const isFlatConfig = Array.isArray(mockConfig);
+
+  if (isFlatConfig) {
+    return runFlatConfig(mockConfig, argv);
+  }
+
   run(mockConfig, argv);
 };

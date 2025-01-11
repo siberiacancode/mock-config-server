@@ -24,7 +24,7 @@ describe('callResponseLogger', () => {
 
   vi.spyOn(Date, 'now').mockImplementation(() => 1735623296789);
 
-  test('Should log default tokens if logger or tokens was not provided', () => {
+  it('Should log default tokens if logger or tokens was not provided', () => {
     const consoleDir = vi.spyOn(console, 'dir');
 
     callResponseLogger({ data, request, response });
@@ -58,7 +58,7 @@ describe('callResponseLogger', () => {
     ]);
   });
 
-  test('Should call rewrite function with unformatted tokens instead of default console.dir if provided', () => {
+  it('Should call rewrite function with unformatted tokens instead of default console.dir if provided', () => {
     const consoleDir = vi.spyOn(console, 'dir');
     const rewrite = vi.fn();
 
@@ -79,7 +79,7 @@ describe('callResponseLogger', () => {
     ]);
   });
 
-  test('Should return logged tokens', () => {
+  it('Should return logged tokens', () => {
     const rewrite = vi.fn();
 
     expect(callResponseLogger({ data, request, response })).toStrictEqual({

@@ -15,8 +15,8 @@ const DEFAULT_RESPONSE_LOGGER_OPTIONS: LoggerOptions<'response'> = {
 };
 
 interface CallResponseLoggerParams {
-  logger?: Logger<'response'>;
   data: Data;
+  logger?: Logger<'response'>;
   request: Request;
   response: Response;
 }

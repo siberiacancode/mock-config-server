@@ -1,4 +1,5 @@
 import type { IRouter } from 'express';
+
 import rewrite from 'express-urlrewrite';
 
 export const createRewrittenDatabaseRoutes = (

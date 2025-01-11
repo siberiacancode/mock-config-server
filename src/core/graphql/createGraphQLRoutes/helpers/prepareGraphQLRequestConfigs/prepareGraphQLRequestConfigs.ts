@@ -1,5 +1,6 @@
-import { isPlainObject } from '@/utils/helpers';
 import type { GraphQLRequestConfig, GraphQLRouteConfig } from '@/utils/types';
+
+import { isPlainObject } from '@/utils/helpers';
 
 const calculateRouteConfigWeight = (graphQLRouteConfig: GraphQLRouteConfig) => {
   const { entities } = graphQLRouteConfig;
@@ -12,7 +13,7 @@ const calculateRouteConfigWeight = (graphQLRouteConfig: GraphQLRouteConfig) => {
   if (cookies) routeConfigWeight += Object.keys(cookies).length;
   if (query) routeConfigWeight += Object.keys(query).length;
   if (variables) {
-    if (isPlainObject(variables) && variables.checkMode) {
+    if (variables.checkMode) {
       // ✅ important:
       // check that actual value check modes does not have `value` for compare
       if (variables.checkMode === 'exists' || variables.checkMode === 'notExists') {
@@ -22,7 +23,7 @@ const calculateRouteConfigWeight = (graphQLRouteConfig: GraphQLRouteConfig) => {
       routeConfigWeight += isPlainObject(variables.value) ? Object.keys(variables.value).length : 1;
       return routeConfigWeight;
     }
-    routeConfigWeight += isPlainObject(variables) ? Object.keys(variables).length : 1;
+    routeConfigWeight += Object.keys(variables).length;
   }
 
   return routeConfigWeight;

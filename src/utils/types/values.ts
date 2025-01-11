@@ -1,9 +1,9 @@
-import type { ParamsDictionary, Query as ExpressQuery } from 'express-serve-static-core';
-import type { IncomingHttpHeaders } from 'http';
+import type { Query as ExpressQuery, ParamsDictionary } from 'express-serve-static-core';
+import type { IncomingHttpHeaders } from 'node:http';
 
 export type PlainObject = Record<string, any>;
 
-export type Primitive = boolean | number | bigint | string | null | undefined | symbol;
+export type Primitive = bigint | boolean | number | string | symbol | null | undefined;
 
 export type Headers = IncomingHttpHeaders;
 export type Query = ExpressQuery;

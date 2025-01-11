@@ -12,7 +12,7 @@ describe('filterTokens', () => {
     }
   };
 
-  test('Should remain only "true" options by whitelist logic on first level', () => {
+  it('Should remain only "true" options by whitelist logic on first level', () => {
     expect(
       filterTokens(tokens, {
         key1: true,
@@ -29,7 +29,7 @@ describe('filterTokens', () => {
     });
   });
 
-  test('Should remain only "true" options by whitelist logic on second level', () => {
+  it('Should remain only "true" options by whitelist logic on second level', () => {
     expect(
       filterTokens(tokens, {
         key4: {
@@ -58,7 +58,7 @@ describe('filterTokens', () => {
     });
   });
 
-  test('Should remove all "false" options by blacklist logic on second level', () => {
+  it('Should remove all "false" options by blacklist logic on second level', () => {
     expect(
       filterTokens(tokens, {
         key1: true,

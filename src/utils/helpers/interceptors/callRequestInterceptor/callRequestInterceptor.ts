@@ -6,8 +6,8 @@ import { callRequestLogger } from '../../logger';
 import { setDelay } from '../helpers/setDelay';
 
 interface CallRequestInterceptorParams {
-  request: Request;
   interceptor: RequestInterceptor;
+  request: Request;
 }
 
 export const callRequestInterceptor = async (params: CallRequestInterceptorParams) => {
@@ -26,7 +26,8 @@ export const callRequestInterceptor = async (params: CallRequestInterceptorParam
     getHeader,
     getHeaders,
     getCookie,
-    log
+    log,
+    orm: request.context.orm
   };
 
   await interceptor(requestInterceptorParams);

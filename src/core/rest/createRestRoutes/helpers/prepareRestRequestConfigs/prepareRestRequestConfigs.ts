@@ -1,5 +1,6 @@
-import { isPlainObject } from '@/utils/helpers';
 import type { RestMethod, RestRequestConfig, RestRouteConfig } from '@/utils/types';
+
+import { isPlainObject } from '@/utils/helpers';
 
 const calculateRouteConfigWeight = (restRouteConfig: RestRouteConfig<RestMethod>) => {
   const { entities } = restRouteConfig;

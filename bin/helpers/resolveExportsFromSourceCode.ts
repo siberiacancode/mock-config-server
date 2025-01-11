@@ -1,7 +1,7 @@
 export const resolveExportsFromSourceCode = (sourceCode: string) => {
-  // @ts-ignore
+  // @ts-expect-error: module is constructed
   const moduleInstance = new module.constructor();
-  // eslint-disable-next-line no-underscore-dangle
+
   moduleInstance._compile(sourceCode, '');
   return moduleInstance.exports;
 };

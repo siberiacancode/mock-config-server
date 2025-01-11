@@ -4,9 +4,15 @@ import type { RequestInterceptor } from '@/utils/types';
 
 import { callRequestInterceptor } from './callRequestInterceptor';
 
+const createRequest = (value: object) =>
+  ({
+    context: { orm: {} },
+    ...value
+  }) as Request;
+
 describe('callRequestInterceptor: order of calls', () => {
-  test('Should call passed request interceptor', () => {
-    const request = {} as Request;
+  it('Should call passed request interceptor', () => {
+    const request = createRequest({});
     const interceptor = vi.fn();
 
     callRequestInterceptor({ request, interceptor });
@@ -15,8 +21,8 @@ describe('callRequestInterceptor: order of calls', () => {
 });
 
 describe('callRequestInterceptors: params functions', () => {
-  test('Should correctly get header from request.headers object when use getHeader param', () => {
-    const request = { headers: { name: 'value' } };
+  it('Should correctly get header from request.headers object when use getHeader param', () => {
+    const request = createRequest({ headers: { name: 'value' } });
     const getHeaderRequestInterceptor: RequestInterceptor = ({ getHeader }) => {
       expect(getHeader('name')).toBe('value');
     };
@@ -27,8 +33,8 @@ describe('callRequestInterceptors: params functions', () => {
     });
   });
 
-  test('Should correctly get headers as request.headers object when use getHeaders param', () => {
-    const request = { headers: { name: 'value' } };
+  it('Should correctly get headers as request.headers object when use getHeaders param', () => {
+    const request = createRequest({ headers: { name: 'value' } });
     const getHeadersRequestInterceptor: RequestInterceptor = ({ getHeaders }) => {
       expect(getHeaders()).toStrictEqual({ name: 'value' });
     };
@@ -39,8 +45,8 @@ describe('callRequestInterceptors: params functions', () => {
     });
   });
 
-  test('Should correctly get cookie from request.cookies object when use getCookie param', () => {
-    const request = { cookies: { name: 'value' } };
+  it('Should correctly get cookie from request.cookies object when use getCookie param', () => {
+    const request = createRequest({ cookies: { name: 'value' } });
     const getCookieRequestInterceptor: RequestInterceptor = ({ getCookie }) => {
       expect(getCookie('name')).toBe('value');
     };

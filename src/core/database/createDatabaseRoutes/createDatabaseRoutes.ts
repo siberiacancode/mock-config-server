@@ -2,6 +2,7 @@ import type { IRouter } from 'express';
 
 import type { DatabaseConfig, NestedDatabase, ShallowDatabase } from '@/utils/types';
 
+import { createStorage } from '../createStorage/createStorage';
 import {
   createNestedDatabaseRoutes,
   createRewrittenDatabaseRoutes,
@@ -15,9 +16,7 @@ const isVariableJsonFile = (variable: unknown): variable is `${string}.json` =>
 
 export const createDatabaseRoutes = (router: IRouter, { data, routes }: DatabaseConfig) => {
   if (routes) {
-    const storage = isVariableJsonFile(routes)
-      ? new FileStorage(routes)
-      : new MemoryStorage(routes);
+    const storage = createStorage(routes);
     createRewrittenDatabaseRoutes(router, storage.read());
 
     router.route('/__routes').get((_request, response) => {

@@ -1,8 +1,9 @@
-import type { MockServerConfig } from 'mock-config-server';
-import { createMockServer, startMockServer } from 'mock-config-server';
+import type { FlatMockServerConfig } from 'mock-config-server';
 
-export const mockServerConfig: MockServerConfig = {
-  graphql: {
+import { createFlatMockServer, startFlatMockServer } from 'mock-config-server';
+
+export const mockServerConfig: FlatMockServerConfig = [
+  {
     configs: [
       {
         operationType: 'query',
@@ -40,7 +41,7 @@ export const mockServerConfig: MockServerConfig = {
       }
     ]
   }
-};
+];
 
-createMockServer(mockServerConfig);
-startMockServer(mockServerConfig);
+createFlatMockServer(mockServerConfig);
+startFlatMockServer(mockServerConfig);

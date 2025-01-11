@@ -4,11 +4,11 @@ import path from 'node:path';
 import { APP_PATH, DEFAULT } from '@/utils/constants';
 
 interface CreateTemplateOptions {
-  withTypescript: boolean;
+  apiType: 'full' | 'graphql' | 'rest';
   baseUrl: string;
-  staticPath: string;
   port: number;
-  apiType: 'rest' | 'graphql' | 'full';
+  staticPath: string;
+  withTypescript: boolean;
 }
 
 export const createTemplate = (options: CreateTemplateOptions) => {
@@ -25,7 +25,7 @@ export const createTemplate = (options: CreateTemplateOptions) => {
   if (options.staticPath !== '/') {
     mockServerConfig = mockServerConfig.replace(
       `port: ${DEFAULT.PORT}`,
-      `port: ${DEFAULT.PORT},\n  staticPath: '${options.staticPath}'`
+      `port: ${DEFAULT.PORT},\n\u0020\u0020\u0020\u0020staticPath: '${options.staticPath}'`
     );
   }
 

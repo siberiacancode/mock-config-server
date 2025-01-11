@@ -1,8 +1,9 @@
 import type { Express } from 'express';
 
+import type { Cors, CorsOrigin } from '@/utils/types';
+
 import { DEFAULT } from '@/utils/constants';
 import { asyncHandler } from '@/utils/helpers';
-import type { Cors, CorsOrigin } from '@/utils/types';
 
 import { getAllowedOrigins } from './helpers';
 

@@ -20,9 +20,16 @@ interface CallResponseInterceptorsParams {
 export const callResponseInterceptors = async (params: CallResponseInterceptorsParams) => {
   const { data, request, response, interceptors } = params;
 
-  const getHeader: ResponseInterceptorParams['getHeader'] = (field) => response.getHeader(field);
-  const getHeaders: ResponseInterceptorParams['getHeaders'] = () => response.getHeaders();
-  const setHeader: ResponseInterceptorParams['setHeader'] = (field, value) => {
+  const getRequestHeader: ResponseInterceptorParams['getRequestHeader'] = (field: string) =>
+    request.headers[field];
+  const getRequestHeaders: ResponseInterceptorParams['getRequestHeaders'] = () => request.headers;
+
+  const getResponseHeader: ResponseInterceptorParams['getResponseHeader'] = (field: string) =>
+    response.getHeader(field);
+  const getResponseHeaders: ResponseInterceptorParams['getResponseHeaders'] = () =>
+    response.getHeaders();
+
+  const setHeader = (field: string, value?: string | string[]) => {
     response.set(field, value);
   };
   const appendHeader: ResponseInterceptorParams['appendHeader'] = (field, value) => {
@@ -59,13 +66,16 @@ export const callResponseInterceptors = async (params: CallResponseInterceptorsP
     setStatusCode,
     setHeader,
     appendHeader,
-    getHeader,
-    getHeaders,
+    getRequestHeader,
+    getRequestHeaders,
+    getResponseHeader,
+    getResponseHeaders,
     setCookie,
     getCookie,
     clearCookie,
     attachment,
-    log
+    log,
+    orm: request.context.orm
   };
 
   let updatedData = data;

@@ -1,9 +1,11 @@
 import type { Express } from 'express';
+
 import express from 'express';
+
+import type { BaseUrl, StaticPath } from '@/utils/types';
 
 import { APP_PATH } from '@/utils/constants';
 import { urlJoin } from '@/utils/helpers';
-import type { BaseUrl, StaticPath } from '@/utils/types';
 
 export const staticMiddleware = (server: Express, baseUrl: BaseUrl, staticPath: StaticPath) => {
   const isStaticPathArray = Array.isArray(staticPath);
