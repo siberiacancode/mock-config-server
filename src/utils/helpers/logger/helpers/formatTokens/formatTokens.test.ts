@@ -1,7 +1,7 @@
 import { formatTokens } from './formatTokens';
 
 describe('formatTokens', () => {
-  test('Should correctly format tokens', () => {
+  it('Should correctly format tokens', () => {
     const tokens = {
       timestamp: 1735623296789,
       method: 'get',

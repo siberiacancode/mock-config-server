@@ -1,23 +1,9 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
     "target": "esnext",
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
+    "baseUrl": "./",
     "module": "commonjs",
     "moduleResolution": "node",
-    "isolatedModules": true,
-    "resolveJsonModule": true,
-    "newLine": "lf",
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "types": ["node", "vitest/globals"],
-    "baseUrl": "./",
     "paths": {
       "@/server": ["./src/server"],
       "@/core/database": ["./src/core/database"],
@@ -29,7 +15,21 @@
       "@/utils/types": ["./src/utils/types"],
       "@/utils/constants": ["./src/utils/constants"],
       "@/utils/validate": ["./src/utils/validate"]
-    }
+    },
+    "resolveJsonModule": true,
+    "types": ["node", "vitest/globals"],
+    "allowJs": true,
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "newLine": "lf",
+    "outDir": "dist",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "skipLibCheck": true
   },
   "exclude": ["examples", "bin/templates", "dist", "node_modules", "vi.config.js"]
 }

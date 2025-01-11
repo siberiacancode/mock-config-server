@@ -1,13 +1,14 @@
 import type { Express } from 'express';
 
-import { createOrm, createStorage } from '@/core/database';
-import { getGraphQLInput, parseQuery } from '@/utils/helpers';
 import type {
   GraphQLEntity,
   GraphQLOperationName,
   GraphQLOperationType,
   MockServerConfig
 } from '@/utils/types';
+
+import { createOrm, createStorage } from '@/core/database';
+import { getGraphQLInput, parseQuery } from '@/utils/helpers';
 
 declare global {
   namespace Express {

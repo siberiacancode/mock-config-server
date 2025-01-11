@@ -4,7 +4,7 @@ import { isPlainObject } from '../../../isPlainObject/isPlainObject';
 
 type TokenNestedOption = Record<string, boolean>;
 
-type TokenNestedOptionFilterMode = 'whitelist' | 'blacklist';
+type TokenNestedOptionFilterMode = 'blacklist' | 'whitelist';
 
 const resolveNestedOptionFilterMode = (
   nestedOption: TokenNestedOption

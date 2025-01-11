@@ -1,6 +1,9 @@
-import bodyParser from 'body-parser';
 import type { Express } from 'express';
+
+import bodyParser from 'body-parser';
 import express from 'express';
+
+import type { RestMockServerConfig } from '@/utils/types';
 
 import { createDatabaseRoutes } from '@/core/database';
 import {
@@ -13,7 +16,6 @@ import {
   staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
-import type { RestMockServerConfig } from '@/utils/types';
 import { validateApiMockServerConfig } from '@/utils/validate';
 
 export const createRestMockServer = (

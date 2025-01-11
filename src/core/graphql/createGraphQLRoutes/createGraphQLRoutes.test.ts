@@ -2,13 +2,14 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import request from 'supertest';
 
-import { urlJoin } from '@/utils/helpers';
 import type { GraphqlConfig, GraphQLOperationType, MockServerConfig } from '@/utils/types';
+
+import { urlJoin } from '@/utils/helpers';
 
 import { createGraphQLRoutes } from './createGraphQLRoutes';
 
 const createServer = (
-  mockServerConfig: Pick<MockServerConfig, 'interceptors' | 'baseUrl'> & {
+  mockServerConfig: Pick<MockServerConfig, 'baseUrl' | 'interceptors'> & {
     graphql: GraphqlConfig;
   }
 ) => {
@@ -34,7 +35,7 @@ const createServer = (
 };
 
 describe('createGraphQLRoutes: routing', () => {
-  test('Should match config with operationName', async () => {
+  it('Should match config with operationName', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -64,7 +65,7 @@ describe('createGraphQLRoutes: routing', () => {
     expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should match config with operationName regExp', async () => {
+  it('Should match config with operationName regExp', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -106,7 +107,7 @@ describe('createGraphQLRoutes: routing', () => {
     expect(secondGetResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should match config with query independent of spaces and new lines', async () => {
+  it('Should match config with query independent of spaces and new lines', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -136,7 +137,7 @@ describe('createGraphQLRoutes: routing', () => {
     expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should return 400 and description text for invalid query', async () => {
+  it('Should return 400 and description text for invalid query', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -179,7 +180,7 @@ describe('createGraphQLRoutes: routing', () => {
     });
   });
 
-  test('Should return 404 for no matched request configs', async () => {
+  it('Should return 404 for no matched request configs', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -215,7 +216,7 @@ describe('createGraphQLRoutes: routing', () => {
     expect(getResponse.statusCode).toBe(404);
   });
 
-  test('Should have response Cache-Control header value equals to no-cache', async () => {
+  it('Should have response Cache-Control header value equals to no-cache', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -243,7 +244,7 @@ describe('createGraphQLRoutes: routing', () => {
     'mutation'
   ];
   operationTypesWithoutCacheControlHeader.forEach((operationTypeWithoutCacheControlHeader) => {
-    test(`Should do not have Cache-Control header if operation type is ${operationTypeWithoutCacheControlHeader}`, async () => {
+    it(`Should do not have Cache-Control header if operation type is ${operationTypeWithoutCacheControlHeader}`, async () => {
       const server = createServer({
         graphql: {
           configs: [
@@ -270,7 +271,7 @@ describe('createGraphQLRoutes: routing', () => {
 });
 
 describe('createGraphQLRoutes: content', () => {
-  test('Should correctly use data function', async () => {
+  it('Should correctly use data function', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -309,7 +310,7 @@ describe('createGraphQLRoutes: content', () => {
     });
   });
 
-  test('Should correctly use data function with polling enabled', async () => {
+  it('Should correctly use data function with polling enabled', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -353,7 +354,7 @@ describe('createGraphQLRoutes: content', () => {
     });
   });
 
-  test('Should return the same polling data until the specified time interval elapses', async () => {
+  it('Should return the same polling data until the specified time interval elapses', async () => {
     vi.useFakeTimers();
     const server = createServer({
       graphql: {
@@ -399,7 +400,7 @@ describe('createGraphQLRoutes: content', () => {
     vi.useRealTimers();
   });
 
-  test('Should return 404 when the polling queue is empty', async () => {
+  it('Should return 404 when the polling queue is empty', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -427,7 +428,7 @@ describe('createGraphQLRoutes: content', () => {
 });
 
 describe('createGraphQLRoutes: settings', () => {
-  test('Should correctly delay response based on delay setting', async () => {
+  it('Should correctly delay response based on delay setting', async () => {
     const delay = 1000;
     const server = createServer({
       graphql: {
@@ -457,7 +458,7 @@ describe('createGraphQLRoutes: settings', () => {
     expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should correctly set status code of response based on status setting', async () => {
+  it('Should correctly set status code of response based on status setting', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -484,7 +485,7 @@ describe('createGraphQLRoutes: settings', () => {
     expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should cycle through queue data with polling setting', async () => {
+  it('Should cycle through queue data with polling setting', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -524,7 +525,7 @@ describe('createGraphQLRoutes: settings', () => {
 });
 
 describe('createGraphQLRoutes: entities', () => {
-  test('Should match route configuration when actual entities include specified properties', async () => {
+  it('Should match route configuration when actual entities include specified properties', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -572,7 +573,7 @@ describe('createGraphQLRoutes: entities', () => {
     expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should prioritize more specific route configuration when multiple matches exist', async () => {
+  it('Should prioritize more specific route configuration when multiple matches exist', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -633,7 +634,7 @@ describe('createGraphQLRoutes: entities', () => {
     expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Smith' });
   });
 
-  test('Should strictly compare variables if top level descriptor used', async () => {
+  it('Should strictly compare variables if top level descriptor used', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -705,7 +706,7 @@ describe('createGraphQLRoutes: entities', () => {
     expect(failedGetResponse.statusCode).toBe(404);
   });
 
-  test('Should correctly resolve flat object variables with nested key matching', async () => {
+  it('Should correctly resolve flat object variables with nested key matching', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -758,7 +759,7 @@ describe('createGraphQLRoutes: entities', () => {
     expect(getResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  test('Should be case-insensitive for header keys', async () => {
+  it('Should be case-insensitive for header keys', async () => {
     const server = createServer({
       graphql: {
         configs: [
@@ -800,7 +801,7 @@ describe('createGraphQLRoutes: entities', () => {
 });
 
 describe('createGraphQLRoutes: interceptors', () => {
-  test('Should call request interceptors in order: request -> route', async () => {
+  it('Should call request interceptors in order: request -> route', async () => {
     const routeInterceptor = vi.fn();
     const requestInterceptor = vi.fn();
 

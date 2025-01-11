@@ -28,11 +28,11 @@ export interface EntityDescriptorSchema {
 
   (
     checkModeSchema:
+      | z.ZodLiteral<'function'>
+      | z.ZodLiteral<'regExp'>
       | typeof compareWithDescriptorAnyValueCheckModeSchema
       | typeof compareWithDescriptorStringValueCheckModeSchema
-      | typeof compareWithDescriptorValueCheckModeSchema
-      | z.ZodLiteral<'function'>
-      | z.ZodLiteral<'regExp'>,
+      | typeof compareWithDescriptorValueCheckModeSchema,
     valueSchema: z.ZodTypeAny
   ): z.ZodDiscriminatedUnion<
     'oneOf',
@@ -59,12 +59,12 @@ export interface EntityDescriptorSchema {
 
 export const entityDescriptorSchema = ((
   checkModeSchema:
+    | z.ZodLiteral<'function'>
+    | z.ZodLiteral<'regExp'>
     | typeof checkActualValueCheckModeSchema
     | typeof compareWithDescriptorAnyValueCheckModeSchema
     | typeof compareWithDescriptorStringValueCheckModeSchema
-    | typeof compareWithDescriptorValueCheckModeSchema
-    | z.ZodLiteral<'function'>
-    | z.ZodLiteral<'regExp'>,
+    | typeof compareWithDescriptorValueCheckModeSchema,
   valueSchema?: z.ZodTypeAny
 ) => {
   const isCheckActualValueCheckMode = !valueSchema;

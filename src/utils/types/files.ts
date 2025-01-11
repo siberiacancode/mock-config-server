@@ -1,4 +1,6 @@
+import type { Buffer } from 'node:buffer';
+
 export interface FileDescriptor {
-  path: string;
   file: Buffer;
+  path: string;
 }

@@ -2,11 +2,10 @@ import { z } from 'zod';
 
 import { getMostSpecificPathFromError } from '../../getMostSpecificPathFromError';
 import { getValidationMessageFromPath } from '../../getValidationMessageFromPath';
-
 import { extendedDiscriminatedUnion } from './extendedDiscriminatedUnion';
 
 describe('extendedDiscriminatedUnion', () => {
-  test('Should return correct error path if discriminator is not presented in parsed value', () => {
+  it('Should return correct error path if discriminator is not presented in parsed value', () => {
     const value = {
       property: { age: 34 }
     };
@@ -30,7 +29,7 @@ describe('extendedDiscriminatedUnion', () => {
     }
   });
 
-  test('Should return correct error path if none of passed variants have matched discriminator', () => {
+  it('Should return correct error path if none of passed variants have matched discriminator', () => {
     const value = {
       property: { name: 'Joe', age: 34 }
     };
@@ -54,7 +53,7 @@ describe('extendedDiscriminatedUnion', () => {
     }
   });
 
-  test('Should return correct error path if object variant matched by discriminator, but some of other properties not', () => {
+  it('Should return correct error path if object variant matched by discriminator, but some of other properties not', () => {
     const value = {
       property: { name: 'John', age: true }
     };
@@ -74,7 +73,7 @@ describe('extendedDiscriminatedUnion', () => {
     }
   });
 
-  test('Should return correct error path if union variant matched by discriminator, but some of other properties not', () => {
+  it('Should return correct error path if union variant matched by discriminator, but some of other properties not', () => {
     const value = {
       property: { name: 'Jane', age: true }
     };

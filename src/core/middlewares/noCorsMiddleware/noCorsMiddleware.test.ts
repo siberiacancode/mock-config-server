@@ -4,7 +4,7 @@ import request from 'supertest';
 import { noCorsMiddleware } from './noCorsMiddleware';
 
 describe('noCorsMiddleware', () => {
-  test('Should set no cors settings for OPTIONS preflight request', async () => {
+  it('Should set no cors settings for OPTIONS preflight request', async () => {
     const server = express();
 
     noCorsMiddleware(server);
@@ -27,7 +27,7 @@ describe('noCorsMiddleware', () => {
     expect(response.statusCode).toBe(204);
   });
 
-  test('Should set no cors settings for request', async () => {
+  it('Should set no cors settings for request', async () => {
     const server = express();
 
     noCorsMiddleware(server);

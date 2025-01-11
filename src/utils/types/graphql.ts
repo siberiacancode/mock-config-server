@@ -4,12 +4,12 @@ import type { MappedEntity, VariablesPlainEntity } from './entities';
 import type { Interceptors } from './interceptors';
 import type { Data } from './values';
 
-export type GraphQLEntityName = 'headers' | 'cookies' | 'query' | 'variables';
+export type GraphQLEntityName = 'cookies' | 'headers' | 'query' | 'variables';
 
 export type GraphQLEntity<EntityName extends GraphQLEntityName = GraphQLEntityName> =
   EntityName extends 'variables' ? VariablesPlainEntity : MappedEntity;
 
-export type GraphQLOperationType = 'query' | 'mutation';
+export type GraphQLOperationType = 'mutation' | 'query';
 export type GraphQLOperationName = string | RegExp;
 
 export type GraphQLEntitiesByEntityName = {
@@ -17,9 +17,9 @@ export type GraphQLEntitiesByEntityName = {
 };
 
 interface GraphQLSettings {
+  readonly delay?: number;
   readonly polling?: boolean;
   readonly status?: number;
-  readonly delay?: number;
 }
 
 export type GraphqlDataResponse =
@@ -41,9 +41,9 @@ export type GraphQLRouteConfig = (
 ) & { entities?: GraphQLEntitiesByEntityName; interceptors?: Interceptors<'graphql'> };
 
 interface BaseGraphQLRequestConfig {
+  interceptors?: Interceptors<'graphql'>;
   operationType: GraphQLOperationType;
   routes: GraphQLRouteConfig[];
-  interceptors?: Interceptors<'graphql'>;
 }
 
 export interface OperationNameGraphQLRequestConfig extends BaseGraphQLRequestConfig {

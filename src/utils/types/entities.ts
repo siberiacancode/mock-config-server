@@ -11,7 +11,7 @@ import type { NestedObjectOrArray } from './utils';
 
 /* ----- Plain entity ----- */
 
-type PlainEntityPrimitiveValue = string | number | boolean | null;
+type PlainEntityPrimitiveValue = boolean | number | string | null;
 type PlainEntityObjectiveValue = NestedObjectOrArray<PlainEntityPrimitiveValue>;
 
 export type EntityFunctionDescriptorValue<ActualValue> = (
@@ -32,12 +32,12 @@ type PropertyLevelPlainEntityDescriptor<Check extends CheckMode = CheckMode> =
   Check extends 'function'
     ? EntityDescriptor<
         Check,
-        EntityFunctionDescriptorValue<PlainEntityPrimitiveValue | PlainEntityObjectiveValue>
+        EntityFunctionDescriptorValue<PlainEntityObjectiveValue | PlainEntityPrimitiveValue>
       >
     : Check extends 'regExp'
       ? EntityDescriptor<Check, RegExp>
       : Check extends CompareWithDescriptorAnyValueCheckMode
-        ? EntityDescriptor<Check, PlainEntityPrimitiveValue | PlainEntityObjectiveValue>
+        ? EntityDescriptor<Check, PlainEntityObjectiveValue | PlainEntityPrimitiveValue>
         : Check extends CompareWithDescriptorStringValueCheckMode
           ? EntityDescriptor<Check, PlainEntityPrimitiveValue>
           : Check extends CheckActualValueCheckMode
@@ -49,24 +49,24 @@ type NonCheckMode<T extends object> = T & { checkMode?: never };
 type TopLevelPlainEntityRecord = NonCheckMode<
   Record<
     string,
-    | PropertyLevelPlainEntityDescriptor
     | NonCheckMode<PlainEntityObjectiveValue>
     | PlainEntityPrimitiveValue
+    | PropertyLevelPlainEntityDescriptor
   >
 >;
 
-export type TopLevelPlainEntityArray = Array<PlainEntityPrimitiveValue | PlainEntityObjectiveValue>;
+export type TopLevelPlainEntityArray = Array<PlainEntityObjectiveValue | PlainEntityPrimitiveValue>;
 
 export type BodyPlainEntity =
+  | TopLevelPlainEntityArray
   | TopLevelPlainEntityDescriptor
-  | TopLevelPlainEntityRecord
-  | TopLevelPlainEntityArray;
+  | TopLevelPlainEntityRecord;
 
 export type VariablesPlainEntity = TopLevelPlainEntityDescriptor | TopLevelPlainEntityRecord;
 
 /* ----- Mapped entity ----- */
 
-type MappedEntityValue = string | number | boolean;
+type MappedEntityValue = boolean | number | string;
 
 type MappedEntityDescriptor<Check extends CheckMode = CheckMode> = Check extends 'function'
   ? EntityDescriptor<Check, EntityFunctionDescriptorValue<MappedEntityValue>>

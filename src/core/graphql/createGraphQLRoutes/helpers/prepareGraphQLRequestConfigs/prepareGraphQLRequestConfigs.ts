@@ -1,5 +1,6 @@
-import { isPlainObject } from '@/utils/helpers';
 import type { GraphQLRequestConfig, GraphQLRouteConfig } from '@/utils/types';
+
+import { isPlainObject } from '@/utils/helpers';
 
 const calculateRouteConfigWeight = (graphQLRouteConfig: GraphQLRouteConfig) => {
   const { entities } = graphQLRouteConfig;

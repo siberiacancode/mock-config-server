@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-import { isPlainObject } from '@/utils/helpers';
 import type { RestMethod } from '@/utils/types';
+
+import { isPlainObject } from '@/utils/helpers';
 
 import { interceptorsSchema } from '../../interceptorsSchema/interceptorsSchema';
 import { isOnlyRequestedDataResolvingPropertyExists } from '../../isOnlyRequestedDataResolvingPropertyExists';

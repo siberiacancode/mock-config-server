@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable ts/no-require-imports */
 
 const pleaseUpgradeNode = require('please-upgrade-node');
 

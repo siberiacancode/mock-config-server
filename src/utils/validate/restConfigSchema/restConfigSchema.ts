@@ -5,7 +5,6 @@ import type { RestMethod } from '@/utils/types';
 import { baseUrlSchema } from '../baseUrlSchema/baseUrlSchema';
 import { interceptorsSchema } from '../interceptorsSchema/interceptorsSchema';
 import { plainObjectSchema, stringForwardSlashSchema } from '../utils';
-
 import { routeConfigSchema } from './routeConfigSchema/routeConfigSchema';
 
 const baseRequestConfigSchema = (method: RestMethod) =>

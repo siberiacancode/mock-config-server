@@ -1,7 +1,7 @@
 import { splitDatabaseByNesting } from './splitDatabaseByNesting';
 
 describe('splitDatabaseByNesting', () => {
-  test('Should put in nested database only arrays of objects with unique id (string | number)', () => {
+  it('Should put in nested database only arrays of objects with unique id (string | number)', () => {
     const databaseConfig = {
       data: {
         key: 'value',

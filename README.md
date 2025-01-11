@@ -384,7 +384,7 @@ const flatMockServerConfig = [
       }
     ]
   }
-};
+];
 
 module.exports = flatMockServerConfig;
 ```
@@ -421,7 +421,6 @@ const flatMockServerConfig = [
       }
     ]
   }
-];
 ];
 
 export default flatMockServerConfig;
@@ -524,9 +523,10 @@ const flatMockServerConfig = [
             file: './settings.json',
             interceptors: {
               response: (data) => {
-                data.file = data.file; // some logic with buffer
-                fs.writeFileSync(data.path, data.file); // rewrite ./settings.json file on disk with new content
-                return data;
+                const { file, path } = data;
+                const buffer = file; // some logic with buffer
+                fs.writeFileSync(path, buffer); // rewrite ./settings.json file on disk with new content
+                return { path, file: buffer };
               }
             }
           }

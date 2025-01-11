@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 import { createTmpDir } from '@/utils/helpers/tests';
 
@@ -35,15 +35,15 @@ describe('FileStorage', () => {
       vi.clearAllMocks();
     });
 
-    test('Should return correct full data for read without keys', () => {
+    it('Should return correct full data for read without keys', () => {
       expect(fileStorage.read()).toStrictEqual(initialData);
     });
 
-    test('Should return correct data for read with valid single key', () => {
+    it('Should return correct data for read with valid single key', () => {
       expect(fileStorage.read('john')).toStrictEqual(initialData.john);
     });
 
-    test('Should return correct data for read with valid array key', () => {
+    it('Should return correct data for read with valid array key', () => {
       expect(fileStorage.read(['john', 'name'])).toStrictEqual(initialData.john.name);
     });
   });
@@ -67,7 +67,7 @@ describe('FileStorage', () => {
       vi.clearAllMocks();
     });
 
-    test('Should update value with valid single key', () => {
+    it('Should update value with valid single key', () => {
       const johnWithNewAge = { ...initialData.john, age: initialData.john.age + 1 };
 
       fileStorage.write('john', johnWithNewAge);
@@ -75,7 +75,7 @@ describe('FileStorage', () => {
       expect(fileStorage.read('john')).toStrictEqual(johnWithNewAge);
     });
 
-    test('Should update value with valid array key', () => {
+    it('Should update value with valid array key', () => {
       const newAge = initialData.john.age + 1;
 
       fileStorage.write(['john', 'age'], newAge);
@@ -83,7 +83,7 @@ describe('FileStorage', () => {
       expect(fileStorage.read(['john', 'age'])).toBe(newAge);
     });
 
-    test('Should update value with valid key which contain non-existent last part', () => {
+    it('Should update value with valid key which contain non-existent last part', () => {
       const stand = 'The World';
 
       fileStorage.write(['john', 'stand'], stand);
@@ -91,7 +91,7 @@ describe('FileStorage', () => {
       expect(fileStorage.read(['john', 'stand'])).toBe(stand);
     });
 
-    test('Should write in file updated data', () => {
+    it('Should write in file updated data', () => {
       fileStorage.write(['john', 'stand'], 'The World');
 
       expect(fileWriterWriteMethodMock).toHaveBeenCalledTimes(1);
@@ -118,7 +118,7 @@ describe('FileStorage', () => {
       vi.clearAllMocks();
     });
 
-    test('Should correctly delete object property with valid single key', () => {
+    it('Should correctly delete object property with valid single key', () => {
       expect(fileStorage.read('john')).toStrictEqual(initialData.john);
 
       fileStorage.delete('john');
@@ -126,7 +126,7 @@ describe('FileStorage', () => {
       expect(fileStorage.read('john')).toBe(undefined);
     });
 
-    test('Should correctly delete object property with valid array key', () => {
+    it('Should correctly delete object property with valid array key', () => {
       expect(fileStorage.read('john')).toStrictEqual(initialData.john);
 
       fileStorage.delete(['john', 'age']);
@@ -134,7 +134,7 @@ describe('FileStorage', () => {
       expect(fileStorage.read('john')).toStrictEqual({ name: initialData.john.name });
     });
 
-    test('Should splice array if delete element from array', () => {
+    it('Should splice array if delete element from array', () => {
       expect(fileStorage.read('users')).toStrictEqual(initialData.users);
 
       fileStorage.delete(['users', 0]);
@@ -144,7 +144,7 @@ describe('FileStorage', () => {
       expect(updatedUsers.length).toBe(1);
     });
 
-    test('Should write in file updated data', () => {
+    it('Should write in file updated data', () => {
       fileStorage.delete(['users', 0]);
 
       expect(fileWriterWriteMethodMock).toHaveBeenCalledTimes(1);

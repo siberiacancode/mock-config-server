@@ -1,5 +1,6 @@
-import color from 'ansi-colors';
 import type { ErrorRequestHandler, Express } from 'express';
+
+import color from 'ansi-colors';
 
 export const errorMiddleware = (server: Express) => {
   server.use(((error, request, response, next) => {

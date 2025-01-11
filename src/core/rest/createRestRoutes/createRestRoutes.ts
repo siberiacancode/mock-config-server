@@ -1,19 +1,9 @@
 import type { IRouter } from 'express';
-import { flatten } from 'flat';
-import fs from 'fs';
-import path from 'path';
 
-import {
-  asyncHandler,
-  callRequestInterceptor,
-  callResponseInterceptors,
-  convertToEntityDescriptor,
-  isEntityDescriptor,
-  isFileDescriptor,
-  isFilePathValid,
-  resolveEntityValues,
-  sleep
-} from '@/utils/helpers';
+import { flatten } from 'flat';
+import fs from 'node:fs';
+import path from 'node:path';
+
 import type {
   EntityDescriptor,
   Entries,
@@ -28,11 +18,23 @@ import type {
   TopLevelPlainEntityDescriptor
 } from '@/utils/types';
 
+import {
+  asyncHandler,
+  callRequestInterceptor,
+  callResponseInterceptors,
+  convertToEntityDescriptor,
+  isEntityDescriptor,
+  isFileDescriptor,
+  isFilePathValid,
+  resolveEntityValues,
+  sleep
+} from '@/utils/helpers';
+
 import { prepareRestRequestConfigs } from './helpers';
 
 interface CreateRestRoutesParams {
-  router: IRouter;
   restConfig: RestConfig;
+  router: IRouter;
   serverResponseInterceptor?: Interceptors<'rest'>['response'];
 }
 
@@ -96,7 +98,7 @@ export const createRestRoutes = ({
 
             const actualEntity = flatten<PlainObject, PlainObject>(request[entityName]);
             const entityValueEntries = Object.entries(entityDescriptorOrValue) as Entries<
-              Exclude<RestEntity, TopLevelPlainEntityDescriptor | TopLevelPlainEntityArray>
+              Exclude<RestEntity, TopLevelPlainEntityArray | TopLevelPlainEntityDescriptor>
             >;
             return entityValueEntries.every(
               ([entityPropertyKey, entityPropertyDescriptorOrValue]) => {

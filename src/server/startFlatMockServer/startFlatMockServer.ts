@@ -1,8 +1,9 @@
 import color from 'ansi-colors';
 
+import type { FlatMockServerConfig } from '@/utils/types';
+
 import { destroyerMiddleware } from '@/core/middlewares';
 import { DEFAULT } from '@/utils/constants';
-import type { FlatMockServerConfig } from '@/utils/types';
 
 import { createFlatMockServer } from '../createFlatMockServer/createFlatMockServer';
 

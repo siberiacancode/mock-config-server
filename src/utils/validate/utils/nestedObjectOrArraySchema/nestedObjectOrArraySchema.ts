@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-import { isPlainObject } from '@/utils/helpers';
 import type { NestedObjectOrArray } from '@/utils/types';
+
+import { isPlainObject } from '@/utils/helpers';
 
 export const nestedObjectOrArraySchema = <Value>(
   valueSchema: z.ZodType<Value>

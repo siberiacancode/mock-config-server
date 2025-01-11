@@ -11,7 +11,7 @@ const createRequest = (value: object) =>
   }) as Request;
 
 describe('callResponseInterceptors: order of calls', () => {
-  test('Should call all passed response interceptors in order: route -> request -> api -> server', async () => {
+  it('Should call all passed response interceptors in order: route -> request -> api -> server', async () => {
     const initialData = '';
     const request = createRequest({});
     const response = {} as Response;
@@ -63,7 +63,7 @@ describe('callResponseInterceptors: order of calls', () => {
 });
 
 describe('callResponseInterceptors: params functions', () => {
-  test('Should correctly get header from request.headers when use getRequestHeader param', async () => {
+  it('Should correctly get header from request.headers when use getRequestHeader param', async () => {
     const data = null;
     const request = createRequest({ headers: { name: 'value' } });
     const response = {};
@@ -82,7 +82,7 @@ describe('callResponseInterceptors: params functions', () => {
     });
   });
 
-  test('Should correctly get headers property from request when use getRequestHeaders param', async () => {
+  it('Should correctly get headers property from request when use getRequestHeaders param', async () => {
     const data = null;
     const request = createRequest({ headers: { name: 'value' } });
     const response = {};
@@ -101,7 +101,7 @@ describe('callResponseInterceptors: params functions', () => {
     });
   });
 
-  test('Should correctly call response getHeader method when use getResponseHeader param', async () => {
+  it('Should correctly call response getHeader method when use getResponseHeader param', async () => {
     const data = null;
     const request = createRequest({});
     const response = { getHeader: vi.fn() };
@@ -122,7 +122,7 @@ describe('callResponseInterceptors: params functions', () => {
     expect(response.getHeader).toHaveBeenCalledTimes(1);
   });
 
-  test('Should correctly call response getHeaders method when use getResponseHeaders param', async () => {
+  it('Should correctly call response getHeaders method when use getResponseHeaders param', async () => {
     const data = null;
     const request = createRequest({});
     const response = { getHeaders: vi.fn() };
@@ -143,7 +143,7 @@ describe('callResponseInterceptors: params functions', () => {
     expect(response.getHeaders).toHaveBeenCalledTimes(1);
   });
 
-  test('Should correctly call response set method when use setHeader param', async () => {
+  it('Should correctly call response set method when use setHeader param', async () => {
     const data = null;
     const request = createRequest({});
     const response = { set: vi.fn() };
@@ -164,7 +164,7 @@ describe('callResponseInterceptors: params functions', () => {
     expect(response.set).toHaveBeenCalledTimes(1);
   });
 
-  test('Should correctly call response append method when use appendHeader param', async () => {
+  it('Should correctly call response append method when use appendHeader param', async () => {
     const data = null;
     const request = createRequest({});
     const response = { append: vi.fn() };
@@ -185,7 +185,7 @@ describe('callResponseInterceptors: params functions', () => {
     expect(response.append).toHaveBeenCalledTimes(1);
   });
 
-  test('Should correctly set statusCode into response when use setStatusCode param', async () => {
+  it('Should correctly set statusCode into response when use setStatusCode param', async () => {
     const data = null;
     const request = createRequest({});
     const response = {} as Response;
@@ -205,7 +205,7 @@ describe('callResponseInterceptors: params functions', () => {
     expect(response.statusCode).toBe(204);
   });
 
-  test('Should correctly get cookie from request.cookies object when use getCookie param', async () => {
+  it('Should correctly get cookie from request.cookies object when use getCookie param', async () => {
     const data = null;
     const request = createRequest({ cookies: { name: 'value' } });
     const response = {};
@@ -224,7 +224,7 @@ describe('callResponseInterceptors: params functions', () => {
     });
   });
 
-  test('Should correctly call response cookie method with/without options when use setCookie param', async () => {
+  it('Should correctly call response cookie method with/without options when use setCookie param', async () => {
     const data = null;
     const request = createRequest({});
     const response = { cookie: vi.fn() };
@@ -262,7 +262,7 @@ describe('callResponseInterceptors: params functions', () => {
     expect(response.cookie).toBeCalledTimes(1);
   });
 
-  test('Should correctly call response clearCookie method when use clearCookie param', async () => {
+  it('Should correctly call response clearCookie method when use clearCookie param', async () => {
     const data = null;
     const request = createRequest({});
     const response = { clearCookie: vi.fn() };
@@ -283,7 +283,7 @@ describe('callResponseInterceptors: params functions', () => {
     expect(response.clearCookie).toHaveBeenCalledTimes(1);
   });
 
-  test('Should correctly call response attachment method when use attachment param', async () => {
+  it('Should correctly call response attachment method when use attachment param', async () => {
     const data = null;
     const request = createRequest({});
     const response = { attachment: vi.fn() };

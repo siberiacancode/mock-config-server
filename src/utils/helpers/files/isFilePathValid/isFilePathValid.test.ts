@@ -1,8 +1,7 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 import { createTmpDir } from '../../tests';
-
 import { isFilePathValid } from './isFilePathValid';
 
 describe('isFilePathValid', () => {
@@ -16,7 +15,7 @@ describe('isFilePathValid', () => {
     fs.rmSync(tmpDirPath, { recursive: true, force: true });
   });
 
-  test('Should return true only for existed files', () => {
+  it('Should return true only for existed files', () => {
     const notExistedFilePath = path.join(tmpDirPath, './notExistedFile.json');
     expect(isFilePathValid(notExistedFilePath)).toBe(false);
 
@@ -25,7 +24,7 @@ describe('isFilePathValid', () => {
     expect(isFilePathValid(existedFilePath)).toBe(true);
   });
 
-  test('Should return true only for files (not directories, etc.)', () => {
+  it('Should return true only for files (not directories, etc.)', () => {
     expect(isFilePathValid(tmpDirPath)).toBe(false);
 
     const existedFilePath = path.join(tmpDirPath, './existedFile.json');

@@ -1,18 +1,19 @@
-import { isPlainObject } from '@/utils/helpers';
 import type { FlatMockServerConfig, MockServerConfig } from '@/utils/types';
+
+import { isPlainObject } from '@/utils/helpers';
 
 import { resolveExportsFromSourceCode } from './resolveExportsFromSourceCode';
 
 export const resolveConfigFile = (
   configSourceCode: string
-): MockServerConfig | FlatMockServerConfig => {
+): FlatMockServerConfig | MockServerConfig => {
   if (!configSourceCode) {
     throw new Error('Cannot handle source code of mock-server.config.(ts|js)');
   }
 
   const mockServerConfigExports = resolveExportsFromSourceCode(configSourceCode);
 
-  const mockServerConfig: MockServerConfig | FlatMockServerConfig = mockServerConfigExports.default;
+  const mockServerConfig: FlatMockServerConfig | MockServerConfig = mockServerConfigExports.default;
 
   if (!mockServerConfig) {
     throw new Error('Cannot handle exports of mock-server.config.(ts|js)');

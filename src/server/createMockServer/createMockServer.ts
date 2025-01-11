@@ -1,6 +1,9 @@
-import bodyParser from 'body-parser';
 import type { Express } from 'express';
+
+import bodyParser from 'body-parser';
 import express from 'express';
+
+import type { MockServerConfig } from '@/utils/types';
 
 import { createDatabaseRoutes } from '@/core/database';
 import { createGraphQLRoutes } from '@/core/graphql';
@@ -15,7 +18,6 @@ import {
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
 import { urlJoin } from '@/utils/helpers';
-import type { MockServerConfig } from '@/utils/types';
 import { validateMockServerConfig } from '@/utils/validate';
 
 export const createMockServer = (

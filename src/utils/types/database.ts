@@ -4,11 +4,11 @@ export type ShallowDatabase = Record<string, unknown>;
 export type NestedDatabaseId = number | string;
 export type NestedDatabase = Record<string, { id: NestedDatabaseId; [key: string]: unknown }[]>;
 
-export type StorageIndex = string | number;
+export type StorageIndex = number | string;
 export interface Storage {
-  read(key?: StorageIndex | StorageIndex[]): any;
-  write(key: StorageIndex | StorageIndex[], value: unknown): void;
-  delete(key: StorageIndex | StorageIndex[]): void;
+  delete: (key: StorageIndex | StorageIndex[]) => void;
+  read: (key?: StorageIndex | StorageIndex[]) => any;
+  write: (key: StorageIndex | StorageIndex[], value: unknown) => void;
 }
 
 export interface ShallowOrm<Item = unknown> {
@@ -17,20 +17,20 @@ export interface ShallowOrm<Item = unknown> {
 }
 
 export interface NestedOrm<Item = Record<string, unknown>> {
+  count: () => number;
   create: (item: Omit<Item, 'id'>) => Item;
-  update: (id: StorageIndex, item: Partial<Omit<Item, 'id'>>) => void;
-  delete: (id: StorageIndex) => void;
-
   createMany: (items: Omit<Item, 'id'>[]) => void;
-  updateMany: (ids: StorageIndex[], item: Partial<Omit<Item, 'id'>>) => number;
-  deleteMany: (ids: StorageIndex[]) => void;
 
-  findById: (id: StorageIndex) => Item | undefined;
-  findMany: (filters?: Partial<Item>) => Item[];
-  findFirst: (filters?: Partial<Item>) => Item | undefined;
+  delete: (id: StorageIndex) => void;
+  deleteMany: (ids: StorageIndex[]) => void;
   exists: (filters: Partial<Item>) => boolean;
 
-  count: () => number;
+  findById: (id: StorageIndex) => Item | undefined;
+  findFirst: (filters?: Partial<Item>) => Item | undefined;
+  findMany: (filters?: Partial<Item>) => Item[];
+  update: (id: StorageIndex, item: Partial<Omit<Item, 'id'>>) => void;
+
+  updateMany: (ids: StorageIndex[], item: Partial<Omit<Item, 'id'>>) => number;
 }
 
 export type Orm<Database extends Record<string, unknown>> = {

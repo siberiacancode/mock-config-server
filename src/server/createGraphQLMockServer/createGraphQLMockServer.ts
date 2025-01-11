@@ -1,6 +1,9 @@
-import bodyParser from 'body-parser';
 import type { Express } from 'express';
+
+import bodyParser from 'body-parser';
 import express from 'express';
+
+import type { GraphQLMockServerConfig } from '@/utils/types';
 
 import { createDatabaseRoutes } from '@/core/database';
 import { createGraphQLRoutes } from '@/core/graphql';
@@ -13,7 +16,6 @@ import {
   requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
-import type { GraphQLMockServerConfig } from '@/utils/types';
 import { validateApiMockServerConfig } from '@/utils/validate';
 
 export const createGraphQLMockServer = (

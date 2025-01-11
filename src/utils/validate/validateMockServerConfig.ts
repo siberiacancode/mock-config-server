@@ -5,13 +5,13 @@ import type { PlainObject } from '@/utils/types';
 import { baseUrlSchema } from './baseUrlSchema/baseUrlSchema';
 import { corsSchema } from './corsSchema/corsSchema';
 import { databaseConfigSchema } from './databaseConfigSchema/databaseConfigSchema';
+import { getMostSpecificPathFromError } from './getMostSpecificPathFromError';
+import { getValidationMessageFromPath } from './getValidationMessageFromPath';
 import { graphqlConfigSchema } from './graphqlConfigSchema/graphqlConfigSchema';
 import { interceptorsSchema } from './interceptorsSchema/interceptorsSchema';
 import { portSchema } from './portSchema/portSchema';
 import { restConfigSchema } from './restConfigSchema/restConfigSchema';
 import { staticPathSchema } from './staticPathSchema/staticPathSchema';
-import { getMostSpecificPathFromError } from './getMostSpecificPathFromError';
-import { getValidationMessageFromPath } from './getValidationMessageFromPath';
 import { plainObjectSchema } from './utils';
 
 export const validateMockServerConfig = (mockServerConfig: PlainObject) => {

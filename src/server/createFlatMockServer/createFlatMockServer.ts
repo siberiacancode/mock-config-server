@@ -1,6 +1,15 @@
-import bodyParser from 'body-parser';
 import type { Express } from 'express';
+
+import bodyParser from 'body-parser';
 import express from 'express';
+
+import type {
+  FlatMockServerConfig,
+  GraphQLRequestConfig,
+  RequestInterceptor,
+  ResponseInterceptor,
+  RestRequestConfig
+} from '@/utils/types';
 
 import { createDatabaseRoutes } from '@/core/database';
 import { createGraphQLRoutes } from '@/core/graphql';
@@ -13,13 +22,6 @@ import {
   staticMiddleware
 } from '@/core/middlewares';
 import { createRestRoutes } from '@/core/rest';
-import type {
-  FlatMockServerConfig,
-  GraphQLRequestConfig,
-  RequestInterceptor,
-  ResponseInterceptor,
-  RestRequestConfig
-} from '@/utils/types';
 import { validateFlatMockServerConfig } from '@/utils/validate';
 
 export const createFlatMockServer = (

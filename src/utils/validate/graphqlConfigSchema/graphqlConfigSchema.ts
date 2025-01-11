@@ -5,7 +5,6 @@ import { isPlainObject } from '@/utils/helpers';
 import { baseUrlSchema } from '../baseUrlSchema/baseUrlSchema';
 import { interceptorsSchema } from '../interceptorsSchema/interceptorsSchema';
 import { plainObjectSchema } from '../utils';
-
 import { routeConfigSchema } from './routeConfigSchema/routeConfigSchema';
 
 const baseRequestConfigSchema = z.strictObject({

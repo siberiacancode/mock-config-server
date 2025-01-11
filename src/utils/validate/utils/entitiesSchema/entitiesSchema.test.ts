@@ -1,9 +1,8 @@
 import { getMostSpecificPathFromError } from '../../getMostSpecificPathFromError';
 import { getValidationMessageFromPath } from '../../getValidationMessageFromPath';
-
 import { bodyPlainEntitySchema } from './entitiesSchema';
 
-test('Should return correct error path: firstly check object as a descriptor', () => {
+it('Should return correct error path: firstly check object as a descriptor', () => {
   const incorrectTopLevelDescriptorBodyEntities = {
     checkMode: 'equals'
   };

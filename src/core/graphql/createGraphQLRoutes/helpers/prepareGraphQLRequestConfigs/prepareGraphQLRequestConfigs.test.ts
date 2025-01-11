@@ -3,7 +3,7 @@ import type { GraphQLRequestConfig } from '@/utils/types';
 import { prepareGraphQLRequestConfigs } from './prepareGraphQLRequestConfigs';
 
 describe('prepareGraphQLRequestConfigs', () => {
-  test('Should not sort routes if they does not contain entities', () => {
+  it('Should not sort routes if they does not contain entities', () => {
     const graphQLRequestConfigs: GraphQLRequestConfig[] = [
       {
         operationName: 'GetUser',
@@ -26,7 +26,7 @@ describe('prepareGraphQLRequestConfigs', () => {
     );
   });
 
-  test('Should sort routes by their specificity of entities', () => {
+  it('Should sort routes by their specificity of entities', () => {
     const graphQLRequestConfigs: GraphQLRequestConfig[] = [
       {
         operationName: 'GetUser',
@@ -114,7 +114,7 @@ describe('prepareGraphQLRequestConfigs', () => {
     );
   });
 
-  test('Should set descriptor variables with value weight equals to variables.value weight', () => {
+  it('Should set descriptor variables with value weight equals to variables.value weight', () => {
     const graphQLRequestConfigs: GraphQLRequestConfig[] = [
       {
         operationName: 'GetUser',
@@ -180,7 +180,7 @@ describe('prepareGraphQLRequestConfigs', () => {
     );
   });
 
-  test('Should set descriptor variables without value weight equals to one', () => {
+  it('Should set descriptor variables without value weight equals to one', () => {
     const graphQLRequestConfigs: GraphQLRequestConfig[] = [
       {
         operationName: 'GetUser',

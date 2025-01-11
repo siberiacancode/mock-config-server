@@ -1,8 +1,9 @@
 import color from 'ansi-colors';
 
+import type { RestMockServerConfig } from '@/utils/types';
+
 import { destroyerMiddleware } from '@/core/middlewares';
 import { DEFAULT } from '@/utils/constants';
-import type { RestMockServerConfig } from '@/utils/types';
 
 import { createRestMockServer } from '../createRestMockServer/createRestMockServer';
 

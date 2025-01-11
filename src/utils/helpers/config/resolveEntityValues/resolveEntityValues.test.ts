@@ -3,7 +3,7 @@ import type { CheckFunction, CheckMode } from '@/utils/types';
 import { resolveEntityValues } from './resolveEntityValues';
 
 describe('resolveEntityValues: checkMode without descriptor value', () => {
-  test('"exists"/"notExists" checkMode should return false/true only for undefined', () => {
+  it('"exists"/"notExists" checkMode should return false/true only for undefined', () => {
     const existedValues = ['string', true, 3000, null, {}, [], () => {}, /\d/];
     existedValues.forEach((value) => {
       expect(resolveEntityValues({ checkMode: 'exists', actualValue: value })).toBe(true);
@@ -20,7 +20,7 @@ describe('resolveEntityValues: checkMode without descriptor value', () => {
 
 describe('resolveEntityValues: checkMode with descriptor value', () => {
   describe('"regExp" checkMode', () => {
-    test('Should correctly test actual value against descriptor regExp', () => {
+    it('Should correctly test actual value against descriptor regExp', () => {
       expect(
         resolveEntityValues({
           checkMode: 'regExp',
@@ -39,7 +39,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
 
     // ✅ important:
     // this is about https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastIndex#avoiding_side_effects
-    test('Should be independent of regExp "lastIndex" property when this regExp using "g" flag', () => {
+    it('Should be independent of regExp "lastIndex" property when this regExp using "g" flag', () => {
       const regExpWithGlobalFlag = /string/g;
       expect(
         resolveEntityValues({
@@ -59,7 +59,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
   });
 
   describe('"function" checkMode', () => {
-    test('Should define resolving result by descriptor function truthy/falsy return value', () => {
+    it('Should define resolving result by descriptor function truthy/falsy return value', () => {
       expect(
         resolveEntityValues({
           checkMode: 'function',
@@ -76,7 +76,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
       ).toBe(false);
     });
 
-    test('Should call descriptor function with correct arguments', () => {
+    it('Should call descriptor function with correct arguments', () => {
       const descriptorFn = vi.fn();
       resolveEntityValues({
         checkMode: 'function',
@@ -87,7 +87,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
       expect(descriptorFn).toBeCalledWith('primitive', expect.any(Function));
     });
 
-    test('Should support nested function calls using checkFunction', () => {
+    it('Should support nested function calls using checkFunction', () => {
       expect(
         resolveEntityValues({
           checkMode: 'function',
@@ -99,7 +99,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
     });
   });
 
-  test('Should compare values independent of their types', () => {
+  it('Should compare values independent of their types', () => {
     const positiveCheckModes = [
       'equals',
       'includes',
@@ -189,7 +189,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
     });
   });
 
-  test('Should return false/true for positive/negative check modes when primitive and object are compared', () => {
+  it('Should return false/true for positive/negative check modes when primitive and object are compared', () => {
     const positiveCheckModes = [
       'equals',
       'includes',
@@ -237,7 +237,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
     });
   });
 
-  test('"equals"/"notEquals" checkMode should return true/false when actual and descriptor values are equal', () => {
+  it('"equals"/"notEquals" checkMode should return true/false when actual and descriptor values are equal', () => {
     expect(
       resolveEntityValues({
         checkMode: 'equals',
@@ -269,7 +269,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
     ).toBe(false);
   });
 
-  test('"includes"/"notIncludes" checkMode should return true/false when actual value includes descriptor value', () => {
+  it('"includes"/"notIncludes" checkMode should return true/false when actual value includes descriptor value', () => {
     expect(
       resolveEntityValues({
         checkMode: 'includes',
@@ -301,7 +301,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
     ).toBe(false);
   });
 
-  test('"startsWith"/"notStartsWith" checkMode should return true/false when actual value starts with descriptor value', () => {
+  it('"startsWith"/"notStartsWith" checkMode should return true/false when actual value starts with descriptor value', () => {
     expect(
       resolveEntityValues({
         checkMode: 'startsWith',
@@ -333,7 +333,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
     ).toBe(false);
   });
 
-  test('"endsWith"/"notEndsWith" checkMode should return true/false when actual value ends with descriptor value', () => {
+  it('"endsWith"/"notEndsWith" checkMode should return true/false when actual value ends with descriptor value', () => {
     expect(
       resolveEntityValues({
         checkMode: 'endsWith',
@@ -367,7 +367,7 @@ describe('resolveEntityValues: checkMode with descriptor value', () => {
 });
 
 describe('resolveEntityValues: oneOf', () => {
-  test('Should return true with oneOf=true if at least one passed descriptor value matched to actual value', () => {
+  it('Should return true with oneOf=true if at least one passed descriptor value matched to actual value', () => {
     expect(
       resolveEntityValues({
         checkMode: 'equals',
@@ -387,7 +387,7 @@ describe('resolveEntityValues: oneOf', () => {
     ).toBe(true);
   });
 
-  test('Should return true with oneOf=false/undefined if full passed descriptor value matched to actual value', () => {
+  it('Should return true with oneOf=false/undefined if full passed descriptor value matched to actual value', () => {
     expect(
       resolveEntityValues({
         checkMode: 'equals',

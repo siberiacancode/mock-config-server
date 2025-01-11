@@ -1,6 +1,5 @@
 import { flatten } from 'flat';
 
-import { NEGATIVE_CHECK_MODES } from '@/utils/constants';
 import type {
   CheckActualValueCheckMode,
   CheckFunction,
@@ -8,6 +7,8 @@ import type {
   EntityFunctionDescriptorValue,
   PlainObject
 } from '@/utils/types';
+
+import { NEGATIVE_CHECK_MODES } from '@/utils/constants';
 
 import { isPlainObject } from '../../isPlainObject/isPlainObject';
 import { isPrimitive } from '../../isPrimitive/isPrimitive';
@@ -95,28 +96,28 @@ const compareEntityValues = (checkMode: CheckMode, actualValue: any, descriptorV
 };
 
 interface ResolveEntityValuesParamsWithCheckActualValueCheckMode {
-  checkMode: CheckActualValueCheckMode;
   actualValue: unknown;
+  checkMode: CheckActualValueCheckMode;
 }
 
 interface ResolveEntityValuesParamsWithEnabledOneOf {
-  checkMode: Exclude<CheckMode, CheckActualValueCheckMode>;
   actualValue: unknown;
+  checkMode: Exclude<CheckMode, CheckActualValueCheckMode>;
   descriptorValue: unknown[];
   oneOf: true;
 }
 
 interface ResolveEntityValuesParamsWithDisabledOneOf {
-  checkMode: Exclude<CheckMode, CheckActualValueCheckMode>;
   actualValue: unknown;
+  checkMode: Exclude<CheckMode, CheckActualValueCheckMode>;
   descriptorValue: unknown;
   oneOf?: false;
 }
 
 type ResolveEntityValuesParams =
   | ResolveEntityValuesParamsWithCheckActualValueCheckMode
-  | ResolveEntityValuesParamsWithEnabledOneOf
-  | ResolveEntityValuesParamsWithDisabledOneOf;
+  | ResolveEntityValuesParamsWithDisabledOneOf
+  | ResolveEntityValuesParamsWithEnabledOneOf;
 
 export const resolveEntityValues = (params: ResolveEntityValuesParams) => {
   const { checkMode, actualValue } = params;

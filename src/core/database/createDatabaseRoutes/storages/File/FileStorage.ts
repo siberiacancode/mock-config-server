@@ -1,11 +1,11 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
-import { APP_PATH } from '@/utils/constants';
 import type { Storage, StorageIndex } from '@/utils/types';
 
-import { isIndex } from '../../helpers';
+import { APP_PATH } from '@/utils/constants';
 
+import { isIndex } from '../../helpers';
 import { FileWriter } from './FileWriter';
 
 export class FileStorage<Data extends Record<StorageIndex, any> = Record<StorageIndex, any>>

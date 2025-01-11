@@ -1,1 +1,1 @@
-export type ApiType = 'rest' | 'graphql';
+export type ApiType = 'graphql' | 'rest';

@@ -1,16 +1,15 @@
 import type { Orm } from '@/utils/types';
 
 import { createStorage } from '../createStorage/createStorage';
-
 import { createOrm } from './createOrm';
 
 describe('createOrm', () => {
   describe('createOrm: shallow orm', () => {
     interface User {
-      name: string;
-      age: number;
       address: { city: string };
+      age: number;
       hobbies: string[];
+      name: string;
     }
     let orm = {} as Orm<{ users: User[] }>;
 
@@ -30,7 +29,7 @@ describe('createOrm', () => {
       orm = createOrm<typeof data>(storage);
     });
 
-    test('Should get value', () => {
+    it('Should get value', () => {
       const collection = orm.users.get();
       expect(collection).toStrictEqual([
         {
@@ -43,7 +42,7 @@ describe('createOrm', () => {
       ]);
     });
 
-    test('Should update value', () => {
+    it('Should update value', () => {
       orm.users.update([]);
 
       const updatedCollection = orm.users.get();
@@ -53,11 +52,11 @@ describe('createOrm', () => {
 
   describe('createOrm: nested orm', () => {
     interface User {
+      address: { city: string };
+      age: number;
+      hobbies: string[];
       id: number;
       name: string;
-      age: number;
-      address: { city: string };
-      hobbies: string[];
     }
     let orm = {} as Orm<{ users: User[] }>;
 
@@ -86,7 +85,7 @@ describe('createOrm', () => {
       orm = createOrm<typeof data>(storage);
     });
 
-    test('Should create new resource', () => {
+    it('Should create new resource', () => {
       const newUser = {
         name: 'Bob Marley',
         age: 35,
@@ -123,7 +122,7 @@ describe('createOrm', () => {
       ]);
     });
 
-    test('Should update a resource', () => {
+    it('Should update a resource', () => {
       orm.users.update(1, { age: 26 });
       const updatedUser = orm.users.findById(1)!;
       const users = orm.users.findMany();
@@ -148,7 +147,7 @@ describe('createOrm', () => {
       ]);
     });
 
-    test('Should delete a resource', () => {
+    it('Should delete a resource', () => {
       orm.users.delete(1);
       const remainingUsers = orm.users.findMany();
 
@@ -164,7 +163,7 @@ describe('createOrm', () => {
       ]);
     });
 
-    test('Should create many new resources', () => {
+    it('Should create many new resources', () => {
       const newUsers = [
         {
           name: 'Bob Marley',
@@ -216,7 +215,7 @@ describe('createOrm', () => {
       ]);
     });
 
-    test('Should update many resources', () => {
+    it('Should update many resources', () => {
       const usersLength = orm.users.updateMany([1, 2], { age: 40 });
       const users = orm.users.findMany();
 
@@ -240,7 +239,7 @@ describe('createOrm', () => {
       ]);
     });
 
-    test('Should delete many resources', () => {
+    it('Should delete many resources', () => {
       orm.users.deleteMany([1, 2]);
       const remainingUsers = orm.users.findMany();
 
@@ -250,7 +249,7 @@ describe('createOrm', () => {
       ]);
     });
 
-    test('Should find by id', () => {
+    it('Should find by id', () => {
       const user = orm.users.findById(1);
       expect(user).toStrictEqual({
         id: 1,
@@ -264,7 +263,7 @@ describe('createOrm', () => {
       expect(undefinedUser).toBeUndefined();
     });
 
-    test('Should find many', () => {
+    it('Should find many', () => {
       const users = orm.users.findMany();
       expect(users).toStrictEqual([
         {
@@ -285,7 +284,7 @@ describe('createOrm', () => {
       ]);
     });
 
-    test('Should find many by filters', () => {
+    it('Should find many by filters', () => {
       const users = orm.users.findMany({ age: 25 });
       expect(users).toStrictEqual([
         {
@@ -298,7 +297,7 @@ describe('createOrm', () => {
       ]);
     });
 
-    test('Should find first', () => {
+    it('Should find first', () => {
       const user = orm.users.findFirst();
       expect(user).toStrictEqual({
         id: 1,
@@ -309,7 +308,7 @@ describe('createOrm', () => {
       });
     });
 
-    test('Should find first by filters', () => {
+    it('Should find first by filters', () => {
       const user = orm.users.findFirst({ id: 2 });
       expect(user).toStrictEqual({
         id: 2,
@@ -320,7 +319,7 @@ describe('createOrm', () => {
       });
     });
 
-    test('Should check existence', () => {
+    it('Should check existence', () => {
       const exists = orm.users.exists({ name: 'John Doe' });
       expect(exists).toBe(true);
 
@@ -328,7 +327,7 @@ describe('createOrm', () => {
       expect(notExists).toBe(false);
     });
 
-    test('Should count the number of resourses', () => {
+    it('Should count the number of resourses', () => {
       const count = orm.users.count();
       expect(count).toBe(3);
     });

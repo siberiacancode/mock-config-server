@@ -1,12 +1,12 @@
-import bodyParser from 'body-parser';
 import type { Express } from 'express';
+
+import bodyParser from 'body-parser';
 import express from 'express';
 import request from 'supertest';
 
 import type { ShallowDatabase } from '@/utils/types';
 
 import { MemoryStorage } from '../../storages';
-
 import { createShallowDatabaseRoutes } from './createShallowDatabaseRoutes';
 
 describe('createShallowDatabaseRoutes', () => {
@@ -41,14 +41,14 @@ describe('createShallowDatabaseRoutes', () => {
     const shallowDatabase = createShallowDatabase();
     const server = createServer(shallowDatabase);
 
-    test('Should return correct data for valid key', async () => {
+    it('Should return correct data for valid key', async () => {
       const response = await request(server).get('/john');
 
       expect(response.statusCode).toBe(200);
       expect(response.body).toStrictEqual(shallowDatabase.john);
     });
 
-    test('Should return correct Cache-Control header for valid key', async () => {
+    it('Should return correct Cache-Control header for valid key', async () => {
       const response = await request(server).get('/john');
 
       expect(response.headers['cache-control']).toBe('no-cache');
@@ -63,7 +63,7 @@ describe('createShallowDatabaseRoutes', () => {
       server = createServer(shallowDatabase);
     });
 
-    test('Should return correct data for valid key and successfully update database', async () => {
+    it('Should return correct data for valid key and successfully update database', async () => {
       const newJohnInfo = { age: 26, standName: 'The World' };
 
       const postResponse = await request(server).post('/john').send(newJohnInfo);
@@ -74,7 +74,7 @@ describe('createShallowDatabaseRoutes', () => {
       expect(getResponse.body).toStrictEqual(newJohnInfo);
     });
 
-    test('Should return correct Location header for valid key', async () => {
+    it('Should return correct Location header for valid key', async () => {
       const response = await request(server).post('/john').send(undefined);
 
       expect(response.headers.location).toBe('/john');
@@ -89,7 +89,7 @@ describe('createShallowDatabaseRoutes', () => {
       server = createServer(shallowDatabase);
     });
 
-    test('Should return correct data for valid key and successfully update database', async () => {
+    it('Should return correct data for valid key and successfully update database', async () => {
       const newJohnInfo = { age: 26, standName: 'The World' };
 
       const putResponse = await request(server).put('/john').send(newJohnInfo);
@@ -109,7 +109,7 @@ describe('createShallowDatabaseRoutes', () => {
       server = createServer(shallowDatabase);
     });
 
-    test('Should return correct data for valid key and successfully update database', async () => {
+    it('Should return correct data for valid key and successfully update database', async () => {
       const newJohnInfo = { age: 26, standName: 'The World' };
 
       const patchResponse = await request(server).patch('/john').send(newJohnInfo);
@@ -125,7 +125,7 @@ describe('createShallowDatabaseRoutes', () => {
     const notArrayShallowDatabaseValues = ['string', true, 3000, null, {}];
 
     notArrayShallowDatabaseValues.forEach((notArrayShallowDatabaseValue) => {
-      test(`Should return unchanged result when data type is ${typeof notArrayShallowDatabaseValue}`, async () => {
+      it(`Should return unchanged result when data type is ${typeof notArrayShallowDatabaseValue}`, async () => {
         const server = createServer({ users: notArrayShallowDatabaseValue });
 
         const response = await request(server).get(
@@ -141,7 +141,7 @@ describe('createShallowDatabaseRoutes', () => {
     const shallowDatabase = createShallowDatabase();
     const server = createServer(shallowDatabase);
 
-    test('Should return filtered array by query', async () => {
+    it('Should return filtered array by query', async () => {
       const response = await request(server).get('/users?name=John Doe');
 
       expect(response.body).toStrictEqual([
@@ -154,13 +154,13 @@ describe('createShallowDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by identical queries names', async () => {
+    it('Should return filtered array by identical queries names', async () => {
       const response = await request(server).get('/users?age=25&age=30');
 
       expect(response.body).toStrictEqual(shallowDatabase.users);
     });
 
-    test('Should return filtered array by nested query', async () => {
+    it('Should return filtered array by nested query', async () => {
       const response = await request(server).get('/users?address.city=Novosibirsk');
 
       expect(response.body).toStrictEqual([
@@ -173,7 +173,7 @@ describe('createShallowDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by neq operator', async () => {
+    it('Should return filtered array by neq operator', async () => {
       const response = await request(server).get('/users?age_neq=25');
 
       expect(response.body).toStrictEqual([
@@ -181,7 +181,7 @@ describe('createShallowDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by gt operator', async () => {
+    it('Should return filtered array by gt operator', async () => {
       const response = await request(server).get('/users?age_gt=25');
 
       expect(response.body).toStrictEqual([
@@ -189,13 +189,13 @@ describe('createShallowDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by gte operator', async () => {
+    it('Should return filtered array by gte operator', async () => {
       const response = await request(server).get('/users?age_gte=25');
 
       expect(response.body).toStrictEqual(shallowDatabase.users);
     });
 
-    test('Should return filtered array by lt operator', async () => {
+    it('Should return filtered array by lt operator', async () => {
       const response = await request(server).get('/users?age_lt=30');
 
       expect(response.body).toStrictEqual([
@@ -208,13 +208,13 @@ describe('createShallowDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by lte operator', async () => {
+    it('Should return filtered array by lte operator', async () => {
       const response = await request(server).get('/users?age_lte=30');
 
       expect(response.body).toStrictEqual(shallowDatabase.users);
     });
 
-    test('Should return filtered array by cn operator', async () => {
+    it('Should return filtered array by cn operator', async () => {
       const response = await request(server).get('/users?name_cn=Jane');
 
       expect(response.body).toStrictEqual([
@@ -222,7 +222,7 @@ describe('createShallowDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by ncn operator', async () => {
+    it('Should return filtered array by ncn operator', async () => {
       const response = await request(server).get('/users?name_ncn=Jane');
 
       expect(response.body).toStrictEqual([
@@ -235,31 +235,31 @@ describe('createShallowDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by sw operator', async () => {
+    it('Should return filtered array by sw operator', async () => {
       const response = await request(server).get('/users?name_sw=J');
 
       expect(response.body).toStrictEqual(shallowDatabase.users);
     });
 
-    test('Should return filtered array by nsw operator', async () => {
+    it('Should return filtered array by nsw operator', async () => {
       const response = await request(server).get('/users?name_nsw=J');
 
       expect(response.body).toStrictEqual([]);
     });
 
-    test('Should return filtered array by ew operator', async () => {
+    it('Should return filtered array by ew operator', async () => {
       const response = await request(server).get('/users?name_ew=a');
 
       expect(response.body).toStrictEqual([]);
     });
 
-    test('Should return filtered array by new operator', async () => {
+    it('Should return filtered array by new operator', async () => {
       const response = await request(server).get('/users?name_new=a=J');
 
       expect(response.body).toStrictEqual(shallowDatabase.users);
     });
 
-    test('Should return filtered array by some operator', async () => {
+    it('Should return filtered array by some operator', async () => {
       const response = await request(server).get('/users?hobbies_some=games');
 
       expect(response.body).toStrictEqual([
@@ -277,7 +277,7 @@ describe('createShallowDatabaseRoutes', () => {
     const shallowDatabase = createShallowDatabase();
     const server = createServer(shallowDatabase);
 
-    test('Should return paginationed data by query', async () => {
+    it('Should return paginationed data by query', async () => {
       const response = await request(server).get('/users?_page=1');
 
       expect(response.body.results).toStrictEqual([
@@ -302,7 +302,7 @@ describe('createShallowDatabaseRoutes', () => {
       expect(response.body._link.last).toContain('/users?_page=1');
     });
 
-    test('Should return paginationed data by query with limit', async () => {
+    it('Should return paginationed data by query with limit', async () => {
       const response = await request(server).get('/users?_page=1&_limit=1');
 
       expect(response.body.results).toStrictEqual([
@@ -321,7 +321,7 @@ describe('createShallowDatabaseRoutes', () => {
       expect(response.body._link.next).toContain('/users?_page=2&_limit=1');
     });
 
-    test('Should return valid _link for paginationed data', async () => {
+    it('Should return valid _link for paginationed data', async () => {
       const linkHeaderRegexp = /<([^>]+)>;\s*rel="([^"]+)"/g;
       const firstResponse = await request(server).get('/users?_page=1&_limit=1');
 
@@ -382,7 +382,7 @@ describe('createShallowDatabaseRoutes', () => {
       expect(secondResponse.body._link.prev).toContain('/users?_page=1&_limit=1');
     });
 
-    test('Should return valid data by invalid pagination data', async () => {
+    it('Should return valid data by invalid pagination data', async () => {
       const response = await request(server).get('/users?_page=2');
 
       expect(response.body).toStrictEqual([
@@ -401,19 +401,19 @@ describe('createShallowDatabaseRoutes', () => {
     const shallowDatabase = createShallowDatabase();
     const server = createServer(shallowDatabase);
 
-    test('Should return sliced array by _begin query', async () => {
+    it('Should return sliced array by _begin query', async () => {
       const response = await request(server).get('/users?_begin=1');
 
       expect(response.body).toStrictEqual(shallowDatabase.users.slice(1));
     });
 
-    test('Should return sliced array by _end query', async () => {
+    it('Should return sliced array by _end query', async () => {
       const response = await request(server).get('/users?_end=1');
 
       expect(response.body).toStrictEqual(shallowDatabase.users.slice(0, 1));
     });
 
-    test('Should return sliced array by _begin and _end query', async () => {
+    it('Should return sliced array by _begin and _end query', async () => {
       const response = await request(server).get('/users?_begin=0&_end=2');
 
       expect(response.body).toStrictEqual(shallowDatabase.users.slice(0, 2));
@@ -429,7 +429,7 @@ describe('createShallowDatabaseRoutes', () => {
       ]
     });
 
-    test('Should return sorted data by query', async () => {
+    it('Should return sorted data by query', async () => {
       const response = await request(server).get('/users?_sort=age');
 
       expect(response.body).toStrictEqual([
@@ -444,7 +444,7 @@ describe('createShallowDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return sorted data by query with order', async () => {
+    it('Should return sorted data by query with order', async () => {
       const response = await request(server).get('/users?_sort=age&_order=desc');
 
       expect(response.body).toStrictEqual([
@@ -454,7 +454,7 @@ describe('createShallowDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return sorted data by multiple query', async () => {
+    it('Should return sorted data by multiple query', async () => {
       const response = await request(server).get(
         '/users?_sort=name&_order=asc&_sort=age&_order=desc'
       );
@@ -466,7 +466,7 @@ describe('createShallowDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should return filtered array by nested query', async () => {
+    it('Should return filtered array by nested query', async () => {
       const response = await request(server).get('/users?_sort=address.city&_order=desc');
 
       expect(response.body).toStrictEqual([
@@ -489,7 +489,7 @@ describe('createShallowDatabaseRoutes', () => {
     const correctSearchValues = ['string', true, 3000, null];
 
     correctSearchValues.forEach((correctSearchValue) => {
-      test(`Should search data by "${correctSearchValue}" query with type ${
+      it(`Should search data by "${correctSearchValue}" query with type ${
         correctSearchValue !== null ? typeof correctSearchValue : 'null'
       }`, async () => {
         const server = createServer({ users: [{ data: correctSearchValue }] });
@@ -500,7 +500,7 @@ describe('createShallowDatabaseRoutes', () => {
       });
     });
 
-    test('Should filter data by query when nested text', async () => {
+    it('Should filter data by query when nested text', async () => {
       const response = await request(server).get('/users?_q=Tomsk');
 
       expect(response.body).toStrictEqual([
@@ -508,7 +508,7 @@ describe('createShallowDatabaseRoutes', () => {
       ]);
     });
 
-    test('Should filter data by multiple query', async () => {
+    it('Should filter data by multiple query', async () => {
       const response = await request(server).get('/users?_q=Tomsk&_q=Novosibirsk');
 
       expect(response.body).toStrictEqual([

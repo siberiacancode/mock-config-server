@@ -1,5 +1,6 @@
 import type { BuildOptions, Plugin } from 'esbuild';
-import { build as esBuild, context } from 'esbuild';
+
+import { context, build as esBuild } from 'esbuild';
 
 import type { MockServerConfigArgv } from '@/utils/types';
 

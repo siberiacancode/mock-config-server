@@ -1,6 +1,9 @@
-import bodyParser from 'body-parser';
 import type { Express } from 'express';
+
+import bodyParser from 'body-parser';
 import express from 'express';
+
+import type { DatabaseMockServerConfig } from '@/utils/types';
 
 import { createDatabaseRoutes } from '@/core/database';
 import {
@@ -12,7 +15,6 @@ import {
   requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
-import type { DatabaseMockServerConfig } from '@/utils/types';
 
 export const createDatabaseMockServer = (
   databaseMockServerConfig: Omit<DatabaseMockServerConfig, 'port'>,

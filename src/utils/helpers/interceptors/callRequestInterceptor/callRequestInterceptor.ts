@@ -6,8 +6,8 @@ import { callRequestLogger } from '../../logger';
 import { setDelay } from '../helpers/setDelay';
 
 interface CallRequestInterceptorParams {
-  request: Request;
   interceptor: RequestInterceptor;
+  request: Request;
 }
 
 export const callRequestInterceptor = async (params: CallRequestInterceptorParams) => {

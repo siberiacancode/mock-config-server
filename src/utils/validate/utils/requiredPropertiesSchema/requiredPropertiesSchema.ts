@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-import { isPlainObject } from '@/utils/helpers';
 import type { PlainObject } from '@/utils/types';
+
+import { isPlainObject } from '@/utils/helpers';
 
 export const requiredPropertiesSchema = <T extends PlainObject>(
   schema: z.ZodType<T>,

@@ -1,5 +1,17 @@
 import type { IRouter, NextFunction, Request, Response } from 'express';
+
 import { flatten } from 'flat';
+
+import type {
+  EntityDescriptor,
+  Entries,
+  GraphqlConfig,
+  GraphQLEntitiesByEntityName,
+  GraphQLEntity,
+  Interceptors,
+  PlainObject,
+  TopLevelPlainEntityDescriptor
+} from '@/utils/types';
 
 import {
   asyncHandler,
@@ -12,22 +24,12 @@ import {
   resolveEntityValues,
   sleep
 } from '@/utils/helpers';
-import type {
-  EntityDescriptor,
-  Entries,
-  GraphqlConfig,
-  GraphQLEntitiesByEntityName,
-  GraphQLEntity,
-  Interceptors,
-  PlainObject,
-  TopLevelPlainEntityDescriptor
-} from '@/utils/types';
 
 import { prepareGraphQLRequestConfigs } from './helpers';
 
 interface CreateGraphQLRoutesParams {
-  router: IRouter;
   graphqlConfig: GraphqlConfig;
+  router: IRouter;
   serverResponseInterceptor?: Interceptors<'graphql'>['response'];
 }
 
@@ -58,8 +60,7 @@ export const createGraphQLRoutes = ({
 
       if (
         'query' in requestConfig &&
-        requestConfig.query.replace(/[\s\r\n]+/gi, '') !==
-          graphQLInput.query?.replace(/[\s\r\n]+/gi, '')
+        requestConfig.query.replace(/\s+/g, '') !== graphQLInput.query?.replace(/\s+/g, '')
       )
         return false;
 

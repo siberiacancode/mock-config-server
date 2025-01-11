@@ -4,35 +4,35 @@ import type { ApiType } from './shared';
 import type { Cookies, Headers, Params, PlainObject, Query } from './values';
 
 export interface LoggerBaseTokens {
-  type: string;
-  id: number;
-  timestamp: number;
-  method: RestMethod;
-  url: string;
-  headers: Headers;
-  cookies: Cookies;
-  query: Query;
-  params: Params;
   body: any;
+  cookies: Cookies;
+  headers: Headers;
+  id: number;
+  method: RestMethod;
+  params: Params;
+  query: Query;
+  timestamp: number;
+  type: string;
+  url: string;
 }
 
 interface LoggerRestRequestTokens extends LoggerBaseTokens {}
 
 interface LoggerRestResponseTokens extends LoggerRestRequestTokens {
-  statusCode: number;
   data: any;
+  statusCode: number;
 }
 
 interface LoggerGraphQLRequestTokens extends LoggerBaseTokens {
-  graphQLOperationType: GraphQLOperationType | null;
   graphQLOperationName: GraphQLOperationName | null;
+  graphQLOperationType: GraphQLOperationType | null;
   graphQLQuery: string | null;
   variables: PlainObject | null;
 }
 
 interface LoggerGraphQLResponseTokens extends LoggerGraphQLRequestTokens {
-  statusCode: number;
   data: any;
+  statusCode: number;
 }
 
 export type LoggerType = 'request' | 'response';
@@ -55,7 +55,7 @@ export type LoggerTokens<
     : never;
 
 type LoggerTokensToLoggerOptions<Type> = {
-  [Key in keyof Type]?: Type[Key] extends PlainObject ? Record<string, boolean> | boolean : boolean;
+  [Key in keyof Type]?: Type[Key] extends PlainObject ? boolean | Record<string, boolean> : boolean;
 };
 
 export type LoggerOptions<

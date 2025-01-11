@@ -8,7 +8,7 @@ import { corsMiddleware } from './corsMiddleware';
 describe('corsMiddleware', () => {
   const testOrigin = 'https://test.com';
 
-  test('Should set default cors for OPTIONS preflight request if does not set custom cors settings', async () => {
+  it('Should set default cors for OPTIONS preflight request if does not set custom cors settings', async () => {
     const server = express();
     const cors: Cors = {
       origin: testOrigin
@@ -28,7 +28,7 @@ describe('corsMiddleware', () => {
     });
   });
 
-  test('Should set default cors for request if does not set custom cors settings', async () => {
+  it('Should set default cors for request if does not set custom cors settings', async () => {
     const server = express();
     const cors: Cors = {
       origin: testOrigin
@@ -60,7 +60,7 @@ describe('corsMiddleware', () => {
   ];
 
   unsuitableOrigins.forEach((unsuitableOrigin) => {
-    test('Should not set default cors for OPTIONS preflight request if origin does not match', async () => {
+    it('Should not set default cors for OPTIONS preflight request if origin does not match', async () => {
       const server = express();
       const cors: Cors = {
         origin: unsuitableOrigin
@@ -80,7 +80,7 @@ describe('corsMiddleware', () => {
       });
     });
 
-    test('Should not set cors for request if origin does not match', async () => {
+    it('Should not set cors for request if origin does not match', async () => {
       const server = express();
       const cors: Cors = {
         origin: unsuitableOrigin
@@ -133,7 +133,7 @@ describe('corsMiddleware', () => {
     ];
 
   corsParamsAndHeaders.forEach(({ params, headers }) =>
-    test(`Should set allow param(s) ${Object.keys(params).join(', ')} to header(s) ${Object.keys(
+    it(`Should set allow param(s) ${Object.keys(params).join(', ')} to header(s) ${Object.keys(
       headers
     ).join(', ')}`, async () => {
       const server = express();

@@ -3,7 +3,6 @@ import type { IRouter } from 'express';
 import type { DatabaseConfig, NestedDatabase, ShallowDatabase } from '@/utils/types';
 
 import { createStorage } from '../createStorage/createStorage';
-
 import {
   createNestedDatabaseRoutes,
   createRewrittenDatabaseRoutes,

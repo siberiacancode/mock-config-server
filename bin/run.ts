@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
+import type { GraphQLMockServerConfig, RestMockServerConfig } from '@/utils/types';
+
 import { startGraphQLMockServer, startMockServer, startRestMockServer } from '@/server';
 import { isPlainObject } from '@/utils/helpers';
-import type { GraphQLMockServerConfig, RestMockServerConfig } from '@/utils/types';
 
 import type { MockServerConfig, MockServerConfigArgv } from '../src';
 
@@ -28,8 +29,8 @@ export const run = (
       'configs' in mergedMockServerConfig
     ) {
       const mergedApiMockServerConfig = mergedMockServerConfig as
-        | RestMockServerConfig
-        | GraphQLMockServerConfig;
+        | GraphQLMockServerConfig
+        | RestMockServerConfig;
 
       if (
         Array.isArray(mergedApiMockServerConfig.configs) &&

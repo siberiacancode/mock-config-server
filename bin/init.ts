@@ -2,6 +2,7 @@ import color from 'ansi-colors';
 import prompts from 'prompts';
 
 import type { MockServerConfigArgv } from '@/utils/types';
+
 import { baseUrlSchema, portSchema, staticPathSchema } from '@/utils/validate';
 
 import { createTemplate } from './helpers';
@@ -52,7 +53,7 @@ export const init = async (argv: MockServerConfigArgv) => {
             try {
               portSchema.parse(+port);
               return true;
-            } catch (error: any) {
+            } catch {
               return 'Invalid port value';
             }
           }
@@ -81,7 +82,7 @@ export const init = async (argv: MockServerConfigArgv) => {
 
     await createTemplate({ ...argv, ...response });
     const userAgent = process.env.npm_config_user_agent ?? '';
-    // eslint-disable-next-line no-nested-ternary
+
     const packageManager = /pnpm/.test(userAgent)
       ? 'pnpm'
       : /yarn/.test(userAgent)

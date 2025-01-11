@@ -4,11 +4,11 @@ import path from 'node:path';
 import { APP_PATH, DEFAULT } from '@/utils/constants';
 
 interface CreateTemplateOptions {
-  withTypescript: boolean;
+  apiType: 'full' | 'graphql' | 'rest';
   baseUrl: string;
-  staticPath: string;
   port: number;
-  apiType: 'rest' | 'graphql' | 'full';
+  staticPath: string;
+  withTypescript: boolean;
 }
 
 export const createTemplate = (options: CreateTemplateOptions) => {
