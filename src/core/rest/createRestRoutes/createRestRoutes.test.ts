@@ -598,17 +598,17 @@ describe('createRestRoutes: settings', () => {
 
     const firstResponse = await request(server).get('/users');
     expect(firstResponse.statusCode).toBe(200);
-    expect(firstResponse.headers['content-disposition']).toMatch(/filename=(\S*firstUser.json)/);
+    expect(firstResponse.headers['content-disposition']).toBe('filename=firstUser.json');
     expect(firstResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
 
     const secondResponse = await request(server).get('/users');
     expect(secondResponse.statusCode).toBe(200);
-    expect(secondResponse.headers['content-disposition']).toMatch(/filename=(\S*secondUser.json)/);
+    expect(secondResponse.headers['content-disposition']).toBe('filename=secondUser.json');
     expect(secondResponse.body).toStrictEqual({ name: 'John', surname: 'Smith' });
 
     const thirdResponse = await request(server).get('/users');
     expect(thirdResponse.statusCode).toBe(200);
-    expect(thirdResponse.headers['content-disposition']).toMatch(/filename=(\S*firstUser.json)/);
+    expect(thirdResponse.headers['content-disposition']).toBe('filename=firstUser.json');
     expect(thirdResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
 
     fs.rmSync(tmpDirPath, { recursive: true, force: true });

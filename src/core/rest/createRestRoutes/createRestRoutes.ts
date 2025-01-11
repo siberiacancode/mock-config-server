@@ -247,7 +247,8 @@ export const createRestRoutes = ({
             if (!isFilePathValid(data.path)) return next();
             data.file = fs.readFileSync(path.resolve(data.path));
           }
-          const fileName = data.path.split('/').at(-1)!;
+          // ✅ important: replace backslashes because windows can use them in file path
+          const fileName = data.path.replaceAll('\\', '/').split('/').at(-1)!;
           const fileExtension = fileName.split('.').at(-1)!;
           response.type(fileExtension);
           response.set('Content-Disposition', `filename=${fileName}`);
