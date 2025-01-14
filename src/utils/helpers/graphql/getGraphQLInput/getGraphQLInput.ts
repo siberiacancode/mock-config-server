@@ -9,7 +9,8 @@ interface GetGraphQLInputResult {
 
 export const getGraphQLInput = (request: Request): GetGraphQLInputResult => {
   if (request.method === 'GET') {
-    const { query, variables } = request.query;
+    const query = request.query?.query;
+    const variables = request.query?.variables;
 
     // ✅ important:
     // if 'variables' was sent as encoded uri component then it already decoded into object and we do not need to use JSON.parse
@@ -20,7 +21,9 @@ export const getGraphQLInput = (request: Request): GetGraphQLInputResult => {
   }
 
   if (request.method === 'POST') {
-    const { query, variables } = request.body;
+    const query = request.body?.query;
+    const variables = request.body?.variables;
+
     return { query, variables };
   }
 
