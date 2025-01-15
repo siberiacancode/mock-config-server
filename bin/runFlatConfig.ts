@@ -2,7 +2,7 @@
 
 import { startFlatMockServer } from '@/server';
 
-import type { FlatMockServerConfig, FlatMockServerSettings, MockServerConfigArgv } from '../src';
+import type { FlatMockServerConfig, MockServerConfigArgv } from '../src';
 
 export const runFlatConfig = (
   flatMockServerConfig: FlatMockServerConfig,
@@ -12,17 +12,15 @@ export const runFlatConfig = (
     const [option, ...flatMockServerComponents] = flatMockServerConfig;
     const flatMockServerSettings = !('configs' in option) ? option : undefined;
 
-    const mergedFlatMockServerConfig = (
-      flatMockServerSettings ? flatMockServerComponents : flatMockServerConfig
-    ) as FlatMockServerConfig;
-    if (flatMockServerSettings) {
-      mergedFlatMockServerConfig.unshift({
+    const mergedFlatMockServerConfig = [
+      {
         ...flatMockServerSettings,
         ...(baseUrl && { baseUrl }),
         ...(port && { port }),
         ...(staticPath && { staticPath })
-      } as FlatMockServerSettings);
-    }
+      },
+      ...(flatMockServerSettings ? flatMockServerComponents : flatMockServerConfig)
+    ] as FlatMockServerConfig;
 
     return startFlatMockServer(mergedFlatMockServerConfig);
   } catch (error: any) {
