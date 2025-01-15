@@ -10,9 +10,9 @@ import { createFlatMockServer } from '../createFlatMockServer/createFlatMockServ
 export const startFlatMockServer = (flatMockServerConfig: FlatMockServerConfig) => {
   const flatMockServer = createFlatMockServer(flatMockServerConfig);
 
-  const { port = DEFAULT.PORT } = !('configs' in flatMockServerConfig[0])
-    ? flatMockServerConfig[0]
-    : {};
+  const [option] = flatMockServerConfig;
+  const flatMockServerSettings = !('configs' in option) ? option : { port: DEFAULT.PORT };
+  const { port } = flatMockServerSettings;
 
   const server = flatMockServer.listen(port, () => {
     console.log(color.green(`🎉 Flat Mock Server is running at http://localhost:${port}`));
