@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import express from 'express';
 
 import type {
+  FlatMockServerComponent,
   FlatMockServerConfig,
   GraphQLRequestConfig,
   RequestInterceptor,
@@ -72,7 +73,10 @@ export const createFlatMockServer = (
     server.use(serverBaseUrl, routerWithDatabaseRoutes);
   }
 
-  const { restRequestConfigs, graphQLRequestConfigs } = flatMockServerComponents.reduce(
+  const components = flatMockServerSettings
+    ? flatMockServerComponents
+    : (flatMockServerConfig as FlatMockServerComponent[]);
+  const { restRequestConfigs, graphQLRequestConfigs } = components.reduce(
     (acc, component) => {
       const { baseUrl = '' } = component;
 
