@@ -483,6 +483,43 @@ describe('createRestRoutes: content', () => {
 
     fs.rmSync(tmpDirPath, { recursive: true, force: true });
   });
+
+  it('Should not rewrite Content-Type and Content-Disposition headers for file if they was set in interceptor', async () => {
+    const tmpDirPath = createTmpDir();
+    const pathToFile = path.join(tmpDirPath, './data.json');
+    fs.writeFileSync(pathToFile, JSON.stringify({ some: 'data' }));
+
+    const server = createServer({
+      rest: {
+        configs: [
+          {
+            path: '/users',
+            method: 'get',
+            routes: [
+              {
+                file: pathToFile,
+                interceptors: {
+                  response: (data, { appendHeader }) => {
+                    appendHeader('content-type', 'text/plain; charset=utf-8');
+                    appendHeader('content-disposition', 'filename=someData.txt');
+                    return data;
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).get('/users');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toBe('text/plain; charset=utf-8');
+    expect(response.headers['content-disposition']).toBe('filename=someData.txt');
+
+    fs.rmSync(tmpDirPath, { recursive: true, force: true });
+  });
 });
 
 describe('createRestRoutes: settings', () => {

@@ -249,9 +249,15 @@ export const createRestRoutes = ({
           }
           // ✅ important: replace backslashes because windows can use them in file path
           const fileName = data.path.replaceAll('\\', '/').split('/').at(-1)!;
-          const fileExtension = fileName.split('.').at(-1)!;
-          response.type(fileExtension);
-          response.set('Content-Disposition', `filename=${fileName}`);
+
+          if (!response.getHeader('content-disposition')) {
+            response.set('content-disposition', `filename=${fileName}`);
+          }
+          if (!response.getHeader('content-type')) {
+            const fileExtension = fileName.split('.').at(-1)!;
+            response.type(fileExtension);
+          }
+
           return response.send(data.file);
         }
         response.json(data);
