@@ -44,6 +44,7 @@ export const contextMiddleware = (
 
     request.timestamp = Date.now();
 
+    request.graphQL = null;
     if (request.method === 'GET' || request.method === 'POST') {
       const graphQLInput = getGraphQLInput(request);
       const graphQLQuery = parseQuery(graphQLInput.query ?? '');
@@ -55,11 +56,9 @@ export const contextMiddleware = (
           query: graphQLInput.query,
           variables: graphQLInput.variables
         };
-        return next();
       }
     }
 
-    request.graphQL = null;
     request.context = context;
     return next();
   });
