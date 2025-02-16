@@ -260,7 +260,10 @@ export const createRestRoutes = ({
 
           return response.send(data.file);
         }
-        response.json(data);
+        if (!response.getHeader('content-type')) {
+          return response.json(data);
+        }
+        response.send(data);
       })
     );
   });
