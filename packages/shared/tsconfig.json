@@ -1,9 +1,6 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "@siberiacancode/tsconfig/tsconfig.node.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": false,
-    "sourceMap": true
-  },
-  "exclude": ["node_modules"]
+    "lib": ["ESNext"]
+  }
 }

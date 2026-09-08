@@ -1,7 +1,6 @@
 {
-  "extends": "@siberiacancode/tsconfig/tsconfig.bundler.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": "./",
     "paths": {
       "@/server": ["./src/server"],
       "@/core/database": ["./src/core/database"],
