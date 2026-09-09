@@ -4,33 +4,26 @@ import { describe, expect, it } from 'vitest';
 import { createWsFrame } from './createWsFrame';
 
 describe('createWsFrame', () => {
-  it('Should keep text frame as string', () => {
+  it('Should decode a text frame into a string', () => {
     expect(createWsFrame(Buffer.from('ping'), false)).toStrictEqual({
-      data: 'ping',
       isBinary: false,
       raw: 'ping'
     });
   });
 
-  it('Should parse json text frame into data', () => {
-    expect(createWsFrame(Buffer.from('{"type":"ping"}'), false)).toStrictEqual({
-      data: { type: 'ping' },
-      isBinary: false,
-      raw: '{"type":"ping"}'
-    });
+  it('Should keep a binary frame as a buffer', () => {
+    const payload = Buffer.from([0x00, 0x01, 0xfe]);
+
+    expect(createWsFrame(payload, true)).toStrictEqual({ isBinary: true, raw: payload });
   });
 
-  it('Should keep binary frame as buffer', () => {
-    expect(createWsFrame(Buffer.from('{"type":"ping"}'), true)).toStrictEqual({
-      data: { type: 'ping' },
-      isBinary: true,
-      raw: Buffer.from('{"type":"ping"}')
-    });
+  it('Should not parse a json text frame', () => {
+    expect(createWsFrame(Buffer.from('{"type":"ping"}'), false).raw).toBe('{"type":"ping"}');
   });
 
-  it('Should fall back to text when frame is not a json', () => {
-    expect(createWsFrame(Buffer.from([0x01, 0x02]), true).data).toBe(
-      Buffer.from([0x01, 0x02]).toString()
-    );
+  it('Should not decode a binary frame that is not valid utf-8', () => {
+    const payload = Buffer.from([0xff, 0xfe, 0xfd]);
+
+    expect(createWsFrame(payload, true).raw).toBe(payload);
   });
 });

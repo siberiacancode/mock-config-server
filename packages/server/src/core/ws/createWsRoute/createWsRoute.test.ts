@@ -747,7 +747,6 @@ describe('createWsRoute: ws.raw', () => {
       await once(client, 'message');
 
       const frame = {
-        data: { event: 'ping' },
         isBinary: false,
         raw: '{"event":"ping"}'
       };
@@ -768,7 +767,7 @@ describe('createWsRoute: ws.raw', () => {
               type: 'raw',
               routes: [
                 {
-                  entities: { data: { event: 'ping' } },
+                  entities: { raw: (raw) => raw.toString().includes('"event":"ping"') },
                   data: () => ({ source: 'ping' })
                 }
               ]
@@ -792,7 +791,7 @@ describe('createWsRoute: ws.raw', () => {
               type: 'raw',
               routes: [
                 {
-                  entities: { data: { event: 'ping' } },
+                  entities: { raw: (raw) => raw.toString().includes('"event":"ping"') },
                   data: () => ({ source: 'ping' })
                 }
               ]
@@ -852,7 +851,7 @@ describe('createWsRoute: ws.raw', () => {
               routes: [
                 { data: () => ({ source: 'any' }) },
                 {
-                  entities: { data: { event: 'ping' } },
+                  entities: { raw: (raw) => raw.toString().includes('"event":"ping"') },
                   data: () => ({ source: 'specific' })
                 }
               ]

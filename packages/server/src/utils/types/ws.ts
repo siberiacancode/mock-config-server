@@ -7,10 +7,10 @@ import type {
   MappedEntity,
   WsCloseCodeEntity,
   WsCloseReasonEntity,
-  WsDataEntity,
   WsErrorCodeEntity,
   WsErrorMessageEntity,
-  WsIsBinaryEntity
+  WsIsBinaryEntity,
+  WsRawEntity
 } from './entities';
 import type { GraphQLIdentifier, GraphQLTransportWsOperationType } from './graphql';
 import type { GraphqlTransportWsRouteConfig } from './graphql-transport-ws';
@@ -38,12 +38,10 @@ export interface WsSettings {
 }
 
 export interface WsFrameBinary {
-  data: any;
   isBinary: true;
   raw: Buffer;
 }
 export interface WsFrameText {
-  data: any;
   isBinary: false;
   raw: string;
 }
@@ -89,8 +87,8 @@ export interface ConnectionWsRequestArtifact extends BaseWsRequestArtifact {
 /* message */
 
 export interface WsRawEntitiesByEntityName {
-  data?: WsDataEntity;
   isBinary?: WsIsBinaryEntity;
+  raw?: WsRawEntity;
 }
 
 export type WsMessageParams = WsFrame & {

@@ -10,8 +10,8 @@ export const rawRouteConfigSchema = z.strictObject({
   data: z.function(),
   entities: plainObjectSchema(
     z.strictObject({
-      data: z.any().optional(),
-      isBinary: z.union([z.boolean(), z.custom<Comparator>(isComparator)]).optional()
+      isBinary: z.union([z.boolean(), z.custom<Comparator>(isComparator)]).optional(),
+      raw: z.function().optional()
     })
   ).optional()
 });

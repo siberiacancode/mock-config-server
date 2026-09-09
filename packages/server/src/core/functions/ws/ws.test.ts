@@ -1,6 +1,10 @@
+import type { Buffer } from 'node:buffer';
+
 import { describe, expect, it, vi } from 'vitest';
 
 import { ws } from './ws';
+
+const isPing = (raw: string | Buffer) => raw.toString() === 'ping';
 
 describe('ws', () => {
   it('Should build config for ws.message handler', () => {
@@ -58,8 +62,8 @@ describe('ws', () => {
     const result = ws.message({
       handler,
       match: {
-        data: { type: 'ping' },
-        isBinary: false
+        isBinary: false,
+        raw: isPing
       }
     });
 
@@ -69,8 +73,8 @@ describe('ws', () => {
         {
           data: handler,
           entities: {
-            data: { type: 'ping' },
-            isBinary: false
+            isBinary: false,
+            raw: isPing
           }
         }
       ]

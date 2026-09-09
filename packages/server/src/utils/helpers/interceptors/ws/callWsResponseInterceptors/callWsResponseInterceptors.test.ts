@@ -12,7 +12,6 @@ const broadcast = vi.fn();
 const send = vi.fn();
 
 const frame: WsFrame = {
-  data: { type: 'ping' },
   isBinary: false,
   raw: '{"type":"ping"}'
 };

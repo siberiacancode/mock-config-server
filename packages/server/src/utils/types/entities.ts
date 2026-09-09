@@ -19,9 +19,10 @@ export type BodyEntity = BodyEntityValue | Comparator<BodyEntityValue>;
 type VariablesEntityValue = Record<string, unknown>;
 export type VariablesEntity = Comparator<VariablesEntityValue> | VariablesEntityValue;
 
-type WsDataEntityValue =
-  boolean | number | string | Buffer | Record<string, unknown> | unknown[] | null;
-export type WsDataEntity = Comparator<WsDataEntityValue> | WsDataEntityValue;
+// ✅ important:
+// the ws payload is not parsed, a raw entity is a predicate over the untouched frame body,
+// so every protocol decodes it the way it actually encodes it
+export type WsRawEntity = (raw: string | Buffer) => boolean;
 export type WsIsBinaryEntity = boolean | Comparator<boolean>;
 
 export type WsCloseCodeEntity = number | Comparator<number>;

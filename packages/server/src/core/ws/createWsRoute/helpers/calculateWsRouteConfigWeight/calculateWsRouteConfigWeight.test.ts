@@ -25,8 +25,8 @@ describe('calculateWsRouteConfigWeight', () => {
       calculateWsRouteConfigWeight({
         data: () => ({}),
         entities: {
-          data: 'ping',
-          isBinary: false
+          isBinary: false,
+          raw: () => true
         }
       })
     ).toBe(2);
@@ -37,7 +37,7 @@ describe('calculateWsRouteConfigWeight', () => {
       calculateWsRouteConfigWeight({
         data: () => ({}),
         entities: {
-          data: equals({ type: 'ping', id: 1 })
+          isBinary: equals(false)
         }
       })
     ).toBe(1);

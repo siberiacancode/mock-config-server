@@ -13,7 +13,7 @@ describe('rawRouteConfigSchema: entities', () => {
   it('Should pass supported entities', () => {
     const parseResult = rawRouteConfigSchema.safeParse({
       data,
-      entities: { data: { key: 'value' }, isBinary: false }
+      entities: { isBinary: false, raw: () => true }
     });
     expect(parseResult.success).toBe(true);
   });
@@ -30,6 +30,14 @@ describe('rawRouteConfigSchema: entities', () => {
     const parseResult = rawRouteConfigSchema.safeParse({
       data,
       entities: { isBinary: 'true' }
+    });
+    expect(parseResult.success).toBe(false);
+  });
+
+  it('Should return error on invalid raw entity', () => {
+    const parseResult = rawRouteConfigSchema.safeParse({
+      data,
+      entities: { raw: 'ping' }
     });
     expect(parseResult.success).toBe(false);
   });
