@@ -31,7 +31,7 @@ export const createWsMessageHandler =
   }: CreateWsMessageHandlerParams) =>
   async (raw: RawData, isBinary: boolean) => {
     const frame = createWsFrame(raw, isBinary);
-    const eventContext = context.createWsEventContext();
+    const event = context.createWsEventContext();
 
     // ✅ important:
     // the protocol has to be known before the server interceptors run, otherwise a graphql-ws
@@ -43,7 +43,7 @@ export const createWsMessageHandler =
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: graphqlTransportWsInput ? GRAPHQL_TRANSPORT_WS_META : RAW_WS_META,
         frame,
         socket: context.socket,
@@ -54,14 +54,14 @@ export const createWsMessageHandler =
     );
 
     if (!graphqlTransportWsInput) {
-      await handleRawWsMessage({ ...context, eventContext, frame, rawArtifacts, requestPathname });
+      await handleRawWsMessage({ ...context, event, frame, rawArtifacts, requestPathname });
       return;
     }
 
     await handleGraphqlTransportWsMessage({
       ...context,
       completedSubscriptionIds,
-      eventContext,
+      event,
       frame,
       graphqlTransportWsArtifacts,
       input: graphqlTransportWsInput,

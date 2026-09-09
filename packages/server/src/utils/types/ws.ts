@@ -62,7 +62,7 @@ export type WsConnectionEntitiesByEntityName = {
 };
 
 export interface WsConnectionParams {
-  eventContext: WsEventContext;
+  event: WsEventContext;
   handshake: IncomingMessage;
   socket: WsSocket;
   broadcast: <Response = unknown>(response: Response) => void;
@@ -92,7 +92,7 @@ export interface WsRawEntitiesByEntityName {
 }
 
 export type WsMessageParams = WsFrame & {
-  eventContext: WsEventContext;
+  event: WsEventContext;
   handshake: IncomingMessage;
   broadcast: <Response = unknown>(response: Response) => void;
   socket: WsSocket;
@@ -127,7 +127,7 @@ export interface WsErrorEntitiesByEntityName {
 
 export interface WsErrorParams {
   error: NodeJS.ErrnoException;
-  eventContext: WsEventContext;
+  event: WsEventContext;
   handshake: IncomingMessage;
   socket: WsSocket;
   broadcast: <Response = unknown>(response: Response) => void;
@@ -159,7 +159,7 @@ export interface WsCloseEntitiesByEntityName {
 
 export interface WsCloseParams {
   code: number;
-  eventContext: WsEventContext;
+  event: WsEventContext;
   handshake: IncomingMessage;
   reason: string;
   socket: WsSocket;

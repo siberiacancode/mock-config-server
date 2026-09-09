@@ -78,7 +78,7 @@ export interface GraphqlTransportWsEntitiesByEntityName {
 
 export interface GraphqlTransportWsParams {
   entities: GraphqlTransportWsEntitiesByEntityName;
-  eventContext: WsEventContext;
+  event: WsEventContext;
   eventName?: string;
   handshake: IncomingMessage;
   operationName?: string;

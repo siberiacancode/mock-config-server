@@ -34,7 +34,7 @@ export const GRAPHQL_TRANSPORT_WS_META: WsInterceptorMeta = {
 
 interface HandleGraphqlTransportWsMessageParams extends WsHandlerContext {
   completedSubscriptionIds: Set<string>;
-  eventContext: WsEventContext;
+  event: WsEventContext;
   frame: WsFrame;
   graphqlTransportWsArtifacts: GraphqlTransportWsRequestArtifact[];
   input: GraphqlTransportWsMessage;
@@ -44,7 +44,7 @@ interface HandleGraphqlTransportWsMessageParams extends WsHandlerContext {
 
 export const handleGraphqlTransportWsMessage = async ({
   completedSubscriptionIds,
-  eventContext,
+  event,
   frame,
   graphqlTransportWsArtifacts,
   handshake,
@@ -98,12 +98,12 @@ export const handleGraphqlTransportWsMessage = async ({
   if (!matchedArtifact) return;
 
   await callWsRequestInterceptors(
-    { eventContext, meta: GRAPHQL_TRANSPORT_WS_META, frame, socket, broadcast, send },
+    { event, meta: GRAPHQL_TRANSPORT_WS_META, frame, socket, broadcast, send },
     matchedArtifact.componentInterceptors ?? []
   );
 
   const params: GraphqlTransportWsParams = {
-    eventContext,
+    event,
     complete: () => {
       if (completedSubscriptionIds.has(operationId)) return;
       completedSubscriptionIds.add(operationId);
@@ -131,7 +131,7 @@ export const handleGraphqlTransportWsMessage = async ({
 
   const data = await callWsResponseInterceptors(
     {
-      eventContext,
+      event,
       data: resolvedData,
       meta: GRAPHQL_TRANSPORT_WS_META,
       frame,

@@ -7,7 +7,7 @@ import { graphql, ws } from '@/core/interceptors';
 import { callWsRequestInterceptors } from './callWsRequestInterceptors';
 
 const socket = {} as WsSocket;
-const eventContext = { id: 1, timestamp: Date.now() };
+const event = { id: 1, timestamp: Date.now() };
 const broadcast = vi.fn();
 const send = vi.fn();
 
@@ -23,7 +23,7 @@ describe('callWsRequestInterceptors: order of calls', () => {
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: { type: 'ws', event: 'open' },
 
         socket,
@@ -42,14 +42,14 @@ describe('callWsRequestInterceptors: order of calls', () => {
 });
 
 describe('callWsRequestInterceptors: interceptors filtering', () => {
-  it('Should call only interceptors matched by eventContext', async () => {
+  it('Should call only interceptors matched by event', async () => {
     const allInterceptor = vi.fn();
     const openInterceptor = vi.fn();
     const closeInterceptor = vi.fn();
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: { type: 'ws', event: 'open' },
 
         socket,
@@ -74,7 +74,7 @@ describe('callWsRequestInterceptors: interceptors filtering', () => {
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: { type: 'ws', event: 'message', messageType: 'graphql-ws' },
 
         socket,
@@ -96,7 +96,7 @@ describe('callWsRequestInterceptors: interceptors filtering', () => {
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: { type: 'ws', event: 'message', messageType: 'raw' },
         socket,
         broadcast,
@@ -107,7 +107,7 @@ describe('callWsRequestInterceptors: interceptors filtering', () => {
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: { type: 'ws', event: 'message', messageType: 'graphql-ws' },
         socket,
         broadcast,
@@ -118,7 +118,7 @@ describe('callWsRequestInterceptors: interceptors filtering', () => {
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: { type: 'ws', event: 'open' },
         socket,
         broadcast,
@@ -135,7 +135,7 @@ describe('callWsRequestInterceptors: interceptors filtering', () => {
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: { type: 'ws', event: 'message', messageType: 'raw' },
 
         socket,
@@ -153,7 +153,7 @@ describe('callWsRequestInterceptors: interceptors filtering', () => {
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: { type: 'ws', event: 'open' },
 
         socket,
@@ -168,12 +168,12 @@ describe('callWsRequestInterceptors: interceptors filtering', () => {
 });
 
 describe('callWsRequestInterceptors: params functions', () => {
-  it('Should correctly provide frame for message eventContext', async () => {
+  it('Should correctly provide frame for message event', async () => {
     const interceptor = vi.fn();
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: { type: 'ws', event: 'message', messageType: 'raw' },
         frame,
 
@@ -187,12 +187,12 @@ describe('callWsRequestInterceptors: params functions', () => {
     expect(interceptor.mock.calls[0][0].frame).toStrictEqual(frame);
   });
 
-  it('Should correctly provide code and reason for close eventContext', async () => {
+  it('Should correctly provide code and reason for close event', async () => {
     const interceptor = vi.fn();
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: { type: 'ws', event: 'close' },
         code: 1000,
         reason: 'normal closure',
@@ -210,13 +210,13 @@ describe('callWsRequestInterceptors: params functions', () => {
     });
   });
 
-  it('Should correctly provide error for error eventContext', async () => {
+  it('Should correctly provide error for error event', async () => {
     const interceptor = vi.fn();
     const error = new Error('boom');
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: { type: 'ws', event: 'error' },
         error,
 
@@ -230,12 +230,12 @@ describe('callWsRequestInterceptors: params functions', () => {
     expect(interceptor.mock.calls[0][0].error).toBe(error);
   });
 
-  it('Should not provide frame, code and reason for open eventContext', async () => {
+  it('Should not provide frame, code and reason for open event', async () => {
     const interceptor = vi.fn();
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: { type: 'ws', event: 'open' },
 
         socket,
@@ -256,7 +256,7 @@ describe('callWsRequestInterceptors: params functions', () => {
 
     await callWsRequestInterceptors(
       {
-        eventContext,
+        event,
         meta: { type: 'ws', event: 'open' },
 
         socket,

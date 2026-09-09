@@ -22,11 +22,11 @@ export const createWsErrorHandler =
     setDelay
   }: CreateWsErrorHandlerParams) =>
   async (error: NodeJS.ErrnoException) => {
-    const eventContext = createWsEventContext();
+    const event = createWsEventContext();
     const meta = { type: 'ws', event: 'error' } as const;
 
     await callWsRequestInterceptors(
-      { eventContext, meta, error, socket, broadcast, send },
+      { event, meta, error, socket, broadcast, send },
       serverInterceptors
     );
 
@@ -37,12 +37,12 @@ export const createWsErrorHandler =
     if (!matchedArtifact) return;
 
     await callWsRequestInterceptors(
-      { eventContext, meta, error, socket, broadcast, send },
+      { event, meta, error, socket, broadcast, send },
       matchedArtifact.componentInterceptors ?? []
     );
 
     const params: WsErrorParams = {
-      eventContext,
+      event,
       broadcast,
       error,
       handshake,
@@ -58,7 +58,7 @@ export const createWsErrorHandler =
     const resolvedData = await matchedArtifact.config.data(params);
 
     await callWsResponseInterceptors(
-      { eventContext, data: resolvedData, meta, socket, broadcast, send },
+      { event, data: resolvedData, meta, socket, broadcast, send },
       {
         componentInterceptors: matchedArtifact.componentInterceptors,
         serverInterceptors: matchedArtifact.serverInterceptors

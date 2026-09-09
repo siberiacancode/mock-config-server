@@ -522,7 +522,7 @@ describe('createWsRoute: ws.raw', () => {
   });
 
   describe('context', () => {
-    it('Should provide unique eventContext id and increasing timestamp for each message', async () => {
+    it('Should provide unique event id and increasing timestamp for each message', async () => {
       const { port } = await createServer({
         ws: {
           configs: [
@@ -530,9 +530,9 @@ describe('createWsRoute: ws.raw', () => {
               type: 'raw',
               routes: [
                 {
-                  data: (({ eventContext }) => ({
-                    id: eventContext.id,
-                    timestamp: eventContext.timestamp
+                  data: (({ event }) => ({
+                    id: event.id,
+                    timestamp: event.timestamp
                   })) as WsRawDataResponse
                 }
               ]
@@ -551,7 +551,7 @@ describe('createWsRoute: ws.raw', () => {
       expect(second.timestamp).toBeGreaterThanOrEqual(first.timestamp);
     });
 
-    it('Should not overwrite eventContext context of a delayed message by a following one', async () => {
+    it('Should not overwrite event context of a delayed message by a following one', async () => {
       const { port } = await createServer({
         ws: {
           configs: [
@@ -559,9 +559,9 @@ describe('createWsRoute: ws.raw', () => {
               type: 'raw',
               routes: [
                 {
-                  data: (async ({ eventContext, setDelay }) => {
+                  data: (async ({ event, setDelay }) => {
                     await setDelay(50);
-                    return { id: eventContext.id };
+                    return { id: event.id };
                   }) as WsRawDataResponse
                 }
               ]
@@ -615,7 +615,7 @@ describe('createWsRoute: ws.raw', () => {
       });
     });
 
-    it('Should provide the same eventContext context to interceptors and route handler', async () => {
+    it('Should provide the same event context to interceptors and route handler', async () => {
       const requestInterceptor = vi.fn();
       let responseInterceptorParams: unknown;
       const responseInterceptor = vi.fn((data, params) => {
@@ -628,9 +628,7 @@ describe('createWsRoute: ws.raw', () => {
           configs: [
             {
               type: 'raw',
-              routes: [
-                { data: (({ eventContext }) => ({ id: eventContext.id })) as WsRawDataResponse }
-              ]
+              routes: [{ data: (({ event }) => ({ id: event.id })) as WsRawDataResponse }]
             }
           ],
           interceptors: [
@@ -645,11 +643,9 @@ describe('createWsRoute: ws.raw', () => {
       const [response] = await once(client, 'message');
 
       const { id } = JSON.parse(response.toString());
-      expect(requestInterceptor.mock.calls[0][0].eventContext).toMatchObject({ id });
-      expect(
-        (responseInterceptorParams as { eventContext: { id: number } }).eventContext
-      ).toMatchObject({ id });
-      expect(typeof requestInterceptor.mock.calls[0][0].eventContext.timestamp).toBe('number');
+      expect(requestInterceptor.mock.calls[0][0].event).toMatchObject({ id });
+      expect((responseInterceptorParams as { event: { id: number } }).event).toMatchObject({ id });
+      expect(typeof requestInterceptor.mock.calls[0][0].event.timestamp).toBe('number');
     });
 
     it('Should provide connection scoped socket context', async () => {
@@ -1815,7 +1811,7 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
 
       client.send(
         JSON.stringify({
-          id: 'sub-eventContext-name',
+          id: 'sub-event-name',
           type: 'subscribe',
           payload: {
             query: 'subscription UsersByEventName { users { id } }',
@@ -1826,7 +1822,7 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
       const [response] = await once(client, 'message');
 
       expect(JSON.parse(response.toString())).toStrictEqual({
-        id: 'sub-eventContext-name',
+        id: 'sub-event-name',
         type: 'next',
         payload: { data: { source: 'eventName' } }
       });
@@ -1849,7 +1845,7 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
 
       client.send(
         JSON.stringify({
-          id: 'sub-eventContext-name-regexp',
+          id: 'sub-event-name-regexp',
           type: 'subscribe',
           payload: {
             query: 'subscription UsersByEventName { users { id } }',
@@ -1860,7 +1856,7 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
       const [response] = await once(client, 'message');
 
       expect(JSON.parse(response.toString())).toStrictEqual({
-        id: 'sub-eventContext-name-regexp',
+        id: 'sub-event-name-regexp',
         type: 'next',
         payload: { data: { source: 'eventNameRegExp' } }
       });

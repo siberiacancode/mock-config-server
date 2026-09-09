@@ -24,7 +24,7 @@ describe('callWsResponseInterceptors: order of calls', () => {
     expect(
       await callWsResponseInterceptors(
         {
-          eventContext: wsEventContext,
+          event: wsEventContext,
           data: '',
           meta: { type: 'ws', event: 'open' },
           socket,
@@ -40,7 +40,7 @@ describe('callWsResponseInterceptors: order of calls', () => {
     expect(
       await callWsResponseInterceptors(
         {
-          eventContext: wsEventContext,
+          event: wsEventContext,
           data: '',
           meta: { type: 'ws', event: 'open' },
           socket,
@@ -62,14 +62,14 @@ describe('callWsResponseInterceptors: order of calls', () => {
 });
 
 describe('callWsResponseInterceptors: interceptors filtering', () => {
-  it('Should call only interceptors matched by eventContext', async () => {
+  it('Should call only interceptors matched by event', async () => {
     const allInterceptor = vi.fn((data) => data);
     const closeInterceptor = vi.fn((data) => data);
     const openInterceptor = vi.fn((data) => data);
 
     await callWsResponseInterceptors(
       {
-        eventContext: wsEventContext,
+        event: wsEventContext,
         data: { key: 'value' },
         meta: { type: 'ws', event: 'close' },
         socket,
@@ -95,7 +95,7 @@ describe('callWsResponseInterceptors: interceptors filtering', () => {
 
     await callWsResponseInterceptors(
       {
-        eventContext: wsEventContext,
+        event: wsEventContext,
         data: { key: 'value' },
         meta: { type: 'ws', event: 'message', messageType: 'graphql-ws' },
         socket,
@@ -110,12 +110,12 @@ describe('callWsResponseInterceptors: interceptors filtering', () => {
 });
 
 describe('callWsResponseInterceptors: params functions', () => {
-  it('Should correctly provide params for message eventContext', async () => {
+  it('Should correctly provide params for message event', async () => {
     const interceptor = vi.fn((data) => data);
 
     await callWsResponseInterceptors(
       {
-        eventContext: wsEventContext,
+        event: wsEventContext,
         data: { key: 'value' },
         meta: { type: 'ws', event: 'message', messageType: 'raw' },
         frame,
@@ -129,12 +129,12 @@ describe('callWsResponseInterceptors: params functions', () => {
     expect(interceptor).toHaveBeenCalledWith({ key: 'value' }, expect.objectContaining({ frame }));
   });
 
-  it('Should correctly provide params for close eventContext', async () => {
+  it('Should correctly provide params for close event', async () => {
     const interceptor = vi.fn((data) => data);
 
     await callWsResponseInterceptors(
       {
-        eventContext: wsEventContext,
+        event: wsEventContext,
         data: { key: 'value' },
         meta: { type: 'ws', event: 'close' },
         code: 1000,
@@ -157,7 +157,7 @@ describe('callWsResponseInterceptors: params functions', () => {
 
     await callWsResponseInterceptors(
       {
-        eventContext: wsEventContext,
+        event: wsEventContext,
         data: { key: 'value' },
         meta: { type: 'ws', event: 'open' },
         socket,
@@ -183,7 +183,7 @@ describe('callWsResponseInterceptors: params functions', () => {
 
     await callWsResponseInterceptors(
       {
-        eventContext: wsEventContext,
+        event: wsEventContext,
         data: { ok: true },
         meta: { type: 'ws', event: 'message', messageType: 'raw' },
         socket,
@@ -195,7 +195,7 @@ describe('callWsResponseInterceptors: params functions', () => {
 
     await callWsResponseInterceptors(
       {
-        eventContext: wsEventContext,
+        event: wsEventContext,
         data: { ok: true },
         meta: { type: 'ws', event: 'message', messageType: 'graphql-ws' },
         socket,

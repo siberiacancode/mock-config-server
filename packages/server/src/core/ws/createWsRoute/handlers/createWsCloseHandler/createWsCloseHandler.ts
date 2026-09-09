@@ -25,11 +25,11 @@ export const createWsCloseHandler =
   }: CreateWsCloseHandlerParams) =>
   async (code: number, reasonBuffer: Buffer) => {
     const reason = reasonBuffer.toString();
-    const eventContext = createWsEventContext();
+    const event = createWsEventContext();
     const meta = { type: 'ws', event: 'close' } as const;
 
     await callWsRequestInterceptors(
-      { eventContext, meta, code, reason, socket, broadcast, send },
+      { event, meta, code, reason, socket, broadcast, send },
       serverInterceptors
     );
 
@@ -40,12 +40,12 @@ export const createWsCloseHandler =
     if (!matchedArtifact) return;
 
     await callWsRequestInterceptors(
-      { eventContext, meta, code, reason, socket, broadcast, send },
+      { event, meta, code, reason, socket, broadcast, send },
       matchedArtifact.componentInterceptors ?? []
     );
 
     const params: WsCloseParams = {
-      eventContext,
+      event,
       broadcast,
       code,
       handshake,
@@ -65,7 +65,7 @@ export const createWsCloseHandler =
     const resolvedData = await matchedArtifact.config.data(params);
 
     await callWsResponseInterceptors(
-      { eventContext, data: resolvedData, meta, code, reason, socket, broadcast, send },
+      { event, data: resolvedData, meta, code, reason, socket, broadcast, send },
       {
         componentInterceptors: matchedArtifact.componentInterceptors,
         serverInterceptors: matchedArtifact.serverInterceptors
