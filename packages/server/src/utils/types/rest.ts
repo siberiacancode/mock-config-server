@@ -60,8 +60,7 @@ export type RestDataResponseFunction<Method extends RestMethod = RestMethod> = (
   params: RestParams<Method>
 ) => MaybePromise<Data>;
 export type RestDataResponse<Method extends RestMethod = RestMethod> =
-  | Data
-  | RestDataResponseFunction<Method>;
+  Data | RestDataResponseFunction<Method>;
 
 export type RestFileResponse = string;
 

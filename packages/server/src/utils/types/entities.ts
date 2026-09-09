@@ -20,13 +20,7 @@ type VariablesEntityValue = Record<string, unknown>;
 export type VariablesEntity = Comparator<VariablesEntityValue> | VariablesEntityValue;
 
 type WsDataEntityValue =
-  | boolean
-  | number
-  | string
-  | Buffer
-  | Record<string, unknown>
-  | unknown[]
-  | null;
+  boolean | number | string | Buffer | Record<string, unknown> | unknown[] | null;
 export type WsDataEntity = Comparator<WsDataEntityValue> | WsDataEntityValue;
 export type WsIsBinaryEntity = boolean | Comparator<boolean>;
 
