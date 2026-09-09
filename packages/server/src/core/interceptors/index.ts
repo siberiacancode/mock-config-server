@@ -18,13 +18,13 @@ import type {
 import { createInterceptor } from '@/utils/helpers';
 
 const createInterceptorFactories =
-  <Handler, Result>() =>
+  <Handler extends (...args: any[]) => any, Result>() =>
   <const Names extends readonly string[]>(prefix: string, names: Names) =>
     Object.fromEntries(
       names.map((name) => [
         name,
         (interceptor: Handler): Result =>
-          (createInterceptor as any)(`${prefix}.${name}` as InterceptorName, interceptor)
+          createInterceptor(`${prefix}.${name}` as InterceptorName, interceptor) as Result
       ])
     ) as { [Name in Names[number]]: (interceptor: Handler) => Result };
 
