@@ -1,27 +1,18 @@
 import type { Express } from 'express';
 
-import type {
-  Entries,
-  GraphQLEntitiesByEntityName,
-  GraphQLOperationType,
-  GraphQLParams,
-  GraphQLRequestArtifact
-} from '@/utils/types';
+import type { GraphQLOperationType, GraphQLParams, GraphQLRequestArtifact } from '@/utils/types';
 
 import {
   asyncHandler,
   callHttpRequestInterceptors,
   callHttpResponseInterceptors,
   getGraphQLInput,
-  isComparator,
   normalizeUrl,
   parseGraphQLQuery,
-  resolveEntityValues,
   sleep
 } from '@/utils/helpers';
 
-import { equals } from '../../entities';
-import { matchGraphQLRequestArtifacts } from './helpers';
+import { isGraphQLRequestMatchedByEntities, matchGraphQLRequestArtifacts } from './helpers';
 
 interface CreateGraphQLRouteParams {
   graphQLRequestArtifacts: GraphQLRequestArtifact[];
@@ -39,12 +30,14 @@ export const createGraphQLRoute = ({ server, graphQLRequestArtifacts }: CreateGr
       const query = parseGraphQLQuery(graphQLInput.query);
       if (!query) return next();
 
+      const serverInterceptors = graphQLRequestArtifacts[0].serverInterceptors ?? [];
+
       await callHttpRequestInterceptors(
         {
           request,
           meta: { type: 'graphql', operationType: query.operationType as GraphQLOperationType }
         },
-        graphQLRequestArtifacts[0].serverInterceptors ?? []
+        serverInterceptors
       );
 
       const matchedRequestArtifacts = matchGraphQLRequestArtifacts({
@@ -60,50 +53,12 @@ export const createGraphQLRoute = ({ server, graphQLRequestArtifacts }: CreateGr
 
       if (!matchedRequestArtifacts.length) return next();
 
-      const matchedRouteConfig = matchedRequestArtifacts.find(({ config }) => {
-        if (!config.entities) return true;
-
-        const entityEntries = Object.entries(config.entities) as Entries<
-          Required<GraphQLEntitiesByEntityName>
-        >;
-
-        return entityEntries.every(([entityName, valueOrComparator]) => {
-          const actualEntity =
-            entityName === 'variables' ? graphQLInput.variables : request[entityName];
-
-          if (isComparator(valueOrComparator)) {
-            const comparator = valueOrComparator;
-            return resolveEntityValues({ actual: actualEntity, comparator });
-          }
-
-          const isVariables = entityName === 'variables';
-          if (isVariables) {
-            const comparator = equals(valueOrComparator);
-            return resolveEntityValues({ actual: actualEntity, comparator });
-          }
-
-          const mappedEntityEntries = Object.entries(valueOrComparator) as Entries<
-            typeof valueOrComparator
-          >;
-          return mappedEntityEntries.every(([entityPropertyKey, valueOrComparator]) => {
-            // ✅ important:
-            // transform header keys to lower case
-            // because browsers send headers in lowercase
-            const actualPropertyKey =
-              entityName === 'headers' ? entityPropertyKey.toLowerCase() : entityPropertyKey;
-            const actualPropertyValue = actualEntity[actualPropertyKey];
-
-            const comparator = isComparator(valueOrComparator)
-              ? valueOrComparator
-              : equals(valueOrComparator);
-
-            return resolveEntityValues({
-              actual: actualPropertyValue,
-              comparator
-            });
-          });
-        });
-      });
+      const matchedRouteConfig = matchedRequestArtifacts.find(({ config }) =>
+        isGraphQLRequestMatchedByEntities(
+          { request, variables: graphQLInput.variables },
+          config.entities
+        )
+      );
 
       if (!matchedRouteConfig) return next();
 

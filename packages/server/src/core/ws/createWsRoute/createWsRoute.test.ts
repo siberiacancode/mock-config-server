@@ -14,8 +14,8 @@ import type {
   WsCloseRouteConfig,
   WsConnectionRouteConfig,
   WsErrorRouteConfig,
-  WsMessageDataResponse,
-  WsMessageRouteConfig,
+  WsRawDataResponse,
+  WsRawRouteConfig,
   WsRequestArtifact,
   WsRequestInterceptor,
   WsResponseInterceptor,
@@ -34,8 +34,8 @@ import {
 } from './helpers';
 
 export interface WsRawRequestConfig {
-  routes: WsMessageRouteConfig[];
-  type: 'message';
+  routes: WsRawRouteConfig[];
+  type: 'raw';
 }
 
 export interface WsConnectionRequestConfig {
@@ -452,8 +452,8 @@ describe('createWsRoute: ws.raw', () => {
           baseUrl: '/raw',
           configs: [
             {
-              type: 'message',
-              routes: [{ data: (() => ({ source: 'raw' })) as WsMessageDataResponse }]
+              type: 'raw',
+              routes: [{ data: (() => ({ source: 'raw' })) as WsRawDataResponse }]
             }
           ]
         }
@@ -472,8 +472,8 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
-              routes: [{ data: (({ raw }) => ({ message: raw })) as WsMessageDataResponse }]
+              type: 'raw',
+              routes: [{ data: (({ raw }) => ({ message: raw })) as WsRawDataResponse }]
             }
           ]
         }
@@ -492,12 +492,12 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
+              type: 'raw',
               routes: [
                 {
                   data: (({ broadcast, raw }) => {
                     broadcast({ message: raw });
-                  }) as WsMessageDataResponse
+                  }) as WsRawDataResponse
                 }
               ]
             }
@@ -527,13 +527,13 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
+              type: 'raw',
               routes: [
                 {
                   data: (({ event }) => ({
                     id: event.id,
                     timestamp: event.timestamp
-                  })) as WsMessageDataResponse
+                  })) as WsRawDataResponse
                 }
               ]
             }
@@ -556,13 +556,13 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
+              type: 'raw',
               routes: [
                 {
                   data: (async ({ event, setDelay }) => {
                     await setDelay(50);
                     return { id: event.id };
-                  }) as WsMessageDataResponse
+                  }) as WsRawDataResponse
                 }
               ]
             }
@@ -584,13 +584,13 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
+              type: 'raw',
               routes: [
                 {
                   data: (({ raw, socket }) => {
                     socket.context.room = raw;
                     return { room: socket.context.room, keys: Object.keys(socket.context) };
-                  }) as WsMessageDataResponse
+                  }) as WsRawDataResponse
                 }
               ]
             }
@@ -627,8 +627,8 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
-              routes: [{ data: (({ event }) => ({ id: event.id })) as WsMessageDataResponse }]
+              type: 'raw',
+              routes: [{ data: (({ event }) => ({ id: event.id })) as WsRawDataResponse }]
             }
           ],
           interceptors: [
@@ -653,13 +653,13 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
+              type: 'raw',
               routes: [
                 {
                   data: (({ socket }) => ({
                     connectionId: socket.id,
                     hasTimestamp: typeof socket.timestamp === 'number'
-                  })) as WsMessageDataResponse
+                  })) as WsRawDataResponse
                 }
               ]
             }
@@ -697,7 +697,7 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
+              type: 'raw',
               routes: [{ data: () => ({ source: 'raw' }) }]
             }
           ],
@@ -731,7 +731,7 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
+              type: 'raw',
               routes: [{ data: () => ({ source: 'raw' }) }]
             }
           ],
@@ -765,7 +765,7 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
+              type: 'raw',
               routes: [
                 {
                   entities: { data: { event: 'ping' } },
@@ -789,7 +789,7 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
+              type: 'raw',
               routes: [
                 {
                   entities: { data: { event: 'ping' } },
@@ -813,7 +813,7 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
+              type: 'raw',
               routes: [
                 {
                   entities: { isBinary: true },
@@ -848,7 +848,7 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
+              type: 'raw',
               routes: [
                 { data: () => ({ source: 'any' }) },
                 {
@@ -876,11 +876,11 @@ describe('createWsRoute: ws.raw', () => {
         ws: {
           configs: [
             {
-              type: 'message',
+              type: 'raw',
               routes: [
                 {
                   settings: { delay },
-                  data: (({ raw }) => ({ message: raw })) as WsMessageDataResponse
+                  data: (({ raw }) => ({ message: raw })) as WsRawDataResponse
                 }
               ]
             }
@@ -1347,7 +1347,7 @@ describe('createWsRoute: ws.error', () => {
         ws: {
           configs: [
             {
-              type: 'message',
+              type: 'raw',
               routes: [{ data: () => ({ source: 'raw' }) }]
             }
           ]
@@ -2070,6 +2070,45 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
       await once(client, 'message');
 
       expect(componentRequestInterceptor).toBeCalledTimes(1);
+    });
+
+    it('Should call server interceptors once for a graphql subscription message', async () => {
+      const allInterceptor = vi.fn();
+      const messageInterceptor = vi.fn();
+
+      const { port } = await createServer({
+        interceptors: [
+          wsInterceptors.request.all(allInterceptor),
+          wsInterceptors.request.message(messageInterceptor)
+        ],
+        ws: {
+          configs: [
+            {
+              type: 'graphql-ws',
+              operationType: 'subscription',
+              identifier: /^Users$/,
+              routes: [{ data: { data: { ok: true } } }]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      client.send(
+        JSON.stringify({
+          id: 'sub-server-interceptors',
+          type: 'subscribe',
+          payload: {
+            query: 'subscription Users { users { id } }',
+            operationName: 'Users'
+          }
+        })
+      );
+      await once(client, 'message');
+
+      // ✅ important: ws.request.all also fires on open, so one open plus one message
+      expect(allInterceptor).toBeCalledTimes(2);
+      expect(messageInterceptor).toBeCalledTimes(1);
     });
   });
 

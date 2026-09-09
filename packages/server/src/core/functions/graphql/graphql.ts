@@ -15,6 +15,8 @@ import type {
   MaybePromise
 } from '@/utils/types';
 
+import { graphql as graphqlInterceptors } from '@/core/interceptors';
+
 import { createQueueHandler } from './helpers';
 
 interface GraphQLRequestInput {
@@ -296,6 +298,7 @@ const createGraphqlTransportWsFactory = () => {
 };
 
 export const graphql = {
+  ...graphqlInterceptors,
   query: createGraphQLFactory('query'),
   mutation: createGraphQLFactory('mutation'),
   subscription: createGraphqlTransportWsFactory()

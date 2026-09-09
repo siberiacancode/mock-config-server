@@ -10,11 +10,13 @@ import type {
   WsErrorEntitiesByEntityName,
   WsErrorParams,
   WsErrorRouteConfig,
-  WsMessageEntitiesByEntityName,
   WsMessageParams,
-  WsMessageRouteConfig,
+  WsRawEntitiesByEntityName,
+  WsRawRouteConfig,
   WsRequestConfig
 } from '@/utils/types';
+
+import { ws as wsInterceptors } from '@/core/interceptors';
 
 /* connection */
 
@@ -55,12 +57,12 @@ export function createWsConnectionRequestConfig(
 type WsMessageHandler = (params: WsMessageParams) => MaybePromise<Data>;
 interface WsMessageHandlerObject {
   handler: WsMessageHandler;
-  match?: WsMessageEntitiesByEntityName;
+  match?: WsRawEntitiesByEntityName;
 }
 
-const createMessageRouteConfig = (
+const createRawRouteConfig = (
   config: WsMessageHandler | WsMessageHandlerObject
-): WsMessageRouteConfig => {
+): WsRawRouteConfig => {
   if (typeof config === 'function') {
     return {
       data: config
@@ -79,8 +81,8 @@ export function createWsMessageRequestConfig(
   config: WsMessageHandler | WsMessageHandlerObject
 ): WsRequestConfig {
   return {
-    type: 'message',
-    routes: [createMessageRouteConfig(config)]
+    type: 'raw',
+    routes: [createRawRouteConfig(config)]
   };
 }
 
@@ -153,6 +155,7 @@ export function createWsCloseRequestConfig(
 }
 
 export const ws = {
+  ...wsInterceptors,
   connection: createWsConnectionRequestConfig,
   message: createWsMessageRequestConfig,
   error: createWsErrorRequestConfig,

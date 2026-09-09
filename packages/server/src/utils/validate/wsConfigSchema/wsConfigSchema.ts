@@ -1,16 +1,14 @@
 import { z } from 'zod';
 
-import {
-  closeRouteConfigSchema,
-  connectionRouteConfigSchema,
-  errorRouteConfigSchema,
-  messageRouteConfigSchema
-} from './routeConfigSchema/routeConfigSchema';
+import { closeRouteConfigSchema } from './closeRouteConfigSchema/closeRouteConfigSchema';
+import { connectionRouteConfigSchema } from './connectionRouteConfigSchema/connectionRouteConfigSchema';
+import { errorRouteConfigSchema } from './errorRouteConfigSchema/errorRouteConfigSchema';
+import { rawRouteConfigSchema } from './rawRouteConfigSchema/rawRouteConfigSchema';
 
 export const wsRequestConfigSchema = z.union([
   z.strictObject({
-    type: z.literal('message'),
-    routes: z.array(messageRouteConfigSchema)
+    type: z.literal('raw'),
+    routes: z.array(rawRouteConfigSchema)
   }),
   z.strictObject({
     type: z.literal('connection'),

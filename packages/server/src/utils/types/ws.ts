@@ -88,7 +88,7 @@ export interface ConnectionWsRequestArtifact extends BaseWsRequestArtifact {
 
 /* message */
 
-export interface WsMessageEntitiesByEntityName {
+export interface WsRawEntitiesByEntityName {
   data?: WsDataEntity;
   isBinary?: WsIsBinaryEntity;
 }
@@ -101,20 +101,20 @@ export type WsMessageParams = WsFrame & {
   send: <Response = unknown>(response: Response) => void;
   setDelay: (delay: number) => Promise<void>;
 };
-export type WsMessageDataResponse = (params: WsMessageParams) => MaybePromise<Data>;
+export type WsRawDataResponse = (params: WsMessageParams) => MaybePromise<Data>;
 
-export interface WsMessageRouteConfig {
-  data: WsMessageDataResponse;
-  entities?: WsMessageEntitiesByEntityName;
+export interface WsRawRouteConfig {
+  data: WsRawDataResponse;
+  entities?: WsRawEntitiesByEntityName;
   settings?: WsSettings;
 }
-interface WsMessageRequestConfig {
-  routes: WsMessageRouteConfig[];
-  type: 'message';
+interface WsRawRequestConfig {
+  routes: WsRawRouteConfig[];
+  type: 'raw';
 }
-export interface MessageWsRequestArtifact extends BaseWsRequestArtifact {
-  config: WsMessageRouteConfig;
-  type: 'message';
+export interface RawWsRequestArtifact extends BaseWsRequestArtifact {
+  config: WsRawRouteConfig;
+  type: 'raw';
 }
 
 /* error */
@@ -196,14 +196,14 @@ export interface GraphqlTransportWsRequestArtifact extends BaseWsRequestArtifact
 /* unions */
 
 export type WsRouteConfig =
-  WsCloseRouteConfig | WsConnectionRouteConfig | WsErrorRouteConfig | WsMessageRouteConfig;
+  WsCloseRouteConfig | WsConnectionRouteConfig | WsErrorRouteConfig | WsRawRouteConfig;
 
 export type WsRequestConfig =
-  WsCloseRequestConfig | WsConnectionRequestConfig | WsErrorRequestConfig | WsMessageRequestConfig;
+  WsCloseRequestConfig | WsConnectionRequestConfig | WsErrorRequestConfig | WsRawRequestConfig;
 
 export type WsRequestArtifact =
   | CloseWsRequestArtifact
   | ConnectionWsRequestArtifact
   | ErrorWsRequestArtifact
   | GraphqlTransportWsRequestArtifact
-  | MessageWsRequestArtifact;
+  | RawWsRequestArtifact;

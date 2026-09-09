@@ -11,6 +11,8 @@ import type {
   RestSettings
 } from '@/utils/types';
 
+import { rest as restInterceptors } from '@/core/interceptors';
+
 import { createFileHandler, createQueueHandler, formatSsePayload } from './helpers';
 
 interface RestRequestInput {
@@ -293,6 +295,7 @@ const createSseRestFactory = <Method extends 'get' | 'post'>(method: Method) => 
 };
 
 export const rest = {
+  ...restInterceptors,
   delete: createRestFactory('delete'),
   get: createRestFactory('get'),
   options: createRestFactory('options'),
