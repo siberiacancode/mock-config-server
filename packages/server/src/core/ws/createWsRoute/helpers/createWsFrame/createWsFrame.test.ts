@@ -12,7 +12,7 @@ describe('createWsFrame', () => {
   });
 
   it('Should keep a binary frame as a buffer', () => {
-    const payload = Buffer.from([0x00, 0x01, 0xfe]);
+    const payload = Buffer.from([0, 1, 254]);
 
     expect(createWsFrame(payload, true)).toStrictEqual({ isBinary: true, raw: payload });
   });
@@ -22,7 +22,7 @@ describe('createWsFrame', () => {
   });
 
   it('Should not decode a binary frame that is not valid utf-8', () => {
-    const payload = Buffer.from([0xff, 0xfe, 0xfd]);
+    const payload = Buffer.from([255, 254, 253]);
 
     expect(createWsFrame(payload, true).raw).toBe(payload);
   });

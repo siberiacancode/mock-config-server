@@ -43,7 +43,7 @@ describe('isRawRequestMatchedByEntities', () => {
   });
 
   it('Should give the untouched buffer to the raw predicate for a binary frame', () => {
-    const payload = Buffer.from([0x00, 0x01, 0xfe]);
+    const payload = Buffer.from([0, 1, 254]);
 
     expect(
       isRawRequestMatchedByEntities(binaryFrame(payload), {
@@ -52,7 +52,7 @@ describe('isRawRequestMatchedByEntities', () => {
     ).toBe(true);
     expect(
       isRawRequestMatchedByEntities(binaryFrame(payload), {
-        raw: (raw) => Buffer.isBuffer(raw) && raw.equals(Buffer.from([0x00]))
+        raw: (raw) => Buffer.isBuffer(raw) && raw.equals(Buffer.from([0]))
       })
     ).toBe(false);
   });

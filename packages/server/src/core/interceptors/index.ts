@@ -8,6 +8,7 @@ import type {
   InterceptorName,
   RestMethod,
   WsEvent,
+  WsMessageType,
   WsRequestInterceptor,
   WsRequestInterceptorHandler,
   WsResponseInterceptor,
@@ -75,8 +76,11 @@ export const graphql = {
   response: httpResponse('graphql.response', GRAPHQL_NAMES)
 };
 
-type WsInterceptorName = 'all' | WsEvent;
-const WS_NAMES = ['all', 'open', 'close', 'error', 'message'] satisfies WsInterceptorName[];
+// ✅ important:
+// raw is the message subtype of the default websocket protocol, graphql-ws messages are covered
+// by graphql.request.subscription instead
+type WsInterceptorName = 'all' | Extract<WsMessageType, 'raw'> | WsEvent;
+const WS_NAMES = ['all', 'open', 'close', 'error', 'message', 'raw'] satisfies WsInterceptorName[];
 export const ws = {
   request: wsRequest('ws.request', WS_NAMES),
   response: wsResponse('ws.response', WS_NAMES)

@@ -17,7 +17,7 @@ import { sleep } from '../../../sleep';
 interface CallWsRequestInterceptorsParams {
   code?: WsCloseParams['code'];
   error?: WsErrorParams['error'];
-  event: WsEventContext;
+  eventContext: WsEventContext;
   frame?: WsFrame;
   meta: WsInterceptorMeta;
   reason?: WsCloseParams['reason'];
@@ -30,7 +30,7 @@ export const callWsRequestInterceptors = async (
   {
     code,
     error,
-    event,
+    eventContext,
     frame,
     meta,
     reason,
@@ -47,7 +47,7 @@ export const callWsRequestInterceptors = async (
   const requestInterceptorFnParams: WsRequestInterceptorHandlerParams = {
     code,
     frame,
-    event,
+    eventContext,
     reason,
     error,
     broadcast,

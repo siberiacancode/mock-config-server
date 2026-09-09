@@ -22,10 +22,13 @@ export const createWsOpenHandler =
     setDelay
   }: CreateWsOpenHandlerParams) =>
   async () => {
-    const event = createWsEventContext();
+    const eventContext = createWsEventContext();
     const meta = { type: 'ws', event: 'open' } as const;
 
-    await callWsRequestInterceptors({ event, meta, socket, broadcast, send }, serverInterceptors);
+    await callWsRequestInterceptors(
+      { eventContext, meta, socket, broadcast, send },
+      serverInterceptors
+    );
 
     const matchedArtifact = connectionArtifacts.find((artifact) =>
       isConnectionRequestMatchedByEntities(handshake, artifact.config.entities)
@@ -34,12 +37,12 @@ export const createWsOpenHandler =
     if (!matchedArtifact) return;
 
     await callWsRequestInterceptors(
-      { event, meta, socket, broadcast, send },
+      { eventContext, meta, socket, broadcast, send },
       matchedArtifact.componentInterceptors ?? []
     );
 
     const params: WsConnectionParams = {
-      event,
+      eventContext,
       broadcast,
       handshake,
       socket,
@@ -50,7 +53,7 @@ export const createWsOpenHandler =
     const resolvedData = await matchedArtifact.config.data(params);
 
     const data = await callWsResponseInterceptors(
-      { event, data: resolvedData, meta, socket, broadcast, send },
+      { eventContext, data: resolvedData, meta, socket, broadcast, send },
       {
         componentInterceptors: matchedArtifact.componentInterceptors,
         serverInterceptors: matchedArtifact.serverInterceptors

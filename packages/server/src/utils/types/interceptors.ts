@@ -52,7 +52,7 @@ export type HttpResponseInterceptorHandler<Data = any> = (
 export interface WsRequestInterceptorHandlerParams {
   code?: WsCloseParams['code'];
   error?: WsErrorParams['error'];
-  event: WsEventContext;
+  eventContext: WsEventContext;
   frame?: WsFrame;
   reason?: WsCloseParams['reason'];
   socket: WsSocket;
@@ -67,7 +67,7 @@ export type WsRequestInterceptorHandler = (
 
 export interface WsResponseInterceptorHandlerParams {
   code?: WsCloseParams['code'];
-  event: WsEventContext;
+  eventContext: WsEventContext;
   frame?: WsFrame;
   reason?: WsCloseParams['reason'];
   socket: WsSocket;
