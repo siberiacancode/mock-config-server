@@ -53,7 +53,7 @@ export const createWsOpenHandler =
       { event, data: resolvedData, meta, socket, broadcast, send },
       {
         componentInterceptors: matchedArtifact.componentInterceptors,
-        serverInterceptors: matchedArtifact.serverInterceptors
+        serverInterceptors
       }
     );
 

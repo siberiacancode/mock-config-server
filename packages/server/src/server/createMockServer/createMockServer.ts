@@ -104,7 +104,6 @@ export const createMockServer = (
               path: config.path,
               config: route,
               weight: calculateRestRouteConfigWeight(route),
-              serverInterceptors,
               componentInterceptors: component.interceptors
             });
           });
@@ -119,7 +118,6 @@ export const createMockServer = (
               identifier: config.identifier,
               config: route,
               weight: calculateGraphQLRouteConfigWeight(route),
-              serverInterceptors,
               componentInterceptors: component.interceptors
             });
           });
@@ -136,7 +134,6 @@ export const createMockServer = (
               operationType: config.operationType,
               identifier: config.identifier,
               config: route,
-              serverInterceptors,
               componentInterceptors: component.interceptors
             });
           });
@@ -151,7 +148,6 @@ export const createMockServer = (
               type: config.type,
               config: route,
               weight: calculateWsRouteConfigWeight(route),
-              serverInterceptors,
               componentInterceptors: component.interceptors
             } as WsRequestArtifact);
           });
@@ -194,21 +190,24 @@ export const createMockServer = (
   if (restRequestArtifacts.length) {
     createRestRoute({
       server,
-      restRequestArtifacts: prepareRestRequestArtifacts(restRequestArtifacts)
+      restRequestArtifacts: prepareRestRequestArtifacts(restRequestArtifacts),
+      serverInterceptors
     });
   }
 
   if (graphQLRequestArtifacts.length) {
     createGraphQLRoute({
       server,
-      graphQLRequestArtifacts: prepareGraphQLRequestArtifacts(graphQLRequestArtifacts)
+      graphQLRequestArtifacts: prepareGraphQLRequestArtifacts(graphQLRequestArtifacts),
+      serverInterceptors
     });
   }
 
   if (wsRequestArtifacts.length) {
     createWsRoute({
       server: ws,
-      wsRequestArtifacts: prepareWsRequestArtifacts(wsRequestArtifacts)
+      wsRequestArtifacts: prepareWsRequestArtifacts(wsRequestArtifacts),
+      serverInterceptors
     });
   }
 

@@ -98,6 +98,5 @@ export interface RestRequestArtifact {
   config: RestRouteConfig<RestMethod>;
   method: RestMethod;
   path: RegExp | RestPathString;
-  serverInterceptors?: Interceptor[];
   weight: number;
 }

@@ -1,6 +1,11 @@
 import type { Express } from 'express';
 
-import type { GraphQLOperationType, GraphQLParams, GraphQLRequestArtifact } from '@/utils/types';
+import type {
+  GraphQLOperationType,
+  GraphQLParams,
+  GraphQLRequestArtifact,
+  Interceptor
+} from '@/utils/types';
 
 import {
   asyncHandler,
@@ -17,9 +22,14 @@ import { isGraphQLRequestMatchedByEntities, matchGraphQLRequestArtifacts } from 
 interface CreateGraphQLRouteParams {
   graphQLRequestArtifacts: GraphQLRequestArtifact[];
   server: Express;
+  serverInterceptors?: Interceptor[];
 }
 
-export const createGraphQLRoute = ({ server, graphQLRequestArtifacts }: CreateGraphQLRouteParams) =>
+export const createGraphQLRoute = ({
+  server,
+  graphQLRequestArtifacts,
+  serverInterceptors = []
+}: CreateGraphQLRouteParams) =>
   server.use(
     asyncHandler(async (request, response, next) => {
       if (request.method !== 'GET' && request.method !== 'POST') return next();
@@ -29,8 +39,6 @@ export const createGraphQLRoute = ({ server, graphQLRequestArtifacts }: CreateGr
 
       const query = parseGraphQLQuery(graphQLInput.query);
       if (!query) return next();
-
-      const serverInterceptors = graphQLRequestArtifacts[0].serverInterceptors ?? [];
 
       await callHttpRequestInterceptors(
         {
@@ -135,7 +143,7 @@ export const createGraphQLRoute = ({ server, graphQLRequestArtifacts }: CreateGr
         },
         {
           componentInterceptors: matchedRouteConfig.componentInterceptors,
-          serverInterceptors: matchedRouteConfig.serverInterceptors
+          serverInterceptors
         }
       );
 

@@ -50,7 +50,6 @@ export type WsFrame = WsFrameBinary | WsFrameText;
 interface BaseWsRequestArtifact {
   baseUrl: BaseUrl;
   componentInterceptors?: Interceptor[];
-  serverInterceptors?: Interceptor[];
   weight: number;
 }
 

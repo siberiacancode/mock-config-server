@@ -68,7 +68,7 @@ export const createWsCloseHandler =
       { event, data: resolvedData, meta, code, reason, socket, broadcast, send },
       {
         componentInterceptors: matchedArtifact.componentInterceptors,
-        serverInterceptors: matchedArtifact.serverInterceptors
+        serverInterceptors
       }
     );
   };

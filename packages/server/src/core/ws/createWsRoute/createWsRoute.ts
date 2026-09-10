@@ -5,6 +5,7 @@ import type {
   ConnectionWsRequestArtifact,
   ErrorWsRequestArtifact,
   GraphqlTransportWsRequestArtifact,
+  Interceptor,
   RawWsRequestArtifact,
   WsEventContext,
   WsRequestArtifact,
@@ -23,10 +24,15 @@ import { broadcastWsData, sendWsData } from './helpers';
 
 interface CreateWsRouteParams {
   server: WebSocketServer;
+  serverInterceptors?: Interceptor[];
   wsRequestArtifacts: WsRequestArtifact[];
 }
 
-export const createWsRoute = ({ server, wsRequestArtifacts }: CreateWsRouteParams) => {
+export const createWsRoute = ({
+  server,
+  wsRequestArtifacts,
+  serverInterceptors = []
+}: CreateWsRouteParams) => {
   let eventId = 0;
   const createWsEventContext = (): WsEventContext => {
     eventId += 1;
@@ -40,7 +46,7 @@ export const createWsRoute = ({ server, wsRequestArtifacts }: CreateWsRouteParam
       handshake,
       socket,
       createWsEventContext,
-      serverInterceptors: wsRequestArtifacts[0].serverInterceptors ?? [],
+      serverInterceptors,
       broadcast: (data: unknown) => broadcastWsData(server, data),
       send: (data: unknown) => sendWsData(socket, data),
       setDelay: async (delay: number) => {

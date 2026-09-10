@@ -51,6 +51,7 @@ export const handleGraphqlTransportWsMessage = async ({
   input,
   raw,
   requestPathname,
+  serverInterceptors,
   socket,
   broadcast,
   send,
@@ -141,7 +142,7 @@ export const handleGraphqlTransportWsMessage = async ({
     },
     {
       componentInterceptors: matchedArtifact.componentInterceptors,
-      serverInterceptors: matchedArtifact.serverInterceptors
+      serverInterceptors
     }
   );
 

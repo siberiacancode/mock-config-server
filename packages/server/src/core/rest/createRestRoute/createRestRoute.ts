@@ -1,6 +1,6 @@
 import type { Express } from 'express';
 
-import type { RestMethod, RestParams, RestRequestArtifact } from '@/utils/types';
+import type { Interceptor, RestMethod, RestParams, RestRequestArtifact } from '@/utils/types';
 
 import {
   asyncHandler,
@@ -20,6 +20,7 @@ import {
 interface CreateRestRoutesParams {
   restRequestArtifacts: RestRequestArtifact[];
   server: Express;
+  serverInterceptors?: Interceptor[];
 }
 
 const extractPathParams = (artifact: RestRequestArtifact, path: string) => {
@@ -38,12 +39,14 @@ const extractPathParams = (artifact: RestRequestArtifact, path: string) => {
   }, {});
 };
 
-export const createRestRoute = ({ server, restRequestArtifacts }: CreateRestRoutesParams) =>
+export const createRestRoute = ({
+  server,
+  restRequestArtifacts,
+  serverInterceptors = []
+}: CreateRestRoutesParams) =>
   server.use(
     asyncHandler(async (request, response, next) => {
       const requestMethod = request.method.toLowerCase() as RestMethod;
-      const serverInterceptors = restRequestArtifacts[0].serverInterceptors ?? [];
-
       await callHttpRequestInterceptors(
         { request, meta: { type: 'rest', method: requestMethod } },
         serverInterceptors
@@ -142,7 +145,7 @@ export const createRestRoute = ({ server, restRequestArtifacts }: CreateRestRout
         },
         {
           componentInterceptors: matchedRouteConfig.componentInterceptors,
-          serverInterceptors: matchedRouteConfig.serverInterceptors
+          serverInterceptors
         }
       );
 

@@ -57,14 +57,14 @@ const createServer = (
             path: config.path,
             config: route,
             weight: calculateRestRouteConfigWeight(route),
-            componentInterceptors: rest.interceptors,
-            serverInterceptors: interceptors
+            componentInterceptors: rest.interceptors
           });
         });
 
         return acc;
       }, [] as RestRequestArtifact[])
-    )
+    ),
+    serverInterceptors: interceptors
   });
 
   return server;

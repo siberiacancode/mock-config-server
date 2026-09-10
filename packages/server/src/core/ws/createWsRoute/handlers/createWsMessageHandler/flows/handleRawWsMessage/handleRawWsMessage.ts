@@ -35,6 +35,7 @@ export const handleRawWsMessage = async ({
   handshake,
   rawArtifacts,
   requestPathname,
+  serverInterceptors,
   socket,
   broadcast,
   send,
@@ -67,7 +68,7 @@ export const handleRawWsMessage = async ({
     { event, data: resolvedData, meta: RAW_WS_META, frame, socket, broadcast, send },
     {
       componentInterceptors: matchedArtifact.componentInterceptors,
-      serverInterceptors: matchedArtifact.serverInterceptors
+      serverInterceptors
     }
   );
 

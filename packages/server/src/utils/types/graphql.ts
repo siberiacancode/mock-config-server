@@ -79,6 +79,5 @@ export interface GraphQLRequestArtifact {
   config: GraphQLRouteConfig;
   identifier: GraphQLIdentifier;
   operationType: GraphQLOperationType;
-  serverInterceptors?: Interceptor[];
   weight: number;
 }

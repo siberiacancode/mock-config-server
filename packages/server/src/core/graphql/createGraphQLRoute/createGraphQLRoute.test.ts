@@ -57,14 +57,14 @@ const createServer = (
             identifier: config.identifier,
             config: route,
             weight: calculateGraphQLRouteConfigWeight(route),
-            componentInterceptors: graphql.interceptors,
-            serverInterceptors: interceptors
+            componentInterceptors: graphql.interceptors
           });
         });
 
         return acc;
       }, [] as GraphQLRequestArtifact[])
-    )
+    ),
+    serverInterceptors: interceptors
   });
 
   return server;

@@ -110,8 +110,7 @@ const createServer = async (
               identifier: config.identifier,
               config: route,
               weight: calculateGraphqlTransportWsRouteConfigWeight(route),
-              componentInterceptors: ws.interceptors,
-              serverInterceptors
+              componentInterceptors: ws.interceptors
             } as WsRequestArtifact);
           });
 
@@ -124,14 +123,14 @@ const createServer = async (
             type: config.type,
             config: route,
             weight: calculateWsRouteConfigWeight(route),
-            componentInterceptors: ws.interceptors,
-            serverInterceptors
+            componentInterceptors: ws.interceptors
           } as unknown as WsRequestArtifact);
         });
 
         return acc;
       }, [] as WsRequestArtifact[])
-    )
+    ),
+    serverInterceptors
   });
 
   servers.push(server);
