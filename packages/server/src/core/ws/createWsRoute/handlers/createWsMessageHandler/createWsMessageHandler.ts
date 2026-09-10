@@ -33,10 +33,6 @@ export const createWsMessageHandler =
     const frame = createWsFrame(raw, isBinary);
     const event = context.createWsEventContext();
 
-    // ✅ important:
-    // the protocol has to be known before the server interceptors run, otherwise a graphql-ws
-    // frame calls them twice — once as raw and once as graphql-ws. a new protocol plugs in here:
-    // detect it from the untouched frame, then add its flow below
     const graphqlTransportWsInput = frame.isBinary
       ? undefined
       : getGraphqlTransportWsInput(frame.raw);
@@ -54,16 +50,22 @@ export const createWsMessageHandler =
     );
 
     if (!graphqlTransportWsInput) {
-      await handleRawWsMessage({ ...context, event, frame, rawArtifacts, requestPathname });
+      await handleRawWsMessage({
+        ...context,
+        artifacts: rawArtifacts,
+        event,
+        frame,
+        requestPathname
+      });
       return;
     }
 
     await handleGraphqlTransportWsMessage({
       ...context,
+      artifacts: graphqlTransportWsArtifacts,
       completedSubscriptionIds,
       event,
       frame,
-      graphqlTransportWsArtifacts,
       input: graphqlTransportWsInput,
       raw,
       requestPathname

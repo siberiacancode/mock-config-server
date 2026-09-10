@@ -147,7 +147,7 @@ describe('callHttpRequestInterceptors: params functions', () => {
     expect(interceptor).toBeCalledTimes(1);
   });
 
-  it('Should correctly provide request and setDelay', async () => {
+  it('Should correctly provide params', async () => {
     const request = createRequest({});
     const interceptor = vi.fn();
 

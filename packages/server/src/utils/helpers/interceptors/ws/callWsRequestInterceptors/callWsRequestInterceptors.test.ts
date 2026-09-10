@@ -25,7 +25,6 @@ describe('callWsRequestInterceptors: order of calls', () => {
       {
         event,
         meta: { type: 'ws', event: 'open' },
-
         socket,
         broadcast,
         send
@@ -51,7 +50,6 @@ describe('callWsRequestInterceptors: interceptors filtering', () => {
       {
         event,
         meta: { type: 'ws', event: 'open' },
-
         socket,
         broadcast,
         send
@@ -76,7 +74,6 @@ describe('callWsRequestInterceptors: interceptors filtering', () => {
       {
         event,
         meta: { type: 'ws', event: 'message', messageType: 'graphql-ws' },
-
         socket,
         broadcast,
         send
@@ -137,7 +134,6 @@ describe('callWsRequestInterceptors: interceptors filtering', () => {
       {
         event,
         meta: { type: 'ws', event: 'message', messageType: 'raw' },
-
         socket,
         broadcast,
         send
@@ -155,7 +151,6 @@ describe('callWsRequestInterceptors: interceptors filtering', () => {
       {
         event,
         meta: { type: 'ws', event: 'open' },
-
         socket,
         broadcast,
         send
@@ -176,7 +171,6 @@ describe('callWsRequestInterceptors: params functions', () => {
         event,
         meta: { type: 'ws', event: 'message', messageType: 'raw' },
         frame,
-
         socket,
         broadcast,
         send
@@ -196,7 +190,6 @@ describe('callWsRequestInterceptors: params functions', () => {
         meta: { type: 'ws', event: 'close' },
         code: 1000,
         reason: 'normal closure',
-
         socket,
         broadcast,
         send
@@ -219,7 +212,6 @@ describe('callWsRequestInterceptors: params functions', () => {
         event,
         meta: { type: 'ws', event: 'error' },
         error,
-
         socket,
         broadcast,
         send
@@ -237,7 +229,6 @@ describe('callWsRequestInterceptors: params functions', () => {
       {
         event,
         meta: { type: 'ws', event: 'open' },
-
         socket,
         broadcast,
         send
@@ -258,7 +249,6 @@ describe('callWsRequestInterceptors: params functions', () => {
       {
         event,
         meta: { type: 'ws', event: 'open' },
-
         socket,
         broadcast,
         send

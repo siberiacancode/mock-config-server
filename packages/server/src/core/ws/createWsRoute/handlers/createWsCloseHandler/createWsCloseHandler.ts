@@ -9,12 +9,12 @@ import type { WsHandlerContext } from '../types';
 import { isCloseRequestMatchedByEntities } from '../../helpers';
 
 interface CreateWsCloseHandlerParams extends WsHandlerContext {
-  closeArtifacts: CloseWsRequestArtifact[];
+  artifacts: CloseWsRequestArtifact[];
 }
 
 export const createWsCloseHandler =
   ({
-    closeArtifacts,
+    artifacts,
     handshake,
     serverInterceptors,
     socket,
@@ -33,7 +33,7 @@ export const createWsCloseHandler =
       serverInterceptors
     );
 
-    const matchedArtifact = closeArtifacts.find((artifact) =>
+    const matchedArtifact = artifacts.find((artifact) =>
       isCloseRequestMatchedByEntities({ code, reason }, artifact.config.entities)
     );
 
@@ -54,10 +54,6 @@ export const createWsCloseHandler =
       setDelay
     };
 
-    // ✅ important:
-    // close and error responses are not sent automatically, the socket is already gone,
-    // handlers and response interceptors call broadcast themselves when they need to,
-    // so the delay is applied before the handler runs instead of before a send
     if (matchedArtifact.config.settings?.delay) {
       await sleep(matchedArtifact.config.settings.delay);
     }

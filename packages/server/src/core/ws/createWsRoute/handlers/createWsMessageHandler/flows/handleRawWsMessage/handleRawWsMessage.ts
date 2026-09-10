@@ -23,9 +23,9 @@ export const RAW_WS_META: WsInterceptorMeta = {
 };
 
 interface HandleRawWsMessageParams extends WsHandlerContext {
+  artifacts: RawWsRequestArtifact[];
   event: WsEventContext;
   frame: WsFrame;
-  rawArtifacts: RawWsRequestArtifact[];
   requestPathname: string;
 }
 
@@ -33,7 +33,7 @@ export const handleRawWsMessage = async ({
   event,
   frame,
   handshake,
-  rawArtifacts,
+  artifacts,
   requestPathname,
   serverInterceptors,
   socket,
@@ -42,7 +42,7 @@ export const handleRawWsMessage = async ({
   setDelay
 }: HandleRawWsMessageParams) => {
   const matchedArtifact = matchRawRequestArtifacts({
-    artifacts: rawArtifacts,
+    artifacts,
     meta: { path: requestPathname }
   }).find((artifact) => isRawRequestMatchedByEntities(frame, artifact.config.entities));
 

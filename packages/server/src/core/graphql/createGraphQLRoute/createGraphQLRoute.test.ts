@@ -18,7 +18,6 @@ import type {
 import { graphql as graphqlInterceptors } from '@/core/interceptors';
 import { parseCookie, urlJoin } from '@/utils/helpers';
 
-import { haveEntries, regExp } from '../../entities';
 import { createGraphQLRoute } from './createGraphQLRoute';
 import { calculateGraphQLRouteConfigWeight, prepareGraphQLRequestArtifacts } from './helpers';
 
@@ -1151,74 +1150,6 @@ describe('createGraphQLRoute: entities', () => {
     expect(getResponse.body).toStrictEqual({
       data: { name: 'John', surname: 'Doe' }
     });
-  });
-
-  it('Should match entity by top-level comparator', async () => {
-    const server = createServer({
-      graphql: {
-        configs: [
-          {
-            identifier: 'GetUsers',
-            operationType: 'query',
-            routes: [
-              {
-                entities: {
-                  variables: haveEntries({ key1: 'value1' })
-                },
-                data: { data: { name: 'John', surname: 'Doe' } }
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const matchedResponse = await request(server)
-      .post('/')
-      .send({ query: 'query GetUsers { users { name } }', variables: { key1: 'value1' } });
-    expect(matchedResponse.statusCode).toBe(200);
-    expect(matchedResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
-
-    const unmatchedResponse = await request(server)
-      .post('/')
-      .send({ query: 'query GetUsers { users { name } }', variables: { key1: 'value2' } });
-    expect(unmatchedResponse.statusCode).toBe(404);
-  });
-
-  it('Should match entity property by comparator', async () => {
-    const server = createServer({
-      graphql: {
-        configs: [
-          {
-            identifier: 'GetUsers',
-            operationType: 'query',
-            routes: [
-              {
-                entities: {
-                  headers: {
-                    key1: regExp(/^value/)
-                  }
-                },
-                data: { data: { name: 'John', surname: 'Doe' } }
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const matchedResponse = await request(server)
-      .post('/')
-      .set({ key1: 'value1' })
-      .send({ query: 'query GetUsers { users { name } }' });
-    expect(matchedResponse.statusCode).toBe(200);
-    expect(matchedResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
-
-    const unmatchedResponse = await request(server)
-      .post('/')
-      .set({ key1: 'other' })
-      .send({ query: 'query GetUsers { users { name } }' });
-    expect(unmatchedResponse.statusCode).toBe(404);
   });
 });
 

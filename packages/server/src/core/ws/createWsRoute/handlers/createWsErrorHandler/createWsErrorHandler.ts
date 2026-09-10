@@ -7,12 +7,12 @@ import type { WsHandlerContext } from '../types';
 import { isErrorRequestMatchedByEntities } from '../../helpers';
 
 interface CreateWsErrorHandlerParams extends WsHandlerContext {
-  errorArtifacts: ErrorWsRequestArtifact[];
+  artifacts: ErrorWsRequestArtifact[];
 }
 
 export const createWsErrorHandler =
   ({
-    errorArtifacts,
+    artifacts,
     handshake,
     serverInterceptors,
     socket,
@@ -30,7 +30,7 @@ export const createWsErrorHandler =
       serverInterceptors
     );
 
-    const matchedArtifact = errorArtifacts.find((artifact) =>
+    const matchedArtifact = artifacts.find((artifact) =>
       isErrorRequestMatchedByEntities(error, artifact.config.entities)
     );
 

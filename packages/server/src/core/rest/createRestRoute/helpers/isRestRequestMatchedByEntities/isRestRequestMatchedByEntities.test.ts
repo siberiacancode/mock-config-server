@@ -31,6 +31,28 @@ describe('isRestRequestMatchedByEntities', () => {
     expect(isRestRequestMatchedByEntities(request, { body: { key: 'other' } })).toBe(false);
   });
 
+  it('Should match flat body key against a nested actual body', () => {
+    const request = createRequest({
+      body: { key1: { nestedKey1: 'nestedValue1' }, key2: { nestedKey2: 'nestedValue2' } }
+    });
+
+    expect(
+      isRestRequestMatchedByEntities(request, {
+        body: { 'key1.nestedKey1': 'nestedValue1', 'key2.nestedKey2': 'nestedValue2' }
+      })
+    ).toBe(true);
+    expect(isRestRequestMatchedByEntities(request, { body: { 'key1.nestedKey1': 'other' } })).toBe(
+      false
+    );
+  });
+
+  it('Should match empty body against an empty body entity', () => {
+    expect(isRestRequestMatchedByEntities(createRequest({ body: {} }), { body: {} })).toBe(true);
+    expect(
+      isRestRequestMatchedByEntities(createRequest({ body: { key: 'value' } }), { body: {} })
+    ).toBe(false);
+  });
+
   it('Should match mapped entity by property', () => {
     const request = createRequest({ queries: { key: 'value', extra: 'ignored' } });
 

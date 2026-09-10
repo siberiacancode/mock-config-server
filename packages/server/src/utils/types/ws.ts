@@ -117,9 +117,6 @@ export interface RawWsRequestArtifact extends BaseWsRequestArtifact {
 /* error */
 
 export interface WsErrorEntitiesByEntityName {
-  // ✅ important:
-  // ws attaches a stable code to protocol errors (WS_ERR_INVALID_UTF8, ...)
-  // and socket errors carry the node one (ECONNRESET, ...), unlike the message text
   code?: WsErrorCodeEntity;
   message?: WsErrorMessageEntity;
 }

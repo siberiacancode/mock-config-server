@@ -1,5 +1,5 @@
+export { http } from '../interceptors';
 export * from './graphql/graphql';
 export * from './mock';
 export * from './rest/rest';
 export * from './ws/ws';
-export { http } from '@/core/interceptors';

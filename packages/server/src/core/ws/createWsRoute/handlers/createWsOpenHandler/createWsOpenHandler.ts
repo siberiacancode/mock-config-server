@@ -7,12 +7,12 @@ import type { WsHandlerContext } from '../types';
 import { isConnectionRequestMatchedByEntities, sendWsData } from '../../helpers';
 
 interface CreateWsOpenHandlerParams extends WsHandlerContext {
-  connectionArtifacts: ConnectionWsRequestArtifact[];
+  artifacts: ConnectionWsRequestArtifact[];
 }
 
 export const createWsOpenHandler =
   ({
-    connectionArtifacts,
+    artifacts,
     handshake,
     serverInterceptors,
     socket,
@@ -27,7 +27,7 @@ export const createWsOpenHandler =
 
     await callWsRequestInterceptors({ event, meta, socket, broadcast, send }, serverInterceptors);
 
-    const matchedArtifact = connectionArtifacts.find((artifact) =>
+    const matchedArtifact = artifacts.find((artifact) =>
       isConnectionRequestMatchedByEntities(handshake, artifact.config.entities)
     );
 

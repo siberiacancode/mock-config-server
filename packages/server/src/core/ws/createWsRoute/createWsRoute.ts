@@ -98,10 +98,10 @@ export const createWsRoute = ({
       })
     );
 
-    socket.on('close', createWsCloseHandler({ ...context, closeArtifacts }));
+    socket.on('close', createWsCloseHandler({ ...context, artifacts: closeArtifacts }));
 
-    socket.on('error', createWsErrorHandler({ ...context, errorArtifacts }));
+    socket.on('error', createWsErrorHandler({ ...context, artifacts: errorArtifacts }));
 
-    await createWsOpenHandler({ ...context, connectionArtifacts })();
+    await createWsOpenHandler({ ...context, artifacts: connectionArtifacts })();
   });
 };

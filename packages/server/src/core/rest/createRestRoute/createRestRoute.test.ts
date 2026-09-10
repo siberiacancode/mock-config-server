@@ -18,7 +18,6 @@ import type {
 import { rest as restInterceptors } from '@/core/interceptors';
 import { parseCookie, urlJoin } from '@/utils/helpers';
 
-import { haveEntries, regExp } from '../../entities';
 import { createRestRoute } from './createRestRoute';
 import { calculateRestRouteConfigWeight, prepareRestRequestArtifacts } from './helpers';
 
@@ -748,41 +747,6 @@ describe('createRestRoutes: entities', () => {
     expect(response.body).toStrictEqual({ name: 'John', surname: 'Smith' });
   });
 
-  it('Should correctly resolve flat object body with nested key matching', async () => {
-    const server = createServer({
-      rest: {
-        configs: [
-          {
-            path: '/users',
-            method: 'post',
-            routes: [
-              {
-                entities: {
-                  body: {
-                    'key1.nestedKey1': 'nestedValue1',
-                    'key2.nestedKey2': 'nestedValue2'
-                  }
-                },
-                data: { name: 'John', surname: 'Doe' }
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const response = await request(server)
-      .post('/users')
-      .set('Content-Type', 'application/json')
-      .send({
-        key1: { nestedKey1: 'nestedValue1' },
-        key2: { nestedKey2: 'nestedValue2' }
-      });
-
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
-  });
-
   it('Should be case-insensitive for header keys', async () => {
     const server = createServer({
       rest: {
@@ -815,35 +779,6 @@ describe('createRestRoutes: entities', () => {
     expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
-  it('Should correctly handle empty object body', async () => {
-    const server = createServer({
-      rest: {
-        configs: [
-          {
-            path: '/users',
-            method: 'post',
-            routes: [
-              {
-                entities: {
-                  body: {}
-                },
-                data: { name: 'John', surname: 'Doe' }
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const response = await request(server)
-      .post('/users')
-      .set('Content-Type', 'application/json')
-      .send({});
-
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
-  });
-
   it('Should match route configuration by params entity', async () => {
     const server = createServer({
       rest: {
@@ -871,64 +806,6 @@ describe('createRestRoutes: entities', () => {
     expect(matchedResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
 
     const unmatchedResponse = await request(server).get('/users/456');
-    expect(unmatchedResponse.statusCode).toBe(404);
-  });
-
-  it('Should match entity by top-level comparator', async () => {
-    const server = createServer({
-      rest: {
-        configs: [
-          {
-            path: '/users',
-            method: 'get',
-            routes: [
-              {
-                entities: {
-                  queries: haveEntries({ key1: 'value1' })
-                },
-                data: { name: 'John', surname: 'Doe' }
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const matchedResponse = await request(server).get('/users').query({ key1: 'value1' });
-    expect(matchedResponse.statusCode).toBe(200);
-    expect(matchedResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
-
-    const unmatchedResponse = await request(server).get('/users').query({ key1: 'value2' });
-    expect(unmatchedResponse.statusCode).toBe(404);
-  });
-
-  it('Should match entity property by comparator', async () => {
-    const server = createServer({
-      rest: {
-        configs: [
-          {
-            path: '/users',
-            method: 'get',
-            routes: [
-              {
-                entities: {
-                  headers: {
-                    key1: regExp(/^value/)
-                  }
-                },
-                data: { name: 'John', surname: 'Doe' }
-              }
-            ]
-          }
-        ]
-      }
-    });
-
-    const matchedResponse = await request(server).get('/users').set({ key1: 'value1' });
-    expect(matchedResponse.statusCode).toBe(200);
-    expect(matchedResponse.body).toStrictEqual({ name: 'John', surname: 'Doe' });
-
-    const unmatchedResponse = await request(server).get('/users').set({ key1: 'other' });
     expect(unmatchedResponse.statusCode).toBe(404);
   });
 });

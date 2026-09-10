@@ -2,9 +2,6 @@ import type { GraphqlTransportWsMessage } from '@/utils/types';
 
 import { isPlainObject } from '../../isPlainObject/isPlainObject';
 
-// ✅ important:
-// this is the graphql-transport-ws protocol detector, not a json parser — a frame is claimed
-// only when it carries a type the protocol defines, everything else stays a raw message
 const GRAPHQL_TRANSPORT_WS_MESSAGE_TYPES = [
   'complete',
   'connection_init',
@@ -17,9 +14,10 @@ export const getGraphqlTransportWsInput = (message: string) => {
   try {
     const value = JSON.parse(message) as GraphqlTransportWsMessage;
 
-    if (!isPlainObject(value) || !GRAPHQL_TRANSPORT_WS_MESSAGE_TYPES.includes(value.type)) {
-      return undefined;
-    }
+    // ✅ important:
+    // anything that is not a protocol message falls out here — a non object json has no type,
+    // and null or a non json string throws into the catch below
+    if (!GRAPHQL_TRANSPORT_WS_MESSAGE_TYPES.includes(value.type)) return undefined;
 
     if (value.type === 'subscribe') {
       value.payload = {
