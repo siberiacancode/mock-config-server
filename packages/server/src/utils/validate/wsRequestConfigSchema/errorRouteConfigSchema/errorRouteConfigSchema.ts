@@ -4,6 +4,7 @@ import type { Comparator } from '@/utils/types';
 
 import { isComparator } from '@/utils/helpers';
 
+import { settingsSchema } from '../../settingsSchema/settingsSchema';
 import { plainObjectSchema } from '../../utils';
 
 export const errorRouteConfigSchema = z.strictObject({
@@ -13,5 +14,6 @@ export const errorRouteConfigSchema = z.strictObject({
       code: z.union([z.string(), z.custom<Comparator>(isComparator)]).optional(),
       message: z.union([z.string(), z.custom<Comparator>(isComparator)]).optional()
     })
-  ).optional()
+  ).optional(),
+  settings: plainObjectSchema(settingsSchema.pick({ delay: true })).optional()
 });

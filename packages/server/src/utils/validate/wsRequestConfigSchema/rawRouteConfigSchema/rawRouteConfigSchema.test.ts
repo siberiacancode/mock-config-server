@@ -49,4 +49,14 @@ describe('rawRouteConfigSchema: entities', () => {
     });
     expect(parseResult.success).toBe(false);
   });
+
+  it('Should pass settings with delay', () => {
+    const parseResult = rawRouteConfigSchema.safeParse({ data, settings: { delay: 100 } });
+    expect(parseResult.success).toBe(true);
+  });
+
+  it('Should return error on status in settings', () => {
+    const parseResult = rawRouteConfigSchema.safeParse({ data, settings: { status: 200 } });
+    expect(parseResult.success).toBe(false);
+  });
 });

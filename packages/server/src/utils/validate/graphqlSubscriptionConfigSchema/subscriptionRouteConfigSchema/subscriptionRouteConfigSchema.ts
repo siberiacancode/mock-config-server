@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { isPlainObject } from '@/utils/helpers';
 
+import { settingsSchema } from '../../settingsSchema/settingsSchema';
 import { plainObjectSchema, variablesEntitySchema } from '../../utils';
 
 export const subscriptionRouteConfigSchema = z
@@ -13,6 +14,7 @@ export const subscriptionRouteConfigSchema = z
         z.strictObject({
           variables: variablesEntitySchema.optional()
         })
-      ).optional()
+      ).optional(),
+      settings: plainObjectSchema(settingsSchema.pick({ delay: true })).optional()
     })
   );
