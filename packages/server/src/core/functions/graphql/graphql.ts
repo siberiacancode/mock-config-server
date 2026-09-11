@@ -16,6 +16,7 @@ import type {
   MaybePromise
 } from '@/utils/types';
 
+import { graphql as graphqlInterceptors } from '@/core/interceptors';
 import { isGeneratorFunction } from '@/utils/helpers';
 
 import { createGenerator } from '../shared/helpers';
@@ -83,8 +84,7 @@ type GraphqlTransportWsFunction<Input extends GraphqlTransportWsRequestInput> = 
 ) => MaybePromise<Input['response']>;
 
 type GraphqlTransportWsConfig<Input extends GraphqlTransportWsRequestInput> =
-  | GraphqlTransportWsFunction<Input>
-  | GraphqlTransportWsInlineResponse<Input['response']>;
+  GraphqlTransportWsFunction<Input> | GraphqlTransportWsInlineResponse<Input['response']>;
 
 const resolveConfigType = <Input extends GraphQLRequestInput>(config: GraphQLConfig<Input>) => {
   if (typeof config === 'function' && isGeneratorFunction(config))
@@ -267,6 +267,7 @@ const polling = <Input extends GraphQLRequestInput = GraphQLRequestInput>(
 ) => ({ polling: value });
 
 export const graphql = {
+  ...graphqlInterceptors,
   query: createGraphQLFactory('query'),
   mutation: createGraphQLFactory('mutation'),
   polling,

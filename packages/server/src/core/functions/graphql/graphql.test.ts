@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { graphqlRequestConfigSchema } from '../../../utils/validate';
+import { graphqlSubscriptionRequestConfigSchema } from '../../../utils/validate/graphqlSubscriptionConfigSchema/graphqlSubscriptionConfigSchema';
 import { graphql } from './graphql';
 
 describe('graphql', () => {
@@ -117,6 +119,27 @@ describe('graphql', () => {
     });
   });
 
+  it('Should build request configs that pass validation', () => {
+    expect(
+      graphqlRequestConfigSchema.safeParse(graphql.query('GetUsers', { data: { ok: true } }))
+        .success
+    ).toBe(true);
+    expect(
+      graphqlRequestConfigSchema.safeParse(graphql.mutation('GetUsers', { data: { ok: true } }))
+        .success
+    ).toBe(true);
+    expect(
+      graphqlSubscriptionRequestConfigSchema.safeParse(
+        graphql.subscription('GetUsers', { data: { ok: true } })
+      ).success
+    ).toBe(true);
+    expect(
+      graphqlSubscriptionRequestConfigSchema.safeParse(
+        graphql.subscription('GetUsers', { data: { ok: true } }, { delay: 100 })
+      ).success
+    ).toBe(true);
+  });
+
   it('Should keep provided settings for request', () => {
     const result = graphql.query('GetUsers', { data: { ok: true } }, { delay: 150, status: 200 });
 
@@ -175,7 +198,7 @@ describe('graphql', () => {
       const query = params.request.query.query;
       const body = params.request.body.body;
       const path = params.request.params.params;
-      console.log(query, body, path);
+      console.info(query, body, path);
 
       return { data: { response: 'value' } };
     });

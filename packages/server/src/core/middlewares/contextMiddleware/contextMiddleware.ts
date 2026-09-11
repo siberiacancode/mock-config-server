@@ -1,26 +1,35 @@
 import type { Express } from 'express';
+import type { IncomingMessage } from 'node:http';
 import type { WebSocketServer } from 'ws';
 
 import { Buffer } from 'node:buffer';
 import { WebSocket } from 'ws';
 
-import type { DatabaseConfig, GraphQLEntity, GraphQLOperationType } from '@/utils/types';
+import type {
+  ApiContext,
+  DatabaseConfig,
+  GraphQLOperationType,
+  RestMethod,
+  WsSocket
+} from '@/utils/types';
 
 import { createOrm, createStorage } from '@/core/database';
-import { getGraphQLInput, parseGraphQLQuery } from '@/utils/helpers';
+import { getGraphQLInput, parseCookie, parseGraphQLQuery, parseQuery } from '@/utils/helpers';
 
-declare global {
-  namespace Express {
-    export interface Request {
-      graphQL: {
-        operationType: GraphQLOperationType;
-        operationName?: string;
-        query: string;
-        variables?: GraphQLEntity<'variables'>;
-      } | null;
-      id: number;
-      timestamp: number;
-    }
+export interface RequestContext {
+  orm: Partial<ReturnType<typeof createOrm>>;
+  broadcast: (data: unknown) => void;
+  [key: string]: any;
+}
+
+declare module 'http' {
+  interface IncomingMessage {
+    api: ApiContext;
+    context: RequestContext;
+    cookies: Record<string, string>;
+    id: number;
+    queries: Record<string, string | string[]>;
+    timestamp: number;
   }
 }
 
@@ -54,7 +63,8 @@ export const contextMiddleware = (
   };
 
   let requestId = 0;
-  const context: Express['request']['context'] = {
+  let connectionId = 0;
+  const context: RequestContext = {
     orm: {},
     broadcast: (payload: unknown) => broadcast(payload)
   };
@@ -65,19 +75,30 @@ export const contextMiddleware = (
     context.orm = orm;
   }
 
-  server.use((request, _response, next) => {
+  const addContext = (request: IncomingMessage) => {
     requestId += 1;
     request.id = requestId;
-
     request.timestamp = Date.now();
+    request.context = { ...context };
+  };
 
-    request.graphQL = null;
+  server.use((request, _response, next) => {
+    addContext(request);
+
+    request.queries = request.query as Record<string, string | string[]>;
+    request.api = {
+      type: 'rest',
+      method: request.method.toLowerCase() as RestMethod
+    };
+
     if (request.method === 'GET' || request.method === 'POST') {
       const graphQLInput = getGraphQLInput(request);
       const graphQLQuery = parseGraphQLQuery(graphQLInput.query ?? '');
 
       if (graphQLInput.query && graphQLQuery) {
-        request.graphQL = {
+        request.api = {
+          type: 'graphql',
+          eventName: graphQLQuery.eventName,
           operationType: graphQLQuery.operationType as GraphQLOperationType,
           operationName: graphQLQuery.operationName,
           query: graphQLInput.query,
@@ -86,7 +107,22 @@ export const contextMiddleware = (
       }
     }
 
-    request.context = context;
     return next();
+  });
+
+  ws.on('connection', (socket, request) => {
+    addContext(request);
+
+    request.queries = parseQuery(request.url ?? '');
+    request.cookies = parseCookie(request.headers.cookie ?? '');
+
+    // ✅ important:
+    // socket fields are connection scoped, so they are assigned once and never mutated by events
+    // per event id and timestamp are passed through route params instead
+    const wsSocket = socket as WsSocket;
+    connectionId += 1;
+    wsSocket.id = connectionId;
+    wsSocket.timestamp = Date.now();
+    wsSocket.context = {};
   });
 };

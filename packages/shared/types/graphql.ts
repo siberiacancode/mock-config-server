@@ -35,8 +35,7 @@ type PollingGenerator<Data> = Generator<
 >;
 
 export type GraphQLDataResponse =
-  | ((request: Request, entities: GraphQLEntitiesByEntityName) => MaybePromise<Data>)
-  | Data;
+  ((request: Request, entities: GraphQLEntitiesByEntityName) => MaybePromise<Data>) | Data;
 
 export type GraphQLRouteConfig = (
   | {

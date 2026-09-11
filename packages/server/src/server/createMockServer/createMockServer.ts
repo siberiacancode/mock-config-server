@@ -25,7 +25,6 @@ import {
   corsMiddleware,
   errorMiddleware,
   noCorsMiddleware,
-  requestInterceptorMiddleware,
   staticMiddleware
 } from '@/core/middlewares';
 import {
@@ -35,6 +34,7 @@ import {
 } from '@/core/rest';
 import {
   calculateGraphqlTransportWsRouteConfigWeight,
+  calculateWsRouteConfigWeight,
   createWsRoute,
   prepareWsRequestArtifacts
 } from '@/core/ws';
@@ -57,7 +57,7 @@ export const createMockServer = (
   const {
     cors,
     staticPath,
-    interceptors,
+    interceptors: serverInterceptors,
     baseUrl: serverBaseUrl = '/',
     database
   } = mockServerSettings ?? {};
@@ -72,14 +72,6 @@ export const createMockServer = (
   contextMiddleware(server, { database, ws });
 
   cookieParseMiddleware(server);
-
-  const serverRequestInterceptor = interceptors?.request;
-  if (serverRequestInterceptor) {
-    requestInterceptorMiddleware({
-      server,
-      interceptor: serverRequestInterceptor
-    });
-  }
 
   if (cors) {
     corsMiddleware(server, cors);
@@ -107,19 +99,12 @@ export const createMockServer = (
         if (isRest) {
           config.routes.forEach((route) => {
             acc.restRequestArtifacts.push({
-              baseUrl: urlJoin(serverBaseUrl ?? '/', component.baseUrl ?? '') as BaseUrl,
+              baseUrl: urlJoin(serverBaseUrl, component.baseUrl ?? '') as BaseUrl,
               method: config.method,
               path: config.path,
               config: route,
               weight: calculateRestRouteConfigWeight(route),
-              serverResponseInterceptor: interceptors?.response,
-              serverRequestInterceptor: interceptors?.request,
-              requestResponseInterceptor: config.interceptors?.response,
-              requestRequestInterceptor: config.interceptors?.request,
-              componentResponseInterceptor: component.interceptors?.response,
-              componentRequestInterceptor: component.interceptors?.request,
-              routeResponseInterceptor: route.interceptors?.response,
-              routeRequestInterceptor: route.interceptors?.request
+              componentInterceptors: component.interceptors
             });
           });
         }
@@ -128,19 +113,12 @@ export const createMockServer = (
         if (isGraphql) {
           config.routes.forEach((route) => {
             acc.graphQLRequestArtifacts.push({
-              baseUrl: urlJoin(serverBaseUrl ?? '/', component.baseUrl ?? '') as BaseUrl,
+              baseUrl: urlJoin(serverBaseUrl, component.baseUrl ?? '') as BaseUrl,
               operationType: config.operationType,
               identifier: config.identifier,
               config: route,
               weight: calculateGraphQLRouteConfigWeight(route),
-              serverResponseInterceptor: interceptors?.response,
-              serverRequestInterceptor: interceptors?.request,
-              requestResponseInterceptor: config.interceptors?.response,
-              requestRequestInterceptor: config.interceptors?.request,
-              componentResponseInterceptor: component.interceptors?.response,
-              componentRequestInterceptor: component.interceptors?.request,
-              routeResponseInterceptor: route.interceptors?.response,
-              routeRequestInterceptor: route.interceptors?.request
+              componentInterceptors: component.interceptors
             });
           });
         }
@@ -151,26 +129,26 @@ export const createMockServer = (
           config.routes.forEach((route) => {
             acc.wsRequestArtifacts.push({
               type: 'graphql-ws',
-              baseUrl: urlJoin(serverBaseUrl ?? '/', component.baseUrl ?? '') as BaseUrl,
+              baseUrl: urlJoin(serverBaseUrl, component.baseUrl ?? '') as BaseUrl,
               weight: calculateGraphqlTransportWsRouteConfigWeight(route),
               operationType: config.operationType,
               identifier: config.identifier,
-              config: route
+              config: route,
+              componentInterceptors: component.interceptors
             });
           });
         }
 
         const isWs = 'type' in config;
         if (isWs) {
-          const baseUrl = urlJoin(serverBaseUrl ?? '/', component.baseUrl ?? '') as BaseUrl;
+          const baseUrl = urlJoin(serverBaseUrl, component.baseUrl ?? '') as BaseUrl;
           config.routes.forEach((route) => {
             acc.wsRequestArtifacts.push({
               baseUrl,
               type: config.type,
               config: route,
-              weight: 0,
-              componentRequestInterceptor: component.interceptors?.request,
-              componentResponseInterceptor: component.interceptors?.response
+              weight: calculateWsRouteConfigWeight(route),
+              componentInterceptors: component.interceptors
             } as WsRequestArtifact);
           });
         }
@@ -187,7 +165,7 @@ export const createMockServer = (
 
   const wsBaseUrls = new Set<string>(wsRequestArtifacts.map((artifact) => artifact.baseUrl));
   const originalListen = server.listen.bind(server);
-  server.listen = ((...args: any[]) => {
+  server.listen = ((...args: Parameters<typeof originalListen>) => {
     const httpServer = originalListen(...args);
     httpServer.on('upgrade', (request, socket, head) => {
       const [requestPathname] = request.url!.split('?');
@@ -197,6 +175,7 @@ export const createMockServer = (
       });
 
       if (!shouldHandleUpgrade) {
+        socket.write('HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n');
         socket.destroy();
         return;
       }
@@ -211,21 +190,24 @@ export const createMockServer = (
   if (restRequestArtifacts.length) {
     createRestRoute({
       server,
-      restRequestArtifacts: prepareRestRequestArtifacts(restRequestArtifacts)
+      restRequestArtifacts: prepareRestRequestArtifacts(restRequestArtifacts),
+      serverInterceptors
     });
   }
 
   if (graphQLRequestArtifacts.length) {
     createGraphQLRoute({
       server,
-      graphQLRequestArtifacts: prepareGraphQLRequestArtifacts(graphQLRequestArtifacts)
+      graphQLRequestArtifacts: prepareGraphQLRequestArtifacts(graphQLRequestArtifacts),
+      serverInterceptors
     });
   }
 
   if (wsRequestArtifacts.length) {
     createWsRoute({
       server: ws,
-      wsRequestArtifacts: prepareWsRequestArtifacts(wsRequestArtifacts)
+      wsRequestArtifacts: prepareWsRequestArtifacts(wsRequestArtifacts),
+      serverInterceptors
     });
   }
 

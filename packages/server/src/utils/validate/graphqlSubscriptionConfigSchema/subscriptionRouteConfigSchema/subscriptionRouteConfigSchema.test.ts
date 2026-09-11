@@ -39,3 +39,21 @@ describe('subscriptionRouteConfigSchema: data resolving properties combinations'
     }
   );
 });
+
+describe('subscriptionRouteConfigSchema: settings', () => {
+  it('Should pass settings with delay', () => {
+    const parseResult = subscriptionRouteConfigSchema.safeParse({
+      data: { ok: true },
+      settings: { delay: 100 }
+    });
+    expect(parseResult.success).toBe(true);
+  });
+
+  it('Should return error on status in settings', () => {
+    const parseResult = subscriptionRouteConfigSchema.safeParse({
+      data: { ok: true },
+      settings: { status: 200 }
+    });
+    expect(parseResult.success).toBe(false);
+  });
+});
