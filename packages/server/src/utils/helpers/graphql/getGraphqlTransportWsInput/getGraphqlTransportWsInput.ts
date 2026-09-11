@@ -1,6 +1,6 @@
 import type { GraphqlTransportWsMessage } from '@/utils/types';
 
-import { isPlainObject } from '../../isPlainObject/isPlainObject';
+import { isPlainObject } from '../../is';
 
 const GRAPHQL_TRANSPORT_WS_MESSAGE_TYPES = [
   'complete',
