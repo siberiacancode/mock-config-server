@@ -1453,6 +1453,7 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
     });
 
     it('Should ignore a client pong message', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const { port } = await createServer({
         ws: {
           configs: [
@@ -1471,6 +1472,8 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
       client.send(JSON.stringify({ type: 'pong' }));
 
       expect(await messagesPromise).toStrictEqual([]);
+      expect(warn).not.toHaveBeenCalled();
+      warn.mockRestore();
     });
 
     it('Should not call raw interceptors for a graphql-ws frame', async () => {
@@ -2264,5 +2267,110 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
         payload: { data: { ok: true } }
       });
     });
+  });
+});
+
+describe('createWsRoute: event order', () => {
+  it('Should reply to a message only after a delayed connection handler', async () => {
+    const { port } = await createServer({
+      ws: {
+        configs: [
+          {
+            type: 'connection',
+            routes: [
+              {
+                data: async ({ setDelay }) => {
+                  await setDelay(100);
+                  return { source: 'connection' };
+                }
+              }
+            ]
+          },
+          {
+            type: 'raw',
+            routes: [{ data: () => ({ source: 'message' }) }]
+          }
+        ]
+      }
+    });
+    const client = await connectClient(`ws://127.0.0.1:${port}/`);
+    const messagesPromise = collectMessages(client, 300);
+
+    client.send('ping');
+
+    expect(await messagesPromise).toStrictEqual([{ source: 'connection' }, { source: 'message' }]);
+  });
+
+  it('Should handle close only after a delayed connection handler', async () => {
+    let connectionCount = 0;
+    const { port } = await createServer({
+      ws: {
+        configs: [
+          {
+            type: 'connection',
+            routes: [
+              {
+                data: async ({ broadcast, setDelay }) => {
+                  connectionCount += 1;
+                  if (connectionCount === 1) return;
+
+                  await setDelay(100);
+                  broadcast({ source: 'joined' });
+                }
+              }
+            ]
+          },
+          {
+            type: 'close',
+            routes: [{ data: ({ broadcast }) => broadcast({ source: 'left' }) }]
+          }
+        ]
+      }
+    });
+    const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+    const messagesPromise = collectMessages(observer, 300);
+
+    const client = await connectClient(`ws://127.0.0.1:${port}/`);
+    client.close();
+
+    expect(await messagesPromise).toStrictEqual([{ source: 'joined' }, { source: 'left' }]);
+  });
+
+  it('Should keep handling messages when the connection handler fails', async () => {
+    const rejections: unknown[] = [];
+    const onUnhandledRejection = (reason: unknown) => rejections.push(reason);
+    process.on('unhandledRejection', onUnhandledRejection);
+
+    const { port } = await createServer({
+      ws: {
+        configs: [
+          {
+            type: 'connection',
+            routes: [
+              {
+                data: () => {
+                  throw new Error('connection failed');
+                }
+              }
+            ]
+          },
+          {
+            type: 'raw',
+            routes: [{ data: () => ({ source: 'message' }) }]
+          }
+        ]
+      }
+    });
+    const client = await connectClient(`ws://127.0.0.1:${port}/`);
+    const messagesPromise = collectMessages(client, 200);
+
+    client.send('first');
+    client.send('second');
+
+    expect(await messagesPromise).toStrictEqual([{ source: 'message' }, { source: 'message' }]);
+    process.off('unhandledRejection', onUnhandledRejection);
+    expect(rejections.map((reason) => (reason as Error).message)).toStrictEqual([
+      'connection failed'
+    ]);
   });
 });

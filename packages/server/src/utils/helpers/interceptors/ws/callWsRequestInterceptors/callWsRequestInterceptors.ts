@@ -1,5 +1,6 @@
 import type {
   Interceptor,
+  InterceptorName,
   WsCloseParams,
   WsErrorParams,
   WsEventContext,
@@ -56,12 +57,14 @@ export const callWsRequestInterceptors = async (
     setDelay
   };
 
-  const interceptorNames = [
+  const interceptorNames: InterceptorName[] = [
     'ws.request.all',
     `ws.request.${meta.event}`,
-    ...(meta.event === 'message' && meta.messageType === 'raw' ? ['ws.request.raw'] : []),
+    ...(meta.event === 'message' && meta.messageType === 'raw'
+      ? (['ws.request.raw'] as const)
+      : []),
     ...(meta.event === 'message' && meta.messageType === 'graphql-ws'
-      ? ['graphql.request.subscription']
+      ? (['graphql.request.subscription'] as const)
       : [])
   ];
 

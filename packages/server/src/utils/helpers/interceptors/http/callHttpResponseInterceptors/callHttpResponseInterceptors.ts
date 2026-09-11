@@ -5,7 +5,8 @@ import type {
   HttpInterceptorMeta,
   HttpResponseInterceptor,
   HttpResponseInterceptorHandlerParams,
-  Interceptor
+  Interceptor,
+  InterceptorName
 } from '@/utils/types';
 
 import { INTERCEPTOR_NAME } from '@/utils/constants';
@@ -93,11 +94,13 @@ export const callHttpResponseInterceptors = async (
   };
 
   let updatedData = data;
-  const interceptorNames = [
+  const interceptorNames: InterceptorName[] = [
     'http.response.all',
-    ...(meta.type === 'rest' ? ['rest.response.all', `rest.response.${meta.method}`] : []),
+    ...(meta.type === 'rest'
+      ? (['rest.response.all', `rest.response.${meta.method}`] as const)
+      : []),
     ...(meta.type === 'graphql'
-      ? ['graphql.response.all', `graphql.response.${meta.operationType}`]
+      ? (['graphql.response.all', `graphql.response.${meta.operationType}`] as const)
       : [])
   ];
 

@@ -87,21 +87,36 @@ export const createWsRoute = ({
       }
     );
 
+    // ✅ important:
+    // listeners are attached right away so no early frame is lost, but every event waits for the
+    // connection handler — otherwise a slow connection reply lands after a message or close reply.
+    // a failed connection handler still surfaces below, it just does not block the events after it
+    const openPromise = createWsOpenHandler({ ...context, artifacts: connectionArtifacts })();
+    const opened = openPromise.catch(() => {});
+    const afterOpen =
+      <Args extends unknown[]>(handler: (...args: Args) => Promise<void>) =>
+      async (...args: Args) => {
+        await opened;
+        await handler(...args);
+      };
+
     socket.on(
       'message',
-      createWsMessageHandler({
-        ...context,
-        completedSubscriptionIds: new Set<string>(),
-        graphqlTransportWsArtifacts,
-        rawArtifacts,
-        requestPathname
-      })
+      afterOpen(
+        createWsMessageHandler({
+          ...context,
+          completedSubscriptionIds: new Set<string>(),
+          graphqlTransportWsArtifacts,
+          rawArtifacts,
+          requestPathname
+        })
+      )
     );
 
-    socket.on('close', createWsCloseHandler({ ...context, artifacts: closeArtifacts }));
+    socket.on('close', afterOpen(createWsCloseHandler({ ...context, artifacts: closeArtifacts })));
 
-    socket.on('error', createWsErrorHandler({ ...context, artifacts: errorArtifacts }));
+    socket.on('error', afterOpen(createWsErrorHandler({ ...context, artifacts: errorArtifacts })));
 
-    await createWsOpenHandler({ ...context, artifacts: connectionArtifacts })();
+    await openPromise;
   });
 };

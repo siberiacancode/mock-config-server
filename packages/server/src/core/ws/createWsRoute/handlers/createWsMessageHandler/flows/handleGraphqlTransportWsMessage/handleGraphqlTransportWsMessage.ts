@@ -72,10 +72,7 @@ export const handleGraphqlTransportWsMessage = async ({
     return;
   }
 
-  if (input.type !== 'subscribe') {
-    console.warn('Unsupported graphQL subscription input type', input.type);
-    return;
-  }
+  if (input.type === 'pong') return;
 
   const operationId = input.id;
   completedSubscriptionIds.delete(operationId);

@@ -1,7 +1,7 @@
 import type {
   Data,
-  HttpResponseInterceptorHandlerParams,
   Interceptor,
+  InterceptorName,
   WsCloseParams,
   WsEventContext,
   WsFrame,
@@ -46,7 +46,7 @@ export const callWsResponseInterceptors = async (
   }: CallWsResponseInterceptorsParams,
   { componentInterceptors = [], serverInterceptors = [] }: CallWsResponseInterceptors
 ) => {
-  const setDelay: HttpResponseInterceptorHandlerParams['setDelay'] = async (delay) => {
+  const setDelay: WsResponseInterceptorHandlerParams['setDelay'] = async (delay) => {
     await sleep(delay);
   };
 
@@ -63,12 +63,14 @@ export const callWsResponseInterceptors = async (
 
   let updatedData = data;
 
-  const interceptorNames = [
+  const interceptorNames: InterceptorName[] = [
     'ws.response.all',
     `ws.response.${meta.event}`,
-    ...(meta.event === 'message' && meta.messageType === 'raw' ? ['ws.response.raw'] : []),
+    ...(meta.event === 'message' && meta.messageType === 'raw'
+      ? (['ws.response.raw'] as const)
+      : []),
     ...(meta.event === 'message' && meta.messageType === 'graphql-ws'
-      ? ['graphql.response.subscription']
+      ? (['graphql.response.subscription'] as const)
       : [])
   ];
 
