@@ -914,7 +914,7 @@ describe('createWsRoute: ws.raw', () => {
       const [response] = await once(client, 'message');
       const endTime = performance.now();
 
-      expect(endTime - startTime).toBeGreaterThanOrEqual(delay);
+      expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
       expect(JSON.parse(response.toString())).toStrictEqual({
         message: 'hello'
       });
@@ -1127,7 +1127,7 @@ describe('createWsRoute: ws.close', () => {
       const [response] = await promise;
       const endTime = performance.now();
 
-      expect(endTime - startTime).toBeGreaterThanOrEqual(delay - 5);
+      expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
       expect(JSON.parse(response.toString())).toStrictEqual({ source: 'close' });
     });
   });
@@ -1334,7 +1334,7 @@ describe('createWsRoute: ws.error', () => {
       const [response] = await promise;
       const endTime = performance.now();
 
-      expect(endTime - startTime).toBeGreaterThanOrEqual(delay - 5);
+      expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
       expect(JSON.parse(response.toString())).toStrictEqual({ source: 'error' });
     });
   });
@@ -2260,7 +2260,7 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
       const [response] = await once(client, 'message');
       const endTime = performance.now();
 
-      expect(endTime - startTime).toBeGreaterThanOrEqual(delay - 5);
+      expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
       expect(JSON.parse(response.toString())).toStrictEqual({
         id: 'sub-delay',
         type: 'next',

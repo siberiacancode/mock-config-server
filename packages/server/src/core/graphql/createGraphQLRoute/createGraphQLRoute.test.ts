@@ -843,7 +843,7 @@ describe('createGraphQLRoute: content', () => {
       .send({ query: 'query GetUsers { users { name } }' });
     const endTime = performance.now();
 
-    expect(endTime - startTime).toBeGreaterThanOrEqual(delay);
+    expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
     expect(response.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
   });
 
@@ -904,7 +904,7 @@ describe('createGraphQLRoute: settings', () => {
     const response = await request(server).get('/').query(query);
     const endTime = performance.now();
 
-    expect(endTime - startTime).toBeGreaterThanOrEqual(delay);
+    expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
     expect(response.body).toEqual({ data: { name: 'John', surname: 'Doe' } });
   });
 

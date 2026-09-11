@@ -552,7 +552,7 @@ describe('createRestRoutes: content', () => {
     const response = await request(server).get('/users');
     const endTime = performance.now();
 
-    expect(endTime - startTime).toBeGreaterThanOrEqual(delay);
+    expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
     expect(response.body).toStrictEqual({ name: 'John', surname: 'Doe' });
   });
 
@@ -635,7 +635,7 @@ describe('createRestRoutes: settings', () => {
     const response = await request(server).get('/users');
     const endTime = performance.now();
 
-    expect(endTime - startTime).toBeGreaterThanOrEqual(delay);
+    expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
     expect(response.body).toEqual({ name: 'John', surname: 'Doe' });
   });
 
