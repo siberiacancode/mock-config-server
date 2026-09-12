@@ -19,6 +19,10 @@ export default mock(
     name: 'rest',
     configs: [
       rest.get('/users', users),
+      rest.get<{ queries: { test: 1 } }>(
+        '/poll',
+        rest.polling([{ handler: (params) => params.request.queries.test }])
+      ),
       rest.get<{ params: { id: string } }>('/users/:id', (params) => {
         const user = users[Number(params.request.params.id) - 1];
         if (!user) {

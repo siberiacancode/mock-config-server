@@ -5,10 +5,6 @@ interface User {
   name: string;
 }
 
-interface Error {
-  error: string;
-}
-
 const users: User[] = [
   { emoji: '🍎', name: 'Alice' },
   { emoji: '🍌', name: 'Bob' },
@@ -24,17 +20,14 @@ export default mock(
     baseUrl: '/graphql',
     configs: [
       graphql.query('GetUsers', { data: { users } }),
-      graphql.query<{ data: Error | User }, { body: { variables: { id: string } } }>(
-        'GetUser',
-        (params) => {
-          const user = users[Number(params.request.body.variables.id) - 1];
-          if (!user) {
-            params.setStatusCode(404);
-            return { data: { error: 'Not found' } };
-          }
-          return { data: user };
+      graphql.query<{ body: { variables: { id: string } } }>('GetUser', (params) => {
+        const user = users[Number(params.request.body.variables.id) - 1];
+        if (!user) {
+          params.setStatusCode(404);
+          return { data: { error: 'Not found' } };
         }
-      )
+        return { data: user };
+      })
     ]
   }
 );

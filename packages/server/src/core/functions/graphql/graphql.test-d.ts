@@ -38,5 +38,35 @@ describe('graphql types', () => {
       data: { response: 'ordinary response data' },
       polling: [{ response: { data: { response: 'polling config-like data' } } }]
     }));
+
+    graphql.query<{ response: PollingResponse }>('GetUsers', function* () {
+      yield {
+        data: { response: 'ordinary response data' },
+        polling: [{ response: { data: { response: 'polling config-like data' } } }]
+      };
+
+      return {
+        data: { response: 'ordinary response data' },
+        polling: [{ response: { data: { response: 'polling config-like data' } } }]
+      };
+    });
+
+    graphql.query<{ response: PollingResponse }>(
+      'GetUsers',
+      graphql.polling([
+        {
+          response: {
+            data: { response: 'ordinary response data' },
+            polling: [{ response: { data: { response: 'polling config-like data' } } }]
+          }
+        },
+        {
+          handler: () => ({
+            data: { response: 'ordinary response data' },
+            polling: [{ response: { data: { response: 'polling config-like data' } } }]
+          })
+        }
+      ])
+    );
   });
 });

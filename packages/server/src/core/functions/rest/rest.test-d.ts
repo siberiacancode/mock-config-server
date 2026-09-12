@@ -25,20 +25,46 @@ describe('rest types', () => {
     interface FileResponse {
       file: '/tmp/user.json';
     }
+
     interface PollingResponse {
       polling: [{ response: 'ordinary response data' }];
     }
 
-    rest.get<{ response: FileResponse }>('/users/file', { file: '/tmp/user.json' });
-    rest.get<{ response: PollingResponse }>('/users/polling', {
+    interface PollingResponse {
+      polling: [{ response: 'ordinary response data' }];
+    }
+
+    rest.get<{ response: FileResponse }>('/users/file-inline', {
+      file: '/tmp/user.json'
+    });
+
+    rest.get<{ response: PollingResponse }>('/users/polling-inline', {
       polling: [{ response: 'ordinary response data' }]
     });
 
     rest.get<{ response: FileResponse }>('/users/file-handler', () => ({
       file: '/tmp/user.json'
     }));
+
     rest.get<{ response: PollingResponse }>('/users/polling-handler', () => ({
       polling: [{ response: 'ordinary response data' }]
     }));
+
+    rest.get<{ response: PollingResponse }>('/users/polling-generator', function* () {
+      yield {
+        polling: [{ response: 'ordinary response data' }]
+      };
+
+      return {
+        polling: [{ response: 'ordinary response data' }]
+      };
+    });
+
+    rest.get('/users/file-config', rest.file('/tmp/user.json'));
+
+    rest.get<{ response: string }>(
+      '/users/polling-config',
+      rest.polling([{ response: 'ordinary response data' }])
+    );
   });
 });
