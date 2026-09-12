@@ -1,9 +1,8 @@
 {
-  "extends": "../tsconfig.dev.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./../",
     "paths": {
-      "mock-config-server": ["./dist"]
+      "mock-config-server": ["../dist/index.d.mts"]
     }
   },
   "include": ["./**/*.ts"],

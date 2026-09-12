@@ -1,12 +1,13 @@
 import type { CookieOptions, Response as ExpressResponse, Request } from 'express';
 
 import type { BodyEntity, MappedEntity } from './entities';
-import type { Interceptors } from './interceptors';
+import type { Interceptor } from './interceptors';
 import type { BaseUrl } from './server';
 import type { MaybePromise } from './utils';
 import type { Data } from './values';
 
 export type RestMethod = 'delete' | 'get' | 'options' | 'patch' | 'post' | 'put';
+
 export type RestEntityName = 'body' | 'cookies' | 'headers' | 'params' | 'queries';
 
 export type RestEntity<EntityName extends RestEntityName = RestEntityName> =
@@ -31,13 +32,13 @@ type RestHeaderValue = number | string | string[] | undefined;
 
 export interface RestParams<
   Method extends RestMethod = RestMethod,
-  Query = Record<string, unknown>,
+  Queries = Record<string, unknown>,
   Body = Record<string, unknown>,
   Params = Record<string, unknown>,
   Response = any
 > {
   entities: RestEntitiesByEntityName<Method>;
-  request: Request<Params, Response, Body, Query>;
+  request: Omit<Request<Params, Response, Body, Queries>, 'queries'> & { queries: Queries };
   response: ExpressResponse;
   appendHeader: (field: string, value?: string | string[]) => void;
   attachment: (filename: string) => void;
@@ -68,23 +69,19 @@ export type RestDataResponseFunction<Method extends RestMethod = RestMethod> = (
   params: RestParams<Method>
 ) => MaybePromise<Data>;
 export type RestDataResponse<Method extends RestMethod = RestMethod> =
-  | Data
-  | RestDataResponseFunction<Method>
-  | RestDataResponseGenerator<Method>;
+  Data | RestDataResponseFunction<Method> | RestDataResponseGenerator<Method>;
 
 export type RestFileResponse = string;
 
 export interface RestRouteConfig<Method extends RestMethod> {
   data: RestDataResponse<Method>;
   entities?: RestEntitiesByEntityName<Method>;
-  interceptors?: Interceptors<'rest'>;
   settings?: RestSettings;
 }
 
 export type RestPathString = `/${string}`;
 
 export interface BaseRestRequestConfig<Method extends RestMethod> {
-  interceptors?: Interceptors<'rest'>;
   method: Method;
   path: RegExp | RestPathString;
   routes: RestRouteConfig<Method>[];
@@ -106,16 +103,9 @@ export type RestRequestConfig =
 
 export interface RestRequestArtifact {
   baseUrl: BaseUrl;
-  componentRequestInterceptor?: Interceptors<'rest'>['request'];
-  componentResponseInterceptor?: Interceptors<'rest'>['response'];
+  componentInterceptors?: Interceptor[];
   config: RestRouteConfig<RestMethod>;
   method: RestMethod;
   path: RegExp | RestPathString;
-  requestRequestInterceptor?: Interceptors<'rest'>['request'];
-  requestResponseInterceptor?: Interceptors<'rest'>['response'];
-  routeRequestInterceptor?: Interceptors<'rest'>['request'];
-  routeResponseInterceptor?: Interceptors<'rest'>['response'];
-  serverRequestInterceptor?: Interceptors<'rest'>['request'];
-  serverResponseInterceptor?: Interceptors<'rest'>['response'];
   weight: number;
 }

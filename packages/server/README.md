@@ -41,7 +41,7 @@ export default mock(
     name: 'rest',
     configs: [
       rest.get('/users', [{ emoji: '🧊', name: 'siberiacancode' }]),
-      rest.get<{ response: { emoji: string; id: number; name: string }; params: { id: string } }>(
+      rest.get<{ emoji: string; id: number; name: string }, { params: { id: string } }>(
         '/user/:id',
         {
           id: 1,
@@ -57,7 +57,7 @@ export default mock(
           delay: 1000
         }
       ),
-      rest.get<{ response: { emoji: string; id: number; name: string }; params: { id: string } }>(
+      rest.get<{ emoji: string; id: number; name: string }, { params: { id: string } }>(
         '/user/:id',
         (params) => ({
           id: Number(params.request.params.id),

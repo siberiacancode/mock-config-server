@@ -1,10 +1,13 @@
 import type { ExecutionResult, GraphQLError } from 'graphql';
-import type { RawData, WebSocket } from 'ws';
+import type { IncomingMessage } from 'node:http';
+import type { RawData } from 'ws';
 
+import type { WsEventContext } from './context';
 import type { VariablesEntity } from './entities';
-import type { GraphQLIdentifier } from './graphql';
+import type { GraphQLIdentifier, GraphQLTransportWsOperationType } from './graphql';
 import type { MaybePromise } from './utils';
 import type { PlainObject } from './values';
+import type { WsSocket } from './ws';
 
 export type GraphqlTransportWsOperationId = string;
 export type GraphqlTransportWsMessagePayload = Record<string, unknown> | null;
@@ -75,11 +78,13 @@ export interface GraphqlTransportWsEntitiesByEntityName {
 
 export interface GraphqlTransportWsParams {
   entities: GraphqlTransportWsEntitiesByEntityName;
+  event: WsEventContext;
   eventName?: string;
+  handshake: IncomingMessage;
   operationName?: string;
   query?: string;
   raw: RawData;
-  socket: WebSocket;
+  socket: WsSocket;
   variables?: PlainObject;
   complete: () => void;
   next: (payload: GraphqlTransportWsExecutionResult) => void;
@@ -100,10 +105,8 @@ export interface GraphqlTransportWsRouteConfig {
   settings?: GraphqlTransportWsSettings;
 }
 
-export type GraphqlTransportWsOperationType = 'subscription';
-
 export interface GraphqlTransportWsRequestConfig {
   identifier: GraphQLIdentifier;
-  operationType: GraphqlTransportWsOperationType;
+  operationType: GraphQLTransportWsOperationType;
   routes: GraphqlTransportWsRouteConfig[];
 }

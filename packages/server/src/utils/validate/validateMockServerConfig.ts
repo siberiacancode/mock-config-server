@@ -14,7 +14,7 @@ import { portSchema } from './portSchema/portSchema';
 import { restRequestConfigSchema } from './restRequestConfigSchema/restRequestConfigSchema';
 import { staticPathSchema } from './staticPathSchema/staticPathSchema';
 import { plainObjectSchema } from './utils';
-import { wsRequestConfigSchema } from './wsConfigSchema/wsConfigSchema';
+import { wsRequestConfigSchema } from './wsRequestConfigSchema/wsRequestConfigSchema';
 
 export const validateMockServerConfig = (mockServerConfig: PlainObject) => {
   if (!mockServerConfig.length) {

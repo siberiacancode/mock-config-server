@@ -1,318 +1,122 @@
-import type { IncomingMessage } from 'node:http';
-import type { RawData, WebSocketServer } from 'ws';
-
-import { Buffer } from 'node:buffer';
-import { WebSocket } from 'ws';
+import type { WebSocketServer } from 'ws';
 
 import type {
+  CloseWsRequestArtifact,
   ConnectionWsRequestArtifact,
-  Entries,
-  GraphQLEntitiesByEntityName,
-  GraphqlTransportWsExecutionResult,
-  GraphqlTransportWsParams,
+  ErrorWsRequestArtifact,
   GraphqlTransportWsRequestArtifact,
+  Interceptor,
   RawWsRequestArtifact,
-  WsFrame,
-  WsParams,
-  WsRequestArtifact
+  WsEventContext,
+  WsRequestArtifact,
+  WsSocket
 } from '@/utils/types';
 
-import {
-  getGraphqlTransportWsInput,
-  isComparator,
-  parseCookie,
-  parseGraphQLQuery,
-  parseQuery,
-  resolveEntityValues,
-  sleep
-} from '@/utils/helpers';
+import { sleep } from '@/utils/helpers';
 
-import { equals } from '../../entities';
-import { matchGraphqlTransportWsRequestArtifacts, matchRawRequestArtifacts } from './helpers';
+import {
+  createWsCloseHandler,
+  createWsErrorHandler,
+  createWsMessageHandler,
+  createWsOpenHandler
+} from './handlers';
+import { broadcastWsData, sendWsData } from './helpers';
 
 interface CreateWsRouteParams {
   server: WebSocketServer;
+  serverInterceptors?: Interceptor[];
   wsRequestArtifacts: WsRequestArtifact[];
 }
 
-const sendGraphqlTransportWsData = (
-  socket: WebSocket,
-  id: string,
-  payload: GraphqlTransportWsExecutionResult
-) => {
-  if (payload === undefined) return;
-  socket.send(JSON.stringify({ id, type: 'next', payload }));
-};
+export const createWsRoute = ({
+  server,
+  wsRequestArtifacts,
+  serverInterceptors = []
+}: CreateWsRouteParams) => {
+  let eventId = 0;
+  const createWsEventContext = (): WsEventContext => {
+    eventId += 1;
+    return { id: eventId, timestamp: Date.now() };
+  };
 
-const sendGraphqlTransportWsComplete = (socket: WebSocket, id: string) => {
-  socket.send(JSON.stringify({ id, type: 'complete' }));
-};
+  return server.on('connection', async (rawSocket, handshake) => {
+    const socket = rawSocket as WsSocket;
 
-const sendWsData = (socket: WebSocket, data: unknown) => {
-  if (data === undefined) return;
-  if (typeof data === 'string') {
-    socket.send(data);
-    return;
-  }
-
-  const isBinary =
-    data instanceof ArrayBuffer ||
-    ArrayBuffer.isView(data) ||
-    data instanceof Blob ||
-    Buffer.isBuffer(data);
-  if (isBinary) {
-    socket.send(data);
-    return;
-  }
-
-  socket.send(JSON.stringify(data));
-};
-
-const broadcastWsData = (server: WebSocketServer, data: unknown) => {
-  if (data === undefined) return;
-  for (const client of server.clients) {
-    if (client.readyState !== WebSocket.OPEN) continue;
-    sendWsData(client, data);
-  }
-};
-
-export const createWsRoute = ({ server, wsRequestArtifacts }: CreateWsRouteParams) => {
-  server.on(
-    'connection',
-    async (
+    const context = {
+      handshake,
       socket,
-      request: IncomingMessage & {
-        queries: Record<string, string | string[]>;
-        cookies: Record<string, string>;
+      createWsEventContext,
+      serverInterceptors,
+      broadcast: (data: unknown) => broadcastWsData(server, data),
+      send: (data: unknown) => sendWsData(socket, data),
+      setDelay: async (delay: number) => {
+        await sleep(delay);
       }
-    ) => {
-      const completedSubscriptionIds = new Set<string>();
+    };
 
-      const [requestPathname] = request.url!.split('?');
-      const matchedRequestArtifacts = wsRequestArtifacts.filter((artifact) => {
-        if (artifact.baseUrl === '/') return true;
-        return (
-          requestPathname === artifact.baseUrl || requestPathname.startsWith(`${artifact.baseUrl}/`)
-        );
-      });
+    const [requestPathname] = handshake.url!.split('?');
+    const matchedRequestArtifacts = wsRequestArtifacts.filter((artifact) => {
+      if (artifact.baseUrl === '/') return true;
+      return (
+        requestPathname === artifact.baseUrl || requestPathname.startsWith(`${artifact.baseUrl}/`)
+      );
+    });
 
-      const { connectionArtifacts, graphqlTransportWsRequestArtifacts, rawWsRequestArtifacts } =
-        matchedRequestArtifacts.reduce(
-          (acc, artifact) => {
-            if (artifact.type === 'connection') acc.connectionArtifacts.push(artifact);
-            if (artifact.type === 'graphql-ws')
-              acc.graphqlTransportWsRequestArtifacts.push(artifact);
-            if (artifact.type === 'raw') acc.rawWsRequestArtifacts.push(artifact);
+    const {
+      connectionArtifacts,
+      graphqlTransportWsArtifacts,
+      rawArtifacts,
+      closeArtifacts,
+      errorArtifacts
+    } = matchedRequestArtifacts.reduce(
+      (acc, artifact) => {
+        if (artifact.type === 'connection') acc.connectionArtifacts.push(artifact);
+        if (artifact.type === 'graphql-ws') acc.graphqlTransportWsArtifacts.push(artifact);
+        if (artifact.type === 'raw') acc.rawArtifacts.push(artifact);
+        if (artifact.type === 'close') acc.closeArtifacts.push(artifact);
+        if (artifact.type === 'error') acc.errorArtifacts.push(artifact);
 
-            return acc;
-          },
-          {
-            connectionArtifacts: [] as ConnectionWsRequestArtifact[],
-            graphqlTransportWsRequestArtifacts: [] as GraphqlTransportWsRequestArtifact[],
-            rawWsRequestArtifacts: [] as RawWsRequestArtifact[]
-          }
-        );
-
-      request.queries = parseQuery(request.url!);
-      request.cookies = parseCookie(request.headers.cookie ?? '');
-
-      for (const artifact of connectionArtifacts) {
-        if (artifact.config.entities) {
-          const entityEntries = Object.entries(artifact.config.entities) as Entries<
-            Required<typeof artifact.config.entities>
-          >;
-
-          const isMatchedByEntities = entityEntries.every(([entityName, valueOrComparator]) => {
-            const actualEntity = request[entityName];
-
-            if (isComparator(valueOrComparator)) {
-              const comparator = valueOrComparator;
-              return resolveEntityValues({ actual: actualEntity, comparator });
-            }
-
-            const mappedEntityEntries = Object.entries(valueOrComparator);
-            return mappedEntityEntries.every(([entityPropertyKey, valueOrComparator]) => {
-              // ✅ important:
-              // transform header keys to lower case
-              // because browsers send headers in lowercase
-              const actualPropertyKey =
-                entityName === 'headers' ? entityPropertyKey.toLowerCase() : entityPropertyKey;
-              const actualPropertyValue = actualEntity[actualPropertyKey];
-
-              const comparator = isComparator(valueOrComparator)
-                ? valueOrComparator
-                : equals(valueOrComparator);
-
-              return resolveEntityValues({
-                actual: actualPropertyValue,
-                comparator
-              });
-            });
-          });
-
-          if (!isMatchedByEntities) continue;
-        }
-
-        const params = {
-          broadcast: (data: unknown) => broadcastWsData(server, data),
-          request,
-          socket,
-          send: (data: unknown) => sendWsData(socket, data),
-          setDelay: async (delay: number) => {
-            await sleep(delay);
-          }
-        };
-
-        const resolvedData = await artifact.config.data(params);
-
-        sendWsData(socket, resolvedData);
+        return acc;
+      },
+      {
+        connectionArtifacts: [] as ConnectionWsRequestArtifact[],
+        graphqlTransportWsArtifacts: [] as GraphqlTransportWsRequestArtifact[],
+        rawArtifacts: [] as RawWsRequestArtifact[],
+        closeArtifacts: [] as CloseWsRequestArtifact[],
+        errorArtifacts: [] as ErrorWsRequestArtifact[]
       }
+    );
 
-      socket.on('message', async (raw: RawData, isBinary: boolean) => {
-        const frame: WsFrame = isBinary
-          ? { isBinary: true, raw: raw as Buffer }
-          : { isBinary: false, raw: raw.toString() };
-        const wsParams: WsParams = {
-          ...frame,
-          broadcast: (data: unknown) => broadcastWsData(server, data),
-          socket,
-          send: (data: unknown) => sendWsData(socket, data),
-          setDelay: async (delay) => {
-            await sleep(delay);
-          }
-        };
+    // ✅ important:
+    // listeners are attached right away so no early frame is lost, but every event waits for the
+    // connection handler — otherwise a slow connection reply lands after a message or close reply.
+    // a failed connection handler still surfaces below, it just does not block the events after it
+    const openPromise = createWsOpenHandler({ ...context, artifacts: connectionArtifacts })();
+    const opened = openPromise.catch(() => {});
+    const afterOpen =
+      <Args extends unknown[]>(handler: (...args: Args) => Promise<void>) =>
+      async (...args: Args) => {
+        await opened;
+        await handler(...args);
+      };
 
-        const matchedRawArtifacts = matchRawRequestArtifacts({
-          artifacts: rawWsRequestArtifacts,
-          meta: {
-            path: requestPathname
-          }
-        });
+    socket.on(
+      'message',
+      afterOpen(
+        createWsMessageHandler({
+          ...context,
+          completedSubscriptionIds: new Set<string>(),
+          graphqlTransportWsArtifacts,
+          rawArtifacts,
+          requestPathname
+        })
+      )
+    );
 
-        for (const artifact of matchedRawArtifacts) {
-          if (artifact.componentRequestInterceptor) {
-            await artifact.componentRequestInterceptor(wsParams);
-          }
+    socket.on('close', afterOpen(createWsCloseHandler({ ...context, artifacts: closeArtifacts })));
 
-          const resolvedData = await artifact.config.data(wsParams);
+    socket.on('error', afterOpen(createWsErrorHandler({ ...context, artifacts: errorArtifacts })));
 
-          const data = artifact.componentResponseInterceptor
-            ? artifact.componentResponseInterceptor(resolvedData, wsParams)
-            : resolvedData;
-
-          if (artifact.config.settings?.delay) {
-            await sleep(artifact.config.settings.delay);
-          }
-
-          sendWsData(socket, data);
-        }
-
-        if (frame.isBinary) return;
-
-        const graphqlSubscriptionInput = getGraphqlTransportWsInput(frame.raw.toString());
-
-        if (!graphqlSubscriptionInput) {
-          console.warn('[mock-config] Error parsing graphQL subscription input');
-          return;
-        }
-
-        if (graphqlSubscriptionInput.type === 'connection_init') {
-          socket.send(JSON.stringify({ type: 'connection_ack' }));
-          return;
-        }
-
-        if (graphqlSubscriptionInput.type === 'ping') {
-          socket.send(JSON.stringify({ type: 'pong' }));
-          return;
-        }
-
-        if (graphqlSubscriptionInput.type === 'complete') {
-          completedSubscriptionIds.add(graphqlSubscriptionInput.id);
-          return;
-        }
-
-        if (graphqlSubscriptionInput.type !== 'subscribe') {
-          console.warn(
-            'Unsupported graphQL subscription input type',
-            graphqlSubscriptionInput.type
-          );
-          return;
-        }
-
-        const operationId = graphqlSubscriptionInput.id;
-        completedSubscriptionIds.delete(operationId);
-
-        const query = parseGraphQLQuery(graphqlSubscriptionInput.payload?.query ?? '');
-        if (!query) return;
-
-        const matchedGraphqlTransportWsRequestArtifacts = matchGraphqlTransportWsRequestArtifacts({
-          artifacts: graphqlTransportWsRequestArtifacts,
-          meta: {
-            path: requestPathname,
-            eventName: query.eventName,
-            query: graphqlSubscriptionInput.payload?.query,
-            operationType: query.operationType,
-            operationName: query.operationName
-          }
-        });
-
-        const matchedArtifact = matchedGraphqlTransportWsRequestArtifacts.find(({ config }) => {
-          if (!config.entities) return true;
-
-          const entityEntries = Object.entries(config.entities) as Entries<
-            Required<GraphQLEntitiesByEntityName>
-          >;
-
-          return entityEntries.every(([_, valueOrComparator]) => {
-            const actualEntity = graphqlSubscriptionInput.payload?.variables;
-
-            if (isComparator(valueOrComparator)) {
-              const comparator = valueOrComparator;
-              return resolveEntityValues({ actual: actualEntity, comparator });
-            }
-
-            const comparator = equals(valueOrComparator);
-            return resolveEntityValues({ actual: actualEntity, comparator });
-          });
-        });
-
-        if (!matchedArtifact) return;
-
-        const graphqlTransportWsParams: GraphqlTransportWsParams = {
-          complete: () => {
-            if (completedSubscriptionIds.has(operationId)) return;
-            completedSubscriptionIds.add(operationId);
-            sendGraphqlTransportWsComplete(socket, operationId);
-          },
-          entities: matchedArtifact.config.entities ?? {},
-          eventName: query.eventName,
-          next: (payload) => {
-            if (completedSubscriptionIds.has(operationId)) return;
-            sendGraphqlTransportWsData(socket, operationId, payload);
-          },
-          operationName: query.operationName,
-          query: graphqlSubscriptionInput.payload?.query,
-          raw,
-          setDelay: async (delay) => {
-            await sleep(delay);
-          },
-          socket,
-          variables: graphqlSubscriptionInput.payload?.variables ?? {}
-        };
-
-        const resolvedData =
-          typeof matchedArtifact.config.data === 'function'
-            ? await matchedArtifact.config.data(graphqlTransportWsParams)
-            : matchedArtifact.config.data;
-
-        if (matchedArtifact.config.settings?.delay) {
-          await sleep(matchedArtifact.config.settings.delay);
-        }
-
-        if (completedSubscriptionIds.has(operationId)) return;
-
-        sendGraphqlTransportWsData(socket, operationId, resolvedData);
-      });
-    }
-  );
+    await openPromise;
+  });
 };

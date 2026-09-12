@@ -2,17 +2,19 @@ import type { CookieOptions, Response as ExpressResponse, Request } from 'expres
 import type { ExecutionResult } from 'graphql';
 
 import type { MappedEntity, VariablesEntity } from './entities';
-import type { Interceptors } from './interceptors';
+import type { Interceptor } from './interceptors';
 import type { BaseUrl } from './server';
 import type { MaybePromise } from './utils';
 import type { PlainObject } from './values';
+
+export type GraphQLOperationType = 'mutation' | 'query';
+export type GraphQLTransportWsOperationType = 'subscription';
 
 export type GraphQLEntityName = 'cookies' | 'headers' | 'queries' | 'variables';
 
 export type GraphQLEntity<EntityName extends GraphQLEntityName = GraphQLEntityName> =
   EntityName extends 'variables' ? VariablesEntity : MappedEntity;
 
-export type GraphQLOperationType = 'mutation' | 'query';
 export type GraphQLIdentifier = string | RegExp;
 
 export type GraphQLEntitiesByEntityName = {
@@ -27,16 +29,19 @@ export interface GraphQLSettings {
 type GraphQLCookieValue = string | undefined;
 type GraphQLHeaderValue = number | string | string[] | undefined;
 
-export type GraphQLExecutionResult = ExecutionResult<Record<string, unknown>, PlainObject>;
+export type GraphQLExecutionResult<
+  Data extends object = object,
+  Extensions = PlainObject
+> = ExecutionResult<Data, Extensions>;
 
 export interface GraphQLParams<
-  Query = Record<string, unknown>,
+  Queries = Record<string, unknown>,
   Body = Record<string, unknown>,
   Params = Record<string, unknown>,
   Response = any
 > {
   entities: GraphQLEntitiesByEntityName;
-  request: Request<Params, Response, Body, Query>;
+  request: Omit<Request<Params, Response, Body, Queries>, 'queries'> & { queries: Queries };
   response: ExpressResponse;
   appendHeader: (field: string, value?: string | string[]) => void;
   attachment: (filename: string) => void;
@@ -67,36 +72,25 @@ export type GraphQLDataResponseFunction = (
   params: GraphQLParams
 ) => MaybePromise<GraphQLExecutionResult>;
 export type GraphQLDataResponse =
-  | GraphQLDataResponseFunction
-  | GraphQLDataResponseGenerator
-  | GraphQLExecutionResult;
+  GraphQLDataResponseFunction | GraphQLDataResponseGenerator | GraphQLExecutionResult;
 
 export interface GraphQLRouteConfig {
   data: GraphQLDataResponse;
   entities?: GraphQLEntitiesByEntityName;
-  interceptors?: Interceptors<'graphql'>;
   settings?: GraphQLSettings;
 }
 
 export interface GraphQLRequestConfig {
   identifier: GraphQLIdentifier;
-  interceptors?: Interceptors<'graphql'>;
   operationType: GraphQLOperationType;
   routes: GraphQLRouteConfig[];
 }
 
 export interface GraphQLRequestArtifact {
   baseUrl: BaseUrl;
-  componentRequestInterceptor?: Interceptors<'graphql'>['request'];
-  componentResponseInterceptor?: Interceptors<'graphql'>['response'];
+  componentInterceptors?: Interceptor[];
   config: GraphQLRouteConfig;
   identifier: GraphQLIdentifier;
   operationType: GraphQLOperationType;
-  requestRequestInterceptor?: Interceptors<'graphql'>['request'];
-  requestResponseInterceptor?: Interceptors<'graphql'>['response'];
-  routeRequestInterceptor?: Interceptors<'graphql'>['request'];
-  routeResponseInterceptor?: Interceptors<'graphql'>['response'];
-  serverRequestInterceptor?: Interceptors<'graphql'>['request'];
-  serverResponseInterceptor?: Interceptors<'graphql'>['response'];
   weight: number;
 }

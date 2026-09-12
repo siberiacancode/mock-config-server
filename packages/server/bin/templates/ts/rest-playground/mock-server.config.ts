@@ -1,6 +1,11 @@
 import { mock, rest } from 'mock-config-server';
 
-const users = [
+interface User {
+  emoji: string;
+  name: string;
+}
+
+const users: User[] = [
   { emoji: '🍎', name: 'Alice' },
   { emoji: '🍌', name: 'Bob' },
   { emoji: '🍒', name: 'Carol' },
@@ -22,19 +27,16 @@ export default mock(
         }
         return user;
       }),
-      rest.post<{ body: { emoji: string; name: string } }>('/users', (params) => {
+      rest.post<{ body: User }>('/users', (params) => {
         const user = params.request.body;
         users.push(user);
         return user;
       }),
-      rest.put<{ params: { id: string }; body: { emoji: string; name: string } }>(
-        '/users/:id',
-        (params) => {
-          const user = params.request.body;
-          users[Number(params.request.params.id) - 1] = user;
-          return user;
-        }
-      ),
+      rest.put<{ params: { id: string }; body: User }>('/users/:id', (params) => {
+        const user = params.request.body;
+        users[Number(params.request.params.id) - 1] = user;
+        return user;
+      }),
       rest.delete<{ params: { id: string } }>('/users/:id', (params) => {
         users.splice(Number(params.request.params.id) - 1, 1);
         return { ok: true };

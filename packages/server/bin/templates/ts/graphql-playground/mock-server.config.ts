@@ -1,6 +1,11 @@
 import { graphql, mock } from 'mock-config-server';
 
-const users = [
+interface User {
+  emoji: string;
+  name: string;
+}
+
+const users: User[] = [
   { emoji: '🍎', name: 'Alice' },
   { emoji: '🍌', name: 'Bob' },
   { emoji: '🍒', name: 'Carol' },
@@ -15,40 +20,28 @@ export default mock(
     baseUrl: '/graphql',
     configs: [
       graphql.query('GetUsers', () => ({ data: { users } })),
-      graphql.query<{
-        body: { variables: { id: string } };
-        response: { data: { user: null | { emoji: string; name: string } } };
-      }>('GetUser', (params) => {
+      graphql.query<{ body: { variables: { id: string } } }>('GetUser', (params) => {
         const id = params.request.body.variables.id;
         const user = users[Number(id) - 1];
         if (!user) {
           params.setStatusCode(404);
-          return { data: { user: null } };
+          return { data: { error: 'Not found' } };
         }
-        return { data: { user } };
+        return { data: user };
       }),
-      graphql.mutation<{
-        body: { variables: { emoji: string; name: string } };
-        response: { data: { createUser: { emoji: string; name: string } } };
-      }>('CreateUser', (params) => {
+      graphql.mutation<{ body: { variables: User } }>('CreateUser', (params) => {
         const user = params.request.body.variables;
         users.push(user);
-        return { data: { createUser: user } };
+        return { data: user };
       }),
-      graphql.mutation<{
-        body: { variables: { emoji: string; id: string; name: string } };
-        response: { data: { changeUser: { emoji: string; name: string } } };
-      }>('ChangeUser', (params) => {
-        const user = params.request.body.variables;
-        users[Number(user.id) - 1] = user;
-        return { data: { changeUser: user } };
+      graphql.mutation<{ body: { variables: User & { id: string } } }>('ChangeUser', (params) => {
+        const { id, ...user } = params.request.body.variables;
+        users[Number(id) - 1] = user;
+        return { data: user };
       }),
-      graphql.mutation<{
-        body: { variables: { id: string } };
-        response: { data: { deleteUser: boolean } };
-      }>('DeleteUser', (params) => {
+      graphql.mutation<{ body: { variables: { id: string } } }>('DeleteUser', (params) => {
         users.splice(Number(params.request.body.variables.id) - 1, 1);
-        return { data: { deleteUser: true } };
+        return { data: { deleted: true } };
       })
     ]
   }

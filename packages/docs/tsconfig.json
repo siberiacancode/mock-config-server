@@ -4,14 +4,14 @@
     "target": "ESNext",
     "jsx": "react-jsx",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "baseUrl": ".",
     "module": "esnext",
     "moduleResolution": "bundler",
     "paths": {
       "@/*": ["./src/*"],
-      "fumadocs-mdx:collections/*": [".source/*"]
+      "fumadocs-mdx:collections/*": ["./.source/*"]
     },
     "resolveJsonModule": true,
+    "types": ["node", "react", "react-dom", "mdx"],
     "allowJs": true,
     "strict": true,
     "noEmit": true,

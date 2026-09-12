@@ -1,6 +1,11 @@
 import { mock, rest } from 'mock-config-server';
 
-const users = [
+interface User {
+  emoji: string;
+  name: string;
+}
+
+const users: User[] = [
   { emoji: '🍎', name: 'Alice' },
   { emoji: '🍌', name: 'Bob' },
   { emoji: '🍒', name: 'Carol' },

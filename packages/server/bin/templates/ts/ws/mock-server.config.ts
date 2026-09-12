@@ -6,7 +6,9 @@ export default mock(
     name: 'ws',
     baseUrl: '/ws',
     configs: [
-      ws.connection(() => ({ message: `${new Date().toISOString()} Hello from server` })),
+      ws.connection(() => ({
+        message: `${new Date().toISOString()} Hello from server`
+      })),
       ws.message(async (params) => {
         await params.setDelay(200);
         params.send({ ok: true });

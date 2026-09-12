@@ -54,7 +54,7 @@ export const cli = () => {
   try {
     const { error } = playgroundDataSchema.safeParse(JSON.parse(dataContent));
 
-    if (error) throw new Error(`Data file should be a valid object`);
+    if (error) throw new Error('Data file should be a valid object');
   } catch (error) {
     console.error(
       `${color.red('Error')}: ${error instanceof Error ? error.message : 'Unknown error'}`

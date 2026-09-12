@@ -1,6 +1,15 @@
 import { graphql, mock } from 'mock-config-server';
 
-const users = [
+interface User {
+  emoji: string;
+  name: string;
+}
+
+interface Error {
+  error: string;
+}
+
+const users: User[] = [
   { emoji: '🍎', name: 'Alice' },
   { emoji: '🍌', name: 'Bob' },
   { emoji: '🍒', name: 'Carol' },
@@ -15,17 +24,17 @@ export default mock(
     baseUrl: '/graphql',
     configs: [
       graphql.query('GetUsers', { data: { users } }),
-      graphql.query<{
-        body: { variables: { id: string } };
-        response: { data: { user: null | { emoji: string; name: string } } };
-      }>('GetUser', (params) => {
-        const user = users[Number(params.request.body.variables.id) - 1];
-        if (!user) {
-          params.setStatusCode(404);
-          return { data: { user: null } };
+      graphql.query<{ data: Error | User }, { body: { variables: { id: string } } }>(
+        'GetUser',
+        (params) => {
+          const user = users[Number(params.request.body.variables.id) - 1];
+          if (!user) {
+            params.setStatusCode(404);
+            return { data: { error: 'Not found' } };
+          }
+          return { data: user };
         }
-        return { data: { user } };
-      })
+      )
     ]
   }
 );

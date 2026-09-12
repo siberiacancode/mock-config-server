@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { graphqlRequestConfigSchema } from '../../../utils/validate';
+import { graphqlSubscriptionRequestConfigSchema } from '../../../utils/validate/graphqlSubscriptionConfigSchema/graphqlSubscriptionConfigSchema';
 import { graphql } from './graphql';
 
 describe('graphql', () => {
@@ -12,6 +14,26 @@ describe('graphql', () => {
       routes: [
         {
           data: { data: { ok: true } },
+          entities: {},
+          settings: {}
+        }
+      ]
+    });
+  });
+
+  it('Should treat an unbranded polling key as inline response data', () => {
+    const response = {
+      data: { ok: true },
+      polling: [{ response: { data: { ok: 'ordinary response data' } } }]
+    };
+    const result = graphql.query('GetUsers', response);
+
+    expect(result).toStrictEqual({
+      identifier: 'GetUsers',
+      operationType: 'query',
+      routes: [
+        {
+          data: response,
           entities: {},
           settings: {}
         }
@@ -117,6 +139,27 @@ describe('graphql', () => {
     });
   });
 
+  it('Should build request configs that pass validation', () => {
+    expect(
+      graphqlRequestConfigSchema.safeParse(graphql.query('GetUsers', { data: { ok: true } }))
+        .success
+    ).toBe(true);
+    expect(
+      graphqlRequestConfigSchema.safeParse(graphql.mutation('GetUsers', { data: { ok: true } }))
+        .success
+    ).toBe(true);
+    expect(
+      graphqlSubscriptionRequestConfigSchema.safeParse(
+        graphql.subscription('GetUsers', { data: { ok: true } })
+      ).success
+    ).toBe(true);
+    expect(
+      graphqlSubscriptionRequestConfigSchema.safeParse(
+        graphql.subscription('GetUsers', { data: { ok: true } }, { delay: 100 })
+      ).success
+    ).toBe(true);
+  });
+
   it('Should keep provided settings for request', () => {
     const result = graphql.query('GetUsers', { data: { ok: true } }, { delay: 150, status: 200 });
 
@@ -160,34 +203,6 @@ describe('graphql', () => {
             }
           },
           settings: { delay: 150, status: 200 }
-        }
-      ]
-    });
-  });
-
-  it('Should type handler params with all typed fields', () => {
-    const result = graphql.query<{
-      query: { query: string };
-      body: { body: string };
-      params: { params: string };
-      response: { data: { response: string } };
-    }>('GetUsers', (params) => {
-      const query = params.request.query.query;
-      const body = params.request.body.body;
-      const path = params.request.params.params;
-      console.log(query, body, path);
-
-      return { data: { response: 'value' } };
-    });
-
-    expect(result).toStrictEqual({
-      identifier: 'GetUsers',
-      operationType: 'query',
-      routes: [
-        {
-          data: expect.any(Function),
-          entities: {},
-          settings: {}
         }
       ]
     });

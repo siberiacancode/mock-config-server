@@ -1,29 +1,26 @@
 import type { Express } from 'express';
 
-import type {
-  Entries,
-  RestEntitiesByEntityName,
-  RestParams,
-  RestRequestArtifact
-} from '@/utils/types';
+import type { Interceptor, RestMethod, RestParams, RestRequestArtifact } from '@/utils/types';
 
 import {
   asyncHandler,
-  callRequestInterceptor,
-  callResponseInterceptors,
-  isComparator,
+  callHttpRequestInterceptors,
+  callHttpResponseInterceptors,
   normalizeUrl,
-  resolveEntityValues,
   sleep,
   urlJoin
 } from '@/utils/helpers';
 
-import { equals } from '../../entities';
-import { generatePathRegex, matchRestRequestArtifacts } from './helpers';
+import {
+  generatePathRegex,
+  isRestRequestMatchedByEntities,
+  matchRestRequestArtifacts
+} from './helpers';
 
 interface CreateRestRoutesParams {
   restRequestArtifacts: RestRequestArtifact[];
   server: Express;
+  serverInterceptors?: Interceptor[];
 }
 
 const extractPathParams = (artifact: RestRequestArtifact, path: string) => {
@@ -31,7 +28,6 @@ const extractPathParams = (artifact: RestRequestArtifact, path: string) => {
 
   const fullPath = urlJoin(artifact.baseUrl, artifact.path);
   const keys = fullPath.match(/:[^/]+/g)?.map((key) => key.slice(1)) ?? [];
-
   if (!keys.length) return {};
 
   const match = path.match(generatePathRegex(fullPath));
@@ -43,12 +39,18 @@ const extractPathParams = (artifact: RestRequestArtifact, path: string) => {
   }, {});
 };
 
-export const createRestRoute = ({ server, restRequestArtifacts }: CreateRestRoutesParams) =>
+export const createRestRoute = ({
+  server,
+  restRequestArtifacts,
+  serverInterceptors = []
+}: CreateRestRoutesParams) =>
   server.use(
     asyncHandler(async (request, response, next) => {
-      const requestMethod = request.method.toLowerCase();
-
-      request.queries = request.query;
+      const requestMethod = request.method.toLowerCase() as RestMethod;
+      await callHttpRequestInterceptors(
+        { request, meta: { type: 'rest', method: requestMethod } },
+        serverInterceptors
+      );
 
       const previousParams = { ...request.params };
 
@@ -64,47 +66,7 @@ export const createRestRoute = ({ server, restRequestArtifacts }: CreateRestRout
 
       const matchedRouteConfig = matchedRequestArtifacts.find((artifact) => {
         request.params = extractPathParams(artifact, request.path);
-        const { config } = artifact;
-
-        if (!config.entities) return true;
-
-        const entityEntries = Object.entries(config.entities) as Entries<
-          Required<RestEntitiesByEntityName>
-        >;
-        return entityEntries.every(([entityName, valueOrComparator]) => {
-          const actualEntity = request[entityName];
-
-          if (isComparator(valueOrComparator)) {
-            const comparator = valueOrComparator;
-            return resolveEntityValues({ actual: actualEntity, comparator });
-          }
-
-          const isBody = entityName === 'body';
-          if (isBody) {
-            const comparator = equals(valueOrComparator);
-            return resolveEntityValues({ actual: actualEntity, comparator });
-          }
-
-          const mappedEntityEntries = Object.entries(valueOrComparator) as Entries<
-            typeof valueOrComparator
-          >;
-          return mappedEntityEntries.every(([entityPropertyKey, valueOrComparator]) => {
-            // ✅ important:
-            // transform header keys to lower case
-            // because browsers send headers in lowercase
-            const actualPropertyKey =
-              entityName === 'headers' ? entityPropertyKey.toLowerCase() : entityPropertyKey;
-            const actualPropertyValue = actualEntity[actualPropertyKey];
-
-            const comparator = isComparator(valueOrComparator)
-              ? valueOrComparator
-              : equals(valueOrComparator);
-            return resolveEntityValues({
-              actual: actualPropertyValue,
-              comparator
-            });
-          });
-        });
+        return isRestRequestMatchedByEntities(request, artifact.config.entities);
       });
 
       if (!matchedRouteConfig) {
@@ -112,26 +74,10 @@ export const createRestRoute = ({ server, restRequestArtifacts }: CreateRestRout
         return next();
       }
 
-      if (matchedRouteConfig.componentRequestInterceptor) {
-        await callRequestInterceptor({
-          request,
-          interceptor: matchedRouteConfig.componentRequestInterceptor
-        });
-      }
-
-      if (matchedRouteConfig.requestRequestInterceptor) {
-        await callRequestInterceptor({
-          request,
-          interceptor: matchedRouteConfig.requestRequestInterceptor
-        });
-      }
-
-      if (matchedRouteConfig.routeRequestInterceptor) {
-        await callRequestInterceptor({
-          request,
-          interceptor: matchedRouteConfig.routeRequestInterceptor
-        });
-      }
+      await callHttpRequestInterceptors(
+        { request, meta: { type: 'rest', method: requestMethod } },
+        matchedRouteConfig.componentInterceptors ?? []
+      );
 
       if (matchedRouteConfig.config.settings?.status) {
         response.statusCode = matchedRouteConfig.config.settings.status;
@@ -190,18 +136,18 @@ export const createRestRoute = ({ server, restRequestArtifacts }: CreateRestRout
       if (response.headersSent) {
         return;
       }
-
-      const data = await callResponseInterceptors({
-        data: resolvedData,
-        request,
-        response,
-        interceptors: {
-          routeInterceptor: matchedRouteConfig.routeResponseInterceptor,
-          requestInterceptor: matchedRouteConfig.requestResponseInterceptor,
-          componentInterceptor: matchedRouteConfig.componentResponseInterceptor,
-          serverInterceptor: matchedRouteConfig.serverResponseInterceptor
+      const data = await callHttpResponseInterceptors(
+        {
+          data: resolvedData,
+          request,
+          response,
+          meta: { type: 'rest', method: requestMethod }
+        },
+        {
+          componentInterceptors: matchedRouteConfig.componentInterceptors,
+          serverInterceptors
         }
-      });
+      );
 
       if (matchedRouteConfig.config.settings?.delay) {
         await sleep(matchedRouteConfig.config.settings.delay);

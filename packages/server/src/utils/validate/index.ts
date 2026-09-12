@@ -11,4 +11,4 @@ export * from './restRequestConfigSchema/restRequestConfigSchema';
 export * from './staticPathSchema/staticPathSchema';
 export * from './utils';
 export * from './validateMockServerConfig';
-export * from './wsConfigSchema/wsConfigSchema';
+export * from './wsRequestConfigSchema/wsRequestConfigSchema';
