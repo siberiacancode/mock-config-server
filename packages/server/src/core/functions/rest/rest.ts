@@ -31,7 +31,7 @@ type RestFactorySettings<Method extends RestMethod> = RestSettings & {
   match?: RestEntitiesByEntityName<Method>;
 };
 
-type RestInlineResponse<Response> = Response;
+type RestInlineResponse<Response> = unknown extends Response ? Data : Response;
 
 type RestFunction<
   Method extends RestMethod,
@@ -162,27 +162,6 @@ const createConfigResolver = <Method extends RestMethod, Input extends RestReque
 };
 
 const createRestFactory = <Method extends RestMethod>(method: Method) => {
-  function createRequestConfig<Input extends RestRequestInput = Partial<RestRequestInput>>(
-    path: RestRequestConfig['path'],
-    config:
-      | RestFunction<Method, Input>
-      | RestGeneratorFunction<Method, Input>
-      | RestInlineResponse<Input['response']>,
-    settings?: RestFactorySettings<Method>
-  ): BaseRestRequestConfig<Method>;
-
-  function createRequestConfig(
-    path: RestRequestConfig['path'],
-    config: RestFileObject,
-    settings?: RestFactorySettings<Method>
-  ): BaseRestRequestConfig<Method>;
-
-  function createRequestConfig<Input extends RestRequestInput = Partial<RestRequestInput>>(
-    path: RestRequestConfig['path'],
-    config: RestPollingObject<Method, Input>,
-    settings?: RestFactorySettings<Method>
-  ): BaseRestRequestConfig<Method>;
-
   function createRequestConfig<Input extends RestRequestInput = Partial<RestRequestInput>>(
     path: RestRequestConfig['path'],
     config: RestConfig<Method, Input>,

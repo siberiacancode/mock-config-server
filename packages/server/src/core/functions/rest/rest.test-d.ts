@@ -5,6 +5,54 @@ import { describe, expectTypeOf, it } from 'vitest';
 import { rest } from './rest';
 
 describe('rest types', () => {
+  it('Should infer request-only handler and polling types', () => {
+    rest.get<{ query: { test: 1 } }>('/users', (params) => {
+      expectTypeOf(params.request.query).toEqualTypeOf<{ test: 1 }>();
+      return params.request.query.test;
+    });
+
+    rest.post<{ body: { name: string } }>('/users', async ({ request }) => {
+      expectTypeOf(request.body).toEqualTypeOf<{ name: string }>();
+      return { name: request.body.name };
+    });
+
+    rest.get<{ params: { id: string } }>('/users/:id', function* ({ request }) {
+      expectTypeOf(request.params).toEqualTypeOf<{ id: string }>();
+      yield request.params.id;
+    });
+
+    rest.get<{ query: { test: 1 } }>(
+      '/poll',
+      rest.polling([
+        {
+          handler: (params) => {
+            expectTypeOf(params.request.query).toEqualTypeOf<{ test: 1 }>();
+            return params.request.query.test;
+          }
+        }
+      ])
+    );
+  });
+
+  it('Should accept default and request-only inline responses', () => {
+    rest.get('/users', { ok: true });
+    rest.get<{ query: { test: 1 } }>('/users', { ok: true });
+    rest.get('/users', ({ request }) => {
+      expectTypeOf(request).not.toBeAny();
+      return { ok: true };
+    });
+  });
+
+  it('Should preserve explicit response constraints', () => {
+    rest.get<{ response: { a: 1; b: 2 } }>('/users', { a: 1, b: 2 });
+    rest.get<{ response: { a: 1; b: 2 } }>('/users', () => ({ a: 1, b: 2 }));
+
+    // @ts-expect-error Inline responses must include all required properties.
+    rest.get<{ response: { a: 1; b: 2 } }>('/users', { a: 1 });
+    // @ts-expect-error Handler responses must include all required properties.
+    rest.get<{ response: { a: 1; b: 2 } }>('/users', () => ({ a: 1 }));
+  });
+
   it('Should type handler params with all typed fields', () => {
     rest.post<{
       query: { query: string };
