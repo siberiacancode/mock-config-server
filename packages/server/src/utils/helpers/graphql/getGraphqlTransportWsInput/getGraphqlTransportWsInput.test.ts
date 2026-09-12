@@ -51,49 +51,34 @@ describe('getGraphqlTransportWsInput', () => {
     });
   });
 
-  it('Should parse complete message', () => {
-    expect(
-      getGraphqlTransportWsInput(`
-        {
-          "id": "1",
-          "type": "complete"
-        }
-      `)
-    ).toStrictEqual({
+  it('Should parse valid messages', () => {
+    expect(getGraphqlTransportWsInput('{"type":"connection_init"}')).toStrictEqual({
+      type: 'connection_init'
+    });
+    expect(getGraphqlTransportWsInput('{"type":"ping"}')).toStrictEqual({ type: 'ping' });
+    expect(getGraphqlTransportWsInput('{"type":"pong"}')).toStrictEqual({ type: 'pong' });
+    expect(getGraphqlTransportWsInput('{"id":"1","type":"complete"}')).toStrictEqual({
       id: '1',
       type: 'complete'
     });
   });
 
-  it('Should parse next and error messages', () => {
-    expect(
-      getGraphqlTransportWsInput(`
-        {
-          "id": "1",
-          "type": "next",
-          "payload": { "data": { "ok": true } }
-        }
-      `)
-    ).toStrictEqual({
-      id: '1',
-      type: 'next',
-      payload: { data: { ok: true } }
-    });
+  it('Should claim only client to server protocol types', () => {
+    expect(getGraphqlTransportWsInput('{"id":"1","type":"next"}')).toBeUndefined();
+    expect(getGraphqlTransportWsInput('{"id":"1","type":"error"}')).toBeUndefined();
+    expect(getGraphqlTransportWsInput('{"type":"connection_ack"}')).toBeUndefined();
 
-    expect(
-      getGraphqlTransportWsInput(`
-        {
-          "id": "1",
-          "type": "error",
-          "payload": [
-            { "message": "fail" }
-          ]
-        }
-      `)
-    ).toStrictEqual({
-      id: '1',
-      type: 'error',
-      payload: [{ message: 'fail' }]
-    });
+    expect(getGraphqlTransportWsInput('{"type":"custom"}')).toBeUndefined();
+  });
+
+  it('Should treat a plain json message as raw', () => {
+    expect(getGraphqlTransportWsInput('{"event":"ping"}')).toBeUndefined();
+  });
+
+  it('Should not claim anything that is not a protocol message', () => {
+    expect(getGraphqlTransportWsInput('"ping"')).toBeUndefined();
+    expect(getGraphqlTransportWsInput('[1,2,3]')).toBeUndefined();
+    expect(getGraphqlTransportWsInput('null')).toBeUndefined();
+    expect(getGraphqlTransportWsInput('ping')).toBeUndefined();
   });
 });

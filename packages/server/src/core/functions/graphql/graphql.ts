@@ -16,6 +16,7 @@ import type {
   MaybePromise
 } from '@/utils/types';
 
+import { graphql as graphqlInterceptors } from '@/core/interceptors';
 import { isGeneratorFunction } from '@/utils/helpers';
 
 import { createGenerator } from '../shared/helpers';
@@ -265,6 +266,7 @@ const polling = <Input extends GraphQLRequestInput = GraphQLRequestInput>(
 });
 
 export const graphql = {
+  ...graphqlInterceptors,
   query: createGraphQLFactory('query'),
   mutation: createGraphQLFactory('mutation'),
   polling,

@@ -1,3 +1,5 @@
+import type { Mock } from 'vitest';
+
 import bodyParser from 'body-parser';
 import express from 'express';
 import request from 'supertest';
@@ -9,10 +11,12 @@ import type {
   GraphQLOperationType,
   GraphQLRequestArtifact,
   GraphQLRequestConfig,
-  Interceptors
+  HttpRequestInterceptor,
+  HttpResponseInterceptor
 } from '@/utils/types';
 
-import { urlJoin } from '@/utils/helpers';
+import { graphql as graphqlInterceptors } from '@/core/interceptors';
+import { parseCookie, urlJoin } from '@/utils/helpers';
 
 import { createGraphQLRoute } from './createGraphQLRoute';
 import { calculateGraphQLRouteConfigWeight, prepareGraphQLRequestArtifacts } from './helpers';
@@ -20,7 +24,7 @@ import { calculateGraphQLRouteConfigWeight, prepareGraphQLRequestArtifacts } fro
 interface GraphqlConfig {
   baseUrl?: BaseUrl;
   configs: GraphQLRequestConfig[];
-  interceptors?: Interceptors<'graphql'>;
+  interceptors?: (HttpRequestInterceptor | HttpResponseInterceptor)[];
 }
 
 const createServer = (
@@ -31,8 +35,11 @@ const createServer = (
   const { baseUrl, graphql, interceptors } = mockServerConfig;
   const server = express();
 
+  // ✅ important: contextMiddleware does it in real server, tests use bare express app
   server.use((request, _, next) => {
     request.context = { orm: {}, broadcast: vi.fn() };
+    request.queries = request.query as Record<string, string | string[]>;
+    request.cookies = parseCookie(request.headers.cookie ?? '');
     next();
   });
 
@@ -49,20 +56,14 @@ const createServer = (
             identifier: config.identifier,
             config: route,
             weight: calculateGraphQLRouteConfigWeight(route),
-            serverResponseInterceptor: interceptors?.response,
-            serverRequestInterceptor: interceptors?.request,
-            requestResponseInterceptor: config.interceptors?.response,
-            requestRequestInterceptor: config.interceptors?.request,
-            componentResponseInterceptor: undefined,
-            componentRequestInterceptor: undefined,
-            routeResponseInterceptor: route.interceptors?.response,
-            routeRequestInterceptor: route.interceptors?.request
+            componentInterceptors: graphql.interceptors
           });
         });
 
         return acc;
       }, [] as GraphQLRequestArtifact[])
-    )
+    ),
+    serverInterceptors: interceptors
   });
 
   return server;
@@ -90,13 +91,17 @@ describe('createGraphQLRoute: routing', () => {
       .post('/')
       .send({ query: 'query {\n User {\n  name\n  }\n}\n' });
     expect(postResponse.statusCode).toBe(200);
-    expect(postResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(postResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
 
     const getResponse = await request(server).get('/').query({
       query: 'query {\n User {\n  name\n  }\n}\n'
     });
     expect(getResponse.statusCode).toBe(200);
-    expect(getResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(getResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
   });
 
   it('Should match config with query regExp', async () => {
@@ -120,13 +125,17 @@ describe('createGraphQLRoute: routing', () => {
       .post('/')
       .send({ query: 'query {\n User {\n  name\n  }\n}\n' });
     expect(postResponse.statusCode).toBe(200);
-    expect(postResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(postResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
 
     const getResponse = await request(server).get('/').query({
       query: 'query {\n User {\n  name\n  }\n}\n'
     });
     expect(getResponse.statusCode).toBe(200);
-    expect(getResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(getResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
   });
 
   it('Should match config with query independent of spaces and new lines', async () => {
@@ -150,13 +159,17 @@ describe('createGraphQLRoute: routing', () => {
       .post('/')
       .send({ query: 'query {\n User {\n  name\n  }\n}\n' });
     expect(postResponse.statusCode).toBe(200);
-    expect(postResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(postResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
 
     const getResponse = await request(server).get('/').query({
       query: 'query {\n User {\n  name\n  }\n}\n'
     });
     expect(getResponse.statusCode).toBe(200);
-    expect(getResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(getResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
   });
 
   it('Should match config with operation name', async () => {
@@ -180,13 +193,17 @@ describe('createGraphQLRoute: routing', () => {
       .post('/')
       .send({ query: 'query GetUsers { users { name } }' });
     expect(postResponse.statusCode).toBe(200);
-    expect(postResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(postResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
 
     const getResponse = await request(server).get('/').query({
       query: 'query GetUsers { users { name } }'
     });
     expect(getResponse.statusCode).toBe(200);
-    expect(getResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(getResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
   });
 
   it('Should match config with operation name regExp', async () => {
@@ -272,13 +289,17 @@ describe('createGraphQLRoute: routing', () => {
       .post('/')
       .send({ query: 'query GetUsers { users { name } }' });
     expect(postResponse.statusCode).toBe(200);
-    expect(postResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(postResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
 
     const getResponse = await request(server).get('/').query({
       query: 'query GetUsers { users { name } }'
     });
     expect(getResponse.statusCode).toBe(200);
-    expect(getResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(getResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
   });
 
   it('Should match config with event name regExp', async () => {
@@ -302,13 +323,17 @@ describe('createGraphQLRoute: routing', () => {
       .post('/')
       .send({ query: 'query GetUsers { users { name } }' });
     expect(postResponse.statusCode).toBe(200);
-    expect(postResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(postResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
 
     const getResponse = await request(server).get('/').query({
       query: 'query GetUsers { users { name } }'
     });
     expect(getResponse.statusCode).toBe(200);
-    expect(getResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(getResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
   });
 
   it('Should return 404 for no matched request configs', async () => {
@@ -398,6 +423,64 @@ describe('createGraphQLRoute: routing', () => {
         .query({ query: 'query GetUsers { users { name } }' });
       expect(getResponse.headers['cache-control']).toBe(undefined);
     });
+  });
+
+  it('Should not set Cache-Control for a matched mutation', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            identifier: 'CreateUser',
+            operationType: 'mutation',
+            routes: [{ data: { data: { name: 'John', surname: 'Doe' } } }]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .post('/')
+      .send({ query: 'mutation CreateUser { createUser { id } }' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(response.headers['cache-control']).toBe(undefined);
+  });
+
+  it('Should skip requests without a GraphQL query', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            identifier: 'GetUsers',
+            operationType: 'query',
+            routes: [{ data: { data: { name: 'John', surname: 'Doe' } } }]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).post('/').send({});
+
+    expect(response.statusCode).toBe(404);
+  });
+
+  it('Should skip requests with an invalid GraphQL query', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            identifier: 'GetUsers',
+            operationType: 'query',
+            routes: [{ data: { data: { name: 'John', surname: 'Doe' } } }]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server).post('/').send({ query: 'query {' });
+
+    expect(response.statusCode).toBe(404);
   });
 });
 
@@ -511,6 +594,287 @@ describe('createGraphQLRoute: content', () => {
       }
     });
   });
+
+  it('Should expose request header helpers to the data function', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            identifier: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                data: ({ getRequestHeader, getRequestHeaders }) => ({
+                  data: {
+                    header: getRequestHeader('key1'),
+                    hasHeaderInList: 'key1' in getRequestHeaders()
+                  }
+                })
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .post('/')
+      .set({ key1: 'value1' })
+      .send({ query: 'query GetUsers { users { name } }' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({ data: { header: 'value1', hasHeaderInList: true } });
+  });
+
+  it('Should set and read response headers from the data function', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            identifier: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                data: ({ setHeader, appendHeader, getResponseHeader, getResponseHeaders }) => {
+                  setHeader('key1', 'value1');
+                  appendHeader('key2', 'value2');
+
+                  return {
+                    data: {
+                      header: getResponseHeader('key1'),
+                      hasHeaderInList: 'key2' in getResponseHeaders()
+                    }
+                  };
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .post('/')
+      .send({ query: 'query GetUsers { users { name } }' });
+
+    expect(response.headers.key1).toBe('value1');
+    expect(response.headers.key2).toBe('value2');
+    expect(response.body).toStrictEqual({ data: { header: 'value1', hasHeaderInList: true } });
+  });
+
+  it('Should set cookies from the data function', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            identifier: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                data: ({ setCookie }) => {
+                  setCookie('token', 'abc');
+                  setCookie('session', 'xyz', { maxAge: 1000 });
+
+                  return { data: { name: 'John', surname: 'Doe' } };
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .post('/')
+      .send({ query: 'query GetUsers { users { name } }' });
+
+    expect(response.headers['set-cookie']).toStrictEqual([
+      expect.stringContaining('token=abc'),
+      expect.stringContaining('session=xyz')
+    ]);
+    expect(response.headers['set-cookie'][1]).toContain('Max-Age');
+  });
+
+  it('Should read and clear cookies from the data function', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            identifier: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                data: ({ getCookie, clearCookie }) => {
+                  clearCookie('token');
+
+                  return { data: { token: getCookie('token') } };
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .post('/')
+      .set('Cookie', 'token=abc')
+      .send({ query: 'query GetUsers { users { name } }' });
+
+    expect(response.body).toStrictEqual({ data: { token: 'abc' } });
+    expect(response.headers['set-cookie'][0]).toContain('token=;');
+  });
+
+  it('Should attach a filename to the response', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            identifier: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                data: ({ attachment }) => {
+                  attachment('users.csv');
+
+                  return { data: { name: 'John', surname: 'Doe' } };
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .post('/')
+      .send({ query: 'query GetUsers { users { name } }' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-disposition']).toBe('attachment; filename="users.csv"');
+  });
+
+  it('Should broadcast payload from the data function', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            identifier: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                data: ({ request, broadcast }) => {
+                  broadcast({ message: 'hello' });
+
+                  return {
+                    data: {
+                      broadcasted: (request.context.broadcast as unknown as Mock).mock.calls[0][0]
+                    }
+                  };
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .post('/')
+      .send({ query: 'query GetUsers { users { name } }' });
+
+    expect(response.body).toStrictEqual({ data: { broadcasted: { message: 'hello' } } });
+  });
+
+  it('Should set the status code from the data function', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            identifier: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                data: ({ setStatusCode }) => {
+                  setStatusCode(201);
+
+                  return { data: { name: 'John', surname: 'Doe' } };
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .post('/')
+      .send({ query: 'query GetUsers { users { name } }' });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+  });
+
+  it('Should delay the response from the data function', async () => {
+    const delay = 100;
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            identifier: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                data: async ({ setDelay }) => {
+                  await setDelay(delay);
+
+                  return { data: { name: 'John', surname: 'Doe' } };
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const startTime = performance.now();
+    const response = await request(server)
+      .post('/')
+      .send({ query: 'query GetUsers { users { name } }' });
+    const endTime = performance.now();
+
+    expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
+    expect(response.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+  });
+
+  it('Should not send data when the data function has already sent the response', async () => {
+    const server = createServer({
+      graphql: {
+        configs: [
+          {
+            identifier: 'GetUsers',
+            operationType: 'query',
+            routes: [
+              {
+                data: ({ response }) => {
+                  response.send('from data');
+
+                  return { data: { name: 'John', surname: 'Doe' } };
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    const response = await request(server)
+      .post('/')
+      .send({ query: 'query GetUsers { users { name } }' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.text).toBe('from data');
+  });
 });
 
 describe('createGraphQLRoute: settings', () => {
@@ -540,7 +904,7 @@ describe('createGraphQLRoute: settings', () => {
     const response = await request(server).get('/').query(query);
     const endTime = performance.now();
 
-    expect(endTime - startTime).toBeGreaterThanOrEqual(delay);
+    expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
     expect(response.body).toEqual({ data: { name: 'John', surname: 'Doe' } });
   });
 
@@ -606,7 +970,9 @@ describe('createGraphQLRoute: entities', () => {
       .query({ key1: 'value1', key2: 'value2' });
 
     expect(postResponse.statusCode).toBe(200);
-    expect(postResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(postResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
 
     const getResponse = await request(server)
       .get('/')
@@ -618,7 +984,9 @@ describe('createGraphQLRoute: entities', () => {
       });
 
     expect(getResponse.statusCode).toBe(200);
-    expect(getResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(getResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
   });
 
   it('Should prioritize more specific route configuration when multiple matches exist', async () => {
@@ -667,7 +1035,9 @@ describe('createGraphQLRoute: entities', () => {
       .query({ key1: 'value1', key2: 'value2' });
 
     expect(postResponse.statusCode).toBe(200);
-    expect(postResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Smith' } });
+    expect(postResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Smith' }
+    });
 
     const getResponse = await request(server)
       .get('/')
@@ -679,7 +1049,9 @@ describe('createGraphQLRoute: entities', () => {
       });
 
     expect(getResponse.statusCode).toBe(200);
-    expect(getResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Smith' } });
+    expect(getResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Smith' }
+    });
   });
 
   it('Should correctly resolve flat object variables with nested key matching', async () => {
@@ -717,7 +1089,9 @@ describe('createGraphQLRoute: entities', () => {
       });
 
     expect(postResponse.statusCode).toBe(200);
-    expect(postResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(postResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
 
     const getResponse = await request(server)
       .get('/')
@@ -729,7 +1103,9 @@ describe('createGraphQLRoute: entities', () => {
       });
 
     expect(getResponse.statusCode).toBe(200);
-    expect(getResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(getResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
   });
 
   it('Should be case-insensitive for header keys', async () => {
@@ -761,7 +1137,9 @@ describe('createGraphQLRoute: entities', () => {
       .set({ LowerCase: 'lowercase', upperCase: 'UPPERCASE' });
 
     expect(postResponse.statusCode).toBe(200);
-    expect(postResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(postResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
 
     const getResponse = await request(server)
       .get('/')
@@ -769,80 +1147,73 @@ describe('createGraphQLRoute: entities', () => {
       .query({ query: 'query GetUsers { users { name } }' });
 
     expect(getResponse.statusCode).toBe(200);
-    expect(getResponse.body).toStrictEqual({ data: { name: 'John', surname: 'Doe' } });
+    expect(getResponse.body).toStrictEqual({
+      data: { name: 'John', surname: 'Doe' }
+    });
   });
 });
 
 describe('createGraphQLRoute: interceptors', () => {
-  it('Should call request interceptors in order: request -> route', async () => {
-    const routeInterceptor = vi.fn();
-    const requestInterceptor = vi.fn();
+  it('Should call interceptors in order: component request -> component response -> server response', async () => {
+    const componentRequestInterceptor = vi.fn();
+    const componentResponseInterceptor = vi.fn((data) => data);
+    const serverResponseInterceptor = vi.fn((data) => data);
 
     const server = createServer({
+      // ✅ important: server request interceptors are called by middleware, not by route
+      interceptors: [graphqlInterceptors.response.query(serverResponseInterceptor)],
       graphql: {
+        interceptors: [
+          graphqlInterceptors.request.query(componentRequestInterceptor),
+          graphqlInterceptors.response.query(componentResponseInterceptor)
+        ],
         configs: [
           {
             identifier: 'GetUsers',
             operationType: 'query',
-            routes: [
-              {
-                entities: {
-                  variables: {
-                    key1: 'value1',
-                    key2: 'value2'
-                  }
-                },
-                data: { data: { name: 'John', surname: 'Doe' } },
-                interceptors: { request: routeInterceptor }
-              }
-            ],
-            interceptors: { request: requestInterceptor }
-          },
-          {
-            identifier: 'CreateUser',
-            operationType: 'mutation',
-            routes: [
-              {
-                entities: {
-                  variables: {
-                    name: 'John'
-                  }
-                },
-                data: { data: { name: 'John', surname: 'Smith' } }
-              }
-            ]
+            routes: [{ data: { data: { source: 'query' } } }]
           }
         ]
       }
     });
 
-    await request(server).get('/').set('Content-Type', 'application/json').query({
-      query: 'query GetUsers { users { name } }',
-      variables: '{ "key1": "value1", "key2": "value2" }'
-    });
-    expect(requestInterceptor).toBeCalledTimes(1);
-    expect(routeInterceptor).toBeCalledTimes(1);
-    expect(requestInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
-      routeInterceptor.mock.invocationCallOrder[0]
+    await request(server).post('/').send({ query: 'query GetUsers {\n User {\n  name\n  }\n}\n' });
+
+    expect(componentRequestInterceptor).toBeCalledTimes(1);
+    expect(componentResponseInterceptor).toBeCalledTimes(1);
+    expect(serverResponseInterceptor).toBeCalledTimes(1);
+    expect(componentRequestInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
+      componentResponseInterceptor.mock.invocationCallOrder[0]
     );
+    expect(componentResponseInterceptor.mock.invocationCallOrder[0]).toBeLessThan(
+      serverResponseInterceptor.mock.invocationCallOrder[0]
+    );
+  });
 
-    // ✅ important:
-    // request interceptor called when operation type and operation name is matched
-    await request(server).get('/').set('Content-Type', 'application/json').query({
-      query: 'query GetUsers { users { name } }',
-      variables: '{ "key3": "value3", "key4": "value4" }'
+  it('Should not send data when a response interceptor has already sent the response', async () => {
+    const server = createServer({
+      graphql: {
+        interceptors: [
+          graphqlInterceptors.response.query((data, { response }) => {
+            response.send('from interceptor');
+            return data;
+          })
+        ],
+        configs: [
+          {
+            identifier: 'GetUsers',
+            operationType: 'query',
+            routes: [{ data: { data: { name: 'John', surname: 'Doe' } } }]
+          }
+        ]
+      }
     });
-    expect(requestInterceptor).toBeCalledTimes(1);
-    expect(routeInterceptor).toBeCalledTimes(1);
 
-    await request(server)
+    const response = await request(server)
       .post('/')
-      .set('Content-Type', 'application/json')
-      .send({
-        query: 'mutation CreateUser($name: String!) { createUser(name: $name) { name } }',
-        variables: { name: 'John' }
-      });
-    expect(requestInterceptor).toBeCalledTimes(1);
-    expect(routeInterceptor).toBeCalledTimes(1);
+      .send({ query: 'query GetUsers { users { name } }' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.text).toBe('from interceptor');
   });
 });

@@ -1,5 +1,6 @@
 import type { AddressInfo } from 'ws';
 
+import { Buffer } from 'node:buffer';
 import { once } from 'node:events';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { WebSocket, WebSocketServer } from 'ws';
@@ -8,18 +9,29 @@ import type {
   BaseServerConfig,
   BaseUrl,
   GraphQLIdentifier,
-  GraphqlTransportWsOperationType,
+  GraphQLTransportWsOperationType,
   GraphqlTransportWsRouteConfig,
-  Interceptors,
+  WsCloseRouteConfig,
   WsConnectionRouteConfig,
-  WsDataResponse,
+  WsErrorRouteConfig,
+  WsRawDataResponse,
   WsRawRouteConfig,
-  WsRequestArtifact
+  WsRequestArtifact,
+  WsRequestInterceptor,
+  WsResponseInterceptor,
+  WsSocket
 } from '@/utils/types';
 
-import { urlJoin } from '@/utils/helpers';
+import { ws as wsInterceptors } from '@/core/interceptors';
+import { parseCookie, parseQuery, urlJoin } from '@/utils/helpers';
 
+import { haveEntries, regExp } from '../../entities';
 import { createWsRoute } from './createWsRoute';
+import {
+  calculateGraphqlTransportWsRouteConfigWeight,
+  calculateWsRouteConfigWeight,
+  prepareWsRequestArtifacts
+} from './helpers';
 
 export interface WsRawRequestConfig {
   routes: WsRawRouteConfig[];
@@ -33,20 +45,32 @@ export interface WsConnectionRequestConfig {
 
 export interface WsGraphqlTransportWsRequestConfig {
   identifier: GraphQLIdentifier;
-  operationType: GraphqlTransportWsOperationType;
+  operationType: GraphQLTransportWsOperationType;
   routes: GraphqlTransportWsRouteConfig[];
   type: 'graphql-ws';
 }
 
+export interface WsCloseRequestConfig {
+  routes: WsCloseRouteConfig[];
+  type: 'close';
+}
+
+export interface WsErrorRequestConfig {
+  routes: WsErrorRouteConfig[];
+  type: 'error';
+}
+
 export type WsRequestConfig =
+  | WsCloseRequestConfig
   | WsConnectionRequestConfig
+  | WsErrorRequestConfig
   | WsGraphqlTransportWsRequestConfig
   | WsRawRequestConfig;
 
 export interface WsConfig {
   baseUrl?: BaseUrl;
   configs: WsRequestConfig[];
-  interceptors?: Interceptors<'rest'>;
+  interceptors?: (WsRequestInterceptor | WsResponseInterceptor)[];
 }
 
 const clients: WebSocket[] = [];
@@ -57,40 +81,56 @@ const createServer = async (
     ws: WsConfig;
   }
 ) => {
-  const { baseUrl, ws } = mockServerConfig;
+  const { baseUrl, interceptors: serverInterceptors, ws } = mockServerConfig;
   const server = new WebSocketServer({ host: '127.0.0.1', port: 0 });
+
+  // ✅ important: contextMiddleware does it in real server, tests use bare WebSocketServer
+  let connectionId = 0;
+  server.on('connection', (socket, request) => {
+    request.queries = parseQuery(request.url ?? '');
+    request.cookies = parseCookie(request.headers.cookie ?? '');
+
+    const wsSocket = socket as WsSocket;
+    connectionId += 1;
+    wsSocket.id = connectionId;
+    wsSocket.timestamp = Date.now();
+    wsSocket.context = {};
+  });
 
   createWsRoute({
     server,
-    wsRequestArtifacts: ws.configs.reduce((acc, config) => {
-      if ('type' in config && config.type === 'graphql-ws') {
+    wsRequestArtifacts: prepareWsRequestArtifacts(
+      ws.configs.reduce((acc, config) => {
+        if ('type' in config && config.type === 'graphql-ws') {
+          config.routes.forEach((route) => {
+            acc.push({
+              baseUrl: urlJoin(baseUrl ?? '/', ws.baseUrl ?? '/'),
+              type: 'graphql-ws',
+              operationType: 'subscription',
+              identifier: config.identifier,
+              config: route,
+              weight: calculateGraphqlTransportWsRouteConfigWeight(route),
+              componentInterceptors: ws.interceptors
+            } as WsRequestArtifact);
+          });
+
+          return acc;
+        }
+
         config.routes.forEach((route) => {
           acc.push({
             baseUrl: urlJoin(baseUrl ?? '/', ws.baseUrl ?? '/'),
-            type: 'graphql-ws',
-            operationType: 'subscription',
-            identifier: config.identifier,
+            type: config.type,
             config: route,
-            weight: 0
-          } as WsRequestArtifact);
+            weight: calculateWsRouteConfigWeight(route),
+            componentInterceptors: ws.interceptors
+          } as unknown as WsRequestArtifact);
         });
 
         return acc;
-      }
-
-      config.routes.forEach((route) => {
-        acc.push({
-          baseUrl: urlJoin(baseUrl ?? '/', ws.baseUrl ?? '/'),
-          type: config.type,
-          config: route,
-          weight: 0,
-          componentRequestInterceptor: ws.interceptors?.request,
-          componentResponseInterceptor: ws.interceptors?.response
-        } as WsRequestArtifact);
-      });
-
-      return acc;
-    }, [] as WsRequestArtifact[])
+      }, [] as WsRequestArtifact[])
+    ),
+    serverInterceptors
   });
 
   servers.push(server);
@@ -101,6 +141,15 @@ const createServer = async (
     port: (server.address() as AddressInfo).port,
     server
   };
+};
+
+const collectMessages = async (client: WebSocket, timeout = 100) => {
+  const messages: unknown[] = [];
+  client.on('message', (raw) => messages.push(JSON.parse(raw.toString())));
+  await new Promise((resolve) => {
+    setTimeout(resolve, timeout);
+  });
+  return messages;
 };
 
 const connectClient = async (url: string, headers?: Record<string, string>) => {
@@ -156,7 +205,32 @@ describe('createWsRoute: ws.connection', () => {
       await once(client, 'open');
 
       const [response] = await promise;
-      expect(JSON.parse(response.toString())).toStrictEqual({ source: 'connection' });
+      expect(JSON.parse(response.toString())).toStrictEqual({
+        source: 'connection'
+      });
+    });
+
+    it('Should match route configuration by nested path under baseUrl', async () => {
+      const { port } = await createServer({
+        ws: {
+          baseUrl: '/connection',
+          configs: [
+            {
+              type: 'connection',
+              routes: [{ data: () => ({ source: 'connection' }) }]
+            }
+          ]
+        }
+      });
+      const client = new WebSocket(`ws://127.0.0.1:${port}/connection/nested`);
+      clients.push(client);
+      const promise = once(client, 'message');
+      await once(client, 'open');
+
+      const [response] = await promise;
+      expect(JSON.parse(response.toString())).toStrictEqual({
+        source: 'connection'
+      });
     });
   });
 
@@ -169,8 +243,8 @@ describe('createWsRoute: ws.connection', () => {
               type: 'connection',
               routes: [
                 {
-                  data: ({ request }) => ({
-                    url: request.url
+                  data: ({ handshake }) => ({
+                    url: handshake.url
                   })
                 }
               ]
@@ -184,7 +258,85 @@ describe('createWsRoute: ws.connection', () => {
       await once(client, 'open');
 
       const [response] = await promise;
-      expect(JSON.parse(response.toString())).toStrictEqual({ url: '/?room=public' });
+      expect(JSON.parse(response.toString())).toStrictEqual({
+        url: '/?room=public'
+      });
+    });
+
+    it('Should send and delay from a connection data function', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'connection',
+              routes: [
+                {
+                  data: async ({ send, setDelay }) => {
+                    send({ source: 'manual' });
+                    await setDelay(50);
+
+                    return { source: 'returned' };
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const client = new WebSocket(`ws://127.0.0.1:${port}/`);
+      clients.push(client);
+      const messagesPromise = collectMessages(client, 200);
+      await once(client, 'open');
+
+      expect(await messagesPromise).toStrictEqual([{ source: 'manual' }, { source: 'returned' }]);
+    });
+  });
+
+  describe('interceptors', () => {
+    it('Should call connection component interceptors', async () => {
+      const componentRequestInterceptor = vi.fn();
+
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'connection',
+              routes: [{ data: () => ({ source: 'connection' }) }]
+            }
+          ],
+          interceptors: [wsInterceptors.request.open(componentRequestInterceptor)]
+        }
+      });
+      const client = new WebSocket(`ws://127.0.0.1:${port}/`);
+      clients.push(client);
+      const promise = once(client, 'message');
+      await once(client, 'open');
+      await promise;
+
+      expect(componentRequestInterceptor).toBeCalledTimes(1);
+    });
+
+    it('Should call connection server interceptors', async () => {
+      const serverRequestInterceptor = vi.fn();
+
+      const { port } = await createServer({
+        interceptors: [wsInterceptors.request.open(serverRequestInterceptor)],
+        ws: {
+          configs: [
+            {
+              type: 'connection',
+              routes: [{ data: () => ({ source: 'connection' }) }]
+            }
+          ]
+        }
+      });
+      const client = new WebSocket(`ws://127.0.0.1:${port}/`);
+      clients.push(client);
+      const promise = once(client, 'message');
+      await once(client, 'open');
+      await promise;
+
+      expect(serverRequestInterceptor).toBeCalledTimes(1);
     });
   });
 
@@ -222,7 +374,34 @@ describe('createWsRoute: ws.connection', () => {
       await once(client, 'open');
 
       const [response] = await promise;
-      expect(JSON.parse(response.toString())).toStrictEqual({ source: 'matched' });
+      expect(JSON.parse(response.toString())).toStrictEqual({
+        source: 'matched'
+      });
+    });
+
+    it('Should use only first matched route configuration', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'connection',
+              routes: [
+                { data: () => ({ source: 'any' }) },
+                {
+                  entities: { queries: { room: 'public' } },
+                  data: () => ({ source: 'specific' })
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const client = new WebSocket(`ws://127.0.0.1:${port}?room=public`);
+      clients.push(client);
+      const messagesPromise = collectMessages(client);
+      await once(client, 'open');
+
+      expect(await messagesPromise).toStrictEqual([{ source: 'specific' }]);
     });
 
     it('Should be case-insensitive for header keys', async () => {
@@ -257,7 +436,9 @@ describe('createWsRoute: ws.connection', () => {
       await once(client, 'open');
 
       const [response] = await promise;
-      expect(JSON.parse(response.toString())).toStrictEqual({ source: 'matched' });
+      expect(JSON.parse(response.toString())).toStrictEqual({
+        source: 'matched'
+      });
     });
   });
 });
@@ -271,7 +452,7 @@ describe('createWsRoute: ws.raw', () => {
           configs: [
             {
               type: 'raw',
-              routes: [{ data: (() => ({ source: 'raw' })) as WsDataResponse }]
+              routes: [{ data: (() => ({ source: 'raw' })) as WsRawDataResponse }]
             }
           ]
         }
@@ -291,7 +472,7 @@ describe('createWsRoute: ws.raw', () => {
           configs: [
             {
               type: 'raw',
-              routes: [{ data: (({ raw }) => ({ message: raw })) as WsDataResponse }]
+              routes: [{ data: (({ raw }) => ({ message: raw })) as WsRawDataResponse }]
             }
           ]
         }
@@ -300,7 +481,9 @@ describe('createWsRoute: ws.raw', () => {
 
       client.send('hello');
       const [response] = await once(client, 'message');
-      expect(JSON.parse(response.toString())).toStrictEqual({ message: 'hello' });
+      expect(JSON.parse(response.toString())).toStrictEqual({
+        message: 'hello'
+      });
     });
 
     it('Should broadcast message to all connected clients', async () => {
@@ -313,7 +496,7 @@ describe('createWsRoute: ws.raw', () => {
                 {
                   data: (({ broadcast, raw }) => {
                     broadcast({ message: raw });
-                  }) as WsDataResponse
+                  }) as WsRawDataResponse
                 }
               ]
             }
@@ -328,12 +511,202 @@ describe('createWsRoute: ws.raw', () => {
       const [firstResponse] = await once(firstClient, 'message');
       const [secondResponse] = await once(secondClient, 'message');
 
-      expect(JSON.parse(firstResponse.toString())).toStrictEqual({ message: 'hello' });
-      expect(JSON.parse(secondResponse.toString())).toStrictEqual({ message: 'hello' });
+      expect(JSON.parse(firstResponse.toString())).toStrictEqual({
+        message: 'hello'
+      });
+      expect(JSON.parse(secondResponse.toString())).toStrictEqual({
+        message: 'hello'
+      });
+    });
+  });
+
+  describe('context', () => {
+    it('Should provide unique event id and increasing timestamp for each message', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'raw',
+              routes: [
+                {
+                  data: (({ event }) => ({
+                    id: event.id,
+                    timestamp: event.timestamp
+                  })) as WsRawDataResponse
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+      const messagesPromise = collectMessages(client, 200);
+
+      client.send('first');
+      client.send('second');
+
+      const [first, second] = (await messagesPromise) as { id: number; timestamp: number }[];
+      expect(second.id).toBe(first.id + 1);
+      expect(second.timestamp).toBeGreaterThanOrEqual(first.timestamp);
+    });
+
+    it('Should not overwrite event context of a delayed message by a following one', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'raw',
+              routes: [
+                {
+                  data: (async ({ event, setDelay }) => {
+                    await setDelay(50);
+                    return { id: event.id };
+                  }) as WsRawDataResponse
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+      const messagesPromise = collectMessages(client, 300);
+
+      client.send('first');
+      client.send('second');
+
+      const ids = ((await messagesPromise) as { id: number }[]).map(({ id }) => id);
+      expect(new Set(ids).size).toBe(2);
+    });
+
+    it('Should keep arbitrary socket context per connection', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'raw',
+              routes: [
+                {
+                  data: (({ raw, socket }) => {
+                    socket.context.room = raw;
+                    return { room: socket.context.room, keys: Object.keys(socket.context) };
+                  }) as WsRawDataResponse
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const firstClient = await connectClient(`ws://127.0.0.1:${port}/`);
+      const secondClient = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      firstClient.send('public');
+      const [firstResponse] = await once(firstClient, 'message');
+      secondClient.send('private');
+      const [secondResponse] = await once(secondClient, 'message');
+
+      expect(JSON.parse(firstResponse.toString())).toStrictEqual({
+        room: 'public',
+        keys: ['room']
+      });
+      expect(JSON.parse(secondResponse.toString())).toStrictEqual({
+        room: 'private',
+        keys: ['room']
+      });
+    });
+
+    it('Should provide the same event context to interceptors and route handler', async () => {
+      const requestInterceptor = vi.fn();
+      let responseInterceptorParams: unknown;
+      const responseInterceptor = vi.fn((data, params) => {
+        responseInterceptorParams = params;
+        return data;
+      });
+
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'raw',
+              routes: [{ data: (({ event }) => ({ id: event.id })) as WsRawDataResponse }]
+            }
+          ],
+          interceptors: [
+            wsInterceptors.request.message(requestInterceptor),
+            wsInterceptors.response.message(responseInterceptor)
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      client.send('hello');
+      const [response] = await once(client, 'message');
+
+      const { id } = JSON.parse(response.toString());
+      expect(requestInterceptor.mock.calls[0][0].event).toMatchObject({ id });
+      expect((responseInterceptorParams as { event: { id: number } }).event).toMatchObject({ id });
+      expect(typeof requestInterceptor.mock.calls[0][0].event.timestamp).toBe('number');
+    });
+
+    it('Should provide connection scoped socket context', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'raw',
+              routes: [
+                {
+                  data: (({ socket }) => ({
+                    connectionId: socket.id,
+                    hasTimestamp: typeof socket.timestamp === 'number'
+                  })) as WsRawDataResponse
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const firstClient = await connectClient(`ws://127.0.0.1:${port}/`);
+      const secondClient = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      firstClient.send('hello');
+      const [firstResponse] = await once(firstClient, 'message');
+      secondClient.send('hello');
+      const [secondResponse] = await once(secondClient, 'message');
+
+      expect(JSON.parse(firstResponse.toString())).toStrictEqual({
+        connectionId: 1,
+        hasTimestamp: true
+      });
+      expect(JSON.parse(secondResponse.toString())).toStrictEqual({
+        connectionId: 2,
+        hasTimestamp: true
+      });
     });
   });
 
   describe('interceptors', () => {
+    it('Should call raw interceptors for a plain message', async () => {
+      const rawInterceptor = vi.fn();
+
+      const { port } = await createServer({
+        interceptors: [wsInterceptors.request.raw(rawInterceptor)],
+        ws: {
+          configs: [
+            {
+              type: 'raw',
+              routes: [{ data: () => ({ source: 'raw' }) }]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      client.send('ping');
+      await once(client, 'message');
+
+      expect(rawInterceptor).toBeCalledTimes(1);
+    });
+
     it('Should call component interceptors in order: request -> response', async () => {
       const componentRequestInterceptor = vi.fn();
       const componentResponseInterceptor = vi.fn((data) => ({
@@ -349,10 +722,10 @@ describe('createWsRoute: ws.raw', () => {
               routes: [{ data: () => ({ source: 'raw' }) }]
             }
           ],
-          interceptors: {
-            request: componentRequestInterceptor,
-            response: componentResponseInterceptor
-          }
+          interceptors: [
+            wsInterceptors.request.message(componentRequestInterceptor),
+            wsInterceptors.response.message(componentResponseInterceptor)
+          ]
         }
       });
       const client = await connectClient(`ws://127.0.0.1:${port}/`);
@@ -370,6 +743,150 @@ describe('createWsRoute: ws.raw', () => {
         intercepted: true
       });
     });
+
+    it('Should provide frame to component interceptors', async () => {
+      const componentRequestInterceptor = vi.fn();
+      const componentResponseInterceptor = vi.fn((data) => data);
+
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'raw',
+              routes: [{ data: () => ({ source: 'raw' }) }]
+            }
+          ],
+          interceptors: [
+            wsInterceptors.request.message(componentRequestInterceptor),
+            wsInterceptors.response.message(componentResponseInterceptor)
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      client.send(JSON.stringify({ event: 'ping' }));
+      await once(client, 'message');
+
+      const frame = {
+        isBinary: false,
+        raw: '{"event":"ping"}'
+      };
+      expect(componentRequestInterceptor).toHaveBeenCalledWith(expect.objectContaining({ frame }));
+      expect(componentResponseInterceptor).toHaveBeenCalledWith(
+        { source: 'raw' },
+        expect.objectContaining({ frame })
+      );
+    });
+  });
+
+  describe('entities', () => {
+    it('Should match route configuration by data entity', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'raw',
+              routes: [
+                {
+                  entities: { raw: (raw) => raw.toString().includes('"event":"ping"') },
+                  data: () => ({ source: 'ping' })
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      client.send(JSON.stringify({ event: 'ping' }));
+      const [response] = await once(client, 'message');
+
+      expect(JSON.parse(response.toString())).toStrictEqual({ source: 'ping' });
+    });
+
+    it('Should not match route configuration when data entity is different', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'raw',
+              routes: [
+                {
+                  entities: { raw: (raw) => raw.toString().includes('"event":"ping"') },
+                  data: () => ({ source: 'ping' })
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+      const messagesPromise = collectMessages(client);
+
+      client.send(JSON.stringify({ event: 'pong' }));
+
+      expect(await messagesPromise).toStrictEqual([]);
+    });
+
+    it('Should match route configuration by isBinary entity', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'raw',
+              routes: [
+                {
+                  entities: { isBinary: true },
+                  data: () => ({ source: 'binary' })
+                },
+                {
+                  entities: { isBinary: false },
+                  data: () => ({ source: 'text' })
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      client.send(Buffer.from(JSON.stringify({ event: 'ping' })));
+      const [binaryResponse] = await once(client, 'message');
+      expect(JSON.parse(binaryResponse.toString())).toStrictEqual({
+        source: 'binary'
+      });
+
+      client.send(JSON.stringify({ event: 'ping' }));
+      const [textResponse] = await once(client, 'message');
+      expect(JSON.parse(textResponse.toString())).toStrictEqual({
+        source: 'text'
+      });
+    });
+
+    it('Should use only first matched route configuration', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'raw',
+              routes: [
+                { data: () => ({ source: 'any' }) },
+                {
+                  entities: { raw: (raw) => raw.toString().includes('"event":"ping"') },
+                  data: () => ({ source: 'specific' })
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+      const messagesPromise = collectMessages(client);
+
+      client.send(JSON.stringify({ event: 'ping' }));
+
+      expect(await messagesPromise).toStrictEqual([{ source: 'specific' }]);
+    });
   });
 
   describe('settings', () => {
@@ -383,7 +900,7 @@ describe('createWsRoute: ws.raw', () => {
               routes: [
                 {
                   settings: { delay },
-                  data: (({ raw }) => ({ message: raw })) as WsDataResponse
+                  data: (({ raw }) => ({ message: raw })) as WsRawDataResponse
                 }
               ]
             }
@@ -397,8 +914,473 @@ describe('createWsRoute: ws.raw', () => {
       const [response] = await once(client, 'message');
       const endTime = performance.now();
 
-      expect(endTime - startTime).toBeGreaterThanOrEqual(delay);
-      expect(JSON.parse(response.toString())).toStrictEqual({ message: 'hello' });
+      expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
+      expect(JSON.parse(response.toString())).toStrictEqual({
+        message: 'hello'
+      });
+    });
+  });
+});
+
+describe('createWsRoute: ws.close', () => {
+  describe('content', () => {
+    it('Should correctly use data function with code and reason', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'close',
+              routes: [{ data: ({ code, reason, broadcast }) => broadcast({ code, reason }) }]
+            }
+          ]
+        }
+      });
+      // ✅ important: close response is broadcasted, closing client can not receive it
+      const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const promise = once(observer, 'message');
+      client.close(4000, 'user left');
+
+      const [response] = await promise;
+      expect(JSON.parse(response.toString())).toStrictEqual({
+        code: 4000,
+        reason: 'user left'
+      });
+    });
+  });
+
+  describe('entities', () => {
+    it('Should match route configuration by code entity', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'close',
+              routes: [
+                {
+                  entities: { code: 4000 },
+                  data: ({ broadcast }) => broadcast({ source: 'matched' })
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const promise = once(observer, 'message');
+      client.close(4000, 'user left');
+
+      const [response] = await promise;
+      expect(JSON.parse(response.toString())).toStrictEqual({
+        source: 'matched'
+      });
+    });
+
+    it('Should not match route configuration when code entity is different', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'close',
+              routes: [
+                {
+                  entities: { code: 4001 },
+                  data: ({ broadcast }) => broadcast({ source: 'matched' })
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const messagesPromise = collectMessages(observer);
+      client.close(4000, 'user left');
+
+      expect(await messagesPromise).toStrictEqual([]);
+    });
+
+    it('Should match route configuration by reason entity', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'close',
+              routes: [
+                {
+                  entities: { reason: 'user left' },
+                  data: ({ broadcast }) => broadcast({ source: 'matched' })
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const promise = once(observer, 'message');
+      client.close(4000, 'user left');
+
+      const [response] = await promise;
+      expect(JSON.parse(response.toString())).toStrictEqual({
+        source: 'matched'
+      });
+    });
+
+    it('Should use only first matched route configuration', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'close',
+              routes: [
+                { data: ({ broadcast }) => broadcast({ source: 'any' }) },
+                {
+                  entities: { code: 4000 },
+                  data: ({ broadcast }) => broadcast({ source: 'specific' })
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const messagesPromise = collectMessages(observer);
+      client.close(4000, 'user left');
+
+      expect(await messagesPromise).toStrictEqual([{ source: 'specific' }]);
+    });
+  });
+
+  describe('interceptors', () => {
+    it('Should provide code and reason to component interceptors', async () => {
+      const componentRequestInterceptor = vi.fn();
+      const componentResponseInterceptor = vi.fn((data) => data);
+
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'close',
+              routes: [
+                {
+                  data: ({ broadcast }) => {
+                    broadcast({ source: 'close' });
+                    return { source: 'close' };
+                  }
+                }
+              ]
+            }
+          ],
+          interceptors: [
+            wsInterceptors.request.close(componentRequestInterceptor),
+            wsInterceptors.response.close(componentResponseInterceptor)
+          ]
+        }
+      });
+      const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const promise = once(observer, 'message');
+      client.close(4000, 'user left');
+      await promise;
+
+      expect(componentRequestInterceptor).toHaveBeenCalledWith(
+        expect.objectContaining({ code: 4000, reason: 'user left' })
+      );
+      expect(componentResponseInterceptor).toHaveBeenCalledWith(
+        { source: 'close' },
+        expect.objectContaining({ code: 4000, reason: 'user left' })
+      );
+    });
+  });
+
+  describe('settings', () => {
+    it('Should delay the close response by route setting', async () => {
+      const delay = 100;
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'close',
+              routes: [
+                { settings: { delay }, data: ({ broadcast }) => broadcast({ source: 'close' }) }
+              ]
+            }
+          ]
+        }
+      });
+      const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const promise = once(observer, 'message');
+      const startTime = performance.now();
+      client.close(4000, 'user left');
+
+      const [response] = await promise;
+      const endTime = performance.now();
+
+      expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
+      expect(JSON.parse(response.toString())).toStrictEqual({ source: 'close' });
+    });
+  });
+});
+
+describe('createWsRoute: ws.error', () => {
+  // ✅ important: text frame with invalid utf-8 is the simplest way to break the protocol
+  const breakProtocol = (client: WebSocket) => {
+    client.on('error', () => {});
+    client.send(Buffer.from([255, 254, 253]), { binary: false });
+  };
+
+  describe('content', () => {
+    it('Should correctly use data function with error', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'error',
+              routes: [{ data: ({ error, broadcast }) => broadcast({ message: error.message }) }]
+            }
+          ]
+        }
+      });
+      // ✅ important: socket is already closing on error, response is broadcasted
+      const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const promise = once(observer, 'message');
+      breakProtocol(client);
+
+      const [response] = await promise;
+      expect(JSON.parse(response.toString())).toStrictEqual({
+        message: 'Invalid WebSocket frame: invalid UTF-8 sequence'
+      });
+    });
+  });
+
+  describe('entities', () => {
+    it('Should match route configuration by error message', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'error',
+              routes: [
+                {
+                  entities: { message: 'some other error' },
+                  data: ({ broadcast }) => broadcast({ source: 'unmatched' })
+                },
+                {
+                  entities: { message: 'Invalid WebSocket frame: invalid UTF-8 sequence' },
+                  data: ({ broadcast }) => broadcast({ source: 'matched' })
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const promise = once(observer, 'message');
+      breakProtocol(client);
+
+      const [response] = await promise;
+      expect(JSON.parse(response.toString())).toStrictEqual({ source: 'matched' });
+    });
+
+    it('Should match route configuration by error code', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'error',
+              routes: [
+                {
+                  entities: { code: 'ECONNRESET' },
+                  data: ({ broadcast }) => broadcast({ source: 'unmatched' })
+                },
+                {
+                  // ✅ important: ws attaches this code to invalid utf-8 frames
+                  entities: { code: 'WS_ERR_INVALID_UTF8' },
+                  data: ({ broadcast }) => broadcast({ source: 'matched' })
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const promise = once(observer, 'message');
+      breakProtocol(client);
+
+      const [response] = await promise;
+      expect(JSON.parse(response.toString())).toStrictEqual({ source: 'matched' });
+    });
+
+    it('Should match route configuration by error message comparator', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'error',
+              routes: [
+                {
+                  entities: { message: regExp(/invalid UTF-8/) },
+                  data: ({ broadcast }) => broadcast({ source: 'matched' })
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const promise = once(observer, 'message');
+      breakProtocol(client);
+
+      const [response] = await promise;
+      expect(JSON.parse(response.toString())).toStrictEqual({ source: 'matched' });
+    });
+
+    it('Should not send response if no route configuration is matched by entities', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'error',
+              routes: [
+                {
+                  entities: { message: 'some other error' },
+                  data: ({ broadcast }) => broadcast({ source: 'unmatched' })
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const messagesPromise = collectMessages(observer, 200);
+      breakProtocol(client);
+
+      expect(await messagesPromise).toStrictEqual([]);
+    });
+  });
+
+  describe('interceptors', () => {
+    it('Should provide error to component interceptors', async () => {
+      const componentRequestInterceptor = vi.fn();
+
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'error',
+              routes: [{ data: ({ broadcast }) => broadcast({ source: 'error' }) }]
+            }
+          ],
+          interceptors: [wsInterceptors.request.error(componentRequestInterceptor)]
+        }
+      });
+      const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const promise = once(observer, 'message');
+      breakProtocol(client);
+      await promise;
+
+      expect(componentRequestInterceptor).toHaveBeenCalledWith(
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+    });
+  });
+
+  describe('settings', () => {
+    it('Should delay the error response by route setting', async () => {
+      const delay = 100;
+      const { port, server } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'error',
+              routes: [
+                { settings: { delay }, data: ({ broadcast }) => broadcast({ source: 'error' }) }
+              ]
+            }
+          ]
+        }
+      });
+      const connectionPromise = once(server, 'connection');
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+      const [socket] = await connectionPromise;
+
+      const promise = once(client, 'message');
+      const startTime = performance.now();
+      socket.emit('error', new Error('socket error'));
+
+      const [response] = await promise;
+      const endTime = performance.now();
+
+      expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
+      expect(JSON.parse(response.toString())).toStrictEqual({ source: 'error' });
+    });
+  });
+
+  describe('routing', () => {
+    it('Should send the error response to the socket while it is open', async () => {
+      const { port, server } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'error',
+              routes: [{ data: ({ error, broadcast }) => broadcast({ message: error.message }) }]
+            }
+          ]
+        }
+      });
+      const connectionPromise = once(server, 'connection');
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+      const [socket] = await connectionPromise;
+
+      const promise = once(client, 'message');
+      socket.emit('error', new Error('socket error'));
+
+      const [response] = await promise;
+      expect(JSON.parse(response.toString())).toStrictEqual({ message: 'socket error' });
+    });
+
+    it('Should ignore socket errors when no error route is configured', async () => {
+      const { port, server } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'raw',
+              routes: [{ data: () => ({ source: 'raw' }) }]
+            }
+          ]
+        }
+      });
+      const connectionPromise = once(server, 'connection');
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+      const [socket] = await connectionPromise;
+
+      const messagesPromise = collectMessages(client);
+      socket.emit('error', new Error('socket error'));
+
+      expect(await messagesPromise).toStrictEqual([]);
     });
   });
 });
@@ -423,7 +1405,9 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
       client.send(JSON.stringify({ type: 'connection_init' }));
       const [response] = await once(client, 'message');
 
-      expect(JSON.parse(response.toString())).toStrictEqual({ type: 'connection_ack' });
+      expect(JSON.parse(response.toString())).toStrictEqual({
+        type: 'connection_ack'
+      });
     });
 
     it('Should respond with pong for ping', async () => {
@@ -445,6 +1429,146 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
       const [response] = await once(client, 'message');
 
       expect(JSON.parse(response.toString())).toStrictEqual({ type: 'pong' });
+    });
+
+    it('Should ignore a client complete message', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'graphql-ws',
+              operationType: 'subscription',
+              identifier: /^Users$/,
+              routes: [{ data: { data: { ok: true } } }]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const messagesPromise = collectMessages(client);
+      client.send(JSON.stringify({ id: 'sub-client-complete', type: 'complete' }));
+
+      expect(await messagesPromise).toStrictEqual([]);
+    });
+
+    it('Should ignore a client pong message', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'graphql-ws',
+              operationType: 'subscription',
+              identifier: /^Users$/,
+              routes: [{ data: { data: { ok: true } } }]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+      const messagesPromise = collectMessages(client, 200);
+
+      client.send(JSON.stringify({ type: 'pong' }));
+
+      expect(await messagesPromise).toStrictEqual([]);
+      expect(warn).not.toHaveBeenCalled();
+      warn.mockRestore();
+    });
+
+    it('Should not call raw interceptors for a graphql-ws frame', async () => {
+      const rawInterceptor = vi.fn();
+      const messageInterceptor = vi.fn();
+
+      const { port } = await createServer({
+        interceptors: [
+          wsInterceptors.request.raw(rawInterceptor),
+          wsInterceptors.request.message(messageInterceptor)
+        ],
+        ws: {
+          configs: [
+            {
+              type: 'graphql-ws',
+              operationType: 'subscription',
+              identifier: /^Users$/,
+              routes: [{ data: { data: { ok: true } } }]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      client.send(
+        JSON.stringify({
+          id: 'sub-raw-interceptor',
+          type: 'subscribe',
+          payload: { query: 'subscription Users { users { id } }', operationName: 'Users' }
+        })
+      );
+      await once(client, 'message');
+
+      expect(messageInterceptor).toBeCalledTimes(1);
+      expect(rawInterceptor).toBeCalledTimes(0);
+    });
+
+    it('Should not run raw routes for a graphql-ws frame', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'raw',
+              routes: [{ data: () => ({ source: 'raw' }) }]
+            },
+            {
+              type: 'graphql-ws',
+              operationType: 'subscription',
+              identifier: /^Users$/,
+              routes: [{ data: { data: { source: 'subscription' } } }]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+      const messagesPromise = collectMessages(client, 200);
+
+      client.send(
+        JSON.stringify({
+          id: 'sub-raw-skip',
+          type: 'subscribe',
+          payload: { query: 'subscription Users { users { id } }', operationName: 'Users' }
+        })
+      );
+
+      expect(await messagesPromise).toStrictEqual([
+        { id: 'sub-raw-skip', type: 'next', payload: { data: { source: 'subscription' } } }
+      ]);
+    });
+
+    it('Should ignore a subscription with an invalid query', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'graphql-ws',
+              operationType: 'subscription',
+              identifier: /^Users$/,
+              routes: [{ data: { data: { ok: true } } }]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const messagesPromise = collectMessages(client);
+      client.send(
+        JSON.stringify({
+          id: 'sub-invalid',
+          type: 'subscribe',
+          payload: { query: 'subscription {' }
+        })
+      );
+
+      expect(await messagesPromise).toStrictEqual([]);
     });
   });
 
@@ -768,7 +1892,10 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
         JSON.stringify({
           id: 'sub-next',
           type: 'subscribe',
-          payload: { query: 'subscription Users { users { id } }', operationName: 'Users' }
+          payload: {
+            query: 'subscription Users { users { id } }',
+            operationName: 'Users'
+          }
         })
       );
       const [response] = await once(client, 'message');
@@ -806,7 +1933,10 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
         JSON.stringify({
           id: 'sub-server-complete',
           type: 'subscribe',
-          payload: { query: 'subscription Users { users { id } }', operationName: 'Users' }
+          payload: {
+            query: 'subscription Users { users { id } }',
+            operationName: 'Users'
+          }
         })
       );
       const [response] = await once(client, 'message');
@@ -815,6 +1945,88 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
         id: 'sub-server-complete',
         type: 'complete'
       });
+    });
+
+    it('Should not complete a subscription twice', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'graphql-ws',
+              operationType: 'subscription',
+              identifier: /^Users$/,
+              routes: [
+                {
+                  data: ({ complete }) => {
+                    complete();
+                    complete();
+
+                    return { data: { ok: true } };
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const messagesPromise = collectMessages(client);
+      client.send(
+        JSON.stringify({
+          id: 'sub-double-complete',
+          type: 'subscribe',
+          payload: {
+            query: 'subscription Users { users { id } }',
+            operationName: 'Users'
+          }
+        })
+      );
+
+      expect(await messagesPromise).toStrictEqual([
+        { id: 'sub-double-complete', type: 'complete' }
+      ]);
+    });
+
+    it('Should not push next payload after complete', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'graphql-ws',
+              operationType: 'subscription',
+              identifier: /^Users$/,
+              routes: [
+                {
+                  data: ({ complete, next }) => {
+                    complete();
+                    next({ data: { ok: true } });
+
+                    return { data: { ok: true } };
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const messagesPromise = collectMessages(client);
+      client.send(
+        JSON.stringify({
+          id: 'sub-next-after-complete',
+          type: 'subscribe',
+          payload: {
+            query: 'subscription Users { users { id } }',
+            operationName: 'Users'
+          }
+        })
+      );
+
+      expect(await messagesPromise).toStrictEqual([
+        { id: 'sub-next-after-complete', type: 'complete' }
+      ]);
     });
   });
 
@@ -860,6 +2072,156 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
         payload: { data: { ok: true } }
       });
     });
+
+    it('Should match a subscription route by variables comparator', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'graphql-ws',
+              operationType: 'subscription',
+              identifier: /^Users$/,
+              routes: [
+                {
+                  entities: { variables: haveEntries({ room: 'public' }) },
+                  data: { data: { ok: true } }
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      client.send(
+        JSON.stringify({
+          id: 'sub-comparator',
+          type: 'subscribe',
+          payload: {
+            query: 'subscription Users { users { id } }',
+            operationName: 'Users',
+            variables: { room: 'public', page: 1 }
+          }
+        })
+      );
+      const [response] = await once(client, 'message');
+
+      expect(JSON.parse(response.toString())).toStrictEqual({
+        id: 'sub-comparator',
+        type: 'next',
+        payload: { data: { ok: true } }
+      });
+    });
+
+    it('Should not respond when subscription entities do not match', async () => {
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'graphql-ws',
+              operationType: 'subscription',
+              identifier: /^Users$/,
+              routes: [
+                {
+                  entities: { variables: { room: 'public' } },
+                  data: { data: { ok: true } }
+                }
+              ]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      const messagesPromise = collectMessages(client);
+      client.send(
+        JSON.stringify({
+          id: 'sub-unmatched',
+          type: 'subscribe',
+          payload: {
+            query: 'subscription Users { users { id } }',
+            operationName: 'Users',
+            variables: { room: 'private' }
+          }
+        })
+      );
+
+      expect(await messagesPromise).toStrictEqual([]);
+    });
+  });
+
+  describe('interceptors', () => {
+    it('Should call graphql subscription component interceptors', async () => {
+      const componentRequestInterceptor = vi.fn();
+
+      const { port } = await createServer({
+        ws: {
+          configs: [
+            {
+              type: 'graphql-ws',
+              operationType: 'subscription',
+              identifier: /^Users$/,
+              routes: [{ data: { data: { ok: true } } }]
+            }
+          ],
+          interceptors: [wsInterceptors.request.message(componentRequestInterceptor)]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      client.send(
+        JSON.stringify({
+          id: 'sub-interceptors',
+          type: 'subscribe',
+          payload: {
+            query: 'subscription Users { users { id } }',
+            operationName: 'Users'
+          }
+        })
+      );
+      await once(client, 'message');
+
+      expect(componentRequestInterceptor).toBeCalledTimes(1);
+    });
+
+    it('Should call server interceptors once for a graphql subscription message', async () => {
+      const allInterceptor = vi.fn();
+      const messageInterceptor = vi.fn();
+
+      const { port } = await createServer({
+        interceptors: [
+          wsInterceptors.request.all(allInterceptor),
+          wsInterceptors.request.message(messageInterceptor)
+        ],
+        ws: {
+          configs: [
+            {
+              type: 'graphql-ws',
+              operationType: 'subscription',
+              identifier: /^Users$/,
+              routes: [{ data: { data: { ok: true } } }]
+            }
+          ]
+        }
+      });
+      const client = await connectClient(`ws://127.0.0.1:${port}/`);
+
+      client.send(
+        JSON.stringify({
+          id: 'sub-server-interceptors',
+          type: 'subscribe',
+          payload: {
+            query: 'subscription Users { users { id } }',
+            operationName: 'Users'
+          }
+        })
+      );
+      await once(client, 'message');
+
+      // ✅ important: ws.request.all also fires on open, so one open plus one message
+      expect(allInterceptor).toBeCalledTimes(2);
+      expect(messageInterceptor).toBeCalledTimes(1);
+    });
   });
 
   describe('settings', () => {
@@ -889,18 +2251,126 @@ describe('createWsRoute: ws.graphql-transport-ws', () => {
         JSON.stringify({
           id: 'sub-delay',
           type: 'subscribe',
-          payload: { query: 'subscription Users { users { id } }', operationName: 'Users' }
+          payload: {
+            query: 'subscription Users { users { id } }',
+            operationName: 'Users'
+          }
         })
       );
       const [response] = await once(client, 'message');
       const endTime = performance.now();
 
-      expect(endTime - startTime).toBeGreaterThanOrEqual(delay - 5);
+      expect(Math.ceil(endTime - startTime)).toBeGreaterThanOrEqual(delay);
       expect(JSON.parse(response.toString())).toStrictEqual({
         id: 'sub-delay',
         type: 'next',
         payload: { data: { ok: true } }
       });
     });
+  });
+});
+
+describe('createWsRoute: event order', () => {
+  it('Should reply to a message only after a delayed connection handler', async () => {
+    const { port } = await createServer({
+      ws: {
+        configs: [
+          {
+            type: 'connection',
+            routes: [
+              {
+                data: async ({ setDelay }) => {
+                  await setDelay(100);
+                  return { source: 'connection' };
+                }
+              }
+            ]
+          },
+          {
+            type: 'raw',
+            routes: [{ data: () => ({ source: 'message' }) }]
+          }
+        ]
+      }
+    });
+    const client = await connectClient(`ws://127.0.0.1:${port}/`);
+    const messagesPromise = collectMessages(client, 300);
+
+    client.send('ping');
+
+    expect(await messagesPromise).toStrictEqual([{ source: 'connection' }, { source: 'message' }]);
+  });
+
+  it('Should handle close only after a delayed connection handler', async () => {
+    let connectionCount = 0;
+    const { port } = await createServer({
+      ws: {
+        configs: [
+          {
+            type: 'connection',
+            routes: [
+              {
+                data: async ({ broadcast, setDelay }) => {
+                  connectionCount += 1;
+                  if (connectionCount === 1) return;
+
+                  await setDelay(100);
+                  broadcast({ source: 'joined' });
+                }
+              }
+            ]
+          },
+          {
+            type: 'close',
+            routes: [{ data: ({ broadcast }) => broadcast({ source: 'left' }) }]
+          }
+        ]
+      }
+    });
+    const observer = await connectClient(`ws://127.0.0.1:${port}/`);
+    const messagesPromise = collectMessages(observer, 300);
+
+    const client = await connectClient(`ws://127.0.0.1:${port}/`);
+    client.close();
+
+    expect(await messagesPromise).toStrictEqual([{ source: 'joined' }, { source: 'left' }]);
+  });
+
+  it('Should keep handling messages when the connection handler fails', async () => {
+    const rejections: unknown[] = [];
+    const onUnhandledRejection = (reason: unknown) => rejections.push(reason);
+    process.on('unhandledRejection', onUnhandledRejection);
+
+    const { port } = await createServer({
+      ws: {
+        configs: [
+          {
+            type: 'connection',
+            routes: [
+              {
+                data: () => {
+                  throw new Error('connection failed');
+                }
+              }
+            ]
+          },
+          {
+            type: 'raw',
+            routes: [{ data: () => ({ source: 'message' }) }]
+          }
+        ]
+      }
+    });
+    const client = await connectClient(`ws://127.0.0.1:${port}/`);
+    const messagesPromise = collectMessages(client, 200);
+
+    client.send('first');
+    client.send('second');
+
+    expect(await messagesPromise).toStrictEqual([{ source: 'message' }, { source: 'message' }]);
+    process.off('unhandledRejection', onUnhandledRejection);
+    expect(rejections.map((reason) => (reason as Error).message)).toStrictEqual([
+      'connection failed'
+    ]);
   });
 });

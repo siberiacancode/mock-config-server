@@ -1,33 +1,35 @@
 import type { Express } from 'express';
 
 import type {
-  Entries,
-  GraphQLEntitiesByEntityName,
+  GraphQLOperationType,
   GraphQLParams,
-  GraphQLRequestArtifact
+  GraphQLRequestArtifact,
+  Interceptor
 } from '@/utils/types';
 
 import {
   asyncHandler,
-  callRequestInterceptor,
-  callResponseInterceptors,
+  callHttpRequestInterceptors,
+  callHttpResponseInterceptors,
   getGraphQLInput,
-  isComparator,
   normalizeUrl,
   parseGraphQLQuery,
-  resolveEntityValues,
   sleep
 } from '@/utils/helpers';
 
-import { equals } from '../../entities';
-import { matchGraphQLRequestArtifacts } from './helpers';
+import { isGraphQLRequestMatchedByEntities, matchGraphQLRequestArtifacts } from './helpers';
 
 interface CreateGraphQLRouteParams {
   graphQLRequestArtifacts: GraphQLRequestArtifact[];
   server: Express;
+  serverInterceptors?: Interceptor[];
 }
 
-export const createGraphQLRoute = ({ server, graphQLRequestArtifacts }: CreateGraphQLRouteParams) =>
+export const createGraphQLRoute = ({
+  server,
+  graphQLRequestArtifacts,
+  serverInterceptors = []
+}: CreateGraphQLRouteParams) =>
   server.use(
     asyncHandler(async (request, response, next) => {
       if (request.method !== 'GET' && request.method !== 'POST') return next();
@@ -38,7 +40,13 @@ export const createGraphQLRoute = ({ server, graphQLRequestArtifacts }: CreateGr
       const query = parseGraphQLQuery(graphQLInput.query);
       if (!query) return next();
 
-      request.queries = request.query;
+      await callHttpRequestInterceptors(
+        {
+          request,
+          meta: { type: 'graphql', operationType: query.operationType as GraphQLOperationType }
+        },
+        serverInterceptors
+      );
 
       const matchedRequestArtifacts = matchGraphQLRequestArtifacts({
         artifacts: graphQLRequestArtifacts,
@@ -53,74 +61,22 @@ export const createGraphQLRoute = ({ server, graphQLRequestArtifacts }: CreateGr
 
       if (!matchedRequestArtifacts.length) return next();
 
-      const matchedRouteConfig = matchedRequestArtifacts.find(({ config }) => {
-        if (!config.entities) return true;
-
-        const entityEntries = Object.entries(config.entities) as Entries<
-          Required<GraphQLEntitiesByEntityName>
-        >;
-
-        return entityEntries.every(([entityName, valueOrComparator]) => {
-          const actualEntity =
-            entityName === 'variables' ? graphQLInput.variables : request[entityName];
-
-          if (isComparator(valueOrComparator)) {
-            const comparator = valueOrComparator;
-            return resolveEntityValues({ actual: actualEntity, comparator });
-          }
-
-          const isVariables = entityName === 'variables';
-          if (isVariables) {
-            const comparator = equals(valueOrComparator);
-            return resolveEntityValues({ actual: actualEntity, comparator });
-          }
-
-          const mappedEntityEntries = Object.entries(valueOrComparator) as Entries<
-            typeof valueOrComparator
-          >;
-          return mappedEntityEntries.every(([entityPropertyKey, valueOrComparator]) => {
-            // ✅ important:
-            // transform header keys to lower case
-            // because browsers send headers in lowercase
-            const actualPropertyKey =
-              entityName === 'headers' ? entityPropertyKey.toLowerCase() : entityPropertyKey;
-            const actualPropertyValue = actualEntity[actualPropertyKey];
-
-            const comparator = isComparator(valueOrComparator)
-              ? valueOrComparator
-              : equals(valueOrComparator);
-
-            return resolveEntityValues({
-              actual: actualPropertyValue,
-              comparator
-            });
-          });
-        });
-      });
+      const matchedRouteConfig = matchedRequestArtifacts.find(({ config }) =>
+        isGraphQLRequestMatchedByEntities(
+          { request, variables: graphQLInput.variables },
+          config.entities
+        )
+      );
 
       if (!matchedRouteConfig) return next();
 
-      if (matchedRouteConfig.componentRequestInterceptor) {
-        await callRequestInterceptor({
+      await callHttpRequestInterceptors(
+        {
           request,
-          interceptor: matchedRouteConfig.componentRequestInterceptor
-        });
-      }
-
-      if (matchedRouteConfig.requestRequestInterceptor) {
-        await callRequestInterceptor({
-          request,
-          interceptor: matchedRouteConfig.requestRequestInterceptor
-        });
-      }
-
-      if (matchedRouteConfig.routeRequestInterceptor) {
-        await callRequestInterceptor({
-          request,
-          interceptor: matchedRouteConfig.routeRequestInterceptor
-        });
-      }
-
+          meta: { type: 'graphql', operationType: query.operationType as GraphQLOperationType }
+        },
+        matchedRouteConfig.componentInterceptors ?? []
+      );
       const params: GraphQLParams = {
         request,
         response,
@@ -178,17 +134,18 @@ export const createGraphQLRoute = ({ server, graphQLRequestArtifacts }: CreateGr
         response.set('Cache-control', 'no-cache');
       }
 
-      const data = await callResponseInterceptors({
-        data: resolvedData,
-        request,
-        response,
-        interceptors: {
-          routeInterceptor: matchedRouteConfig.routeResponseInterceptor,
-          componentInterceptor: matchedRouteConfig.componentResponseInterceptor,
-          requestInterceptor: matchedRouteConfig.requestResponseInterceptor,
-          serverInterceptor: matchedRouteConfig.serverResponseInterceptor
+      const data = await callHttpResponseInterceptors(
+        {
+          data: resolvedData,
+          meta: { type: 'graphql', operationType: query.operationType as GraphQLOperationType },
+          request,
+          response
+        },
+        {
+          componentInterceptors: matchedRouteConfig.componentInterceptors,
+          serverInterceptors
         }
-      });
+      );
 
       if (matchedRouteConfig.config.settings?.delay) {
         await sleep(matchedRouteConfig.config.settings.delay);

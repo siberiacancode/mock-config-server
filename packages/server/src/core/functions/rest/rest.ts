@@ -11,6 +11,7 @@ import type {
   RestSettings
 } from '@/utils/types';
 
+import { rest as restInterceptors } from '@/core/interceptors';
 import { isGeneratorFunction } from '@/utils/helpers';
 
 import { createGenerator } from '../shared/helpers';
@@ -263,6 +264,7 @@ const polling = <
 });
 
 export const rest = {
+  ...restInterceptors,
   delete: createRestFactory('delete'),
   file,
   get: createRestFactory('get'),

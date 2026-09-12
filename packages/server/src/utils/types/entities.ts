@@ -1,3 +1,5 @@
+import type { Buffer } from 'node:buffer';
+
 import type { IS_COMPARATOR_SYMBOL } from '@/utils/constants';
 
 export type Comparator<Actual = unknown, Expected = unknown> = ((
@@ -16,3 +18,12 @@ export type BodyEntity = BodyEntityValue | Comparator<BodyEntityValue>;
 
 type VariablesEntityValue = Record<string, unknown>;
 export type VariablesEntity = Comparator<VariablesEntityValue> | VariablesEntityValue;
+
+export type WsRawEntity = (raw: string | Buffer) => boolean;
+export type WsIsBinaryEntity = boolean | Comparator<boolean>;
+
+export type WsCloseCodeEntity = number | Comparator<number>;
+export type WsCloseReasonEntity = string | Comparator<string>;
+
+export type WsErrorCodeEntity = string | Comparator<string>;
+export type WsErrorMessageEntity = string | Comparator<string>;

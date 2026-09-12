@@ -13,12 +13,7 @@ const getLength = (value: unknown) => {
   return Number.NaN;
 };
 
-const normalize = (value: any) => {
-  if (isObjectLike(value)) {
-    return flatten<PlainObject | unknown[], PlainObject>(value);
-  }
-  return value;
-};
+const normalize = (value: any) => flatten<any, PlainObject>(value);
 
 const comparePrimitive = (
   actual: unknown,
@@ -83,15 +78,15 @@ const comparators = {
   startsWith: (actual: unknown, expected: unknown) => {
     if (isIterable(actual)) {
       if (isPrimitive(actual)) return actual.startsWith(String(expected));
-      return JSON.stringify([...actual].at(0)).startsWith(JSON.stringify(expected));
+      return (JSON.stringify([...actual].at(0)) ?? '').startsWith(JSON.stringify(expected));
     }
     return false;
   },
 
   endsWith: (actual: unknown, expected: unknown) => {
     if (isIterable(actual)) {
-      if (isPrimitive(actual)) return actual.startsWith(String(expected));
-      return JSON.stringify([...actual].at(-1)).endsWith(JSON.stringify(expected));
+      if (isPrimitive(actual)) return actual.endsWith(String(expected));
+      return (JSON.stringify([...actual].at(-1)) ?? '').endsWith(JSON.stringify(expected));
     }
     return false;
   },
