@@ -1,0 +1,15 @@
+{
+  "title": "Mocking responses",
+  "pagesIndex": "index",
+  "pages": [
+    "stub-response",
+    "request-settings",
+    "error-responses",
+    "response-delay",
+    "polling",
+    "matching",
+    "subscriptions",
+    "resolver-params",
+    "schema-first-mocking"
+  ]
+}

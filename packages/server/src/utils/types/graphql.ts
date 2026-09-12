@@ -29,16 +29,19 @@ export interface GraphQLSettings {
 type GraphQLCookieValue = string | undefined;
 type GraphQLHeaderValue = number | string | string[] | undefined;
 
-export type GraphQLExecutionResult = ExecutionResult<Record<string, unknown>, PlainObject>;
+export type GraphQLExecutionResult<
+  Data extends object = object,
+  Extensions = PlainObject
+> = ExecutionResult<Data, Extensions>;
 
 export interface GraphQLParams<
-  Query = Record<string, unknown>,
+  Queries = Record<string, unknown>,
   Body = Record<string, unknown>,
   Params = Record<string, unknown>,
   Response = any
 > {
   entities: GraphQLEntitiesByEntityName;
-  request: Request<Params, Response, Body, Query>;
+  request: Omit<Request<Params, Response, Body, Queries>, 'queries'> & { queries: Queries };
   response: ExpressResponse;
   appendHeader: (field: string, value?: string | string[]) => void;
   attachment: (filename: string) => void;
@@ -69,9 +72,7 @@ export type GraphQLDataResponseFunction = (
   params: GraphQLParams
 ) => MaybePromise<GraphQLExecutionResult>;
 export type GraphQLDataResponse =
-  | GraphQLDataResponseFunction
-  | GraphQLDataResponseGenerator
-  | GraphQLExecutionResult;
+  GraphQLDataResponseFunction | GraphQLDataResponseGenerator | GraphQLExecutionResult;
 
 export interface GraphQLRouteConfig {
   data: GraphQLDataResponse;

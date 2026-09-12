@@ -1,0 +1,83 @@
+---
+title: Operation name
+description: Match GraphQL operations by name, query, or event in Mock Config.
+---
+
+The identifier is the first argument to any `graphql.*` method. Mock Config checks it against three things from the incoming request — the **operation name**, the **full query document**, and the **event name** — in that order. The first match wins.
+
+## Operation Name
+
+The most common way to match. Pass a string equal to the name declared after `query`, `mutation`, or `subscription` in the document:
+
+```ts
+graphql.query('GetUsers', { data: { users: [] } });
+```
+
+For the query:
+
+```graphql
+query GetUsers {
+  users {
+    id
+    name
+  }
+}
+```
+
+The operation name is `GetUsers`. This is what most clients send via the `operationName` field in the request payload.
+
+## Full Query Document
+
+Pass the full query string as the identifier to match by the exact shape of the document, regardless of the operation name:
+
+```ts
+graphql.query(
+  `query GetUsers {
+    users { id name }
+  }`,
+  { data: { users: [] } }
+);
+```
+
+Queries are normalized before comparison (whitespace stripped), so formatting differences do not affect matching. Useful when clients do not set an `operationName`.
+
+## Event Name
+
+The identifier is also compared against the **first field** in the selection set — called the event name. This allows matching operations that share a root field even if their operation names differ:
+
+```ts
+graphql.query('users', { data: { users: [] } });
+```
+
+For this query:
+
+```graphql
+query GetUsers {
+  users {
+    id
+    name
+  }
+}
+```
+
+The event name is `users`. Useful when the client sends queries without an explicit `operationName`.
+
+## Regular Expressions
+
+A RegExp identifier is tested against all three values — operation name, full query, and event name. The handler matches if the expression satisfies any of them:
+
+```ts
+graphql.query(/^Get/, { data: {} });
+graphql.query(/users/, { data: { users: [] } });
+```
+
+## Priority
+
+A string identifier is always more specific than a RegExp. When multiple handlers match, the most specific wins:
+
+```ts
+graphql.query('GetUsers', { data: { users: [] } });
+graphql.query(/^Get/, { data: {} });
+```
+
+A `GetUsers` request matches the first handler. Any other operation starting with `Get` matches the second.

@@ -1,0 +1,6 @@
+{
+  "title": "REST Mocking",
+  "icon": "Server",
+  "defaultOpen": true,
+  "pages": ["introduction", "intercepting-requests", "mocking-responses", "methods"]
+}

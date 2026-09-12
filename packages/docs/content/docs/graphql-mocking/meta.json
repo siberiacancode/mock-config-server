@@ -1,0 +1,6 @@
+{
+  "title": "GraphQL Mocking",
+  "icon": "Braces",
+  "defaultOpen": true,
+  "pages": ["introduction", "intercepting-operations", "mocking-responses", "operations"]
+}

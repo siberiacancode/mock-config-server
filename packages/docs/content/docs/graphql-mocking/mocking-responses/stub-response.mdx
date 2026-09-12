@@ -1,0 +1,83 @@
+---
+title: Stub response
+description: Return predictable, static responses for intercepted GraphQL operations in Mock Config.
+---
+
+By default, every mock in Mock Config works as a **stub**: it returns the same predefined response for every operation that matches the identifier, regardless of what variables the client sends. The operation comes in, the stub answers. This is the simplest and most predictable way to mock a GraphQL API, and it covers the majority of scenarios.
+
+## A Stubbed Query
+
+Define a handler with a static response and it will answer every matching operation with the exact same payload:
+
+```ts
+import { graphql } from 'mock-config-server';
+
+graphql.query('GetUsers', {
+  data: {
+    users: [
+      { id: 1, name: 'John' },
+      { id: 2, name: 'Jane' }
+    ]
+  }
+});
+```
+
+Every `GetUsers` query receives the same list of users. It does not matter which variables, headers, or cookies the client sends: the stub always returns this response.
+
+## Stubs And Matchers
+
+A single stub answers every matching operation the same way. To describe **different** responses for **different** requests, combine stubs with a [Matcher](/docs/mocking-requests/matcher). Pass the response as the second argument and `match` in the operation settings argument.
+
+```ts
+import { graphql } from 'mock-config-server';
+
+graphql.query(
+  'GetUsers',
+  { data: { users: [{ id: 1, name: 'John', role: 'admin' }] } },
+  { match: { variables: { role: 'admin' } } }
+);
+
+graphql.query(
+  'GetUsers',
+  { data: { users: [{ id: 2, name: 'Jane', role: 'developer' }] } },
+  { match: { variables: { role: 'developer' } } }
+);
+```
+
+Each stub stays simple and static; the matcher expresses the condition.
+
+## Priority And The Default Stub
+
+When several stubs share the same identifier, the one with a `match` is more specific and takes priority over a stub without one. This lets you describe specific scenarios alongside a general default:
+
+```ts
+import { graphql } from 'mock-config-server';
+
+graphql.query('GetUsers', { data: { users: [] } });
+
+graphql.query(
+  'GetUsers',
+  { data: { users: [{ id: 1, name: 'John', role: 'admin' }] } },
+  { match: { variables: { role: 'admin' } } }
+);
+```
+
+A `GetUsers` request with `role: 'admin'` matches the more specific stub. Every other `GetUsers` request falls back to the default empty list.
+
+## Polling Responses
+
+For scenarios where the response should change across consecutive requests, such as a background job status, use `graphql.polling()`:
+
+```ts
+import { graphql } from 'mock-config-server';
+
+graphql.query(
+  'GetJobStatus',
+  graphql.polling([
+    { response: { data: { job: { status: 'pending' } } }, time: 2000 },
+    { response: { data: { job: { status: 'done' } } } }
+  ])
+);
+```
+
+Polling cycles through items over time. See [Polling](/docs/rest-mocking/polling) for the full details. The same model applies to GraphQL queries and mutations.

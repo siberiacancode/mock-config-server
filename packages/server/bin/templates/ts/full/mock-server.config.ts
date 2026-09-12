@@ -1,21 +1,73 @@
-import type { MockServerConfig } from 'mock-config-server';
+import { graphql, mock, rest, ws } from 'mock-config-server';
 
-import { createUserMutation, getUserQuery, getUsersQuery } from './mock-requests/graphql';
-import { getUserRequest, getUsersRequest, postUserRequest } from './mock-requests/rest';
+interface User {
+  emoji: string;
+  name: string;
+}
 
-const mockServerConfig: MockServerConfig = [
-  {
-    port: 31299,
-    baseUrl: '/'
-  },
+const users: User[] = [
+  { emoji: '🍎', name: 'Alice' },
+  { emoji: '🍌', name: 'Bob' },
+  { emoji: '🍒', name: 'Carol' },
+  { emoji: '🍇', name: 'Dan' },
+  { emoji: '🥝', name: 'Eve' }
+];
+
+export default mock(
+  { port: 7777, baseUrl: '/' },
   {
     name: 'rest',
-    configs: [getUserRequest, getUsersRequest, postUserRequest]
+    configs: [
+      rest.get('/users', users),
+      rest.get<{ queries: { test: 1 } }>(
+        '/poll',
+        rest.polling([{ handler: (params) => params.request.queries.test }])
+      ),
+      rest.get<{ params: { id: string } }>('/users/:id', (params) => {
+        const user = users[Number(params.request.params.id) - 1];
+        if (!user) {
+          params.setStatusCode(404);
+          return { error: 'Not found' };
+        }
+        return user;
+      })
+    ]
   },
   {
     name: 'graphql',
-    configs: [getUserQuery, getUsersQuery, createUserMutation]
-  }
-];
+    baseUrl: '/graphql',
+    configs: [
+      graphql.query('GetUsers', { data: { users } }),
+      graphql.query<{ body: { variables: { id: string } } }>('GetUser', (params) => {
+        const user = users[Number(params.request.body.variables.id) - 1];
 
-export default mockServerConfig;
+        if (!user) {
+          params.setStatusCode(404);
+
+          return {
+            data: {
+              error: 'Not found'
+            }
+          };
+        }
+
+        return {
+          data: user
+        };
+      })
+    ]
+  },
+  {
+    name: 'ws',
+    baseUrl: '/ws',
+    configs: [
+      ws.connection(() => ({
+        message: `${new Date().toISOString()} Hello from server`
+      })),
+      ws.message(async (params) => {
+        await params.setDelay(200);
+        params.send({ ok: true });
+      })
+    ]
+  }
+);

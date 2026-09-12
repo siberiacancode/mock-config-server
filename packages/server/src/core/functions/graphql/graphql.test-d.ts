@@ -7,14 +7,14 @@ import { graphql } from './graphql';
 describe('graphql types', () => {
   it('Should type handler params with all typed fields', () => {
     graphql.query<{
-      query: { query: string };
       body: { body: string };
       params: { params: string };
+      queries: { queries: string };
       response: { data: { response: string } };
     }>('GetUsers', ({ request }) => {
-      expectTypeOf(request.query).toEqualTypeOf<{ query: string }>();
       expectTypeOf(request.body).toEqualTypeOf<{ body: string }>();
       expectTypeOf(request.params).toEqualTypeOf<{ params: string }>();
+      expectTypeOf(request.queries).toEqualTypeOf<{ queries: string }>();
       expectTypeOf(request.res).toEqualTypeOf<
         ExpressResponse<{ data: { response: string } }> | undefined
       >();
@@ -38,5 +38,35 @@ describe('graphql types', () => {
       data: { response: 'ordinary response data' },
       polling: [{ response: { data: { response: 'polling config-like data' } } }]
     }));
+
+    graphql.query<{ response: PollingResponse }>('GetUsers', function* () {
+      yield {
+        data: { response: 'ordinary response data' },
+        polling: [{ response: { data: { response: 'polling config-like data' } } }]
+      };
+
+      return {
+        data: { response: 'ordinary response data' },
+        polling: [{ response: { data: { response: 'polling config-like data' } } }]
+      };
+    });
+
+    graphql.query<{ response: PollingResponse }>(
+      'GetUsers',
+      graphql.polling([
+        {
+          response: {
+            data: { response: 'ordinary response data' },
+            polling: [{ response: { data: { response: 'polling config-like data' } } }]
+          }
+        },
+        {
+          handler: () => ({
+            data: { response: 'ordinary response data' },
+            polling: [{ response: { data: { response: 'polling config-like data' } } }]
+          })
+        }
+      ])
+    );
   });
 });

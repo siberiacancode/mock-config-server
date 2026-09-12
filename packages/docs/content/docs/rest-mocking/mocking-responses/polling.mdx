@@ -1,0 +1,138 @@
+---
+title: Polling
+description: Simulate polling behavior with cycling responses in Mock Config.
+---
+
+Some APIs are polled repeatedly by the client: a job status endpoint, a progress tracker, a notification feed. Mock Config supports this pattern with `rest.polling()`: an ordered list of responses that the server cycles through as requests come in.
+
+```ts
+import { rest } from 'mock-config-server';
+
+rest.get(
+  '/job/status',
+  rest.polling([
+    { response: { status: 'pending' }, time: 3000 },
+    { response: { status: 'processing' }, time: 3000 },
+    { response: { status: 'done' } }
+  ])
+);
+```
+
+## Polling Items
+
+Each item in a polling list has a `response`, `handler`, or REST `file`, plus an optional `time` field.
+
+| Field      | Type     | Description                                                         |
+| ---------- | -------- | ------------------------------------------------------------------- |
+| `response` | `any`    | Static response returned while this item is active.                 |
+| `handler`  | function | Dynamic resolver called while this item is active.                  |
+| `file`     | `string` | REST-only file path returned while this item is active.             |
+| `time`     | `number` | How long, in milliseconds, this item stays active before advancing. |
+
+## Time-Based Items
+
+When an item has a `time` value, it stays active for that many milliseconds. Every request that arrives during that window receives the same response. After the time elapses, polling advances to the next item.
+
+```ts
+import { rest } from 'mock-config-server';
+
+rest.get(
+  '/job/status',
+  rest.polling([
+    { response: { status: 'pending' }, time: 3000 },
+    { response: { status: 'processing' }, time: 3000 },
+    { response: { status: 'done' } }
+  ])
+);
+
+// GET /job/status -> { status: 'pending' }    (active for 3 s)
+// GET /job/status -> { status: 'pending' }    (still in the 3 s window)
+// GET /job/status -> { status: 'processing' } (active for 3 s)
+// GET /job/status -> { status: 'done' }       (no time -> advances on next request)
+// GET /job/status -> { status: 'pending' }    (polling looped)
+```
+
+Here the first two items each hold for 3 seconds. The third item has no `time`, so polling advances on the next request after it becomes active.
+
+## Request-Based Items
+
+When an item has no `time`, it advances immediately after the first request that hits it. Each subsequent request moves to the next item.
+
+```ts
+import { rest } from 'mock-config-server';
+
+rest.get(
+  '/notifications',
+  rest.polling([
+    { response: [] },
+    { response: [{ id: 1, text: 'New message' }] },
+    {
+      response: [
+        { id: 1, text: 'New message' },
+        { id: 2, text: 'Another' }
+      ]
+    }
+  ])
+);
+
+// GET /notifications -> []
+// GET /notifications -> [{ id: 1, text: 'New message' }]
+// GET /notifications -> [{ id: 1, text: 'New message' }, { id: 2, text: 'Another' }]
+// GET /notifications -> []  (polling looped)
+```
+
+## Polling Loop
+
+When the last item is reached, polling loops back to the first item. The client will continuously cycle through the defined states.
+
+## Matching With Polling
+
+You can combine polling with a matcher to scope it to specific request conditions. Pass `match` in the route settings argument.
+
+```ts
+import { rest } from 'mock-config-server';
+
+rest.get(
+  '/status',
+  rest.polling([
+    { response: { progress: 0 }, time: 1000 },
+    { response: { progress: 50 }, time: 1000 },
+    { response: { progress: 100 } }
+  ]),
+  {
+    match: { headers: { 'x-session': 'abc' } }
+  }
+);
+```
+
+Only requests with the matching `x-session` header participate in this polling sequence. Other requests fall through to the next matching route.
+
+## Dynamic Polling Items
+
+A polling item can use a `handler` function instead of a static `response` when the reply depends on the request.
+
+```ts
+import { rest } from 'mock-config-server';
+
+rest.get(
+  '/data',
+  rest.polling([
+    { handler: ({ request }) => ({ id: request.params.id, status: 'loading' }), time: 2000 },
+    { response: { status: 'done' } }
+  ])
+);
+```
+
+## Generator Polling
+
+For request-by-request state, pass a generator function directly as the response resolver. Mock Config preserves the generator state between calls and starts it again after it finishes.
+
+```ts
+import { rest } from 'mock-config-server';
+
+rest.get('/job/status', function* () {
+  yield { status: 'pending' };
+  yield { status: 'processing' };
+  return { status: 'done' };
+});
+```

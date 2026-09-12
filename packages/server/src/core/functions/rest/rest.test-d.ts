@@ -7,14 +7,14 @@ import { rest } from './rest';
 describe('rest types', () => {
   it('Should type handler params with all typed fields', () => {
     rest.post<{
-      query: { query: string };
       body: { body: string };
       params: { params: string };
+      queries: { queries: string };
       response: { response: string };
     }>('/users/:id', ({ request }) => {
-      expectTypeOf(request.query).toEqualTypeOf<{ query: string }>();
       expectTypeOf(request.body).toEqualTypeOf<{ body: string }>();
       expectTypeOf(request.params).toEqualTypeOf<{ params: string }>();
+      expectTypeOf(request.queries).toEqualTypeOf<{ queries: string }>();
       expectTypeOf(request.res).toEqualTypeOf<ExpressResponse<{ response: string }> | undefined>();
 
       return { response: 'value' };
@@ -25,20 +25,46 @@ describe('rest types', () => {
     interface FileResponse {
       file: '/tmp/user.json';
     }
+
     interface PollingResponse {
       polling: [{ response: 'ordinary response data' }];
     }
 
-    rest.get<{ response: FileResponse }>('/users/file', { file: '/tmp/user.json' });
-    rest.get<{ response: PollingResponse }>('/users/polling', {
+    interface PollingResponse {
+      polling: [{ response: 'ordinary response data' }];
+    }
+
+    rest.get<{ response: FileResponse }>('/users/file-inline', {
+      file: '/tmp/user.json'
+    });
+
+    rest.get<{ response: PollingResponse }>('/users/polling-inline', {
       polling: [{ response: 'ordinary response data' }]
     });
 
     rest.get<{ response: FileResponse }>('/users/file-handler', () => ({
       file: '/tmp/user.json'
     }));
+
     rest.get<{ response: PollingResponse }>('/users/polling-handler', () => ({
       polling: [{ response: 'ordinary response data' }]
     }));
+
+    rest.get<{ response: PollingResponse }>('/users/polling-generator', function* () {
+      yield {
+        polling: [{ response: 'ordinary response data' }]
+      };
+
+      return {
+        polling: [{ response: 'ordinary response data' }]
+      };
+    });
+
+    rest.get('/users/file-config', rest.file('/tmp/user.json'));
+
+    rest.get<{ response: string }>(
+      '/users/polling-config',
+      rest.polling([{ response: 'ordinary response data' }])
+    );
   });
 });

@@ -23,7 +23,7 @@ const REST_POLLING_CONFIG = Symbol('mock-config-server.rest.polling');
 interface RestRequestInput {
   body?: unknown;
   params?: unknown;
-  query?: unknown;
+  queries?: unknown;
   response?: Data;
 }
 
@@ -31,23 +31,37 @@ type RestFactorySettings<Method extends RestMethod> = RestSettings & {
   match?: RestEntitiesByEntityName<Method>;
 };
 
-type RestInlineResponse<Response> = Response;
+type RestInlineResponse<Input extends RestRequestInput> = Input['response'] extends Data
+  ? Input['response']
+  : Data;
 
 type RestFunction<
   Method extends RestMethod,
   Input extends RestRequestInput,
   AdditionalParams = {}
 > = (
-  params: RestParams<Method, Input['query'], Input['body'], Input['params'], Input['response']> &
+  params: RestParams<
+    Method,
+    Input['queries'],
+    Input['body'],
+    Input['params'],
+    RestInlineResponse<Input>
+  > &
     AdditionalParams
-) => MaybePromise<Input['response']>;
+) => MaybePromise<RestInlineResponse<Input>>;
 
 type RestGeneratorFunction<Method extends RestMethod, Input extends RestRequestInput> = (
-  params: RestParams<Method, Input['query'], Input['body'], Input['params'], Input['response']>
+  params: RestParams<
+    Method,
+    Input['queries'],
+    Input['body'],
+    Input['params'],
+    RestInlineResponse<Input>
+  >
 ) => Generator<
-  Input['response'],
-  Input['response'] | void,
-  RestParams<Method, Input['query'], Input['body'], Input['params'], Input['response']>
+  RestInlineResponse<Input>,
+  RestInlineResponse<Input> | void,
+  RestParams<Method, Input['queries'], Input['body'], Input['params'], RestInlineResponse<Input>>
 >;
 
 interface RestFileObject {
@@ -58,7 +72,7 @@ interface RestFileObject {
 type RestPollingItem<Method extends RestMethod, Input extends RestRequestInput> =
   | { file: RestFileResponse; time?: number }
   | { handler: RestFunction<Method, Input>; time?: number }
-  | { response: Input['response']; time?: number };
+  | { response: RestInlineResponse<Input>; time?: number };
 
 type RestPolling<Method extends RestMethod, Input extends RestRequestInput> = RestPollingItem<
   Method,
@@ -74,7 +88,7 @@ type RestConfig<Method extends RestMethod, Input extends RestRequestInput> =
   | RestFileObject
   | RestFunction<Method, Input>
   | RestGeneratorFunction<Method, Input>
-  | RestInlineResponse<Input['response']>
+  | RestInlineResponse<Input>
   | RestPollingObject<Method, Input>;
 
 const resolveConfigType = <Method extends RestMethod, Input extends RestRequestInput>(
@@ -162,28 +176,7 @@ const createConfigResolver = <Method extends RestMethod, Input extends RestReque
 };
 
 const createRestFactory = <Method extends RestMethod>(method: Method) => {
-  function createRequestConfig<Input extends RestRequestInput = Partial<RestRequestInput>>(
-    path: RestRequestConfig['path'],
-    config:
-      | RestFunction<Method, Input>
-      | RestGeneratorFunction<Method, Input>
-      | RestInlineResponse<Input['response']>,
-    settings?: RestFactorySettings<Method>
-  ): BaseRestRequestConfig<Method>;
-
-  function createRequestConfig(
-    path: RestRequestConfig['path'],
-    config: RestFileObject,
-    settings?: RestFactorySettings<Method>
-  ): BaseRestRequestConfig<Method>;
-
-  function createRequestConfig<Input extends RestRequestInput = Partial<RestRequestInput>>(
-    path: RestRequestConfig['path'],
-    config: RestPollingObject<Method, Input>,
-    settings?: RestFactorySettings<Method>
-  ): BaseRestRequestConfig<Method>;
-
-  function createRequestConfig<Input extends RestRequestInput = Partial<RestRequestInput>>(
+  function createRequestConfig<Input extends RestRequestInput = RestRequestInput>(
     path: RestRequestConfig['path'],
     config: RestConfig<Method, Input>,
     settings?: RestFactorySettings<Method>
@@ -212,7 +205,7 @@ interface RestSseClient<Response extends string> {
 
 const createSseRestFactory = <Method extends 'get' | 'post'>(method: Method) => {
   function createSseRequestConfig<
-    Input extends RestRequestInput = Partial<RestRequestInput>,
+    Input extends RestRequestInput = RestRequestInput,
     Response extends string = string
   >(
     path: RestRequestConfig['path'],
@@ -255,7 +248,7 @@ const file = <Path extends RestFileResponse>(path: Path): RestFileObject => ({
 
 const polling = <
   Method extends RestMethod = RestMethod,
-  Input extends RestRequestInput = Partial<RestRequestInput>
+  Input extends RestRequestInput = RestRequestInput
 >(
   value: RestPollingObject<Method, Input>['polling']
 ): RestPollingObject<Method, Input> => ({

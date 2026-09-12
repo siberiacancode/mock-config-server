@@ -1,14 +1,27 @@
-import { getUserRequest, getUsersRequest, postUserRequest } from './mock-requests';
+import { mock, rest } from 'mock-config-server';
 
-const mockServerConfig = [
-  {
-    port: 31299,
-    baseUrl: '/'
-  },
-  {
-    name: 'rest',
-    configs: [getUserRequest, getUsersRequest, postUserRequest]
-  }
+const users = [
+  { emoji: '🍎', name: 'Alice' },
+  { emoji: '🍌', name: 'Bob' },
+  { emoji: '🍒', name: 'Carol' },
+  { emoji: '🍇', name: 'Dan' },
+  { emoji: '🥝', name: 'Eve' }
 ];
 
-export default mockServerConfig;
+export default mock(
+  { port: 7777, baseUrl: '/' },
+  {
+    name: 'rest',
+    configs: [
+      rest.get('/users', users),
+      rest.get('/users/:id', (params) => {
+        const user = users[Number(params.request.params.id) - 1];
+        if (!user) {
+          params.setStatusCode(404);
+          return { error: 'Not found' };
+        }
+        return user;
+      })
+    ]
+  }
+);

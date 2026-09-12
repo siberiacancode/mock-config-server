@@ -32,13 +32,13 @@ type RestHeaderValue = number | string | string[] | undefined;
 
 export interface RestParams<
   Method extends RestMethod = RestMethod,
-  Query = Record<string, unknown>,
+  Queries = Record<string, unknown>,
   Body = Record<string, unknown>,
   Params = Record<string, unknown>,
   Response = any
 > {
   entities: RestEntitiesByEntityName<Method>;
-  request: Request<Params, Response, Body, Query>;
+  request: Omit<Request<Params, Response, Body, Queries>, 'queries'> & { queries: Queries };
   response: ExpressResponse;
   appendHeader: (field: string, value?: string | string[]) => void;
   attachment: (filename: string) => void;
@@ -69,9 +69,7 @@ export type RestDataResponseFunction<Method extends RestMethod = RestMethod> = (
   params: RestParams<Method>
 ) => MaybePromise<Data>;
 export type RestDataResponse<Method extends RestMethod = RestMethod> =
-  | Data
-  | RestDataResponseFunction<Method>
-  | RestDataResponseGenerator<Method>;
+  Data | RestDataResponseFunction<Method> | RestDataResponseGenerator<Method>;
 
 export type RestFileResponse = string;
 
