@@ -10,6 +10,7 @@ export type GraphQLEntityName = 'cookies' | 'headers' | 'query' | 'variables';
 export type GraphQLEntity<EntityName extends GraphQLEntityName = GraphQLEntityName> =
   EntityName extends 'variables' ? VariablesPlainEntity : MappedEntity;
 
+export type GraphQLOperationName = string;
 export type GraphQLOperationType = 'mutation' | 'query';
 export type GraphQLIdentifier = string | RegExp;
 
@@ -35,7 +36,8 @@ type PollingGenerator<Data> = Generator<
 >;
 
 export type GraphQLDataResponse =
-  ((request: Request, entities: GraphQLEntitiesByEntityName) => MaybePromise<Data>) | Data;
+  | ((request: Request, entities: GraphQLEntitiesByEntityName) => MaybePromise<Data>)
+  | Data;
 
 export type GraphQLRouteConfig = (
   | {

@@ -69,7 +69,9 @@ export type GraphQLDataResponseFunction = (
   params: GraphQLParams
 ) => MaybePromise<GraphQLExecutionResult>;
 export type GraphQLDataResponse =
-  GraphQLDataResponseFunction | GraphQLDataResponseGenerator | GraphQLExecutionResult;
+  | GraphQLDataResponseFunction
+  | GraphQLDataResponseGenerator
+  | GraphQLExecutionResult;
 
 export interface GraphQLRouteConfig {
   data: GraphQLDataResponse;

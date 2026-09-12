@@ -43,7 +43,8 @@ type PollingGenerator<Data> = Generator<
 >;
 
 export type RestDataResponse<Method extends RestMethod = RestMethod> =
-  ((request: Request, entities: RestEntitiesByEntityName<Method>) => MaybePromise<Data>) | Data;
+  | ((request: Request, entities: RestEntitiesByEntityName<Method>) => MaybePromise<Data>)
+  | Data;
 
 export type RestFileResponse = string;
 

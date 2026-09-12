@@ -1,14 +1,15 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "@siberiacancode/tsconfig/tsconfig.node.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": false,
-    "baseUrl": ".",
+    "lib": ["ESNext"],
     "paths": {
       "@/shared/*": ["../shared/*"],
       "@/core/*": ["./src/core/*"],
       "@/utils/*": ["./src/utils/*"]
     },
+    "noFallthroughCasesInSwitch": true,
     "sourceMap": true
   },
   "exclude": ["node_modules"]

@@ -2,7 +2,7 @@ import express from 'express';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 
-import type { Cors } from '@/utils/types';
+import type { Cors } from '@/shared/types';
 
 import { corsMiddleware } from './corsMiddleware';
 

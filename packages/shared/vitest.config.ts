@@ -5,5 +5,8 @@ export default defineConfig({
   test: {
     ...vitest,
     environment: 'node'
+  },
+  resolve: {
+    tsconfigPaths: true
   }
 });

@@ -12,4 +12,12 @@ export type Params = ParamsDictionary;
 export type Cookies = Record<string, string>;
 
 export type Data =
-  boolean | number | string | any[] | Buffer | Record<any, any> | null | undefined | void;
+  | boolean
+  | number
+  | string
+  | any[]
+  | Buffer
+  | Record<any, any>
+  | null
+  | undefined
+  | void;

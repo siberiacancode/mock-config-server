@@ -24,6 +24,7 @@
   "scripts": {
     "build": "pnpm -r run build",
     "lint": "pnpm -r run lint",
+    "type": "pnpm -r run type",
     "format": "pnpm -r run format",
     "pretty": "pnpm -r run pretty",
     "unit-test": "pnpm -r run unit-test",
@@ -33,8 +34,9 @@
     "@siberiacancode/eslint": "^2.18.1",
     "@siberiacancode/prettier": "^1.7.0",
     "@types/node": "^25.9.2",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.7",
-    "typescript": "^6.0.3"
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
   }
 }

@@ -129,4 +129,7 @@ export type WsResponseInterceptor = WsResponseInterceptorHandler & {
 };
 
 export type Interceptor =
-  HttpRequestInterceptor | HttpResponseInterceptor | WsRequestInterceptor | WsResponseInterceptor;
+  | HttpRequestInterceptor
+  | HttpResponseInterceptor
+  | WsRequestInterceptor
+  | WsResponseInterceptor;

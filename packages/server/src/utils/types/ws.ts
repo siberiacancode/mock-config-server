@@ -190,10 +190,16 @@ export interface GraphqlTransportWsRequestArtifact extends BaseWsRequestArtifact
 /* unions */
 
 export type WsRouteConfig =
-  WsCloseRouteConfig | WsConnectionRouteConfig | WsErrorRouteConfig | WsRawRouteConfig;
+  | WsCloseRouteConfig
+  | WsConnectionRouteConfig
+  | WsErrorRouteConfig
+  | WsRawRouteConfig;
 
 export type WsRequestConfig =
-  WsCloseRequestConfig | WsConnectionRequestConfig | WsErrorRequestConfig | WsRawRequestConfig;
+  | WsCloseRequestConfig
+  | WsConnectionRequestConfig
+  | WsErrorRequestConfig
+  | WsRawRequestConfig;
 
 export type WsRequestArtifact =
   | CloseWsRequestArtifact

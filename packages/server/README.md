@@ -456,6 +456,8 @@ If the file exists, response interceptors will receive file content `Buffer` as 
 `Content-Type` and `Content-Disposition` headers are set before response interceptors are called.
 
 ```javascript
+const { Buffer } = require("node:buffer");
+
 /** @type {import('mock-config-server').FlatMockServerConfig} */
 const flatMockServerConfig = [
   {
